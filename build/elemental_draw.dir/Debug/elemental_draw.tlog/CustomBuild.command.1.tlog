@@ -1,0 +1,10 @@
+^C:\USERS\HAERI\DOCUMENTS\GITHUB\ELEMENTALUI\ELEMENTALDRAW\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/haeri/Documents/GitHub/ElementalUI/ElementalDraw -BC:/Users/haeri/Documents/GitHub/ElementalUI/ElementalDraw/build --check-stamp-file C:/Users/haeri/Documents/GitHub/ElementalUI/ElementalDraw/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

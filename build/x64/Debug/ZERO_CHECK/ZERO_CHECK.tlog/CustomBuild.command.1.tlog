@@ -1,0 +1,10 @@
+^C:\USERS\HAERI\DOCUMENTS\GITHUB\ELEMENTALUI\ELEMENTALDRAW\BUILD\CMAKEFILES\49AC10F075B4535746B09C48196EFB24\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/haeri/Documents/GitHub/ElementalUI/ElementalDraw -BC:/Users/haeri/Documents/GitHub/ElementalUI/ElementalDraw/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/haeri/Documents/GitHub/ElementalUI/ElementalDraw/build/Elemental_Draw.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

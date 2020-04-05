@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\haeri\Documents\GitHub\ElementalUI\ElementalDraw\build\CMakeFiles\49ac10f075b4535746b09c48196efb24\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{D8631608-BB4A-383A-A98E-0A7334B82D90}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
