@@ -34,6 +34,7 @@ public:
 	void setSize(int  width, int  height);
 	void minimize();
 	void maximize();
+	void terminate();
 
 	Context* getContext();
 

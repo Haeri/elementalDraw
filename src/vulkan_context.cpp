@@ -1,11 +1,58 @@
 #include "../include/vulkan_context.hpp"
 
+#include <iostream>
+
+#include "../include/elemental_draw.h"
+#include "vulkan_utils.hpp"
+
 VulkanContext::VulkanContext()
 {
+	VkApplicationInfo applicationInfo;
+	applicationInfo.sType				= VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	applicationInfo.pNext				= NULL;
+	applicationInfo.pApplicationName	= "UI Application";			// TODO: Pass down from application
+	applicationInfo.applicationVersion	= VK_MAKE_VERSION(1, 0, 0);
+	applicationInfo.pEngineName			= ELEM_APPLICATION_NAME;
+	applicationInfo.engineVersion		= VK_MAKE_VERSION(ELEM_VERSION_MAJOR, ELEM_VERSION_MINOR, ELEM_VERSION_PATCH);
+	applicationInfo.apiVersion			= VK_API_VERSION_1_2;
+
+
+	VkInstanceCreateInfo instanceCreateInfo;
+	instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	instanceCreateInfo.pNext = NULL;
+	instanceCreateInfo.flags = 0;
+	instanceCreateInfo.pApplicationInfo = &applicationInfo;
+	instanceCreateInfo.enabledLayerCount = 0;
+	instanceCreateInfo.ppEnabledLayerNames = NULL;
+	instanceCreateInfo.enabledExtensionCount = 0;
+	instanceCreateInfo.ppEnabledExtensionNames = NULL;
+
+
+	_vulkanInstance = new VkInstance();
+	vku::err_check(vkCreateInstance(&instanceCreateInfo, NULL, _vulkanInstance));
+
+	uint32_t physicalDeviceCount = 0;
+	vku::err_check(vkEnumeratePhysicalDevices(*_vulkanInstance, &physicalDeviceCount, NULL));
+
+	VkPhysicalDevice* physicalDevices = new VkPhysicalDevice[physicalDeviceCount];
+	vku::err_check(vkEnumeratePhysicalDevices(*_vulkanInstance, &physicalDeviceCount, physicalDevices));
+
+	for (uint32_t i = 0; i < physicalDeviceCount; ++i) 
+	{
+		vku::print_device(physicalDevices[i]);
+	}
+
+
+
+
+
+	delete[] physicalDevices;
 }
 
 VulkanContext::~VulkanContext()
 {
+	
+	delete _vulkanInstance;
 }
 
 Context* VulkanContext::create_context()

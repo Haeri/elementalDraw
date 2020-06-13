@@ -1,10 +1,13 @@
 #ifndef ELEM_VULKAN_CONTEXT_HPP
 #define ELEM_VULKAN_CONTEXT_HPP
 
-#include <cstdint>
+#include <string>
 
 #include "context.hpp"
 #include "color.hpp"
+
+typedef struct VkInstance_T* VkInstance;
+
 
 class VulkanContext : public Context {
 public:
@@ -36,6 +39,9 @@ public:
 
 	void clear() override;
 	void clear_rect(float x, float y, float width, float height) override;
+
+private:
+	VkInstance* _vulkanInstance;
 };
 
 #endif // ELEM_VULKAN_CONTEXT_HPP

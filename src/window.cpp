@@ -5,6 +5,9 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "../include/vulkan_context.hpp"
+
+
 Window::Window(): Window(WindowConfig())
 {
 }
@@ -21,6 +24,8 @@ Window::Window(WindowConfig config)
 	glfwWindowHint(GLFW_VISIBLE,	config.visible);
 
 	create_window();
+
+	_context = new VulkanContext();
 
 	fill_config();
 
@@ -66,6 +71,11 @@ void Window::setPosition(int x, int y)
 	_config.position_x = x;
 	_config.position_y = y;
 	glfwSetWindowPos(_window, x, y);
+}
+
+void Window::terminate()
+{
+	glfwTerminate();
 }
 
 Context* Window::getContext()
