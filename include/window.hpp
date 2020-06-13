@@ -8,23 +8,25 @@ struct GLFWwindow;
 class Context;
 
 struct WindowConfig {
-	int width;
-	int  height;
-	int  position_x;
-	int  position_y;
-
 	std::string title;
+	
+	int width	= 500;
+	int height	= 600;
 
-	bool decorated = true;
-	bool transparent;
-	bool resizeable = true;
-	bool visible = true;
+	int position_x = -1;
+	int position_y = -1;
+
+	bool decorated		= true;
+	bool transparent	= false;
+	bool resizeable		= true;
+	bool visible		= true;
 };
 
 class Window {
 public:
+	Window();
 	Window(WindowConfig config);
-	Window(uint32_t width, uint32_t height, const std::string& title);
+	//Window(uint32_t width, uint32_t height, const std::string& title);
 	~Window();
 	
 	void setTitle(const std::string& title);

@@ -5,6 +5,10 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+Window::Window(): Window(WindowConfig())
+{
+}
+
 Window::Window(WindowConfig config)
 {
 	setup();
@@ -23,6 +27,7 @@ Window::Window(WindowConfig config)
 	run();
 }
 
+/*
 Window::Window(uint32_t width, uint32_t height, const std::string& title)
 {
 	setup();
@@ -37,6 +42,7 @@ Window::Window(uint32_t width, uint32_t height, const std::string& title)
 
 	run();
 }
+*/
 
 Window::~Window()
 {
@@ -47,6 +53,19 @@ Window::~Window()
 	{
 		glfwTerminate();
 	}
+}
+
+void Window::setTitle(const std::string& title)
+{
+	_config.title = title;
+	glfwSetWindowTitle(_window, title.c_str());
+}
+
+void Window::setPosition(int x, int y)
+{
+	_config.position_x = x;
+	_config.position_y = y;
+	glfwSetWindowPos(_window, x, y);
 }
 
 Context* Window::getContext()
@@ -70,8 +89,11 @@ void Window::setup()
 
 void Window::create_window()
 {
-	_config.width = _config.width != 0 ? _config.width : 10;
-	_config.height = _config.height != 0 ? _config.height : 10;	
+	if (_config.width == 0 || _config.height == 0) 
+	{
+		std::cerr << "Width or height cannont be 0!" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
 	_window = glfwCreateWindow(_config.width, _config.height, _config.title.c_str(), NULL, NULL);
 	if (!_window)
@@ -81,6 +103,15 @@ void Window::create_window()
 		exit(EXIT_FAILURE);
 	}
 	++_windowCount;
+
+	if (_config.position_x != -1 && _config.position_y != -1) 
+	{
+		setPosition(_config.position_x, _config.position_y);
+	}
+	else
+	{
+		glfwGetWindowPos(_window, &_config.position_x, &_config.position_y);
+	}
 }
 
 void Window::run()

@@ -3,3 +3,7 @@
 Context::Context()
 {
 }
+
+Context::~Context()
+{
+}

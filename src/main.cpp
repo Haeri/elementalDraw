@@ -4,11 +4,8 @@
 
 int main()
 {
-	std::cout << "Hello!" << std::endl;
-
-	WindowConfig config{ 500, 600, 0, 0, "Elemental Draw", config.decorated = false };
-
-	Window w(config);
+	WindowConfig wc{ "Lol", 200, 300 };
+	Window w(wc);
 	
 
 	return 0;
