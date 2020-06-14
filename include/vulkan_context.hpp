@@ -7,10 +7,12 @@
 #include "color.hpp"
 
 typedef struct VkInstance_T* VkInstance;
+typedef struct VkDevice_T* VkDevice;
 
 
 class VulkanContext : public Context {
 public:
+	bool tmp = true;
 	VulkanContext();
 	~VulkanContext();
 
@@ -42,6 +44,7 @@ public:
 
 private:
 	VkInstance* _vulkanInstance;
+	VkDevice* _VulkanDevice;
 };
 
 #endif // ELEM_VULKAN_CONTEXT_HPP

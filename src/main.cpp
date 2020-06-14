@@ -4,7 +4,9 @@
 
 int main()
 {
-	WindowConfig wc{ "Lol", 200, 300 };
+	WindowConfig wc{ "UI Application", 400, 300 };
+	wc.position_x = 0;
+	wc.position_y = 40;
 	Window w(wc);
 	
 

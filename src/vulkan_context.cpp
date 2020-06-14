@@ -18,14 +18,14 @@ VulkanContext::VulkanContext()
 
 
 	VkInstanceCreateInfo instanceCreateInfo;
-	instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	instanceCreateInfo.pNext = NULL;
-	instanceCreateInfo.flags = 0;
-	instanceCreateInfo.pApplicationInfo = &applicationInfo;
-	instanceCreateInfo.enabledLayerCount = 0;
-	instanceCreateInfo.ppEnabledLayerNames = NULL;
-	instanceCreateInfo.enabledExtensionCount = 0;
-	instanceCreateInfo.ppEnabledExtensionNames = NULL;
+	instanceCreateInfo.sType					= VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	instanceCreateInfo.pNext					= NULL;
+	instanceCreateInfo.flags					= 0;
+	instanceCreateInfo.pApplicationInfo			= &applicationInfo;
+	instanceCreateInfo.enabledLayerCount		= 0;
+	instanceCreateInfo.ppEnabledLayerNames		= NULL;
+	instanceCreateInfo.enabledExtensionCount	= 0;
+	instanceCreateInfo.ppEnabledExtensionNames	= NULL;
 
 
 	_vulkanInstance = new VkInstance();
@@ -42,16 +42,45 @@ VulkanContext::VulkanContext()
 		vku::print_device(physicalDevices[i]);
 	}
 
+	vku::BestDevice bestDevice = vku::get_best_device_info(physicalDevices, physicalDeviceCount);
+	std::cout
+		<< "Chosen Device Nr. " << (bestDevice.deviceIndex+1) << "\n"
+		<< "Chosen Queue Family: " << (bestDevice.queueFamilyIndex+1) << " with queue count: " << bestDevice.queueCount << "\n";
 
 
+	VkDeviceQueueCreateInfo deviceQueueCreateInfo;
+	deviceQueueCreateInfo.sType				= VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	deviceQueueCreateInfo.pNext				= NULL;
+	deviceQueueCreateInfo.flags				= 0;
+	deviceQueueCreateInfo.queueFamilyIndex	= bestDevice.queueFamilyIndex;
+	deviceQueueCreateInfo.queueCount		= bestDevice.queueCount;
+	deviceQueueCreateInfo.pQueuePriorities	= NULL;
 
+
+	VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
+
+
+	VkDeviceCreateInfo deviceCreateInfo;
+	deviceCreateInfo.sType						= VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	deviceCreateInfo.pNext						= NULL;
+	deviceCreateInfo.flags						= 0;
+	deviceCreateInfo.queueCreateInfoCount		= 1;
+	deviceCreateInfo.pQueueCreateInfos			= &deviceQueueCreateInfo;
+	deviceCreateInfo.enabledLayerCount			= 0;
+	deviceCreateInfo.ppEnabledLayerNames		= NULL;
+	deviceCreateInfo.enabledExtensionCount		= 0;
+	deviceCreateInfo.ppEnabledExtensionNames	= NULL;
+	deviceCreateInfo.pEnabledFeatures			= &physicalDeviceFeatures;
+
+	_VulkanDevice = new VkDevice();
+	vku::err_check(vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo, NULL, _VulkanDevice));
 
 	delete[] physicalDevices;
 }
 
 VulkanContext::~VulkanContext()
 {
-	
+	delete _VulkanDevice;
 	delete _vulkanInstance;
 }
 

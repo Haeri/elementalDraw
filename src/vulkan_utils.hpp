@@ -6,6 +6,13 @@
 
 namespace vku 
 {
+	struct BestDevice 
+	{
+		int deviceIndex;
+		uint32_t queueFamilyIndex;
+		uint32_t queueCount;
+	};
+
 	inline void err(std::string message)
 	{
 		std::cerr << "VK ERROR: " << message << std::endl;
@@ -37,6 +44,35 @@ namespace vku
 		return dtype;
 	}
 
+	inline BestDevice get_best_device_info(VkPhysicalDevice* devices, uint32_t count)
+	{	
+		int bestDeviceIndex = 0;
+		uint32_t bestQueuFamily = 0;
+		uint32_t maxQueueCount = 0;
+
+		for (int d = 0; d < count; ++d) {
+			uint32_t queueFamilyPropertyCount;
+			vkGetPhysicalDeviceQueueFamilyProperties(devices[d], &queueFamilyPropertyCount, NULL);
+
+			VkQueueFamilyProperties* queueFamilyProperties = new VkQueueFamilyProperties[queueFamilyPropertyCount];
+			vkGetPhysicalDeviceQueueFamilyProperties(devices[d], &queueFamilyPropertyCount, queueFamilyProperties);
+
+			for (uint32_t f = 0; f < queueFamilyPropertyCount; ++f)
+			{
+				if (maxQueueCount < queueFamilyProperties[f].queueCount)
+				{
+					maxQueueCount = queueFamilyProperties[f].queueCount;
+					bestQueuFamily = f;
+					bestDeviceIndex = d;
+				}
+			}
+
+			delete[] queueFamilyProperties;
+		}
+
+		return BestDevice{ bestDeviceIndex, bestQueuFamily, maxQueueCount};
+	}
+
 	inline void print_device(const VkPhysicalDevice& device)
 	{
 		VkPhysicalDeviceProperties properties;
@@ -44,12 +80,44 @@ namespace vku
 
 		std::cout
 			<< "GPU Device: " << properties.deviceName << "\n"
-			<< "API Version: " << VK_VERSION_MAJOR(properties.apiVersion) << "." << VK_VERSION_MINOR(properties.apiVersion) << "." << VK_VERSION_PATCH(properties.apiVersion) << "\n"
-			<< "Driver Version: " << properties.driverVersion << "\n"
-			<< "Vendor ID: " << properties.vendorID << "\n"
-			<< "Device ID: " << properties.deviceID << "\n"
-			<< "Device Type: " << device_type(properties.deviceType) << "\n"
-			<< std::endl;
+			<< "\tAPI Version: " << VK_VERSION_MAJOR(properties.apiVersion) << "." << VK_VERSION_MINOR(properties.apiVersion) << "." << VK_VERSION_PATCH(properties.apiVersion) << "\n"
+			<< "\tDriver Version: " << properties.driverVersion << "\n"
+			<< "\tVendor ID: " << properties.vendorID << "\n"
+			<< "\tDevice ID: " << properties.deviceID << "\n"
+			<< "\tDevice Type: " << device_type(properties.deviceType) << "\n" ;
+
+		
+		VkPhysicalDeviceFeatures features;
+		vkGetPhysicalDeviceFeatures(device, &features);
+
+		std::cout << "\tFeatureset:\n"
+			<< "\t\tGeometry shader:\t" << features.geometryShader << "\n"
+			<< "\t\tTesselation shader:\t" << features.tessellationShader << "\n";
+
+
+		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+		vkGetPhysicalDeviceMemoryProperties(device, &physicalDeviceMemoryProperties);
+
+
+		uint32_t queueFamilyPropertyCount;
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyPropertyCount, NULL);
+
+		VkQueueFamilyProperties* queueFamilyProperties = new VkQueueFamilyProperties[queueFamilyPropertyCount];
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyPropertyCount, queueFamilyProperties);
+
+		for (uint32_t i = 0; i < queueFamilyPropertyCount; ++i)
+		{
+			std::cout
+				<< "\tQueue Family Nr. " << (i+1) << "\n"
+				<< "\t\tGraphics bit:\t\t" << ((queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) << "\n"
+				<< "\t\tCompute bit:\t\t" << ((queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) != 0) << "\n"
+				<< "\t\tTransfer bit:\t\t" << ((queueFamilyProperties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) != 0) << "\n"
+				<< "\t\tSparse binding bit:\t" << ((queueFamilyProperties[i].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) != 0) << "\n"
+				<< "\t\tQueue count:\t\t" << queueFamilyProperties[i].queueCount << "\n"
+				<< "\t\tTimestamp bits:\t\t" << queueFamilyProperties[i].timestampValidBits << "\n";
+		}
+
+		delete[] queueFamilyProperties;
 	}
 
 	inline bool err_check(const VkResult& result)
