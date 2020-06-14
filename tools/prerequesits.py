@@ -12,6 +12,9 @@ else:
 	useEmoji = True
 	useColor = True
 
+useEmoji = True
+useColor = True
+
 def emj(emoji):
 	if useEmoji:
 		return emoji
