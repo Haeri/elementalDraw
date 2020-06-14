@@ -4,8 +4,6 @@ import platform
 import subprocess
 import re
 import os
-from termcolor import colored
-
 
 if platform.system() == "Windows" and os.getenv('WT_SESSION') is None:
 	useEmoji = False
@@ -20,6 +18,8 @@ def emj(emoji):
 	else:
 		return	""
 
+def colored(text, color):
+	return text
 
 def do_step(title, emoji, indent, cmd, regex, isFile = True):
 	print(" " * indent + emj(emoji) + " " + title + " " + colored(("." * (30 - len(title) - indent)), "blue") + " ", end='', flush=True)
@@ -61,7 +61,7 @@ else:
 	else:
 		if do_step("Install Vulkan", "📚", 4, "vcpkg install vulkan:x64-" + platform.system(), '()', False) != 0:
 			err = err + 1
-	if do_custon_step("Vcpkg root", "🔖", 4, lambda : "VCPKG_ROOT" in os.environ, "VCPKG_ROOT environment variable not set!") != 0:
+	if do_custon_step("Vcpkg root", "🔖", 4, lambda : "VCPKG_INSTALLATION_ROOT" in os.environ, "VCPKG_INSTALLATION_ROOT environment variable not set!") != 0:
 			err = err + 1
 
 
