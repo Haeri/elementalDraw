@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import platform
 import subprocess
 import re
