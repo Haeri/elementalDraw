@@ -5,12 +5,23 @@ import subprocess
 import re
 import os
 
+colors = {
+	"white": "\x1B[0m",
+	"red": "\x1B[31m",
+	"green": "\x1B[32m",
+	"blue": "\x1B[34m"
+}
+
+print(platform.system() + " | Windows Terminal: " + str(os.getenv('WT_SESSION') is not None))
+
 if platform.system() == "Windows" and os.getenv('WT_SESSION') is None:
 	useEmoji = False
 	useColor = False
 else:
 	useEmoji = True
 	useColor = True
+
+useColor = True
 
 def emj(emoji):
 	if useEmoji:
@@ -19,7 +30,11 @@ def emj(emoji):
 		return	""
 
 def colored(text, color):
-	return text
+	if useColor:
+		return colors[color] + text + colors["white"]
+	else:
+		return text
+
 
 def do_step(title, emoji, indent, cmd, regex, isFile = True):
 	print(" " * indent + emj(emoji) + " " + title + " " + colored(("." * (30 - len(title) - indent)), "blue") + " ", end='', flush=True)

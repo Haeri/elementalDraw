@@ -33,9 +33,15 @@ jobs:
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
+    - name: Setup Environment
+      run: sudo apt-get update
     - name: Prerequesits Check
-      run: sudo ./tools/prerequesits_linux.sh
+      run: |
+        sudo chmod +x ./tools/prerequesits_linux.sh
+        sudo ./tools/prerequesits_linux.sh
     - name: Generate Solution
-      run: sudo ./tools/generate_project_linux.sh
+      run: |
+        sudo chmod +x ./tools/generate_project_linux.sh
+        sudo ./tools/generate_project_linux.sh
     - name: Build
       run: make ./build
