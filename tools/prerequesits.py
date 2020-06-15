@@ -48,7 +48,7 @@ def do_step(title, emoji, indent, cmd, regex, isFile = True):
 			print(colored(emj("❌ ") + "NOT FOUND!", "red"))
 		else:
 			print(colored(emj("❌ ") + "FAILED!", "red"))
-			print(msg)
+			print(colored(msg, "red"))
 		return err
 
 def do_custon_step(title, emoji, indent, fn, errMsg):
@@ -58,7 +58,7 @@ def do_custon_step(title, emoji, indent, fn, errMsg):
 		return 0
 	else:
 		print(colored(emj("❌ ") + "FAILED!", "red"))
-		print(errMsg)
+		print(colored(errMsg, "red"))
 		return 1
 
 err = 0
