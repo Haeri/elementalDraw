@@ -22,13 +22,10 @@ jobs:
       with:
         repository: KhronosGroup/Vulkan-Headers
         path: Vulkan-Headers
-    - name: Debug Dir
-      run: |
-        dir
-        cd Vulkan-Headers
-        dir
     - name: Setup Environment
-      run: setx VULKAN_SDK $GITHUB_WORKSPACE/Vulkan-Headers
+      uses: allenevans/set-env@v1.0.0
+      with:
+        VULKAN_SDK: '$GITHUB_WORKSPACE/Vulkan-Headers'
     - name: Prerequesits Check
       run: ./ElementalDraw/tools/prerequesits_win.bat -s
     - name: Generate Solution
@@ -53,15 +50,11 @@ jobs:
         repository: KhronosGroup/Vulkan-Headers
         path: Vulkan-Headers
     - name: Setup Environment
-      run: |
-        export VULKAN_SDK="$GITHUB_WORKSPACE/Vulkan-Headers"
-        echo $VULKAN_SDK
-        sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
-    - name: Debug Dir
-      run: |
-        ls -la
-        cd Vulkan-Headers
-        ls -la
+      uses: allenevans/set-env@v1.0.0
+      with:
+        VULKAN_SDK: '$GITHUB_WORKSPACE/Vulkan-Headers'
+    - name: Download Libraries
+      run: sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
     - name: Prerequesits Check
       run: |
         sudo chmod +x ./ElementalDraw/tools/prerequesits_linux.sh
