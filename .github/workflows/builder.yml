@@ -28,7 +28,7 @@ jobs:
     - name: Setup Environment
       run: |
         setx VULKAN_SDK ./VulkanSDK/Vulkan-Headers
-        echo %VULKAN_SDK%
+        Get-Item Env:VULKAN_SDK
     - name: Prerequesits Check
       run: ./tools/prerequesits_win.bat -s
     - name: Generate Solution

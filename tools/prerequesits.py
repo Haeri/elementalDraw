@@ -71,8 +71,8 @@ if do_step("Vcpkg", "📦", 0, "vcpkg version", 'Vcpkg package management progra
 else:
 	if do_step("Install glfw3", "📚", 4, "vcpkg install glfw3:x64-" + platform.system(), '()', False) != 0:
 		err = err + 1
-	if do_custon_step("Vulkan SDK", "🔖", 4, lambda : "VULKAN_SDK" in os.environ, "Vulkan SDK not installed!") != 0:
-		err = err + 1
+	#if do_custon_step("Vulkan SDK", "🔖", 4, lambda : "VULKAN_SDK" in os.environ, "Vulkan SDK not installed!") != 0:
+	#	err = err + 1
 	else:
 		if do_step("Install Vulkan", "📚", 4, "vcpkg install vulkan:x64-" + platform.system(), '()', False) != 0:
 			err = err + 1
