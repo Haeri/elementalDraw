@@ -21,7 +21,7 @@ jobs:
         name: KhronosGroup/Vulkan-Headers
     - name: Setup Environment
       uses: microsoft/setup-msbuild@v1
-      run: setx VULKAN_SDK ./Vulkan-Headers
+    - run: setx VULKAN_SDK ./Vulkan-Headers
     - name: Prerequesits Check
       run: ./tools/prerequesits_win.bat -s
     - name: Generate Solution
@@ -46,7 +46,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
-        export VULKAN_SDK=./Vulkan-Headers
+        export VULKAN_SDK="./Vulkan-Headers"
     - name: Prerequesits Check
       run: |
         sudo chmod +x ./tools/prerequesits_linux.sh
