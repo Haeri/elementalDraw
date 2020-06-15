@@ -19,8 +19,14 @@ jobs:
       uses: actions/checkout@master
       with:
         repository: KhronosGroup/Vulkan-Headers
+        path: VulkanSDK
+    - name: Debug Dir
+      run: |
+        dir
+        cd VulkanSDK
+        dir
     - name: Setup Environment
-      run: setx VULKAN_SDK ./Vulkan-Headers
+      run: setx VULKAN_SDK ./VulkanSDK/Vulkan-Headers
     - name: Prerequesits Check
       run: ./tools/prerequesits_win.bat -s
     - name: Generate Solution
@@ -41,10 +47,16 @@ jobs:
       uses: actions/checkout@master
       with:
         repository: KhronosGroup/Vulkan-Headers
+        path: VulkanSDK
     - name: Setup Environment
       run: |
-        export VULKAN_SDK="./Vulkan-Headers"
+        export VULKAN_SDK="./VulkanSDK/Vulkan-Headers"
         sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
+    - name: Debug Dir
+      run: |
+        ls -la
+        cd VulkanSDK
+        ls -la
     - name: Prerequesits Check
       run: |
         sudo chmod +x ./tools/prerequesits_linux.sh
