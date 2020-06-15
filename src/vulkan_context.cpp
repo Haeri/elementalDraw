@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "../include/elemental_draw.h"
-#include "vulkan_utils.hpp"
+#include "vulkan_utils.cpp"
 
 VulkanContext::VulkanContext()
 {
