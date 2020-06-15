@@ -15,19 +15,21 @@ jobs:
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
+      with:
+        path: ElementalDraw
     - name: Vulkan Header Download
       uses: actions/checkout@master
       with:
         repository: KhronosGroup/Vulkan-Headers
-        path: VulkanSDK
+        path: Vulkan-Headers
     - name: Debug Dir
       run: |
         dir
-        cd VulkanSDK
+        cd Vulkan-Headers
         dir
     - name: Setup Environment
       run: |
-        setx VULKAN_SDK ./VulkanSDK/Vulkan-Headers
+        setx VULKAN_SDK ./Vulkan-Headers
         Get-Item Env:VULKAN_SDK
     - name: Prerequesits Check
       run: ./tools/prerequesits_win.bat -s
@@ -45,20 +47,22 @@ jobs:
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
+      with:
+        path: ElementalDraw
     - name: Vulkan Header Download
       uses: actions/checkout@master
       with:
         repository: KhronosGroup/Vulkan-Headers
-        path: VulkanSDK
+        path: Vulkan-Headers
     - name: Setup Environment
       run: |
-        export VULKAN_SDK="./VulkanSDK/Vulkan-Headers"
+        export VULKAN_SDK="./Vulkan-Headers"
         echo $VULKAN_SDK
         sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
     - name: Debug Dir
       run: |
         ls -la
-        cd VulkanSDK
+        cd Vulkan-Headers
         ls -la
     - name: Prerequesits Check
       run: |
