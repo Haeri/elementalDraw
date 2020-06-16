@@ -12,8 +12,6 @@ colors = {
 	"blue": "\x1B[34m"
 }
 
-print(platform.system() + " | Windows Terminal: " + str(os.getenv('WT_SESSION') is not None))
-
 if platform.system() == "Windows" and os.getenv('WT_SESSION') is None:
 	useEmoji = False
 	useColor = False
