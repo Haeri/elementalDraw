@@ -6,9 +6,6 @@ project(${PROJECT_NAME} VERSION 0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(glfw3 CONFIG REQUIRED)
-#find_package(Vulkan REQUIRED)
-
 file(GLOB_RECURSE SOURCE_FILES
         include/elemental_draw/*.hpp
         src/*.cpp)
@@ -17,12 +14,18 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
-#target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
 
+# ---------------- EXTERN ---------------------#
 
-## Extern
+# Glad
+set(GLAD_DIR extern/glad)
+target_include_directories(${PROJECT_NAME} PUBLIC ${GLAD_DIR}/include)
 
-set(GLAD_DIR extern/glad/include)
-# Include the glm headers:
-target_include_directories(${PROJECT_NAME} PUBLIC ${GLAD_DIR})
+# Glfw3
+set(GLFW_DIR extern/glfw3)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_DIR}/include)
+add_subdirectory(${GLFW_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
