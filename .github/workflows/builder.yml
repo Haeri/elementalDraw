@@ -15,6 +15,8 @@ jobs:
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
+      with:
+        submodule: 'true'
     - name: Setup Environment
       uses: microsoft/setup-msbuild@v1.0.0
     - name: Prerequesits Check
