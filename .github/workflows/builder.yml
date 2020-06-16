@@ -16,7 +16,7 @@ jobs:
     - name: Download Repository
       uses: actions/checkout@v2
       with:
-        submodule: 'true'
+        submodules: 'true'
     - name: Setup Environment
       uses: microsoft/setup-msbuild@v1.0.0
     - name: Prerequesits Check
@@ -35,6 +35,8 @@ jobs:
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
+      with:
+        submodules: 'true'
     - name: Setup Environment
       run: |
         sudo chmod +x ./tools/*.sh
