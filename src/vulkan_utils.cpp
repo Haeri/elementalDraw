@@ -2,7 +2,7 @@
 #define ELEM_VULKAN_UTILS_CPP
 
 #include <iostream>
-#include "vulkan/vulkan.h"
+#include <glad/vulkan.h>
 
 namespace vku 
 {
@@ -140,9 +140,9 @@ namespace vku
 			case VK_INCOMPLETE:
 				err("A return array was too small for the result");
 				break;
-			case VK_SUBOPTIMAL_KHR:
-				err("A swapchain no longer matches the surface properties exactly, but can still be used to present to the surface successfully.");
-				break;
+			//case VK_SUBOPTIMAL_KHR:
+			//	err("A swapchain no longer matches the surface properties exactly, but can still be used to present to the surface successfully.");
+			//	break;
 			case VK_ERROR_OUT_OF_HOST_MEMORY:
 				err("A host memory allocation has failed.");
 				break;
@@ -179,21 +179,21 @@ namespace vku
 			case VK_ERROR_FRAGMENTED_POOL:
 				err("A pool allocation has failed due to fragmentation of the pool’s memory. This must only be returned if no attempt to allocate host or device memory was made to accommodate the new allocation. This should be returned in preference to VK_ERROR_OUT_OF_POOL_MEMORY, but only if the implementation is certain that the pool allocation failure was due to fragmentation.");
 				break;
-			case VK_ERROR_SURFACE_LOST_KHR:
-				err("A surface is no longer available.");
-				break;
-			case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
-				err("The requested window is already in use by Vulkan or another API in a manner which prevents it from being used again.");
-				break;
-			case VK_ERROR_OUT_OF_DATE_KHR:
-				err("A surface has changed in such a way that it is no longer compatible with the swapchain, and further presentation requests using the swapchain will fail. Applications must query the new surface properties and recreate their swapchain if they wish to continue presenting to the surface.");
-				break;
-			case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR:
-				err("The display used by a swapchain does not use the same presentable image layout, or is incompatible in a way that prevents sharing an image.");
-				break;
-			case VK_ERROR_INVALID_SHADER_NV:
-				err("One or more shaders failed to compile or link. More details are reported back to the application via VK_EXT_debug_report if enabled.");
-				break;
+			//case VK_ERROR_SURFACE_LOST_KHR:
+			//	err("A surface is no longer available.");
+			//	break;
+			//case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
+			//	err("The requested window is already in use by Vulkan or another API in a manner which prevents it from being used again.");
+			//	break;
+			//case VK_ERROR_OUT_OF_DATE_KHR:
+			//	err("A surface has changed in such a way that it is no longer compatible with the swapchain, and further presentation requests using the swapchain will fail. Applications must query the new surface properties and recreate their swapchain if they wish to continue presenting to the surface.");
+			//	break;
+			//case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR:
+			//	err("The display used by a swapchain does not use the same presentable image layout, or is incompatible in a way that prevents sharing an image.");
+			//	break;
+			//case VK_ERROR_INVALID_SHADER_NV:
+			//	err("One or more shaders failed to compile or link. More details are reported back to the application via VK_EXT_debug_report if enabled.");
+			//	break;
 			case VK_ERROR_OUT_OF_POOL_MEMORY:
 				err("A pool memory allocation has failed. This must only be returned if no attempt to allocate host or device memory was made to accommodate the new allocation. If the failure was definitely due to fragmentation of the pool, VK_ERROR_FRAGMENTED_POOL should be returned instead.");
 				break;
@@ -206,9 +206,9 @@ namespace vku
 			case VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS:
 				err("A buffer creation or memory allocation failed because the requested address is not available. A shader group handle assignment failed because the requested shader group handle information is no longer valid.");
 				break;
-			case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:
-				err("An operation on a swapchain created with VK_FULL_SCREEN_EXCLUSIVE_APPLICATION_CONTROLLED_EXT failed as it did not have exlusive full-screen access. This may occur due to implementation-dependent reasons, outside of the application’s control.");
-				break;
+			//case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:
+			//	err("An operation on a swapchain created with VK_FULL_SCREEN_EXCLUSIVE_APPLICATION_CONTROLLED_EXT failed as it did not have exlusive full-screen access. This may occur due to implementation-dependent reasons, outside of the application’s control.");
+			//	break;
 			default:
 				err("An unknown error has occurred; either the application has provided invalid input, or an implementation failure has occurred");
 				break;

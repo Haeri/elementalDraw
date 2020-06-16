@@ -1,12 +1,19 @@
-#include "../include/vulkan_context.hpp"
+#include "elemental_draw/vulkan_context.hpp"
 
 #include <iostream>
 
-#include "../include/elemental_draw.h"
+#include "elemental_draw/elemental_draw.hpp"
 #include "vulkan_utils.cpp"
 
 VulkanContext::VulkanContext()
 {
+	if (gladLoaderLoadVulkan(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE) <= 0)
+	{
+		std::cerr << "Could not load Vulkan" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+
 	VkApplicationInfo applicationInfo;
 	applicationInfo.sType				= VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	applicationInfo.pNext				= NULL;
@@ -72,8 +79,14 @@ VulkanContext::VulkanContext()
 	deviceCreateInfo.ppEnabledExtensionNames	= NULL;
 	deviceCreateInfo.pEnabledFeatures			= &physicalDeviceFeatures;
 
+
 	_VulkanDevice = new VkDevice();
 	vku::err_check(vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo, NULL, _VulkanDevice));
+	
+	if (gladLoaderLoadVulkan(*_vulkanInstance, physicalDevices[bestDevice.deviceIndex], *_VulkanDevice) <= 0) {
+		std::cerr << "Could not load the Vulkan device!" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
 	delete[] physicalDevices;
 }

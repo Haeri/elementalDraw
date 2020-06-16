@@ -1,11 +1,12 @@
-#include "../include/window.hpp"
+#include "elemental_draw/window.hpp"
 
 #include <iostream>
 
-#define GLFW_INCLUDE_VULKAN
+#define GLAD_VULKAN_IMPLEMENTATION
+#include <glad/vulkan.h>
 #include <GLFW/glfw3.h>
 
-#include "../include/vulkan_context.hpp"
+#include "elemental_draw/vulkan_context.hpp"
 
 
 Window::Window(): Window(WindowConfig())
