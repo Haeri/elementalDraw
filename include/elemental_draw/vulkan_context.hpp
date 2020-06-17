@@ -6,6 +6,8 @@
 #include "context.hpp"
 #include "color.hpp"
 
+class Window;
+//typedef uint64_t VkSurfaceKHR;
 typedef struct VkInstance_T* VkInstance;
 typedef struct VkDevice_T* VkDevice;
 
@@ -13,7 +15,7 @@ typedef struct VkDevice_T* VkDevice;
 class VulkanContext : public Context {
 public:
 	bool tmp = true;
-	VulkanContext();
+    VulkanContext(Window* window);
 	~VulkanContext();
 
 	Context* create_context() override;
@@ -43,6 +45,7 @@ public:
 	void clear_rect(float x, float y, float width, float height) override;
 
 private:
+    //VkSurfaceKHR* _vulkanSurface;
 	VkInstance* _vulkanInstance;
 	VkDevice* _VulkanDevice;
 };

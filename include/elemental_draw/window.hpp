@@ -36,6 +36,7 @@ public:
 	void maximize();
 	void terminate();
 
+	GLFWwindow* getWindow();
 	Context* getContext();
 
 private:

@@ -2,10 +2,7 @@
 
 #include <iostream>
 
-#define GLAD_VULKAN_IMPLEMENTATION
-#include <glad/vulkan.h>
 #include <GLFW/glfw3.h>
-
 #include "elemental_draw/vulkan_context.hpp"
 
 
@@ -26,9 +23,9 @@ Window::Window(WindowConfig config)
 
 	create_window();
 
-	_context = new VulkanContext();
-
 	fill_config();
+
+	_context = new VulkanContext(this);
 
 	run();
 }
@@ -77,6 +74,11 @@ void Window::setPosition(int x, int y)
 void Window::terminate()
 {
 	glfwTerminate();
+}
+
+GLFWwindow* Window::getWindow()
+{
+    return _window;
 }
 
 Context* Window::getContext()

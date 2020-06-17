@@ -1,17 +1,18 @@
 #include "elemental_draw/vulkan_context.hpp"
 
-#include <iostream>
 #include <vector>
 
+#include "vulkan_utils.hpp"
+#include <GLFW/glfw3.h>
+
 #include "elemental_draw/elemental_draw.hpp"
-#include "vulkan_utils.cpp"
+#include "elemental_draw/window.hpp"
 
-
-VulkanContext::VulkanContext()
+VulkanContext::VulkanContext(Window* window)
 {
 	if (gladLoaderLoadVulkan(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE) <= 0)
 	{
-		std::cerr << "Could not load Vulkan" << std::endl;
+		std::cerr << "Error: Could not load Vulkan!" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -20,7 +21,7 @@ VulkanContext::VulkanContext()
 
 	VkApplicationInfo applicationInfo;
 	applicationInfo.sType				= VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	applicationInfo.pNext				= NULL;
+	applicationInfo.pNext				= nullptr;
 	applicationInfo.pApplicationName	= "UI Application";			// TODO: Pass down from application
 	applicationInfo.applicationVersion	= VK_MAKE_VERSION(1, 0, 0);
 	applicationInfo.pEngineName			= ELEM_APPLICATION_NAME;
@@ -31,7 +32,7 @@ VulkanContext::VulkanContext()
 	// --------------- Check Layers ---------------
 
 	uint32_t layerCount = 0;
-    vkEnumerateInstanceLayerProperties(&layerCount, NULL);
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
     VkLayerProperties* layerProperties = new VkLayerProperties[layerCount];
     vkEnumerateInstanceLayerProperties(&layerCount, layerProperties);
 
@@ -45,15 +46,17 @@ VulkanContext::VulkanContext()
 				  << "\n";
     }
 
-	//vkGetInstanceProcAddr(*_vulkanInstance, "");
-	
+	const std::vector<const char*> validationLayers = { 
+		"VK_LAYER_LUNARG_standard_validation" 
+	};
+
 
 	// --------------- Check Extensions ---------------
 
 	uint32_t extencionCount = 0;
-    vkEnumerateInstanceExtensionProperties(NULL, &extencionCount, NULL);
+    vkEnumerateInstanceExtensionProperties(nullptr, &extencionCount, nullptr);
     VkExtensionProperties* extensionProperties = new VkExtensionProperties[extencionCount];
-    vkEnumerateInstanceExtensionProperties(NULL, &extencionCount,extensionProperties);
+    vkEnumerateInstanceExtensionProperties(nullptr, &extencionCount,extensionProperties);
 
     std::cout << "Extensions: " << layerCount << std::endl;
     for (int i = 0; i < layerCount; ++i)
@@ -62,39 +65,52 @@ VulkanContext::VulkanContext()
                   << "Spec Version: " << extensionProperties[i].specVersion << "\n"
                   << "\n";
     }
-	
-	const std::vector<const char*> validationLayers = {
-        "VK_LAYER_LUNARG_standard_validation"
-	};
 
+	std::vector<const char*> extensions = {};
+    uint32_t extensionCount = 0;
+	const char** requiredExtensions = glfwGetRequiredInstanceExtensions(&extensionCount);
+    for (uint32_t i = 0; i < extensionCount; ++i)
+    {
+        extensions.push_back(requiredExtensions[i]);
+    }
 	 
 	// --------------- Create Instance create info ---------------
 
 	VkInstanceCreateInfo instanceCreateInfo;
 	instanceCreateInfo.sType					= VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	instanceCreateInfo.pNext					= NULL;
+	instanceCreateInfo.pNext					= nullptr;
 	instanceCreateInfo.flags					= 0;
 	instanceCreateInfo.pApplicationInfo			= &applicationInfo;
     instanceCreateInfo.enabledLayerCount		= validationLayers.size();
     instanceCreateInfo.ppEnabledLayerNames		= validationLayers.data();
-	instanceCreateInfo.enabledExtensionCount	= 0;
-	instanceCreateInfo.ppEnabledExtensionNames	= NULL;
+	instanceCreateInfo.enabledExtensionCount	= extensions.size();
+    instanceCreateInfo.ppEnabledExtensionNames	= extensions.data();
 
 
 	// --------------- Create Instance ---------------
 
 	_vulkanInstance = new VkInstance();
-	vku::err_check(vkCreateInstance(&instanceCreateInfo, NULL, _vulkanInstance));
+	vku::err_check(vkCreateInstance(&instanceCreateInfo, nullptr, _vulkanInstance));
 
+
+	// --------------- Create Surface ---------------
+
+	
+	/*
+	_vulkanSurface = new VkSurfaceKHR();
+    vku::err_check(glfwCreateWindowSurface(*_vulkanInstance, nullptr, nullptr,
+                                          _vulkanSurface));
+	*/
+	
 
 	// --------------- Cet devices ---------------
 
 	uint32_t physicalDeviceCount = 0;
-	vku::err_check(vkEnumeratePhysicalDevices(*_vulkanInstance, &physicalDeviceCount, NULL));
+	vku::err_check(vkEnumeratePhysicalDevices(*_vulkanInstance, &physicalDeviceCount, nullptr));
 
 	if (physicalDeviceCount == 0)
     {
-        std::cerr << "Could not find a suitable Device that supports Vulkan!" << std::endl;
+        std::cerr << "Error: Could not find a suitable Device that supports Vulkan!" << std::endl;
         exit(EXIT_FAILURE);	
 	}
 
@@ -111,8 +127,8 @@ VulkanContext::VulkanContext()
 
 	vku::BestDevice bestDevice = vku::get_best_device_info(physicalDevices, physicalDeviceCount);
 	std::cout
-		<< "Chosen Device Nr. " << (bestDevice.deviceIndex+1) << "\n"
-		<< "Chosen Queue Family: " << (bestDevice.queueFamilyIndex+1) << " with queue count: " << bestDevice.queueCount << "\n";
+		<< "Best Device Nr. " << (bestDevice.deviceIndex+1) << "\n"
+		<< "Best Queue Family: " << (bestDevice.queueFamilyIndex+1) << " with queue count: " << bestDevice.queueCount << "\n";
 
 
 	// --------------- Create Queue ---------------
@@ -121,7 +137,7 @@ VulkanContext::VulkanContext()
 
 	VkDeviceQueueCreateInfo deviceQueueCreateInfo;
 	deviceQueueCreateInfo.sType				= VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	deviceQueueCreateInfo.pNext				= NULL;
+	deviceQueueCreateInfo.pNext				= nullptr;
 	deviceQueueCreateInfo.flags				= 0;
 	deviceQueueCreateInfo.queueFamilyIndex	= bestDevice.queueFamilyIndex;
 	deviceQueueCreateInfo.queueCount		= bestDevice.queueCount;
@@ -134,26 +150,33 @@ VulkanContext::VulkanContext()
 
 	VkDeviceCreateInfo deviceCreateInfo;
 	deviceCreateInfo.sType						= VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	deviceCreateInfo.pNext						= NULL;
+	deviceCreateInfo.pNext						= nullptr;
 	deviceCreateInfo.flags						= 0;
 	deviceCreateInfo.queueCreateInfoCount		= 1;
 	deviceCreateInfo.pQueueCreateInfos			= &deviceQueueCreateInfo;
 	deviceCreateInfo.enabledLayerCount			= 0;
-	deviceCreateInfo.ppEnabledLayerNames		= NULL;
+	deviceCreateInfo.ppEnabledLayerNames		= nullptr;
 	deviceCreateInfo.enabledExtensionCount		= 0;
-	deviceCreateInfo.ppEnabledExtensionNames	= NULL;
+	deviceCreateInfo.ppEnabledExtensionNames	= nullptr;
 	deviceCreateInfo.pEnabledFeatures			= &physicalDeviceFeatures;
 
 
 	// --------------- Create Device ---------------
 
 	_VulkanDevice = new VkDevice();
-	vku::err_check(vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo, NULL, _VulkanDevice));
+	vku::err_check(vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo, nullptr, _VulkanDevice));
 	
 	if (gladLoaderLoadVulkan(*_vulkanInstance, physicalDevices[bestDevice.deviceIndex], *_VulkanDevice) <= 0) {
-		std::cerr << "Could not load the Vulkan device!" << std::endl;
+		std::cerr << "Error: Could not load the Vulkan device!" << std::endl;
 		exit(EXIT_FAILURE);
 	}
+
+
+	// --------------- Create Queue ---------------
+
+	VkQueue queue;
+    vkGetDeviceQueue(*_VulkanDevice, bestDevice.queueFamilyIndex, 0, &queue);
+
 
 	delete[] physicalDevices;
     delete[] extensionProperties;
@@ -165,9 +188,11 @@ VulkanContext::~VulkanContext()
 
 	vkDeviceWaitIdle(*_VulkanDevice);
 
-	vkDestroyDevice(*_VulkanDevice, NULL);
-    vkDestroyInstance(*_vulkanInstance, NULL);
+	//vkDestroySurfaceKHR(*_vulkanInstance, *_vulkanSurface, nullptr);
+	vkDestroyDevice(*_VulkanDevice, nullptr);
+    vkDestroyInstance(*_vulkanInstance, nullptr);
 
+	//delete _vulkanSurface;
 	delete _VulkanDevice;
 	delete _vulkanInstance;
 }
