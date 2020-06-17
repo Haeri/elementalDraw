@@ -179,12 +179,12 @@ namespace vku
 			case VK_ERROR_FRAGMENTED_POOL:
 				err("A pool allocation has failed due to fragmentation of the pool’s memory. This must only be returned if no attempt to allocate host or device memory was made to accommodate the new allocation. This should be returned in preference to VK_ERROR_OUT_OF_POOL_MEMORY, but only if the implementation is certain that the pool allocation failure was due to fragmentation.");
 				break;
-			//case VK_ERROR_SURFACE_LOST_KHR:
-			//	err("A surface is no longer available.");
-			//	break;
-			//case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
-			//	err("The requested window is already in use by Vulkan or another API in a manner which prevents it from being used again.");
-			//	break;
+			case VK_ERROR_SURFACE_LOST_KHR:
+				err("A surface is no longer available.");
+				break;
+			case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
+				err("The requested window is already in use by Vulkan or another API in a manner which prevents it from being used again.");
+				break;
 			//case VK_ERROR_OUT_OF_DATE_KHR:
 			//	err("A surface has changed in such a way that it is no longer compatible with the swapchain, and further presentation requests using the swapchain will fail. Applications must query the new surface properties and recreate their swapchain if they wish to continue presenting to the surface.");
 			//	break;

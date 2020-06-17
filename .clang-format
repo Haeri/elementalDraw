@@ -1,0 +1,14 @@
+BasedOnStyle: Microsoft
+
+Language: Cpp
+NamespaceIndentation: All
+ColumnLimit: 100
+AccessModifierOffset: -4
+PointerAlignment: Left
+AlwaysBreakTemplateDeclarations: true
+FixNamespaceComments: true
+BraceWrapping:
+    AfterClass: true
+    AfterStruct: true
+    AfterUnion: true
+BreakConstructorInitializers: BeforeColon
