@@ -46,7 +46,9 @@ jobs:
     - name: Generate Solution
       run: sudo ./tools/generate_project_linux.sh
     - name: Build
-      run: make ./build
+      run: |
+        cd ./build
+        make
 
   build-mac:
    name: Mac Build
@@ -68,4 +70,6 @@ jobs:
     - name: Generate Solution
       run: sudo ./tools/generate_project_linux.sh
     - name: Build
-      run: make ./build
+      run: |
+        cd ./build
+        make
