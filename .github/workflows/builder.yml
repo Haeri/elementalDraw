@@ -9,9 +9,9 @@ jobs:
   build-win:
    name: Windows Build
    runs-on: windows-latest
-   strategy:
-     matrix: 
-       conf: [Debug, Release]
+#   strategy:
+#     matrix: 
+#       conf: [Debug, Release]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
@@ -29,9 +29,9 @@ jobs:
   build-linux:
    name: Linux Build
    runs-on: ubuntu-latest
-   strategy:
-     matrix: 
-       conf: [Debug, Release]
+#   strategy:
+#     matrix: 
+#       conf: [Debug, Release]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
@@ -41,6 +41,28 @@ jobs:
       run: |
         sudo chmod +x ./tools/*.sh
         sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
+    - name: Prerequesits Check
+      run: sudo ./tools/prerequesits_linux.sh
+    - name: Generate Solution
+      run: sudo ./tools/generate_project_linux.sh
+    - name: Build
+      run: make ./build
+
+  build-mac:
+   name: Mac Build
+   runs-on: macos-latest
+#   strategy:
+#     matrix: 
+#       conf: [Debug, Release]
+   steps:
+    - name: Download Repository
+      uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+    - name: Setup Environment
+      run: |
+        sudo chmod +x ./tools/*.sh
+ #       sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
     - name: Prerequesits Check
       run: sudo ./tools/prerequesits_linux.sh
     - name: Generate Solution

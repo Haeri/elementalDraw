@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(PROJECT_NAME Elemental_Draw)
+set(PROJECT_NAME elemental_draw)
 project(${PROJECT_NAME} VERSION 0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)

@@ -7,7 +7,7 @@
 #include "color.hpp"
 
 class Window;
-//typedef uint64_t VkSurfaceKHR;
+typedef struct VkSurfaceKHR_T* VkSurfaceKHR;
 typedef struct VkInstance_T* VkInstance;
 typedef struct VkDevice_T* VkDevice;
 
@@ -45,7 +45,7 @@ public:
 	void clear_rect(float x, float y, float width, float height) override;
 
 private:
-    //VkSurfaceKHR* _vulkanSurface;
+    VkSurfaceKHR* _vulkanSurface;
 	VkInstance* _vulkanInstance;
 	VkDevice* _VulkanDevice;
 };

@@ -95,12 +95,10 @@ VulkanContext::VulkanContext(Window* window)
 
 	// --------------- Create Surface ---------------
 
-	
-	/*
 	_vulkanSurface = new VkSurfaceKHR();
-    vku::err_check(glfwCreateWindowSurface(*_vulkanInstance, nullptr, nullptr,
+    vku::err_check(glfwCreateWindowSurface(*_vulkanInstance, window->getWindow(), nullptr,
                                           _vulkanSurface));
-	*/
+	
 	
 
 	// --------------- Cet devices ---------------
