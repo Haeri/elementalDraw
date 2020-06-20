@@ -47,7 +47,7 @@ public:
 private:
     VkSurfaceKHR* _vulkanSurface;
 	VkInstance* _vulkanInstance;
-	VkDevice* _VulkanDevice;
+	VkDevice* _vulkanDevice;
 };
 
 #endif // ELEM_VULKAN_CONTEXT_HPP

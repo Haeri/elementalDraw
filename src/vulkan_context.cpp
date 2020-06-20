@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h>
 
 #include "elemental_draw/elemental_draw.hpp"
-#include "elemental_draw/window.hpp"
+#include "window_impl.hpp"
 
 VulkanContext::VulkanContext(Window* window)
 {
@@ -96,12 +96,11 @@ VulkanContext::VulkanContext(Window* window)
 	// --------------- Create Surface ---------------
 
 	_vulkanSurface = new VkSurfaceKHR();
-    vku::err_check(glfwCreateWindowSurface(*_vulkanInstance, window->getWindow(), nullptr,
+    vku::err_check(glfwCreateWindowSurface(*_vulkanInstance, ((WindowImpl*) window)->getWindow(), nullptr,
                                           _vulkanSurface));
 	
-	
 
-	// --------------- Cet devices ---------------
+	// --------------- Get devices ---------------
 
 	uint32_t physicalDeviceCount = 0;
 	vku::err_check(vkEnumeratePhysicalDevices(*_vulkanInstance, &physicalDeviceCount, nullptr));
@@ -161,21 +160,49 @@ VulkanContext::VulkanContext(Window* window)
 
 	// --------------- Create Device ---------------
 
-	_VulkanDevice = new VkDevice();
-	vku::err_check(vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo, nullptr, _VulkanDevice));
+	_vulkanDevice = new VkDevice();
+	vku::err_check(vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo, nullptr, _vulkanDevice));
 	
-	if (gladLoaderLoadVulkan(*_vulkanInstance, physicalDevices[bestDevice.deviceIndex], *_VulkanDevice) <= 0) {
+	if (gladLoaderLoadVulkan(*_vulkanInstance, physicalDevices[bestDevice.deviceIndex], *_vulkanDevice) <= 0) {
 		std::cerr << "Error: Could not load the Vulkan device!" << std::endl;
 		exit(EXIT_FAILURE);
 	}
+
+	// --------------- Create Surface Capabilities ---------------
+
+	VkSurfaceCapabilitiesKHR surfaceCapabilities;
+    vku::err_check(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevices[bestDevice.deviceIndex],
+                                              *_vulkanSurface, &surfaceCapabilities));
+
+
+	// --------------- Get Surface Formats ---------------
+
+	uint32_t surfaceFormatCount = 0;
+    vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[bestDevice.deviceIndex], *_vulkanSurface, &surfaceFormatCount, nullptr));
+	VkSurfaceFormatKHR* surfaceFormats = new VkSurfaceFormatKHR[surfaceFormatCount];
+    vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[bestDevice.deviceIndex],
+                                                        *_vulkanSurface, &surfaceFormatCount,
+                                                        surfaceFormats));
+
+	std::cout << surfaceFormats->format << std::endl;
+
+
+	// --------------- Get Present Modes ---------------
+
+	uint32_t presentModeCount = 0;
+    vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevices[bestDevice.deviceIndex], *_vulkanSurface, &presentModeCount, nullptr));
+    VkPresentModeKHR* presentModes = new VkPresentModeKHR[presentModeCount];
+    vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(
+        physicalDevices[bestDevice.deviceIndex], *_vulkanSurface, &presentModeCount, presentModes));
 
 
 	// --------------- Create Queue ---------------
 
 	VkQueue queue;
-    vkGetDeviceQueue(*_VulkanDevice, bestDevice.queueFamilyIndex, 0, &queue);
+    vkGetDeviceQueue(*_vulkanDevice, bestDevice.queueFamilyIndex, 0, &queue);
 
 
+	delete[] surfaceFormats;
 	delete[] physicalDevices;
     delete[] extensionProperties;
 	delete[] layerProperties;
@@ -184,14 +211,14 @@ VulkanContext::VulkanContext(Window* window)
 VulkanContext::~VulkanContext()
 {
 
-	vkDeviceWaitIdle(*_VulkanDevice);
+	vkDeviceWaitIdle(*_vulkanDevice);
 
-	//vkDestroySurfaceKHR(*_vulkanInstance, *_vulkanSurface, nullptr);
-	vkDestroyDevice(*_VulkanDevice, nullptr);
+	vkDestroyDevice(*_vulkanDevice, nullptr);
+	vkDestroySurfaceKHR(*_vulkanInstance, *_vulkanSurface, nullptr);
     vkDestroyInstance(*_vulkanInstance, nullptr);
 
-	//delete _vulkanSurface;
-	delete _VulkanDevice;
+	delete _vulkanDevice;
+	delete _vulkanSurface;
 	delete _vulkanInstance;
 }
 

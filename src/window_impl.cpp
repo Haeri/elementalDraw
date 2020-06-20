@@ -1,16 +1,60 @@
-#include "elemental_draw/window.hpp"
+#include "window_impl.hpp"
 
 #include <iostream>
 
-#include <GLFW/glfw3.h>
 #include "elemental_draw/vulkan_context.hpp"
 
 
-Window::Window(): Window(WindowConfig())
+
+/* ------------------------ DOWNCAST ------------------------ */
+
+inline WindowImpl* getImpl(Window* ptr)
 {
+    return (WindowImpl*)ptr;
+}
+inline const WindowImpl* getImpl(const Window* ptr)
+{
+    return (const WindowImpl*)ptr;
 }
 
-Window::Window(WindowConfig config)
+
+/* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
+
+Window* Window::create(WindowConfig config)
+{
+    return new WindowImpl(config);
+}
+
+void Window::setTitle(const std::string& title)
+{
+    WindowImpl* impl = getImpl(this);
+    impl->_config.title = title;
+    glfwSetWindowTitle(impl->_window, title.c_str());
+}
+
+void Window::setPosition(int x, int y)
+{
+    WindowImpl* impl = getImpl(this);
+    impl->_config.position_x = x;
+    impl->_config.position_y = y;
+    glfwSetWindowPos(impl->_window, x, y);
+}
+
+void Window::terminate()
+{
+	glfwTerminate();
+}
+
+Context* Window::getContext()
+{
+    WindowImpl* impl = getImpl(this);
+    return impl->_context;
+}
+
+
+/* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
+
+WindowImpl::WindowImpl(WindowConfig config)
 {
 	setup();
 	
@@ -47,7 +91,7 @@ Window::Window(uint32_t width, uint32_t height, const std::string& title)
 }
 */
 
-Window::~Window()
+WindowImpl::~WindowImpl()
 {
 	glfwDestroyWindow(_window);
 	--_windowCount;
@@ -58,35 +102,13 @@ Window::~Window()
 	}
 }
 
-void Window::setTitle(const std::string& title)
-{
-	_config.title = title;
-	glfwSetWindowTitle(_window, title.c_str());
-}
 
-void Window::setPosition(int x, int y)
-{
-	_config.position_x = x;
-	_config.position_y = y;
-	glfwSetWindowPos(_window, x, y);
-}
-
-void Window::terminate()
-{
-	glfwTerminate();
-}
-
-GLFWwindow* Window::getWindow()
+GLFWwindow* WindowImpl::getWindow()
 {
     return _window;
 }
 
-Context* Window::getContext()
-{
-	return _context;
-}
-
-void Window::setup()
+void WindowImpl::setup()
 {
 	if (_windowCount == 0)
 	{
@@ -100,7 +122,7 @@ void Window::setup()
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 }
 
-void Window::create_window()
+void WindowImpl::create_window()
 {
 	if (_config.width == 0 || _config.height == 0) 
 	{
@@ -127,14 +149,14 @@ void Window::create_window()
 	}
 }
 
-void Window::run()
+void WindowImpl::run()
 {
 	while (!glfwWindowShouldClose(_window)) {
 		glfwPollEvents();
 	}
 }
 
-void Window::fill_config()
+void WindowImpl::fill_config()
 {
 	glfwGetWindowSize(_window, &_config.width, &_config.height);
 	glfwGetWindowPos(_window, &_config.position_x, &_config.position_y);
