@@ -2,9 +2,7 @@
 
 #include <iostream>
 
-#include "elemental_draw/vulkan_context.hpp"
-
-
+#include "elemental_draw/context.hpp"
 
 /* ------------------------ DOWNCAST ------------------------ */
 
@@ -69,7 +67,7 @@ WindowImpl::WindowImpl(WindowConfig config)
 
 	fill_config();
 
-	_context = new VulkanContext(this);
+	_context = Context::create(this);
 
 	run();
 }

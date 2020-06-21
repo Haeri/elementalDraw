@@ -27,7 +27,7 @@ class ELEMD_API Window
 {
 public:
     static Window* create(WindowConfig config);
-    virtual ~Window() {}
+    virtual ~Window() = default;
 
 	Context* getContext();
 
@@ -39,7 +39,7 @@ public:
 	void terminate();
 
 protected:
-    Window() {}
+    Window() = default;
 };
 
 #endif // ELEMD_WINDOW_HPP
