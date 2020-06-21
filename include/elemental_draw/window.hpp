@@ -1,12 +1,14 @@
-#ifndef ELEM_WINDOW_HPP
-#define ELEM_WINDOW_HPP
+#ifndef ELEMD_WINDOW_HPP
+#define ELEMD_WINDOW_HPP
 
+#include <elemental_draw/elemental_draw.hpp>
 #include <string>
 #include <cstdint>
 
 class Context;
 
-struct WindowConfig {
+struct ELEMD_API WindowConfig 
+{
 	std::string title;
 	
 	int width	= 500;
@@ -21,10 +23,12 @@ struct WindowConfig {
 	bool visible		= true;
 };
 
-class Window {
+class ELEMD_API Window 
+{
 public:
     static Window* create(WindowConfig config);
-	
+    virtual ~Window() {}
+
 	Context* getContext();
 
 	void setTitle(const std::string& title);
@@ -38,4 +42,4 @@ protected:
     Window() {}
 };
 
-#endif // ELEM_WINDOW_HPP
+#endif // ELEMD_WINDOW_HPP

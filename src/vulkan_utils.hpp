@@ -1,5 +1,5 @@
-#ifndef ELEM_VULKAN_UTILS_HPP
-#define ELEM_VULKAN_UTILS_HPP
+#ifndef ELEMD_VULKAN_UTILS_HPP
+#define ELEMD_VULKAN_UTILS_HPP
 
 #include <iostream>
 #include <glad/vulkan.h>
@@ -222,4 +222,4 @@ namespace vku
 	}
 }
 
-#endif // ELEM_VULKAN_UTILS_HPP
+#endif // ELEMD_VULKAN_UTILS_HPP

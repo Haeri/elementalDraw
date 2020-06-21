@@ -1,0 +1,3 @@
+link_libraries(elemental_draw)
+
+add_executable(window_sample simple_window.cpp)

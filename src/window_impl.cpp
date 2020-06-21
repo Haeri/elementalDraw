@@ -74,27 +74,12 @@ WindowImpl::WindowImpl(WindowConfig config)
 	run();
 }
 
-/*
-Window::Window(uint32_t width, uint32_t height, const std::string& title)
-{
-	setup();
-
-	_config.width = width;
-	_config.height = height;
-	_config.title = title;
-
-	create_window();
-
-	fill_config();
-
-	run();
-}
-*/
-
 WindowImpl::~WindowImpl()
 {
 	glfwDestroyWindow(_window);
 	--_windowCount;
+
+	delete _context;
 	
 	if (_windowCount == 0)
 	{

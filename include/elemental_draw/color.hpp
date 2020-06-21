@@ -1,9 +1,11 @@
-#ifndef ELEM_COLOR_HPP
-#define ELEM_COLOR_HPP
+#ifndef ELEMD_COLOR_HPP
+#define ELEMD_COLOR_HPP
 
+#include <elemental_draw/elemental_draw.hpp>
 #include <cstdint>
 
-class Color {
+class ELEMD_API Color
+{
 public:
 
 	Color() : _r(0), _g(0), _b(0), _a(255) {}
@@ -22,4 +24,4 @@ private:
 	uint8_t _a;
 };
 
-#endif // ELEM_COLOR_HPP
+#endif // ELEMD_COLOR_HPP

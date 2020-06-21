@@ -1,11 +1,13 @@
-#ifndef ELEM_CONTEXT_HPP
-#define ELEM_CONTEXT_HPP
+#ifndef ELEMD_CONTEXT_HPP
+#define ELEMD_CONTEXT_HPP
 
+#include <elemental_draw/elemental_draw.hpp>
 #include <cstdint>
 
 #include "color.hpp"
 
-class Context{
+class ELEMD_API Context
+{
 public:
 	Context();
 	~Context();
@@ -37,4 +39,4 @@ public:
 	virtual void clear_rect(float x, float y, float width, float height) = 0;
 };
 
-#endif // ELEM_CONTEXT_HPP
+#endif // ELEMD_CONTEXT_HPP

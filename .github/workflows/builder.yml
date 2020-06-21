@@ -9,9 +9,9 @@ jobs:
   build-win:
    name: Windows Build
    runs-on: windows-latest
-#   strategy:
-#     matrix: 
-#       conf: [Debug, Release]
+   strategy:
+     matrix: 
+       conf: [Debug, Release]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
@@ -24,14 +24,14 @@ jobs:
     - name: Generate Solution
       run: ./tools/generate_project_win.bat -s
     - name: Build
-      run: MSBuild.exe ./build/Elemental_Draw.sln
+      run: MSBuild.exe ./build/Elemental_Draw.sln /p:Configuration=${{ matrix.conf }}
     
   build-linux:
    name: Linux Build
    runs-on: ubuntu-latest
-#   strategy:
-#     matrix: 
-#       conf: [Debug, Release]
+   strategy:
+     matrix: 
+       conf: [Debug, Release]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
@@ -48,14 +48,14 @@ jobs:
     - name: Build
       run: |
         cd ./build
-        sudo make
+        sudo make config=${{ matrix.conf }}
 
   build-mac:
    name: Mac Build
    runs-on: macos-latest
-#   strategy:
-#     matrix: 
-#       conf: [Debug, Release]
+   strategy:
+     matrix: 
+       conf: [Debug, Release]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
@@ -64,7 +64,6 @@ jobs:
     - name: Setup Environment
       run: |
         sudo chmod +x ./tools/*.sh
- #       sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
     - name: Prerequesits Check
       run: sudo ./tools/prerequesits_linux.sh
     - name: Generate Solution
@@ -72,4 +71,4 @@ jobs:
     - name: Build
       run: |
         cd ./build
-        sudo make
+        sudo make config=${{ matrix.conf }}

@@ -1,6 +1,7 @@
-#ifndef ELEM_VULKAN_CONTEXT_HPP
-#define ELEM_VULKAN_CONTEXT_HPP
+#ifndef ELEMD_VULKAN_CONTEXT_HPP
+#define ELEMD_VULKAN_CONTEXT_HPP
 
+#include <elemental_draw/elemental_draw.hpp>
 #include <string>
 
 #include "context.hpp"
@@ -12,7 +13,8 @@ typedef struct VkInstance_T* VkInstance;
 typedef struct VkDevice_T* VkDevice;
 
 
-class VulkanContext : public Context {
+class ELEMD_API VulkanContext : public Context 
+{
 public:
 	bool tmp = true;
     VulkanContext(Window* window);
@@ -50,4 +52,4 @@ private:
 	VkDevice* _vulkanDevice;
 };
 
-#endif // ELEM_VULKAN_CONTEXT_HPP
+#endif // ELEMD_VULKAN_CONTEXT_HPP

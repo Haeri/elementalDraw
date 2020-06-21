@@ -1,5 +1,5 @@
-#ifndef ELEM_WINDOW_IMPL_HPP
-#define ELEM_WINDOW_IMPL_HPP
+#ifndef ELEMD_WINDOW_IMPL_HPP
+#define ELEMD_WINDOW_IMPL_HPP
 
 #include "elemental_draw/window.hpp"
 #include <GLFW/glfw3.h>
@@ -23,4 +23,4 @@ public:
     void fill_config();
 };
 
-#endif // ELEM_WINDOW_IMPL_HPP
+#endif // ELEMD_WINDOW_IMPL_HPP
