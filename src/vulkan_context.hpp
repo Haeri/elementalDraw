@@ -7,15 +7,20 @@
 
 #include "vulkan_utils.hpp"
 
-class VulkanContext : public Context 
+namespace elemd
 {
-public:
-    VulkanContext(Window* window);
-	~VulkanContext();
 
-    VkSurfaceKHR* _vulkanSurface;
-	VkInstance* _vulkanInstance;
-	VkDevice* _vulkanDevice;
-};
+    class VulkanContext : public Context
+    {
+    public:
+        VulkanContext(Window* window);
+        ~VulkanContext();
+
+        VkSurfaceKHR* _vulkanSurface;
+        VkInstance* _vulkanInstance;
+        VkDevice* _vulkanDevice;
+    };
+
+} // namespace elemd
 
 #endif // ELEMD_VULKAN_CONTEXT_HPP

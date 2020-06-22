@@ -4,6 +4,9 @@
 
 #include "elemental_draw/context.hpp"
 
+namespace elemd
+{
+
 /* ------------------------ DOWNCAST ------------------------ */
 
 inline WindowImpl* getImpl(Window* ptr)
@@ -149,3 +152,5 @@ void WindowImpl::fill_config()
 	_config.resizeable = glfwGetWindowAttrib(_window, GLFW_RESIZABLE);
 	_config.visible = glfwGetWindowAttrib(_window, GLFW_VISIBLE);
 }
+
+} // namespace elemd

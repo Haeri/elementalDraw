@@ -5,41 +5,46 @@
 #include <string>
 #include <cstdint>
 
-class Context;
 
-struct ELEMD_API WindowConfig 
+namespace elemd
 {
-	std::string title;
-	
-	int width	= 500;
-	int height	= 600;
+    class Context;
 
-	int position_x = -1;
-	int position_y = -1;
+    struct ELEMD_API WindowConfig
+    {
+        std::string title;
 
-	bool decorated		= true;
-	bool transparent	= false;
-	bool resizeable		= true;
-	bool visible		= true;
-};
+        int width = 500;
+        int height = 600;
 
-class ELEMD_API Window 
-{
-public:
-    static Window* create(WindowConfig config);
-    virtual ~Window() = default;
+        int position_x = -1;
+        int position_y = -1;
 
-	Context* getContext();
+        bool decorated = true;
+        bool transparent = false;
+        bool resizeable = true;
+        bool visible = true;
+    };
 
-	void setTitle(const std::string& title);
-	void setPosition(int  x, int  y);
-	void setSize(int  width, int  height);
-	void minimize();
-	void maximize();
-	void terminate();
+    class ELEMD_API Window
+    {
+    public:
+        static Window* create(WindowConfig config);
+        virtual ~Window() = default;
 
-protected:
-    Window() = default;
-};
+        Context* getContext();
+
+        void setTitle(const std::string& title);
+        void setPosition(int x, int y);
+        void setSize(int width, int height);
+        void minimize();
+        void maximize();
+        void terminate();
+
+    protected:
+        Window() = default;
+    };
+
+} // namespace elemd
 
 #endif // ELEMD_WINDOW_HPP
