@@ -13,9 +13,15 @@
 
 #ifdef ELEMD_BUILD_SHARED
 	#ifdef _WIN32
-		#define ELEMD_API __declspec(dllexport)
+		#ifdef elemental_draw_EXPORTS
+			#define ELEMD_API __declspec(dllexport)
+		#else
+			#define ELEMD_API __declspec(dllimport)
+		#endif
 	#else
-		#define ELEMD_API __attribute__((visibility("default")))
+		#ifdef elemental_draw_EXPORTS
+			#define ELEMD_API __attribute__((visibility("default")))
+		#endif
 	#endif
 #else
 	#define ELEMD_API

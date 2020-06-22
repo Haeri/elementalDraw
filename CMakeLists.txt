@@ -41,7 +41,7 @@ endif()
 set(GLAD_DIR extern/glad)
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLAD_DIR}/include)
 add_subdirectory(${GLAD_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC glad)
+target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 
 # Glfw3
 set(GLFW_DIR extern/glfw3)
@@ -49,7 +49,7 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
-target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${GLFW_DIR}/include)
 add_subdirectory(${GLFW_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
 

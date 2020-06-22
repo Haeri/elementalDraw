@@ -32,4 +32,4 @@
 *.app
 
 # Exclude cmake folder
-build/
+/build/
