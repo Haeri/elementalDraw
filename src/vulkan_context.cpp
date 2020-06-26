@@ -327,7 +327,7 @@ namespace elemd
             }
         }
 
-        VkExtent2D chosenExtent = {window->getWidth(), window->getHeight()};
+        VkExtent2D chosenExtent = {(uint32_t)window->getWidth(), (uint32_t)window->getHeight()};
         chosenExtent.width =
             std::max(surfaceCapabilities.minImageExtent.width,
                      std::min(surfaceCapabilities.maxImageExtent.width, chosenExtent.width));
