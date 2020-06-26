@@ -46,6 +46,22 @@ void Window::terminate()
 	glfwTerminate();
 }
 
+int Window::getWidth()
+{
+    int w, h;
+    WindowImpl* impl = getImpl(this);
+    glfwGetWindowSize(impl->_window, &w, &h);
+    return w;
+}
+
+int Window::getHeight()
+{
+    int w, h;
+    WindowImpl* impl = getImpl(this);
+    glfwGetWindowSize(impl->_window, &w, &h);
+    return h;
+}
+
 Context* Window::getContext()
 {
     WindowImpl* impl = getImpl(this);

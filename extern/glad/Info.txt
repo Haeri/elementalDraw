@@ -1,1 +1,1 @@
-http://gen.glad.sh/#profile=gl%3Dcompatibility%2Cgles1%3Dcommon&api=vulkan%3D1.2&options=HEADER_ONLY%2CLOADER&generator=c
+http://gen.glad.sh/#profile=gl%3Dcompatibility%2Cgles1%3Dcommon&api=vulkan%3D1.2&extensions=VK_KHR_surface%2CVK_KHR_swapchain&options=HEADER_ONLY%2CLOADER&generator=c

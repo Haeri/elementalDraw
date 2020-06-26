@@ -2,9 +2,9 @@
 #define ELEMD_WINDOW_HPP
 
 #include <elemental_draw/elemental_draw.hpp>
+
 #include <string>
 #include <cstdint>
-
 
 namespace elemd
 {
@@ -40,6 +40,8 @@ namespace elemd
         void minimize();
         void maximize();
         void terminate();
+        int getWidth();
+        int getHeight();
 
     protected:
         Window() = default;

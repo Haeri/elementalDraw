@@ -16,6 +16,7 @@ namespace elemd
         VulkanContext(Window* window);
         ~VulkanContext();
 
+        VkSwapchainKHR* _vulkanSwapchain;
         VkSurfaceKHR* _vulkanSurface;
         VkInstance* _vulkanInstance;
         VkDevice* _vulkanDevice;

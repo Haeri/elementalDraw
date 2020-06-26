@@ -1,5 +1,6 @@
 #include "vulkan_context.hpp"
 
+#include <algorithm>
 #include <vector>
 #include <GLFW/glfw3.h>
 
@@ -235,6 +236,10 @@ namespace elemd
 
         VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
 
+        const std::vector<const char*> deviceExtensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+        };
+
         VkDeviceCreateInfo deviceCreateInfo;
         deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         deviceCreateInfo.pNext = nullptr;
@@ -243,12 +248,11 @@ namespace elemd
         deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
         deviceCreateInfo.enabledLayerCount = 0;
         deviceCreateInfo.ppEnabledLayerNames = nullptr;
-        deviceCreateInfo.enabledExtensionCount = 0;
-        deviceCreateInfo.ppEnabledExtensionNames = nullptr;
+        deviceCreateInfo.enabledExtensionCount = deviceExtensions.size();
+        deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
         deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
 
         // --------------- Create Device ---------------
-
         _vulkanDevice = new VkDevice();
         vku::err_check(vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo,
                                       nullptr, _vulkanDevice));
@@ -261,10 +265,10 @@ namespace elemd
         }
 
         // --------------- Create Surface Capabilities ---------------
-
         VkSurfaceCapabilitiesKHR surfaceCapabilities;
         vku::err_check(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
             physicalDevices[bestDevice.deviceIndex], *_vulkanSurface, &surfaceCapabilities));
+
 
         // --------------- Get Surface Formats ---------------
 
@@ -277,7 +281,6 @@ namespace elemd
                                                             *_vulkanSurface, &surfaceFormatCount,
                                                             surfaceFormats));
 
-        std::cout << surfaceFormats->format << std::endl;
 
         // --------------- Get Present Modes ---------------
 
@@ -294,6 +297,91 @@ namespace elemd
         VkQueue queue;
         vkGetDeviceQueue(*_vulkanDevice, bestDevice.queueFamilyIndex, 0, &queue);
 
+        VkBool32 surfaceSupport = false;
+        vku::err_check(vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevices[bestDevice.deviceIndex],
+                                             bestDevice.queueFamilyIndex, *_vulkanSurface,
+                                             &surfaceSupport));
+
+        if (!surfaceSupport)
+        {
+            std::cerr << "Error: Swapchain not supported on your Device!" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        // --------------- Create SwapchainCreateInfo ---------------
+        
+        uint32_t chosenImageCount = surfaceCapabilities.minImageCount + 1;
+        if (chosenImageCount > surfaceCapabilities.maxImageCount)
+            chosenImageCount = surfaceCapabilities.maxImageCount;
+
+        
+        VkFormat chosenFormat = surfaceFormats[0].format;
+        VkColorSpaceKHR chosenColorSpace = surfaceFormats[0].colorSpace;
+        for (int i = 0; i < surfaceFormatCount; ++i)
+        {
+            if (surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB &&
+                surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            {
+                chosenFormat = surfaceFormats[i].format;
+                chosenColorSpace = surfaceFormats[i].colorSpace;
+            }
+        }
+
+        VkExtent2D chosenExtent = {window->getWidth(), window->getHeight()};
+        chosenExtent.width =
+            std::max(surfaceCapabilities.minImageExtent.width,
+                     std::min(surfaceCapabilities.maxImageExtent.width, chosenExtent.width));
+        chosenExtent.height =
+            std::max(surfaceCapabilities.minImageExtent.height,
+                     std::min(surfaceCapabilities.maxImageExtent.height, chosenExtent.height));
+        
+
+     
+        VkPresentModeKHR chosenPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+        for (int i = 0; i < presentModeCount; ++i)
+        {
+            if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+            {
+                chosenPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+            }
+        }
+
+
+        VkSwapchainCreateInfoKHR swapchainCreateInfo;
+        swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        swapchainCreateInfo.pNext = nullptr;
+        swapchainCreateInfo.flags = 0;
+        swapchainCreateInfo.surface = *_vulkanSurface;
+        swapchainCreateInfo.minImageCount = chosenImageCount;
+        swapchainCreateInfo.imageFormat = chosenFormat;
+        swapchainCreateInfo.imageColorSpace = chosenColorSpace;
+        swapchainCreateInfo.imageExtent = chosenExtent;
+        swapchainCreateInfo.imageArrayLayers = 1;
+        swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        swapchainCreateInfo.queueFamilyIndexCount = 0;
+        swapchainCreateInfo.pQueueFamilyIndices = nullptr;
+        swapchainCreateInfo.preTransform = surfaceCapabilities.currentTransform;
+        swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        swapchainCreateInfo.presentMode = chosenPresentMode;
+        swapchainCreateInfo.clipped = VK_TRUE;
+        swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+
+        
+        _vulkanSwapchain = new VkSwapchainKHR();
+        vku::err_check(
+            vkCreateSwapchainKHR(*_vulkanDevice, &swapchainCreateInfo, nullptr, _vulkanSwapchain));
+
+
+        uint32_t actualSwapchainImageCount = 0;
+        vku::err_check(vkGetSwapchainImagesKHR(*_vulkanDevice, *_vulkanSwapchain, &actualSwapchainImageCount,
+                                nullptr));
+        VkImage* swapchainImages = new VkImage[actualSwapchainImageCount];
+        vku::err_check(vkGetSwapchainImagesKHR(*_vulkanDevice, *_vulkanSwapchain,
+                                               &actualSwapchainImageCount, swapchainImages));
+
+
+        delete[] swapchainImages;
         delete[] surfaceFormats;
         delete[] physicalDevices;
         delete[] extensionProperties;
@@ -302,13 +390,14 @@ namespace elemd
 
     VulkanContext::~VulkanContext()
     {
-
         vkDeviceWaitIdle(*_vulkanDevice);
 
+        vkDestroySwapchainKHR(*_vulkanDevice, *_vulkanSwapchain, nullptr);
         vkDestroyDevice(*_vulkanDevice, nullptr);
         vkDestroySurfaceKHR(*_vulkanInstance, *_vulkanSurface, nullptr);
         vkDestroyInstance(*_vulkanInstance, nullptr);
 
+        delete _vulkanSwapchain;
         delete _vulkanDevice;
         delete _vulkanSurface;
         delete _vulkanInstance;
