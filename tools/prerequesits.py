@@ -5,6 +5,8 @@ import subprocess
 import re
 import os
 
+print(*os.environ, sep = "\n")
+
 colors = {
 	"white": "\x1B[0m",
 	"red": "\x1B[31m",
