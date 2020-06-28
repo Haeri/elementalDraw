@@ -47,6 +47,14 @@ jobs:
       run: |
         cd ./build
         sudo make config=${{ matrix.conf }}
+        cd $VCPKG_INSTALLATION_ROOT
+        ls -la
+        cd ./installed
+        ls -la
+        cd ./x64-linux
+        ls -la
+        cd ./tools
+        ls -la
     - name: Convert Assets
       run: ./tools/convert_assets_linux.sh
 
@@ -62,6 +70,7 @@ jobs:
     - name: Setup Environment
       run: |
         sudo chmod +x ./tools/*.sh
+        printenv
     - name: Prerequesits Check
       run: sudo ./tools/prerequesits_nix.sh
     - name: Generate Solution
