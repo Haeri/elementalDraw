@@ -12,6 +12,12 @@ colors = {
 	"blue": "\x1B[34m"
 }
 
+platforms = {
+	"Windows": "windows",
+	"Darwin": "macos",
+	"Linux": "linux"
+}
+
 if platform.system() == "Windows" and os.getenv('WT_SESSION') is None:
 	useEmoji = False
 	useColor = False
@@ -68,9 +74,9 @@ if do_step("CMake", "🤖", 0, "cmake --version", 'cmake version (.*)') != 0:
 if do_step("Vcpkg", "📦", 0, "vcpkg version", 'Vcpkg package management program version (.*)') != 0:
 	err = err + 1
 else:
-	if do_step("Install glfw3", "📚", 4, "vcpkg install glfw3:x64-" + platform.system(), '()', False) != 0:
+	if do_step("Install glfw3", "📚", 4, "vcpkg install glfw3:x64-" + platforms[platform.system()], '()', False) != 0:
 		err = err + 1
-	if do_step("Install glslang", "📚", 4, "vcpkg install glslang:x64-" + platform.system(), '()', False) != 0:
+	if do_step("Install glslang", "📚", 4, "vcpkg install glslang:x64-" + platforms[platform.system()], '()', False) != 0:
 		err = err + 1
 	'''
 	if do_custon_step("Vulkan SDK", "🔖", 4, lambda : "VULKAN_SDK" in os.environ, "Vulkan SDK not installed!") != 0:
