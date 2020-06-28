@@ -1,7 +1,7 @@
 #include "vulkan_context.hpp"
 
 #include <algorithm>
-#include <vector>
+#include <fstream>
 #include <GLFW/glfw3.h>
 
 #include "window_impl.hpp"
@@ -402,6 +402,32 @@ namespace elemd
             vku::err_check(vkCreateImageView(*_vulkanDevice, &imageViewCreateInfo, nullptr, &_vulkanImageViews[i]));
         }
 
+
+        createShaderModule("../../res/shader/shader.frag.spv", &fragShaderModule);
+        createShaderModule("../../res/shader/shader.vert.spv", &vertShaderModule);
+
+
+        VkPipelineShaderStageCreateInfo shaderStageCreateInfoVert;
+        shaderStageCreateInfoVert.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shaderStageCreateInfoVert.pNext = nullptr;
+        shaderStageCreateInfoVert.flags = 0;
+        shaderStageCreateInfoVert.stage = VK_SHADER_STAGE_VERTEX_BIT;
+        shaderStageCreateInfoVert.module = vertShaderModule;
+        shaderStageCreateInfoVert.pName = "main";
+        shaderStageCreateInfoVert.pSpecializationInfo = nullptr;
+        
+        VkPipelineShaderStageCreateInfo shaderStageCreateInfoFrag;
+        shaderStageCreateInfoFrag.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shaderStageCreateInfoFrag.pNext = nullptr;
+        shaderStageCreateInfoFrag.flags = 0;
+        shaderStageCreateInfoFrag.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        shaderStageCreateInfoFrag.module = vertShaderModule;
+        shaderStageCreateInfoFrag.pName = "main";
+        shaderStageCreateInfoFrag.pSpecializationInfo = nullptr;
+
+        VkPipelineShaderStageCreateInfo shaderStages[] = {shaderStageCreateInfoVert,
+                                                          shaderStageCreateInfoFrag};
+
         delete[] swapchainImages;
         delete[] surfaceFormats;
         delete[] physicalDevices;
@@ -413,6 +439,8 @@ namespace elemd
     {
         vkDeviceWaitIdle(*_vulkanDevice);
 
+        vkDestroyShaderModule(*_vulkanDevice, vertShaderModule, nullptr);
+        vkDestroyShaderModule(*_vulkanDevice, fragShaderModule, nullptr);
         for (int i = 0; i < actualSwapchainImageCount; ++i)
         {
             vkDestroyImageView(*_vulkanDevice, _vulkanImageViews[i], nullptr);
@@ -427,6 +455,36 @@ namespace elemd
         delete _vulkanDevice;
         delete _vulkanSurface;
         delete _vulkanInstance;
+    }
+
+    void VulkanContext::createShaderModule(const std::string& filename, VkShaderModule* shaderModule)
+    {
+        std::vector<char> spirvCode = readShader(filename);
+
+        VkShaderModuleCreateInfo shaderModuleCreateInfo;
+        shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        shaderModuleCreateInfo.pNext = nullptr;
+        shaderModuleCreateInfo.flags = 0;
+        shaderModuleCreateInfo.codeSize = spirvCode.size();
+        shaderModuleCreateInfo.pCode = (uint32_t*)spirvCode.data();
+
+        vku::err_check(vkCreateShaderModule(*_vulkanDevice, &shaderModuleCreateInfo, nullptr, shaderModule));
+    }
+
+    std::vector<char> VulkanContext::readShader(const std::string& filename)
+    {
+        std::ifstream file(filename, std::ios::binary | std::ios::ate);
+        if (file)
+        {
+            size_t fileSize = (size_t)file.tellg();
+            std::vector<char> fileBuffer(fileSize);
+            file.seekg(0);
+            file.read(fileBuffer.data(), fileSize);
+            file.close();
+            return fileBuffer;
+        }
+        
+        return std::vector<char>();
     }
 
 } // namespace elemd
