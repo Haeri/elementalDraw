@@ -64,21 +64,24 @@ tab = "    "
 
 if do_step("CMake", "🤖", 0, "cmake --version", 'cmake version (.*)') != 0:
 	err = err + 1
-'''
+
 if do_step("Vcpkg", "📦", 0, "vcpkg version", 'Vcpkg package management program version (.*)') != 0:
 	err = err + 1
 else:
 	if do_step("Install glfw3", "📚", 4, "vcpkg install glfw3:x64-" + platform.system(), '()', False) != 0:
 		err = err + 1
-	
+	if do_step("Install glslang", "📚", 4, "vcpkg install glslang:x64-" + platform.system(), '()', False) != 0:
+		err = err + 1
+	'''
 	if do_custon_step("Vulkan SDK", "🔖", 4, lambda : "VULKAN_SDK" in os.environ, "Vulkan SDK not installed!") != 0:
 		err = err + 1
 	else:
 		if do_step("Install Vulkan", "📚", 4, "vcpkg install vulkan:x64-" + platform.system(), '()', False) != 0:
 			err = err + 1
-	if do_custon_step("Vcpkg root", "🔖", 4, lambda : "VCPKG_INSTALLATION_ROOT" in os.environ, "VCPKG_INSTALLATION_ROOT environment variable not set!") != 0:
+	'''
+	if do_custon_step("Vcpkg environment", "🔖", 4, lambda : "VCPKG_INSTALLATION_ROOT" in os.environ, "VCPKG_INSTALLATION_ROOT environment variable not set!") != 0:
 			err = err + 1
-'''
+
 
 if(err == 0):
 	print(colored(emj("✔️ ") + "Everything ready for project steup!", "green"))	

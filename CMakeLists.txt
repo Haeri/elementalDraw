@@ -37,21 +37,31 @@ endif()
 
 # ---------------- EXTERN ---------------------#
 
-# Glad
-set(GLAD_DIR extern/glad)
-target_include_directories(${PROJECT_NAME} PUBLIC ${GLAD_DIR}/include)
-add_subdirectory(${GLAD_DIR})
+set(EXTERN_DIR extern/)
+
+# glad
+add_subdirectory(${EXTERN_DIR}glad)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 
-# Glfw3
-set(GLFW_DIR extern/glfw3)
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
-target_include_directories(${PROJECT_NAME} PRIVATE ${GLFW_DIR}/include)
-add_subdirectory(${GLFW_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
+# glslang
+#set(SKIP_GLSLANG_INSTALL OFF CACHE BOOL "" FORCE)
+#set(ENABLE_SPVREMAPPER OFF CACHE BOOL "" FORCE)
+#set(ENABLE_CTEST OFF CACHE BOOL "" FORCE)
+#set(ENABLE_HLSL OFF CACHE BOOL "" FORCE)
+#add_subdirectory(${EXTERN_DIR}glslang)
+#target_link_libraries(${PROJECT_NAME} PRIVATE glslang SPIRV)
 
 
-set_target_properties(glfw glad PROPERTIES FOLDER extern)
+# glfw3
+#set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+#set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+#set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+#set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+#add_subdirectory(${EXTERN_DIR}glfw3)
+#target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
+
+find_package(glfw3 CONFIG REQUIRED)
+target_link_libraries(main PRIVATE glfw)
+
+
+#set_target_properties(glfw glslang glslangValidator SPIRV glad PROPERTIES FOLDER ${EXTERN_DIR})

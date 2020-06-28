@@ -15,8 +15,6 @@ jobs:
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
-      with:
-        submodules: 'true'
     - name: Setup Environment
       uses: microsoft/setup-msbuild@v1.0.0
     - name: Prerequesits Check
@@ -25,6 +23,8 @@ jobs:
       run: ./tools/generate_project_win.bat -s
     - name: Build
       run: MSBuild.exe ./build/Elemental_Draw.sln /p:Configuration=${{ matrix.conf }}
+    - name: Convert Assets
+      run: ./tools/convert_assets_win.bat -s
     
   build-linux:
    name: Linux Build
@@ -35,20 +35,20 @@ jobs:
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
-      with:
-        submodules: 'true'
     - name: Setup Environment
       run: |
         sudo chmod +x ./tools/*.sh
         sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
     - name: Prerequesits Check
-      run: sudo ./tools/prerequesits_linux.sh
+      run: sudo ./tools/prerequesits_nix.sh
     - name: Generate Solution
       run: sudo ./tools/generate_project_linux.sh
     - name: Build
       run: |
         cd ./build
         sudo make config=${{ matrix.conf }}
+    - name: Convert Assets
+      run: ./tools/convert_assets_linux.sh
 
   build-mac:
    name: Mac Build
@@ -59,16 +59,16 @@ jobs:
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
-      with:
-        submodules: 'true'
     - name: Setup Environment
       run: |
         sudo chmod +x ./tools/*.sh
     - name: Prerequesits Check
-      run: sudo ./tools/prerequesits_linux.sh
+      run: sudo ./tools/prerequesits_nix.sh
     - name: Generate Solution
-      run: sudo ./tools/generate_project_linux.sh
+      run: sudo ./tools/generate_project_mac.sh
     - name: Build
       run: |
         cd ./build
         sudo make config=${{ matrix.conf }}
+    - name: Convert Assets
+      run: ./tools/convert_assets_mac.sh
