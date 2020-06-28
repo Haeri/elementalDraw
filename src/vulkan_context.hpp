@@ -16,6 +16,8 @@ namespace elemd
         VulkanContext(Window* window);
         ~VulkanContext();
 
+        uint32_t actualSwapchainImageCount = 0;
+        VkImageView* _vulkanImageViews;
         VkSwapchainKHR* _vulkanSwapchain;
         VkSurfaceKHR* _vulkanSurface;
         VkInstance* _vulkanInstance;

@@ -373,13 +373,34 @@ namespace elemd
             vkCreateSwapchainKHR(*_vulkanDevice, &swapchainCreateInfo, nullptr, _vulkanSwapchain));
 
 
-        uint32_t actualSwapchainImageCount = 0;
         vku::err_check(vkGetSwapchainImagesKHR(*_vulkanDevice, *_vulkanSwapchain, &actualSwapchainImageCount,
                                 nullptr));
         VkImage* swapchainImages = new VkImage[actualSwapchainImageCount];
         vku::err_check(vkGetSwapchainImagesKHR(*_vulkanDevice, *_vulkanSwapchain,
                                                &actualSwapchainImageCount, swapchainImages));
 
+        _vulkanImageViews = new VkImageView[actualSwapchainImageCount];
+        for (int i = 0; i < actualSwapchainImageCount; ++i)
+        {
+            VkImageViewCreateInfo imageViewCreateInfo;
+            imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            imageViewCreateInfo.pNext = nullptr;
+            imageViewCreateInfo.flags = 0;
+            imageViewCreateInfo.image = swapchainImages[i];
+            imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            imageViewCreateInfo.format = chosenFormat;
+            imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+            imageViewCreateInfo.subresourceRange.levelCount = 1;
+            imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+            imageViewCreateInfo.subresourceRange.layerCount = 1;
+
+            vku::err_check(vkCreateImageView(*_vulkanDevice, &imageViewCreateInfo, nullptr, &_vulkanImageViews[i]));
+        }
 
         delete[] swapchainImages;
         delete[] surfaceFormats;
@@ -392,11 +413,16 @@ namespace elemd
     {
         vkDeviceWaitIdle(*_vulkanDevice);
 
+        for (int i = 0; i < actualSwapchainImageCount; ++i)
+        {
+            vkDestroyImageView(*_vulkanDevice, _vulkanImageViews[i], nullptr);
+        }
         vkDestroySwapchainKHR(*_vulkanDevice, *_vulkanSwapchain, nullptr);
         vkDestroyDevice(*_vulkanDevice, nullptr);
         vkDestroySurfaceKHR(*_vulkanInstance, *_vulkanSurface, nullptr);
         vkDestroyInstance(*_vulkanInstance, nullptr);
 
+        delete[] _vulkanImageViews;
         delete _vulkanSwapchain;
         delete _vulkanDevice;
         delete _vulkanSurface;
