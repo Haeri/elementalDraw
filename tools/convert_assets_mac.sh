@@ -3,6 +3,9 @@
 oldpath=$(pwd)
 cd $(dirname "$0")
 
-"$VCPKG_INSTALLATION_ROOT/installed/x64-osx/tools/glslangValidator.exe" -v
+cd ../res/shader
+for f in *.vert *.frag
+	do "$VCPKG_INSTALLATION_ROOT/installed/x64-osx/tools/glslangValidator.exe" -V $f  -o $f.spv
+
 
 cd $oldpath

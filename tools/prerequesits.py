@@ -14,7 +14,7 @@ colors = {
 
 platforms = {
 	"Windows": "windows",
-	"Darwin": "macos",
+	"Darwin": "osx",
 	"Linux": "linux"
 }
 
