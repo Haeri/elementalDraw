@@ -3,7 +3,7 @@
 oldpath=$(pwd)
 cd $(dirname "$0")
 
-python3 ./prerequesits.py
+sudo python3 ./prerequesits.py
 
 err=$?
 
