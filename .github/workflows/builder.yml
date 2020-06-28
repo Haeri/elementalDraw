@@ -62,6 +62,9 @@ jobs:
     - name: Setup Environment
       run: |
         sudo chmod +x ./tools/*.sh
+        printenv | vcpkg
+        echo $VCPKG_INSTALLATION_ROOT
+        python3 -c "import os; print(os.environ)"
     - name: Prerequesits Check
       run: sudo ./tools/prerequesits_nix.sh
     - name: Generate Solution
