@@ -62,7 +62,7 @@ jobs:
     - name: Setup Environment
       run: |
         sudo chmod +x ./tools/*.sh
-        printenv | vcpkg
+        printenv | grep vcpkg
         echo $VCPKG_INSTALLATION_ROOT
         python3 -c "import os; print(os.environ)"
     - name: Prerequesits Check
