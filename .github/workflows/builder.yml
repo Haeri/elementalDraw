@@ -62,16 +62,13 @@ jobs:
     - name: Setup Environment
       run: |
         sudo chmod +x ./tools/*.sh
-        printenv | grep vcpkg
-        echo $VCPKG_INSTALLATION_ROOT
-        python3 -c "import os; print(os.environ)"
     - name: Prerequesits Check
-      run: sudo ./tools/prerequesits_nix.sh
+      run: ./tools/prerequesits_nix.sh
     - name: Generate Solution
-      run: sudo ./tools/generate_project_mac.sh
+      run: ./tools/generate_project_mac.sh
     - name: Build
       run: |
         cd ./build
-        sudo make config=${{ matrix.conf }}
+        make config=${{ matrix.conf }}
     - name: Convert Assets
       run: ./tools/convert_assets_mac.sh

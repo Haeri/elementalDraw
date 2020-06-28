@@ -87,8 +87,8 @@ else:
 		if do_step("Install Vulkan", "📚", 4, "vcpkg install vulkan:x64-" + platform.system(), '()', False) != 0:
 			err = err + 1
 	'''
-	#if do_custon_step("Vcpkg environment", "🔖", 4, lambda : os.getenv("VCPKG_INSTALLATION_ROOT"), "VCPKG_INSTALLATION_ROOT environment variable not set!") != 0:
-	#		err = err + 1
+	if do_custon_step("Vcpkg environment", "🔖", 4, lambda : os.getenv("VCPKG_INSTALLATION_ROOT"), "VCPKG_INSTALLATION_ROOT environment variable not set!") != 0:
+			err = err + 1
 
 
 if(err == 0):
