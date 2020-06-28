@@ -33,3 +33,6 @@
 
 # Exclude cmake folder
 /build/
+
+# Exclude Vulkan shader
+*.spv
