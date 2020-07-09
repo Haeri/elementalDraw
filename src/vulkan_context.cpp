@@ -134,7 +134,7 @@ namespace elemd
         vkEnumerateInstanceLayerProperties(&layerCount, layerProperties);
 
         std::cout << "Layers: " << layerCount << std::endl;
-        for (int i = 0; i < layerCount; ++i)
+        for (uint32_t i = 0; i < layerCount; ++i)
         {
             std::cout << "Name:         " << layerProperties[i].layerName << "\n"
                       << "Spec Version: " << layerProperties[i].specVersion << "\n"
@@ -153,7 +153,7 @@ namespace elemd
         vkEnumerateInstanceExtensionProperties(nullptr, &extencionCount, extensionProperties);
 
         std::cout << "Extensions: " << layerCount << std::endl;
-        for (int i = 0; i < layerCount; ++i)
+        for (uint32_t i = 0; i < layerCount; ++i)
         {
             std::cout << "Name:         " << extensionProperties[i].extensionName << "\n"
                       << "Spec Version: " << extensionProperties[i].specVersion << "\n"
@@ -175,9 +175,9 @@ namespace elemd
         instanceCreateInfo.pNext = nullptr;
         instanceCreateInfo.flags = 0;
         instanceCreateInfo.pApplicationInfo = &applicationInfo;
-        instanceCreateInfo.enabledLayerCount = validationLayers.size();
+        instanceCreateInfo.enabledLayerCount = (uint32_t)validationLayers.size();
         instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
-        instanceCreateInfo.enabledExtensionCount = extensions.size();
+        instanceCreateInfo.enabledExtensionCount = (uint32_t)extensions.size();
         instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
         // --------------- Create Instance ---------------
@@ -248,7 +248,7 @@ namespace elemd
         deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
         deviceCreateInfo.enabledLayerCount = 0;
         deviceCreateInfo.ppEnabledLayerNames = nullptr;
-        deviceCreateInfo.enabledExtensionCount = deviceExtensions.size();
+        deviceCreateInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
         deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
         deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
 
@@ -317,7 +317,7 @@ namespace elemd
         
         VkFormat chosenFormat = surfaceFormats[0].format;
         VkColorSpaceKHR chosenColorSpace = surfaceFormats[0].colorSpace;
-        for (int i = 0; i < surfaceFormatCount; ++i)
+        for (uint32_t i = 0; i < surfaceFormatCount; ++i)
         {
             if (surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB &&
                 surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
@@ -338,7 +338,7 @@ namespace elemd
 
      
         VkPresentModeKHR chosenPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-        for (int i = 0; i < presentModeCount; ++i)
+        for (uint32_t i = 0; i < presentModeCount; ++i)
         {
             if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
             {
@@ -380,7 +380,7 @@ namespace elemd
                                                &actualSwapchainImageCount, swapchainImages));
 
         _vulkanImageViews = new VkImageView[actualSwapchainImageCount];
-        for (int i = 0; i < actualSwapchainImageCount; ++i)
+        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
             VkImageViewCreateInfo imageViewCreateInfo;
             imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -421,12 +421,97 @@ namespace elemd
         shaderStageCreateInfoFrag.pNext = nullptr;
         shaderStageCreateInfoFrag.flags = 0;
         shaderStageCreateInfoFrag.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        shaderStageCreateInfoFrag.module = vertShaderModule;
+        shaderStageCreateInfoFrag.module = fragShaderModule;
         shaderStageCreateInfoFrag.pName = "main";
         shaderStageCreateInfoFrag.pSpecializationInfo = nullptr;
 
         VkPipelineShaderStageCreateInfo shaderStages[] = {shaderStageCreateInfoVert,
                                                           shaderStageCreateInfoFrag};
+
+
+        VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo;
+        pipelineVertexInputStateCreateInfo.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        pipelineVertexInputStateCreateInfo.pNext = nullptr;
+        pipelineVertexInputStateCreateInfo.flags = 0;
+        pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
+        pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr;
+        pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
+        pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
+
+        VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo;
+        pipelineInputAssemblyStateCreateInfo.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        pipelineInputAssemblyStateCreateInfo.pNext = nullptr;
+        pipelineInputAssemblyStateCreateInfo.flags = 0;
+        pipelineInputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
+
+        VkViewport viewport;
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)window->getWidth();
+        viewport.height = (float)window->getHeight();
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+
+        VkRect2D scissor;
+        scissor.offset = { 0, 0 };
+        scissor.extent = {
+            (uint32_t)window->getWidth(), 
+            (uint32_t)window->getHeight()
+        };
+
+        VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo;
+        pipelineViewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        pipelineViewportStateCreateInfo.pNext = nullptr;
+        pipelineViewportStateCreateInfo.flags = 0;
+        pipelineViewportStateCreateInfo.viewportCount = 1;
+        pipelineViewportStateCreateInfo.pViewports = &viewport;
+        pipelineViewportStateCreateInfo.scissorCount = 1;
+        pipelineViewportStateCreateInfo.pScissors = &scissor;
+
+        VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo;
+        pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+        pipelineRasterizationStateCreateInfo.pNext = nullptr;
+        pipelineRasterizationStateCreateInfo.flags = 0;
+        pipelineRasterizationStateCreateInfo.depthClampEnable = VK_FALSE;
+        pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
+        pipelineRasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
+        pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+        pipelineRasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        pipelineRasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
+        pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
+        pipelineRasterizationStateCreateInfo.depthBiasClamp = 0.0f;
+        pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
+        pipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
+
+        VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo;
+        pipelineMultisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        pipelineMultisampleStateCreateInfo.pNext = nullptr;
+        pipelineMultisampleStateCreateInfo.flags = 0;
+        pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+        pipelineMultisampleStateCreateInfo.sampleShadingEnable = VK_TRUE;
+        pipelineMultisampleStateCreateInfo.minSampleShading = 1.0;
+        pipelineMultisampleStateCreateInfo.pSampleMask = nullptr;
+        pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = VK_TRUE;
+        pipelineMultisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
+
+
+
+
+        VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState;
+        pipelineColorBlendAttachmentState.blendEnable = VK_TRUE;
+        pipelineColorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        pipelineColorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        pipelineColorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+        pipelineColorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        pipelineColorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+        pipelineColorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
+        pipelineColorBlendAttachmentState.colorWriteMask =
+            VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
+            VK_COLOR_COMPONENT_A_BIT;
+
 
         delete[] swapchainImages;
         delete[] surfaceFormats;
@@ -441,7 +526,7 @@ namespace elemd
 
         vkDestroyShaderModule(*_vulkanDevice, vertShaderModule, nullptr);
         vkDestroyShaderModule(*_vulkanDevice, fragShaderModule, nullptr);
-        for (int i = 0; i < actualSwapchainImageCount; ++i)
+        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
             vkDestroyImageView(*_vulkanDevice, _vulkanImageViews[i], nullptr);
         }

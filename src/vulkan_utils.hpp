@@ -50,7 +50,7 @@ namespace vku
 		uint32_t bestQueuFamily = 0;
 		uint32_t maxQueueCount = 0;
 
-		for (int d = 0; d < count; ++d) {
+		for (uint32_t d = 0; d < count; ++d) {
 			uint32_t queueFamilyPropertyCount;
 			vkGetPhysicalDeviceQueueFamilyProperties(devices[d], &queueFamilyPropertyCount, NULL);
 
@@ -63,7 +63,7 @@ namespace vku
 				{
 					maxQueueCount = queueFamilyProperties[f].queueCount;
 					bestQueuFamily = f;
-					bestDeviceIndex = d;
+					bestDeviceIndex = (int)d;
 				}
 			}
 

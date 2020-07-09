@@ -48,4 +48,4 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 find_package(glfw3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
-set_target_properties(glad PROPERTIES FOLDER EXTERN_DIR)
+set_target_properties(glad PROPERTIES FOLDER ${EXTERN_DIR})
