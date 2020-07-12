@@ -1,7 +1,7 @@
 #ifndef ELEMD_VULKAN_CONTEXT_HPP
 #define ELEMD_VULKAN_CONTEXT_HPP
 
-#include "elemental_draw/context.hpp"
+#include "elemd/context.hpp"
 
 #include <string>
 #include <vector>
@@ -19,14 +19,18 @@ namespace elemd
         void createShaderModule(const std::string& filename, VkShaderModule* shaderModule);
         std::vector<char> readShader(const std::string& filename);
 
+
+        uint32_t actualSwapchainImageCount = 0;
+
+        VkDevice* _vulkanDevice;
+        VkInstance* _vulkanInstance;
+        VkSurfaceKHR* _vulkanSurface;
+        VkSwapchainKHR* _vulkanSwapchain;
+        VkImageView* _vulkanImageViews;
         VkShaderModule fragShaderModule;
         VkShaderModule vertShaderModule;
-        uint32_t actualSwapchainImageCount = 0;
-        VkImageView* _vulkanImageViews;
-        VkSwapchainKHR* _vulkanSwapchain;
-        VkSurfaceKHR* _vulkanSurface;
-        VkInstance* _vulkanInstance;
-        VkDevice* _vulkanDevice;
+        VkPipelineLayout* _vulkanPipelineLayout;
+        VkRenderPass* _vulkanRenderPass;
     };
 
 } // namespace elemd

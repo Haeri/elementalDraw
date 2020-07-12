@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <elemental_draw/window.hpp>
+#include <elemd/window.hpp>
 
 int main()
 {

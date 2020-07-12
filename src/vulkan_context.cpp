@@ -497,9 +497,6 @@ namespace elemd
         pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = VK_TRUE;
         pipelineMultisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
-
-
-
         VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState;
         pipelineColorBlendAttachmentState.blendEnable = VK_TRUE;
         pipelineColorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
@@ -513,6 +510,79 @@ namespace elemd
             VK_COLOR_COMPONENT_A_BIT;
 
 
+        VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo;
+        pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        pipelineColorBlendStateCreateInfo.pNext = nullptr;
+        pipelineColorBlendStateCreateInfo.flags = 0;
+        pipelineColorBlendStateCreateInfo.logicOpEnable = VK_FALSE;
+        pipelineColorBlendStateCreateInfo.logicOp = VK_LOGIC_OP_NO_OP;
+        pipelineColorBlendStateCreateInfo.attachmentCount = 1;
+        pipelineColorBlendStateCreateInfo.pAttachments = &pipelineColorBlendAttachmentState;
+        pipelineColorBlendStateCreateInfo.blendConstants[0] = 0.0f;
+        pipelineColorBlendStateCreateInfo.blendConstants[1] = 0.0f;
+        pipelineColorBlendStateCreateInfo.blendConstants[2] = 0.0f;
+        pipelineColorBlendStateCreateInfo.blendConstants[3] = 0.0f;
+
+
+        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
+        pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipelineLayoutCreateInfo.pNext = nullptr;
+        pipelineLayoutCreateInfo.flags = 0;
+        pipelineLayoutCreateInfo.setLayoutCount = 0;
+        pipelineLayoutCreateInfo.pSetLayouts = nullptr;
+        pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+        pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+
+        _vulkanPipelineLayout = new VkPipelineLayout();
+        vku::err_check(vkCreatePipelineLayout(*_vulkanDevice, &pipelineLayoutCreateInfo, nullptr,
+                               _vulkanPipelineLayout));
+
+
+
+        VkAttachmentDescription attachmentDescription;
+        attachmentDescription.flags = 0;
+        attachmentDescription.format = chosenFormat;
+        attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+        attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+        VkAttachmentReference attachmentReference;
+        attachmentReference.attachment = 0;
+        attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkSubpassDescription subpassDescription;
+        subpassDescription.flags = 0;
+        subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpassDescription.inputAttachmentCount = 0;
+        subpassDescription.pInputAttachments = nullptr;
+        subpassDescription.colorAttachmentCount = 1;
+        subpassDescription.pColorAttachments = &attachmentReference;
+        subpassDescription.pResolveAttachments = nullptr;
+        subpassDescription.pDepthStencilAttachment = nullptr;
+        subpassDescription.preserveAttachmentCount = 0;
+        subpassDescription.pPreserveAttachments = nullptr;
+
+        VkRenderPassCreateInfo renderPassCreateInfo;
+        renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassCreateInfo.pNext = nullptr;
+        renderPassCreateInfo.flags = 0;
+        renderPassCreateInfo.attachmentCount = 1;
+        renderPassCreateInfo.pAttachments = &attachmentDescription;
+        renderPassCreateInfo.subpassCount = 1;
+        renderPassCreateInfo.pSubpasses = &subpassDescription;
+        renderPassCreateInfo.dependencyCount = 0;
+        renderPassCreateInfo.pDependencies = nullptr;
+
+        _vulkanRenderPass = new VkRenderPass();
+        vku::err_check(vkCreateRenderPass(*_vulkanDevice, &renderPassCreateInfo, nullptr, _vulkanRenderPass));
+
+
+
+
         delete[] swapchainImages;
         delete[] surfaceFormats;
         delete[] physicalDevices;
@@ -524,6 +594,8 @@ namespace elemd
     {
         vkDeviceWaitIdle(*_vulkanDevice);
 
+        vkDestroyRenderPass(*_vulkanDevice, *_vulkanRenderPass, nullptr);
+        vkDestroyPipelineLayout(*_vulkanDevice, *_vulkanPipelineLayout, nullptr);
         vkDestroyShaderModule(*_vulkanDevice, vertShaderModule, nullptr);
         vkDestroyShaderModule(*_vulkanDevice, fragShaderModule, nullptr);
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
@@ -535,6 +607,8 @@ namespace elemd
         vkDestroySurfaceKHR(*_vulkanInstance, *_vulkanSurface, nullptr);
         vkDestroyInstance(*_vulkanInstance, nullptr);
 
+        delete _vulkanRenderPass;
+        delete _vulkanPipelineLayout;
         delete[] _vulkanImageViews;
         delete _vulkanSwapchain;
         delete _vulkanDevice;

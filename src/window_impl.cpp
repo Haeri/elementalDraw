@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "elemental_draw/context.hpp"
+#include "elemd/context.hpp"
 
 namespace elemd
 {

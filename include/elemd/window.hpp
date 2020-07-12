@@ -1,7 +1,7 @@
 #ifndef ELEMD_WINDOW_HPP
 #define ELEMD_WINDOW_HPP
 
-#include <elemental_draw/elemental_draw.hpp>
+#include <elemd/elemental_draw.hpp>
 
 #include <string>
 #include <cstdint>

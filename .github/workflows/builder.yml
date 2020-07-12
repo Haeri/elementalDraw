@@ -11,7 +11,7 @@ jobs:
    runs-on: windows-latest
    strategy:
      matrix: 
-       conf: [Debug, Release]
+       conf: [Release]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
@@ -22,7 +22,7 @@ jobs:
     - name: Generate Solution
       run: ./tools/generate_project_win.bat -s
     - name: Build
-      run: MSBuild.exe ./build/Elemental_Draw.sln /p:Configuration=${{ matrix.conf }}
+      run: MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
     - name: Convert Assets
       run: ./tools/convert_assets_win.bat -s
     
