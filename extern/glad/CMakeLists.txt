@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.3)
 
 set(PROJECT_NAME glad)
-project(${PROJECT_NAME} VERSION 0.0 LANGUAGES CXX)
+project(${PROJECT_NAME} VERSION 2.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

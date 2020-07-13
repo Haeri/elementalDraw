@@ -31,6 +31,8 @@ namespace elemd
         VkShaderModule vertShaderModule;
         VkPipelineLayout* _vulkanPipelineLayout;
         VkRenderPass* _vulkanRenderPass;
+        VkPipeline* _vulkanPipeline;
+        VkFramebuffer* _vulkanFrameBuffers;
     };
 
 } // namespace elemd

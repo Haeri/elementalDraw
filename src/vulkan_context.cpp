@@ -114,6 +114,9 @@ namespace elemd
             exit(EXIT_FAILURE);
         }
 
+        uint32_t uWidth = (uint32_t)window->getWidth();
+        uint32_t uHeight = (uint32_t)window->getHeight();
+
         // --------------- Create application Info ---------------
 
         VkApplicationInfo applicationInfo;
@@ -327,7 +330,7 @@ namespace elemd
             }
         }
 
-        VkExtent2D chosenExtent = {(uint32_t)window->getWidth(), (uint32_t)window->getHeight()};
+        VkExtent2D chosenExtent = {uWidth, uHeight};
         chosenExtent.width =
             std::max(surfaceCapabilities.minImageExtent.width,
                      std::min(surfaceCapabilities.maxImageExtent.width, chosenExtent.width));
@@ -457,10 +460,7 @@ namespace elemd
 
         VkRect2D scissor;
         scissor.offset = { 0, 0 };
-        scissor.extent = {
-            (uint32_t)window->getWidth(), 
-            (uint32_t)window->getHeight()
-        };
+        scissor.extent = { uWidth, uHeight };
 
         VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo;
         pipelineViewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -491,7 +491,7 @@ namespace elemd
         pipelineMultisampleStateCreateInfo.pNext = nullptr;
         pipelineMultisampleStateCreateInfo.flags = 0;
         pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-        pipelineMultisampleStateCreateInfo.sampleShadingEnable = VK_TRUE;
+        pipelineMultisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
         pipelineMultisampleStateCreateInfo.minSampleShading = 1.0;
         pipelineMultisampleStateCreateInfo.pSampleMask = nullptr;
         pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = VK_TRUE;
@@ -581,6 +581,57 @@ namespace elemd
         vku::err_check(vkCreateRenderPass(*_vulkanDevice, &renderPassCreateInfo, nullptr, _vulkanRenderPass));
 
 
+        VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo;
+        graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        graphicsPipelineCreateInfo.pNext = nullptr;
+        graphicsPipelineCreateInfo.flags = 0;
+        graphicsPipelineCreateInfo.stageCount = 2;
+        graphicsPipelineCreateInfo.pStages = shaderStages;
+        graphicsPipelineCreateInfo.pVertexInputState = &pipelineVertexInputStateCreateInfo;
+        graphicsPipelineCreateInfo.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo;
+        graphicsPipelineCreateInfo.pTessellationState = nullptr;
+        graphicsPipelineCreateInfo.pViewportState = &pipelineViewportStateCreateInfo;
+        graphicsPipelineCreateInfo.pRasterizationState = &pipelineRasterizationStateCreateInfo;
+        graphicsPipelineCreateInfo.pMultisampleState = &pipelineMultisampleStateCreateInfo;
+        graphicsPipelineCreateInfo.pDepthStencilState = nullptr;
+        graphicsPipelineCreateInfo.pColorBlendState = &pipelineColorBlendStateCreateInfo;
+        graphicsPipelineCreateInfo.pDynamicState = nullptr;
+        graphicsPipelineCreateInfo.layout = *_vulkanPipelineLayout;
+        graphicsPipelineCreateInfo.renderPass = *_vulkanRenderPass;
+        graphicsPipelineCreateInfo.subpass = 0;
+        graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+        graphicsPipelineCreateInfo.basePipelineIndex = -1;
+
+
+        _vulkanPipeline = new VkPipeline();
+        vku::err_check(vkCreateGraphicsPipelines(*_vulkanDevice, VK_NULL_HANDLE, 1,
+                                                 &graphicsPipelineCreateInfo, nullptr,
+                                                 _vulkanPipeline));
+
+
+
+        _vulkanFrameBuffers = new VkFramebuffer[actualSwapchainImageCount];
+
+        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        {
+            VkFramebufferCreateInfo frameBufferCreateInfo;
+            frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            frameBufferCreateInfo.pNext = nullptr;
+            frameBufferCreateInfo.flags = 0;
+            frameBufferCreateInfo.renderPass = *_vulkanRenderPass;
+            frameBufferCreateInfo.attachmentCount = 1;
+            frameBufferCreateInfo.pAttachments = &(_vulkanImageViews[i]);
+            frameBufferCreateInfo.width = uWidth;
+            frameBufferCreateInfo.height = uHeight;
+            frameBufferCreateInfo.layers = 1;
+
+            vku::err_check(vkCreateFramebuffer(*_vulkanDevice, &frameBufferCreateInfo, nullptr,
+                                &(_vulkanFrameBuffers[i])));
+        }
+
+
+
+
 
 
         delete[] swapchainImages;
@@ -594,6 +645,12 @@ namespace elemd
     {
         vkDeviceWaitIdle(*_vulkanDevice);
 
+
+        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        {
+          vkDestroyFramebuffer(*_vulkanDevice, _vulkanFrameBuffers[i], nullptr);
+        }
+        vkDestroyPipeline(*_vulkanDevice, *_vulkanPipeline, nullptr);
         vkDestroyRenderPass(*_vulkanDevice, *_vulkanRenderPass, nullptr);
         vkDestroyPipelineLayout(*_vulkanDevice, *_vulkanPipelineLayout, nullptr);
         vkDestroyShaderModule(*_vulkanDevice, vertShaderModule, nullptr);
@@ -607,6 +664,9 @@ namespace elemd
         vkDestroySurfaceKHR(*_vulkanInstance, *_vulkanSurface, nullptr);
         vkDestroyInstance(*_vulkanInstance, nullptr);
 
+
+        delete[] _vulkanFrameBuffers;
+        delete _vulkanPipeline;
         delete _vulkanRenderPass;
         delete _vulkanPipelineLayout;
         delete[] _vulkanImageViews;

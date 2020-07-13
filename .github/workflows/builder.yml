@@ -31,7 +31,7 @@ jobs:
    runs-on: ubuntu-latest
    strategy:
      matrix: 
-       conf: [Debug, Release]
+       conf: [Release]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
@@ -55,7 +55,7 @@ jobs:
    runs-on: macos-latest
    strategy:
      matrix: 
-       conf: [Debug, Release]
+       conf: [Release]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
