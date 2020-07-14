@@ -1,6 +1,8 @@
 #include "window_impl.hpp"
 
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 #include "elemd/context.hpp"
 
@@ -62,10 +64,32 @@ int Window::getHeight()
     return h;
 }
 
-Context* Window::getContext()
+bool Window::isRunning()
 {
     WindowImpl* impl = getImpl(this);
-    return impl->_context;
+    return !glfwWindowShouldClose(impl->_window);
+}
+
+void Window::mainLoop()
+{
+	using namespace std::chrono_literals;
+    WindowImpl* impl = getImpl(this);
+    while (isRunning())
+    {
+        glfwPollEvents();
+        std::this_thread::sleep_for(16ms);
+    }
+}
+
+Context* Window::createContext()
+{
+    _context = Context::create(this);
+    return _context;
+}
+
+Context* Window::getContext()
+{
+    return _context;
 }
 
 
@@ -85,10 +109,6 @@ WindowImpl::WindowImpl(WindowConfig config)
 	create_window();
 
 	fill_config();
-
-	_context = Context::create(this);
-
-	run();
 }
 
 WindowImpl::~WindowImpl()
@@ -148,15 +168,6 @@ void WindowImpl::create_window()
 	else
 	{
 		glfwGetWindowPos(_window, &_config.position_x, &_config.position_y);
-	}
-}
-
-void WindowImpl::run()
-{
-	while (!glfwWindowShouldClose(_window)) {
-		glfwPollEvents();
-
-		_context->new_frame();
 	}
 }
 

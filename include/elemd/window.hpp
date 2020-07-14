@@ -32,6 +32,7 @@ namespace elemd
         static Window* create(WindowConfig config);
         virtual ~Window() = default;
 
+        Context* createContext();
         Context* getContext();
 
         void setTitle(const std::string& title);
@@ -43,8 +44,13 @@ namespace elemd
         int getWidth();
         int getHeight();
 
+        void mainLoop();
+        bool isRunning();
+
     protected:
         Window() = default;
+
+        Context* _context = nullptr;
     };
 
 } // namespace elemd

@@ -4,7 +4,7 @@
 #include <fstream>
 #include <GLFW/glfw3.h>
 
-#include "window_impl.hpp"
+#include "../window_impl.hpp"
 
 
 namespace elemd
@@ -87,12 +87,12 @@ namespace elemd
     {
     }
 
-    void Context::set_color(Color color)
+    void Context::set_clear_color(Color&& color)
     {
-    }
-
-    void Context::set_line_width(float width)
-    {
+        VulkanContext* impl = getImpl(this);
+        _clear_color = color;
+        impl->clearValue = {color.r() / 255.0f, color.g() / 255.0f, color.b() / 255.0f,
+                            color.a() / 255.0f};
     }
 
     void Context::clear()

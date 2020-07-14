@@ -14,7 +14,6 @@ namespace elemd
         ~WindowImpl();
 
         GLFWwindow* _window = nullptr;
-        Context* _context = nullptr;
 
         WindowConfig _config;
         uint32_t _windowCount = 0;
@@ -22,7 +21,6 @@ namespace elemd
         GLFWwindow* getWindow();
         void setup();
         void create_window();
-        void run();
         void fill_config();
     };
 
