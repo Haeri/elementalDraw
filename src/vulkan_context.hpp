@@ -33,6 +33,9 @@ namespace elemd
         VkRenderPass* _vulkanRenderPass;
         VkPipeline* _vulkanPipeline;
         VkFramebuffer* _vulkanFrameBuffers;
+        VkCommandPool* _vulkanCommandPool;
+        VkCommandBuffer* _vulkanCommandBuffers;
+        VkClearValue _clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
     };
 
 } // namespace elemd

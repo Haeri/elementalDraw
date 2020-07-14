@@ -630,7 +630,56 @@ namespace elemd
         }
 
 
+        // --------------- Command Buffer ---------------
 
+        VkCommandPoolCreateInfo commandPoolCreateInfo;
+        commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        commandPoolCreateInfo.pNext = nullptr;
+        commandPoolCreateInfo.flags = 0;
+        commandPoolCreateInfo.queueFamilyIndex = bestDevice.queueFamilyIndex;
+
+
+
+        _vulkanCommandPool = new VkCommandPool();
+        vku::err_check(vkCreateCommandPool(*_vulkanDevice, &commandPoolCreateInfo, nullptr, _vulkanCommandPool));
+
+
+        VkCommandBufferAllocateInfo commandBufferAllocateInfo;
+        commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        commandBufferAllocateInfo.pNext = nullptr;
+        commandBufferAllocateInfo.commandPool = *_vulkanCommandPool;
+        commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        commandBufferAllocateInfo.commandBufferCount = actualSwapchainImageCount;
+
+
+        _vulkanCommandBuffers = new VkCommandBuffer[actualSwapchainImageCount];
+        vku::err_check(vkAllocateCommandBuffers(*_vulkanDevice, &commandBufferAllocateInfo, _vulkanCommandBuffers));
+
+
+
+        VkCommandBufferBeginInfo commandBufferBeginInfo;
+        commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        commandBufferBeginInfo.pNext = nullptr;
+        commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+        commandBufferBeginInfo.pInheritanceInfo = nullptr;
+
+
+        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        {
+            vku::err_check(vkBeginCommandBuffer(_vulkanCommandBuffers[i], &commandBufferBeginInfo));
+
+            VkRenderPassBeginInfo renderPassBeginInfo;
+            renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassBeginInfo.pNext = nullptr;
+            renderPassBeginInfo.renderPass = *_vulkanRenderPass;
+            renderPassBeginInfo.framebuffer = _vulkanFrameBuffers[i];
+            renderPassBeginInfo.renderArea.offset = {0, 0};
+            renderPassBeginInfo.renderArea.extent = {uWidth, uHeight};
+            renderPassBeginInfo.clearValueCount = 1;
+            renderPassBeginInfo.pClearValues = &_clearValue;
+
+            vku::err_check(vkEndCommandBuffer(_vulkanCommandBuffers[i]));
+        }
 
 
 
@@ -645,7 +694,9 @@ namespace elemd
     {
         vkDeviceWaitIdle(*_vulkanDevice);
 
-
+        vkFreeCommandBuffers(*_vulkanDevice, *_vulkanCommandPool, actualSwapchainImageCount,
+                             _vulkanCommandBuffers);
+        vkDestroyCommandPool(*_vulkanDevice, *_vulkanCommandPool, nullptr);
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
           vkDestroyFramebuffer(*_vulkanDevice, _vulkanFrameBuffers[i], nullptr);
@@ -664,7 +715,9 @@ namespace elemd
         vkDestroySurfaceKHR(*_vulkanInstance, *_vulkanSurface, nullptr);
         vkDestroyInstance(*_vulkanInstance, nullptr);
 
-
+        
+        delete _vulkanCommandBuffers;
+        delete _vulkanCommandPool;
         delete[] _vulkanFrameBuffers;
         delete _vulkanPipeline;
         delete _vulkanRenderPass;
