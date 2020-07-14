@@ -38,6 +38,7 @@ jobs:
     - name: Setup Environment
       run: |
         sudo chmod +x ./tools/*.sh
+        sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
     - name: Prerequesits Check
       run: sudo ./tools/prerequesits_nix.sh
     - name: Generate Solution
