@@ -44,6 +44,8 @@ namespace elemd
         void clear();
         void clear_rect(float x, float y, float width, float height);
 
+        void new_frame();
+
     protected:
         Context() = default;
     };

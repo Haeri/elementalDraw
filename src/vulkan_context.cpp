@@ -103,6 +103,43 @@ namespace elemd
     {
     }
 
+    void Context::new_frame()
+    {
+        VulkanContext* impl = getImpl(this);
+
+        uint32_t imageIndex;
+        vku::err_check(vkAcquireNextImageKHR(impl->device, impl->swapchain, std::numeric_limits<uint64_t>::max(),
+                              impl->semaphoreImageAvailable, VK_NULL_HANDLE, &imageIndex));
+
+        VkPipelineStageFlags waitStageMask[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+        VkSubmitInfo submitInfo;
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.pNext = nullptr;
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = &(impl->semaphoreImageAvailable);
+        submitInfo.pWaitDstStageMask = waitStageMask;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &(impl->commandBuffers[imageIndex]);
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = &(impl->semaphoreRenderingComplete);
+
+        vku::err_check(vkQueueSubmit(impl->queue, 1, &submitInfo, VK_NULL_HANDLE));
+
+        VkPresentInfoKHR presentInfoKHR;
+        presentInfoKHR.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        presentInfoKHR.pNext = nullptr;
+        presentInfoKHR.waitSemaphoreCount = 1;
+        presentInfoKHR.pWaitSemaphores = &(impl->semaphoreRenderingComplete);
+        presentInfoKHR.swapchainCount = 1;
+        presentInfoKHR.pSwapchains = &(impl->swapchain);
+        presentInfoKHR.pImageIndices = &imageIndex;
+        presentInfoKHR.pResults = nullptr;
+
+        vku::err_check(vkQueuePresentKHR(impl->queue, &presentInfoKHR));
+
+    }
+
     /* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
 
     VulkanContext::VulkanContext(Window* window)
@@ -185,19 +222,16 @@ namespace elemd
 
         // --------------- Create Instance ---------------
 
-        _vulkanInstance = new VkInstance();
-        vku::err_check(vkCreateInstance(&instanceCreateInfo, nullptr, _vulkanInstance));
+        vku::err_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
 
         // --------------- Create Surface ---------------
-
-        _vulkanSurface = new VkSurfaceKHR();
-        vku::err_check(glfwCreateWindowSurface(*_vulkanInstance, ((WindowImpl*)window)->getWindow(),
-                                               nullptr, _vulkanSurface));
+        vku::err_check(glfwCreateWindowSurface(instance, ((WindowImpl*)window)->getWindow(),
+                                               nullptr, &surface));
 
         // --------------- Get devices ---------------
 
         uint32_t physicalDeviceCount = 0;
-        vku::err_check(vkEnumeratePhysicalDevices(*_vulkanInstance, &physicalDeviceCount, nullptr));
+        vku::err_check(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr));
 
         if (physicalDeviceCount == 0)
         {
@@ -208,7 +242,7 @@ namespace elemd
 
         VkPhysicalDevice* physicalDevices = new VkPhysicalDevice[physicalDeviceCount];
         vku::err_check(
-            vkEnumeratePhysicalDevices(*_vulkanInstance, &physicalDeviceCount, physicalDevices));
+            vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices));
 
         for (uint32_t i = 0; i < physicalDeviceCount; ++i)
         {
@@ -256,12 +290,12 @@ namespace elemd
         deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
 
         // --------------- Create Device ---------------
-        _vulkanDevice = new VkDevice();
-        vku::err_check(vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo,
-                                      nullptr, _vulkanDevice));
 
-        if (gladLoaderLoadVulkan(*_vulkanInstance, physicalDevices[bestDevice.deviceIndex],
-                                 *_vulkanDevice) <= 0)
+        vku::err_check(vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo,
+                                      nullptr, &device));
+
+        if (gladLoaderLoadVulkan(instance, physicalDevices[bestDevice.deviceIndex],
+                                 device) <= 0)
         {
             std::cerr << "Error: Could not load the Vulkan device!" << std::endl;
             exit(EXIT_FAILURE);
@@ -270,18 +304,18 @@ namespace elemd
         // --------------- Create Surface Capabilities ---------------
         VkSurfaceCapabilitiesKHR surfaceCapabilities;
         vku::err_check(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-            physicalDevices[bestDevice.deviceIndex], *_vulkanSurface, &surfaceCapabilities));
+            physicalDevices[bestDevice.deviceIndex], surface, &surfaceCapabilities));
 
 
         // --------------- Get Surface Formats ---------------
 
         uint32_t surfaceFormatCount = 0;
         vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[bestDevice.deviceIndex],
-                                                            *_vulkanSurface, &surfaceFormatCount,
+                                                            surface, &surfaceFormatCount,
                                                             nullptr));
         VkSurfaceFormatKHR* surfaceFormats = new VkSurfaceFormatKHR[surfaceFormatCount];
         vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[bestDevice.deviceIndex],
-                                                            *_vulkanSurface, &surfaceFormatCount,
+                                                            surface, &surfaceFormatCount,
                                                             surfaceFormats));
 
 
@@ -289,20 +323,19 @@ namespace elemd
 
         uint32_t presentModeCount = 0;
         vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(
-            physicalDevices[bestDevice.deviceIndex], *_vulkanSurface, &presentModeCount, nullptr));
+            physicalDevices[bestDevice.deviceIndex], surface, &presentModeCount, nullptr));
         VkPresentModeKHR* presentModes = new VkPresentModeKHR[presentModeCount];
         vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(
-            physicalDevices[bestDevice.deviceIndex], *_vulkanSurface, &presentModeCount,
+            physicalDevices[bestDevice.deviceIndex], surface, &presentModeCount,
             presentModes));
 
         // --------------- Create Queue ---------------
 
-        VkQueue queue;
-        vkGetDeviceQueue(*_vulkanDevice, bestDevice.queueFamilyIndex, 0, &queue);
+        vkGetDeviceQueue(device, bestDevice.queueFamilyIndex, 0, &queue);
 
         VkBool32 surfaceSupport = false;
         vku::err_check(vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevices[bestDevice.deviceIndex],
-                                             bestDevice.queueFamilyIndex, *_vulkanSurface,
+                                             bestDevice.queueFamilyIndex, surface,
                                              &surfaceSupport));
 
         if (!surfaceSupport)
@@ -354,7 +387,7 @@ namespace elemd
         swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         swapchainCreateInfo.pNext = nullptr;
         swapchainCreateInfo.flags = 0;
-        swapchainCreateInfo.surface = *_vulkanSurface;
+        swapchainCreateInfo.surface = surface;
         swapchainCreateInfo.minImageCount = chosenImageCount;
         swapchainCreateInfo.imageFormat = chosenFormat;
         swapchainCreateInfo.imageColorSpace = chosenColorSpace;
@@ -370,19 +403,18 @@ namespace elemd
         swapchainCreateInfo.clipped = VK_TRUE;
         swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        
-        _vulkanSwapchain = new VkSwapchainKHR();
+
         vku::err_check(
-            vkCreateSwapchainKHR(*_vulkanDevice, &swapchainCreateInfo, nullptr, _vulkanSwapchain));
+            vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain));
 
 
-        vku::err_check(vkGetSwapchainImagesKHR(*_vulkanDevice, *_vulkanSwapchain, &actualSwapchainImageCount,
+        vku::err_check(vkGetSwapchainImagesKHR(device, swapchain, &actualSwapchainImageCount,
                                 nullptr));
         VkImage* swapchainImages = new VkImage[actualSwapchainImageCount];
-        vku::err_check(vkGetSwapchainImagesKHR(*_vulkanDevice, *_vulkanSwapchain,
+        vku::err_check(vkGetSwapchainImagesKHR(device, swapchain,
                                                &actualSwapchainImageCount, swapchainImages));
 
-        _vulkanImageViews = new VkImageView[actualSwapchainImageCount];
+        imageViews = new VkImageView[actualSwapchainImageCount];
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
             VkImageViewCreateInfo imageViewCreateInfo;
@@ -402,12 +434,13 @@ namespace elemd
             imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
             imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-            vku::err_check(vkCreateImageView(*_vulkanDevice, &imageViewCreateInfo, nullptr, &_vulkanImageViews[i]));
+            vku::err_check(vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]));
         }
 
-
-        createShaderModule("../../res/shader/shader.frag.spv", &fragShaderModule);
-        createShaderModule("../../res/shader/shader.vert.spv", &vertShaderModule);
+        fragShaderModule = new VkShaderModule();
+        vertShaderModule = new VkShaderModule();
+        createShaderModule("../../res/shader/shader.frag.spv", fragShaderModule);
+        createShaderModule("../../res/shader/shader.vert.spv", vertShaderModule);
 
 
         VkPipelineShaderStageCreateInfo shaderStageCreateInfoVert;
@@ -415,7 +448,7 @@ namespace elemd
         shaderStageCreateInfoVert.pNext = nullptr;
         shaderStageCreateInfoVert.flags = 0;
         shaderStageCreateInfoVert.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        shaderStageCreateInfoVert.module = vertShaderModule;
+        shaderStageCreateInfoVert.module = *vertShaderModule;
         shaderStageCreateInfoVert.pName = "main";
         shaderStageCreateInfoVert.pSpecializationInfo = nullptr;
         
@@ -424,7 +457,7 @@ namespace elemd
         shaderStageCreateInfoFrag.pNext = nullptr;
         shaderStageCreateInfoFrag.flags = 0;
         shaderStageCreateInfoFrag.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        shaderStageCreateInfoFrag.module = fragShaderModule;
+        shaderStageCreateInfoFrag.module = *fragShaderModule;
         shaderStageCreateInfoFrag.pName = "main";
         shaderStageCreateInfoFrag.pSpecializationInfo = nullptr;
 
@@ -533,9 +566,8 @@ namespace elemd
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
         pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
-        _vulkanPipelineLayout = new VkPipelineLayout();
-        vku::err_check(vkCreatePipelineLayout(*_vulkanDevice, &pipelineLayoutCreateInfo, nullptr,
-                               _vulkanPipelineLayout));
+        vku::err_check(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr,
+                               &pipelineLayout));
 
 
 
@@ -566,6 +598,16 @@ namespace elemd
         subpassDescription.preserveAttachmentCount = 0;
         subpassDescription.pPreserveAttachments = nullptr;
 
+        VkSubpassDependency subpassDependency;
+        subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        subpassDependency.dstSubpass = 0;
+        subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        subpassDependency.srcAccessMask = 0;
+        subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        subpassDependency.dependencyFlags = 0;
+
+
         VkRenderPassCreateInfo renderPassCreateInfo;
         renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassCreateInfo.pNext = nullptr;
@@ -574,11 +616,11 @@ namespace elemd
         renderPassCreateInfo.pAttachments = &attachmentDescription;
         renderPassCreateInfo.subpassCount = 1;
         renderPassCreateInfo.pSubpasses = &subpassDescription;
-        renderPassCreateInfo.dependencyCount = 0;
-        renderPassCreateInfo.pDependencies = nullptr;
+        renderPassCreateInfo.dependencyCount = 1;
+        renderPassCreateInfo.pDependencies = &subpassDependency;
 
-        _vulkanRenderPass = new VkRenderPass();
-        vku::err_check(vkCreateRenderPass(*_vulkanDevice, &renderPassCreateInfo, nullptr, _vulkanRenderPass));
+
+        vku::err_check(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass));
 
 
         VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo;
@@ -596,21 +638,20 @@ namespace elemd
         graphicsPipelineCreateInfo.pDepthStencilState = nullptr;
         graphicsPipelineCreateInfo.pColorBlendState = &pipelineColorBlendStateCreateInfo;
         graphicsPipelineCreateInfo.pDynamicState = nullptr;
-        graphicsPipelineCreateInfo.layout = *_vulkanPipelineLayout;
-        graphicsPipelineCreateInfo.renderPass = *_vulkanRenderPass;
+        graphicsPipelineCreateInfo.layout = pipelineLayout;
+        graphicsPipelineCreateInfo.renderPass = renderPass;
         graphicsPipelineCreateInfo.subpass = 0;
         graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
         graphicsPipelineCreateInfo.basePipelineIndex = -1;
 
 
-        _vulkanPipeline = new VkPipeline();
-        vku::err_check(vkCreateGraphicsPipelines(*_vulkanDevice, VK_NULL_HANDLE, 1,
+        vku::err_check(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1,
                                                  &graphicsPipelineCreateInfo, nullptr,
-                                                 _vulkanPipeline));
+                                                 &pipeline));
 
 
 
-        _vulkanFrameBuffers = new VkFramebuffer[actualSwapchainImageCount];
+        frameBuffers = new VkFramebuffer[actualSwapchainImageCount];
 
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
@@ -618,15 +659,15 @@ namespace elemd
             frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             frameBufferCreateInfo.pNext = nullptr;
             frameBufferCreateInfo.flags = 0;
-            frameBufferCreateInfo.renderPass = *_vulkanRenderPass;
+            frameBufferCreateInfo.renderPass = renderPass;
             frameBufferCreateInfo.attachmentCount = 1;
-            frameBufferCreateInfo.pAttachments = &(_vulkanImageViews[i]);
+            frameBufferCreateInfo.pAttachments = &(imageViews[i]);
             frameBufferCreateInfo.width = uWidth;
             frameBufferCreateInfo.height = uHeight;
             frameBufferCreateInfo.layers = 1;
 
-            vku::err_check(vkCreateFramebuffer(*_vulkanDevice, &frameBufferCreateInfo, nullptr,
-                                &(_vulkanFrameBuffers[i])));
+            vku::err_check(vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr,
+                                &(frameBuffers[i])));
         }
 
 
@@ -639,21 +680,19 @@ namespace elemd
         commandPoolCreateInfo.queueFamilyIndex = bestDevice.queueFamilyIndex;
 
 
-
-        _vulkanCommandPool = new VkCommandPool();
-        vku::err_check(vkCreateCommandPool(*_vulkanDevice, &commandPoolCreateInfo, nullptr, _vulkanCommandPool));
+        vku::err_check(vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &commandPool));
 
 
         VkCommandBufferAllocateInfo commandBufferAllocateInfo;
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         commandBufferAllocateInfo.pNext = nullptr;
-        commandBufferAllocateInfo.commandPool = *_vulkanCommandPool;
+        commandBufferAllocateInfo.commandPool = commandPool;
         commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         commandBufferAllocateInfo.commandBufferCount = actualSwapchainImageCount;
 
 
-        _vulkanCommandBuffers = new VkCommandBuffer[actualSwapchainImageCount];
-        vku::err_check(vkAllocateCommandBuffers(*_vulkanDevice, &commandBufferAllocateInfo, _vulkanCommandBuffers));
+        commandBuffers = new VkCommandBuffer[actualSwapchainImageCount];
+        vku::err_check(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, commandBuffers));
 
 
 
@@ -666,20 +705,39 @@ namespace elemd
 
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
-            vku::err_check(vkBeginCommandBuffer(_vulkanCommandBuffers[i], &commandBufferBeginInfo));
+            vku::err_check(vkBeginCommandBuffer(commandBuffers[i], &commandBufferBeginInfo));
 
             VkRenderPassBeginInfo renderPassBeginInfo;
             renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
             renderPassBeginInfo.pNext = nullptr;
-            renderPassBeginInfo.renderPass = *_vulkanRenderPass;
-            renderPassBeginInfo.framebuffer = _vulkanFrameBuffers[i];
+            renderPassBeginInfo.renderPass = renderPass;
+            renderPassBeginInfo.framebuffer = frameBuffers[i];
             renderPassBeginInfo.renderArea.offset = {0, 0};
             renderPassBeginInfo.renderArea.extent = {uWidth, uHeight};
             renderPassBeginInfo.clearValueCount = 1;
-            renderPassBeginInfo.pClearValues = &_clearValue;
+            renderPassBeginInfo.pClearValues = &clearValue;
 
-            vku::err_check(vkEndCommandBuffer(_vulkanCommandBuffers[i]));
+            vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo,
+                                 VK_SUBPASS_CONTENTS_INLINE);
+
+            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+
+            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+
+            vkCmdEndRenderPass(commandBuffers[i]);
+            vku::err_check(vkEndCommandBuffer(commandBuffers[i]));
         }
+
+
+        VkSemaphoreCreateInfo semaphoreCreateInfo;
+        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        semaphoreCreateInfo.pNext = nullptr;
+        semaphoreCreateInfo.flags = 0;
+
+
+        vku::err_check(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreImageAvailable));
+        vku::err_check(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreRenderingComplete));
+
 
 
 
@@ -692,41 +750,37 @@ namespace elemd
 
     VulkanContext::~VulkanContext()
     {
-        vkDeviceWaitIdle(*_vulkanDevice);
+        vkDeviceWaitIdle(device);
 
-        vkFreeCommandBuffers(*_vulkanDevice, *_vulkanCommandPool, actualSwapchainImageCount,
-                             _vulkanCommandBuffers);
-        vkDestroyCommandPool(*_vulkanDevice, *_vulkanCommandPool, nullptr);
+        vkDestroySemaphore(device, semaphoreImageAvailable, nullptr);
+        vkDestroySemaphore(device, semaphoreRenderingComplete, nullptr);
+        vkFreeCommandBuffers(device, commandPool, actualSwapchainImageCount,
+                             commandBuffers);
+        vkDestroyCommandPool(device, commandPool, nullptr);
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
-          vkDestroyFramebuffer(*_vulkanDevice, _vulkanFrameBuffers[i], nullptr);
+          vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
         }
-        vkDestroyPipeline(*_vulkanDevice, *_vulkanPipeline, nullptr);
-        vkDestroyRenderPass(*_vulkanDevice, *_vulkanRenderPass, nullptr);
-        vkDestroyPipelineLayout(*_vulkanDevice, *_vulkanPipelineLayout, nullptr);
-        vkDestroyShaderModule(*_vulkanDevice, vertShaderModule, nullptr);
-        vkDestroyShaderModule(*_vulkanDevice, fragShaderModule, nullptr);
+        vkDestroyPipeline(device, pipeline, nullptr);
+        vkDestroyRenderPass(device, renderPass, nullptr);
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        vkDestroyShaderModule(device, *vertShaderModule, nullptr);
+        vkDestroyShaderModule(device, *fragShaderModule, nullptr);
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
-            vkDestroyImageView(*_vulkanDevice, _vulkanImageViews[i], nullptr);
+            vkDestroyImageView(device, imageViews[i], nullptr);
         }
-        vkDestroySwapchainKHR(*_vulkanDevice, *_vulkanSwapchain, nullptr);
-        vkDestroyDevice(*_vulkanDevice, nullptr);
-        vkDestroySurfaceKHR(*_vulkanInstance, *_vulkanSurface, nullptr);
-        vkDestroyInstance(*_vulkanInstance, nullptr);
+        vkDestroySwapchainKHR(device, swapchain, nullptr);
+        vkDestroyDevice(device, nullptr);
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+        vkDestroyInstance(instance, nullptr);
 
         
-        delete _vulkanCommandBuffers;
-        delete _vulkanCommandPool;
-        delete[] _vulkanFrameBuffers;
-        delete _vulkanPipeline;
-        delete _vulkanRenderPass;
-        delete _vulkanPipelineLayout;
-        delete[] _vulkanImageViews;
-        delete _vulkanSwapchain;
-        delete _vulkanDevice;
-        delete _vulkanSurface;
-        delete _vulkanInstance;
+        delete[] commandBuffers;
+        delete[] frameBuffers;
+        delete vertShaderModule;
+        delete fragShaderModule;
+        delete[] imageViews;
     }
 
     void VulkanContext::createShaderModule(const std::string& filename, VkShaderModule* shaderModule)
@@ -740,7 +794,7 @@ namespace elemd
         shaderModuleCreateInfo.codeSize = spirvCode.size();
         shaderModuleCreateInfo.pCode = (uint32_t*)spirvCode.data();
 
-        vku::err_check(vkCreateShaderModule(*_vulkanDevice, &shaderModuleCreateInfo, nullptr, shaderModule));
+        vku::err_check(vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, shaderModule));
     }
 
     std::vector<char> VulkanContext::readShader(const std::string& filename)

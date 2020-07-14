@@ -155,6 +155,8 @@ void WindowImpl::run()
 {
 	while (!glfwWindowShouldClose(_window)) {
 		glfwPollEvents();
+
+		_context->new_frame();
 	}
 }
 

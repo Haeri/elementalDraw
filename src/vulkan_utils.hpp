@@ -177,7 +177,7 @@ namespace vku
 				err("A requested format is not supported on this device.");
 				break;
 			case VK_ERROR_FRAGMENTED_POOL:
-				err("A pool allocation has failed due to fragmentation of the pool’s memory. This must only be returned if no attempt to allocate host or device memory was made to accommodate the new allocation. This should be returned in preference to VK_ERROR_OUT_OF_POOL_MEMORY, but only if the implementation is certain that the pool allocation failure was due to fragmentation.");
+				err("A pool allocation has failed due to fragmentation of the pool's memory. This must only be returned if no attempt to allocate host or device memory was made to accommodate the new allocation. This should be returned in preference to VK_ERROR_OUT_OF_POOL_MEMORY, but only if the implementation is certain that the pool allocation failure was due to fragmentation.");
 				break;
 			case VK_ERROR_SURFACE_LOST_KHR:
 				err("A surface is no longer available.");
@@ -207,7 +207,7 @@ namespace vku
 				err("A buffer creation or memory allocation failed because the requested address is not available. A shader group handle assignment failed because the requested shader group handle information is no longer valid.");
 				break;
 			//case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:
-			//	err("An operation on a swapchain created with VK_FULL_SCREEN_EXCLUSIVE_APPLICATION_CONTROLLED_EXT failed as it did not have exlusive full-screen access. This may occur due to implementation-dependent reasons, outside of the application’s control.");
+			//	err("An operation on a swapchain created with VK_FULL_SCREEN_EXCLUSIVE_APPLICATION_CONTROLLED_EXT failed as it did not have exlusive full-screen access. This may occur due to implementation-dependent reasons, outside of the application's control.");
 			//	break;
 			default:
 				err("An unknown error has occurred; either the application has provided invalid input, or an implementation failure has occurred");
