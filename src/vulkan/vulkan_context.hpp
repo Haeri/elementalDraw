@@ -21,7 +21,7 @@ namespace elemd
 
 
         uint32_t actualSwapchainImageCount = 0;
-        VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+        VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 0.0f};
 
         VkInstance instance;
         VkSurfaceKHR surface;

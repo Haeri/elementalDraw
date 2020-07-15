@@ -6,18 +6,19 @@
 
 int main()
 {
-    elemd::WindowConfig wc{"UI Application", 400, 300};
-    wc.position_x = 0;
-    wc.position_y = 40;
+    elemd::WindowConfig wc{"UI Application", 600, 500};
+    wc.resizeable = false;
+    wc.transparent = true;
     elemd::Window* w = elemd::Window::create(wc);
     elemd::Context* c = w->createContext();
+    c->set_clear_color({0, 0, 0, 0});
     
     std::thread t([c, w]()
 		{
             while (w->isRunning())
             {
                 c->clear();
-                c->set_clear_color({255, 0, 0, 255});
+                //c->set_clear_color({255, 0, 0, 255});
                 c->new_frame();
             }
         }

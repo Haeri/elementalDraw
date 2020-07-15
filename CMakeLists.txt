@@ -43,6 +43,20 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
+if(APPLE)
+    set(CONVERTER_POSTFIX "mac.sh")
+elseif(WIN32) 
+    set(CONVERTER_POSTFIX "win.bat")
+else()
+    set(CONVERTER_POSTFIX "linux.sh")
+endif()
+
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    PRE_BUILD
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/convert_assets_${CONVERTER_POSTFIX}
+)
+
 
 # ---------------- EXTERN ---------------------#
 

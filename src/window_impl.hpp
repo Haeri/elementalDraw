@@ -14,14 +14,11 @@ namespace elemd
         ~WindowImpl();
 
         GLFWwindow* _window = nullptr;
-
-        WindowConfig _config;
         uint32_t _windowCount = 0;
 
         GLFWwindow* getWindow();
         void setup();
-        void create_window();
-        void fill_config();
+        void create_window(WindowConfig config);
     };
 
 } // namespace elemd
