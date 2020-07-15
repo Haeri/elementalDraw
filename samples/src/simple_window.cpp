@@ -19,7 +19,7 @@ int main()
             {
                 c->clear();
                 //c->set_clear_color({255, 0, 0, 255});
-                c->new_frame();
+                c->draw_frame();
             }
         }
     );

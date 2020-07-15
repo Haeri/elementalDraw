@@ -118,7 +118,7 @@ WindowImpl::~WindowImpl()
 }
 
 
-GLFWwindow* WindowImpl::getWindow()
+GLFWwindow* WindowImpl::getGLFWWindow()
 {
     return _window;
 }

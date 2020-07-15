@@ -7,25 +7,36 @@
 #include <vector>
 
 #include "vulkan_utils.hpp"
+#include "../window_impl.hpp"
 
 namespace elemd
 {
     class VulkanContext : public Context
     {
     public:
+
         VulkanContext(Window* window);
         ~VulkanContext();
 
-        void createInstance();
-        void createShaderModule(const std::string& filename, VkShaderModule* shaderModule);
-        std::vector<char> readShader(const std::string& filename);
+        void create_instance();
+        void create_surface();
+        void create_physical_devices();
+        void create_logical_device();
 
+        void create_shader_module(const std::string& filename, VkShaderModule* shaderModule);
+        std::vector<char> read_shader(const std::string& filename);
+
+        WindowImpl* _window;
 
         uint32_t actualSwapchainImageCount = 0;
-        VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 0.0f};
+        uint32_t physicalDeviceCount = 0;
+        VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 0.3f};
+
+        PhysicalDeviceComposite bestDevice;
 
         VkInstance instance;
         VkSurfaceKHR surface;
+        VkPhysicalDevice* physicalDevices;
         VkDevice device;
         VkQueue queue;
         VkSwapchainKHR swapchain;

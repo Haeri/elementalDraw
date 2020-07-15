@@ -16,7 +16,7 @@ namespace elemd
         GLFWwindow* _window = nullptr;
         uint32_t _windowCount = 0;
 
-        GLFWwindow* getWindow();
+        GLFWwindow* getGLFWWindow();
         void setup();
         void create_window(WindowConfig config);
     };

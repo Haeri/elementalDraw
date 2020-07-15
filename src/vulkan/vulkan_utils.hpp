@@ -4,15 +4,11 @@
 #include <iostream>
 #include <glad/vulkan.h>
 
+#include "vulkan_context.hpp"
+#include "physical_device_composite.hpp"
+
 namespace vku 
 {
-	struct BestDevice 
-	{
-		int deviceIndex;
-		uint32_t queueFamilyIndex;
-		uint32_t queueCount;
-	};
-
 	inline void err(std::string message)
 	{
 		std::cerr << "VK ERROR: " << message << std::endl;
@@ -44,7 +40,8 @@ namespace vku
 		return dtype;
 	}
 
-	inline BestDevice get_best_device_info(VkPhysicalDevice* devices, uint32_t count)
+	inline elemd::PhysicalDeviceComposite select_physical_device(
+        VkPhysicalDevice* physicalDevices, uint32_t count)
 	{	
 		int bestDeviceIndex = 0;
 		uint32_t bestQueuFamily = 0;
@@ -52,10 +49,12 @@ namespace vku
 
 		for (uint32_t d = 0; d < count; ++d) {
 			uint32_t queueFamilyPropertyCount;
-			vkGetPhysicalDeviceQueueFamilyProperties(devices[d], &queueFamilyPropertyCount, NULL);
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[d],
+                                                     &queueFamilyPropertyCount, NULL);
 
 			VkQueueFamilyProperties* queueFamilyProperties = new VkQueueFamilyProperties[queueFamilyPropertyCount];
-			vkGetPhysicalDeviceQueueFamilyProperties(devices[d], &queueFamilyPropertyCount, queueFamilyProperties);
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[d], &queueFamilyPropertyCount,
+                                                     queueFamilyProperties);
 
 			for (uint32_t f = 0; f < queueFamilyPropertyCount; ++f)
 			{
@@ -70,55 +69,137 @@ namespace vku
 			delete[] queueFamilyProperties;
 		}
 
-		return BestDevice{ bestDeviceIndex, bestQueuFamily, maxQueueCount};
+		return elemd::PhysicalDeviceComposite{bestDeviceIndex, bestQueuFamily, maxQueueCount};
 	}
 
-	inline void print_device(const VkPhysicalDevice& device)
+	inline void print_layers()
+    {
+        uint32_t layerCount = 0;
+        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+        VkLayerProperties* layerProperties = new VkLayerProperties[layerCount];
+        vkEnumerateInstanceLayerProperties(&layerCount, layerProperties);
+
+        std::cout << "\"VkLayerProperties\": [\n";
+        for (uint32_t i = 0; i < layerCount; ++i)
+        {
+            std::cout << "{\n"
+                      << "\t\"layerName\": \"" << layerProperties[i].layerName << "\",\n"
+                      << "\t\"specVersion\": " << layerProperties[i].specVersion << ",\n"
+                      << "\t\"implementationVersion\": " << layerProperties[i].implementationVersion
+                      << ",\n"
+                      << "\t\"description\": \"" << layerProperties[i].description << "\"\n"
+                      << "}" << (i + 1 == layerCount ? "\n" : ",\n");
+        }
+        std::cout << "],\n";
+
+		delete[] layerProperties;
+	}
+	
+	inline void print_extensions()
+    {
+        uint32_t extencionCount = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &extencionCount, nullptr);
+        VkExtensionProperties* extensionProperties = new VkExtensionProperties[extencionCount];
+        vkEnumerateInstanceExtensionProperties(nullptr, &extencionCount, extensionProperties);
+
+        std::cout << "\"VkExtensionProperties\": [\n";
+        for (uint32_t i = 0; i < extencionCount; ++i)
+        {
+            std::cout << "{\n"
+                      << "\t\"extensionName\": \"" << extensionProperties[i].extensionName << "\",\n"
+                      << "\t\"specVersion\": " << extensionProperties[i].specVersion << "\n"
+                      << "}" << (i + 1 == extencionCount ? "\n" :",\n");
+        }
+        std::cout << "],\n";
+
+		delete[] extensionProperties;
+    }
+
+	inline void print_physical_devices(VkPhysicalDevice* physicalDevices, uint32_t count)
 	{
-		VkPhysicalDeviceProperties properties;
-		vkGetPhysicalDeviceProperties(device, &properties);
+        std::cout << "\"VkPhysicalDevices\": [\n";
+        for (uint32_t i = 0; i < count; ++i)
+        {
+            std::cout << "\t{\n";
 
-		std::cout
-			<< "GPU Device: " << properties.deviceName << "\n"
-			<< "\tAPI Version: " << VK_VERSION_MAJOR(properties.apiVersion) << "." << VK_VERSION_MINOR(properties.apiVersion) << "." << VK_VERSION_PATCH(properties.apiVersion) << "\n"
-			<< "\tDriver Version: " << properties.driverVersion << "\n"
-			<< "\tVendor ID: " << properties.vendorID << "\n"
-			<< "\tDevice ID: " << properties.deviceID << "\n"
-			<< "\tDevice Type: " << device_type(properties.deviceType) << "\n" ;
+            VkPhysicalDeviceProperties properties;
+            vkGetPhysicalDeviceProperties(physicalDevices[i], &properties);
 
+            std::cout << "\t\"VkPhysicalDeviceProperties\": {\n"
+                      << "\t\t\"apiVersion\": \"" << VK_VERSION_MAJOR(properties.apiVersion) << "."
+                      << VK_VERSION_MINOR(properties.apiVersion) << "."
+                      << VK_VERSION_PATCH(properties.apiVersion) << "\",\n"
+                      << "\t\t\"driverVersion\": " << properties.driverVersion << ",\n"
+                      << "\t\t\"vendorID\": " << properties.vendorID << ",\n"
+                      << "\t\t\"deviceID\": " << properties.deviceID << ",\n"
+                      << "\t\t\"deviceType\": \"" << device_type(properties.deviceType) << "\",\n"
+                      << "\t\t\"deviceName\": \"" << properties.deviceName << "\",\n"
+                      << "\t\t\"pipelineCacheUUID\": \"" << properties.pipelineCacheUUID
+                      << "\"\n"
+                      //<< "\t\t\"limits\": " << properties.limits << ",\n"
+                      //<< "\t\t\"sparseProperties\": \"" << properties.sparseProperties << "\",\n"
+                      << "\t},\n";
+
+            VkPhysicalDeviceFeatures features;
+            vkGetPhysicalDeviceFeatures(physicalDevices[i], &features);
+
+            std::cout << "\t\"VkPhysicalDeviceFeatures\": {\n"
+                      << "\t\t\"geometryShader\": " << std::boolalpha << features.geometryShader
+                      << ",\n"
+                      << "\t\t\"tessellationShader\": " << std::boolalpha
+                      << features.tessellationShader << "\n"
+                      << "\t},\n";
+
+            VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+            vkGetPhysicalDeviceMemoryProperties(physicalDevices[i],
+                                                &physicalDeviceMemoryProperties);
+
+            uint32_t queueFamilyPropertyCount;
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[i], &queueFamilyPropertyCount,
+                                                     NULL);
+
+            VkQueueFamilyProperties* queueFamilyProperties =
+                new VkQueueFamilyProperties[queueFamilyPropertyCount];
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[i], &queueFamilyPropertyCount,
+                                                     queueFamilyProperties);
+
+            std::cout << "\t\"VkQueueFamilyProperties\": [\n";
+            for (uint32_t q = 0; q < queueFamilyPropertyCount; ++q)
+            {
+                std::cout
+                    << "\t\t{\n"
+                    << "\t\t\t\"VK_QUEUE_GRAPHICS_BIT\": " << std::boolalpha
+                    << ((queueFamilyProperties[q].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) << ",\n"
+                    << "\t\t\t\"VK_QUEUE_COMPUTE_BIT\": " << std::boolalpha
+                    << ((queueFamilyProperties[q].queueFlags & VK_QUEUE_COMPUTE_BIT) != 0) << ",\n"
+                    << "\t\t\t\"VK_QUEUE_TRANSFER_BIT\": " << std::boolalpha
+                    << ((queueFamilyProperties[q].queueFlags & VK_QUEUE_TRANSFER_BIT) != 0) << ",\n"
+                    << "\t\t\t\"VK_QUEUE_SPARSE_BINDING_BIT\": " << std::boolalpha
+                    << ((queueFamilyProperties[q].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) != 0)
+                    << ",\n"
+                    << "\t\t\t\"queueCount\": " << queueFamilyProperties[q].queueCount << ",\n"
+                    << "\t\t\t\"timestampValidBits\": "
+                    << queueFamilyProperties[q].timestampValidBits << "\n"
+                    << "\t\t}" << (q + 1 == queueFamilyPropertyCount ? "\n" : ",\n");
+            }
+            std::cout << "\t]\n";
+
+			std::cout << "\t}" << (i + 1 == count ? "\n" : ",\n");
 		
-		VkPhysicalDeviceFeatures features;
-		vkGetPhysicalDeviceFeatures(device, &features);
+			delete[] queueFamilyProperties;
+        }
 
-		std::cout << "\tFeatureset:\n"
-			<< "\t\tGeometry shader:\t" << features.geometryShader << "\n"
-			<< "\t\tTesselation shader:\t" << features.tessellationShader << "\n";
-
-
-		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
-		vkGetPhysicalDeviceMemoryProperties(device, &physicalDeviceMemoryProperties);
-
-
-		uint32_t queueFamilyPropertyCount;
-		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyPropertyCount, NULL);
-
-		VkQueueFamilyProperties* queueFamilyProperties = new VkQueueFamilyProperties[queueFamilyPropertyCount];
-		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyPropertyCount, queueFamilyProperties);
-
-		for (uint32_t i = 0; i < queueFamilyPropertyCount; ++i)
-		{
-			std::cout
-				<< "\tQueue Family Nr. " << (i+1) << "\n"
-				<< "\t\tGraphics bit:\t\t" << ((queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) << "\n"
-				<< "\t\tCompute bit:\t\t" << ((queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) != 0) << "\n"
-				<< "\t\tTransfer bit:\t\t" << ((queueFamilyProperties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) != 0) << "\n"
-				<< "\t\tSparse binding bit:\t" << ((queueFamilyProperties[i].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) != 0) << "\n"
-				<< "\t\tQueue count:\t\t" << queueFamilyProperties[i].queueCount << "\n"
-				<< "\t\tTimestamp bits:\t\t" << queueFamilyProperties[i].timestampValidBits << "\n";
-		}
-
-		delete[] queueFamilyProperties;
+		std::cout << "],\n";
 	}
+
+	inline void print_selected_device(const elemd::PhysicalDeviceComposite& bestDevice)
+    {
+        std::cout << "\"selected_device\": {\n"
+                  << "\t\"deviceIndex\": " << bestDevice.deviceIndex << ",\n"
+                  << "\t\"queueCount\": " << bestDevice.queueCount << ",\n"
+                  << "\t\"queueFamilyIndex\": " << bestDevice.queueFamilyIndex << "\n"
+                  << "},\n";
+    }
 
 	inline bool err_check(const VkResult& result)
 	{
@@ -140,9 +221,9 @@ namespace vku
 			case VK_INCOMPLETE:
 				err("A return array was too small for the result");
 				break;
-			//case VK_SUBOPTIMAL_KHR:
-			//	err("A swapchain no longer matches the surface properties exactly, but can still be used to present to the surface successfully.");
-			//	break;
+			case VK_SUBOPTIMAL_KHR:
+				err("A swapchain no longer matches the surface properties exactly, but can still be used to present to the surface successfully.");
+				break;
 			case VK_ERROR_OUT_OF_HOST_MEMORY:
 				err("A host memory allocation has failed.");
 				break;
@@ -185,9 +266,9 @@ namespace vku
 			case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
 				err("The requested window is already in use by Vulkan or another API in a manner which prevents it from being used again.");
 				break;
-			//case VK_ERROR_OUT_OF_DATE_KHR:
-			//	err("A surface has changed in such a way that it is no longer compatible with the swapchain, and further presentation requests using the swapchain will fail. Applications must query the new surface properties and recreate their swapchain if they wish to continue presenting to the surface.");
-			//	break;
+			case VK_ERROR_OUT_OF_DATE_KHR:
+				err("A surface has changed in such a way that it is no longer compatible with the swapchain, and further presentation requests using the swapchain will fail. Applications must query the new surface properties and recreate their swapchain if they wish to continue presenting to the surface.");
+				break;
 			//case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR:
 			//	err("The display used by a swapchain does not use the same presentable image layout, or is incompatible in a way that prevents sharing an image.");
 			//	break;

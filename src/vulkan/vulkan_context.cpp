@@ -103,7 +103,7 @@ namespace elemd
     {
     }
 
-    void Context::new_frame()
+    void Context::draw_frame()
     {
         VulkanContext* impl = getImpl(this);
 
@@ -142,18 +142,9 @@ namespace elemd
 
     /* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
 
-    VulkanContext::VulkanContext(Window* window)
+
+    void VulkanContext::create_instance()
     {
-
-        if (gladLoaderLoadVulkan(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE) <= 0)
-        {
-            std::cerr << "Error: Could not load Vulkan!" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-        uint32_t uWidth = (uint32_t)window->getWidth();
-        uint32_t uHeight = (uint32_t)window->getHeight();
-
         // --------------- Create application Info ---------------
 
         VkApplicationInfo applicationInfo;
@@ -161,44 +152,11 @@ namespace elemd
         applicationInfo.pNext = nullptr;
         applicationInfo.pApplicationName = "UI Application"; // TODO: Pass down from application
         applicationInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        applicationInfo.pEngineName = ELEM_APPLICATION_NAME;
+        applicationInfo.pEngineName = ELEMD_LIBRARY_NAME;
         applicationInfo.engineVersion =
-            VK_MAKE_VERSION(ELEM_VERSION_MAJOR, ELEM_VERSION_MINOR, ELEM_VERSION_PATCH);
+            VK_MAKE_VERSION(ELEMD_VERSION_MAJOR, ELEMD_VERSION_MINOR, ELEMD_VERSION_PATCH);
         applicationInfo.apiVersion = VK_API_VERSION_1_2;
 
-        // --------------- Check Layers ---------------
-
-        uint32_t layerCount = 0;
-        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-        VkLayerProperties* layerProperties = new VkLayerProperties[layerCount];
-        vkEnumerateInstanceLayerProperties(&layerCount, layerProperties);
-
-        std::cout << "Layers: " << layerCount << std::endl;
-        for (uint32_t i = 0; i < layerCount; ++i)
-        {
-            std::cout << "Name:         " << layerProperties[i].layerName << "\n"
-                      << "Spec Version: " << layerProperties[i].specVersion << "\n"
-                      << "Impl Version: " << layerProperties[i].implementationVersion << "\n"
-                      << "Description:  " << layerProperties[i].description << "\n"
-                      << "\n";
-        }
-
-        const std::vector<const char*> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};
-
-        // --------------- Check Extensions ---------------
-
-        uint32_t extencionCount = 0;
-        vkEnumerateInstanceExtensionProperties(nullptr, &extencionCount, nullptr);
-        VkExtensionProperties* extensionProperties = new VkExtensionProperties[extencionCount];
-        vkEnumerateInstanceExtensionProperties(nullptr, &extencionCount, extensionProperties);
-
-        std::cout << "Extensions: " << layerCount << std::endl;
-        for (uint32_t i = 0; i < layerCount; ++i)
-        {
-            std::cout << "Name:         " << extensionProperties[i].extensionName << "\n"
-                      << "Spec Version: " << extensionProperties[i].specVersion << "\n"
-                      << "\n";
-        }
 
         std::vector<const char*> extensions = {};
         uint32_t extensionCount = 0;
@@ -208,7 +166,10 @@ namespace elemd
             extensions.push_back(requiredExtensions[i]);
         }
 
+
         // --------------- Create Instance create info ---------------
+
+        const std::vector<const char*> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};
 
         VkInstanceCreateInfo instanceCreateInfo;
         instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -220,43 +181,40 @@ namespace elemd
         instanceCreateInfo.enabledExtensionCount = (uint32_t)extensions.size();
         instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
+
         // --------------- Create Instance ---------------
 
         vku::err_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
+    }
 
+    void VulkanContext::create_surface()
+    {
         // --------------- Create Surface ---------------
-        vku::err_check(glfwCreateWindowSurface(instance, ((WindowImpl*)window)->getWindow(),
+
+        vku::err_check(glfwCreateWindowSurface(instance, _window->getGLFWWindow(),
                                                nullptr, &surface));
+    }
 
-        // --------------- Get devices ---------------
+    void VulkanContext::create_physical_devices()
+    {
+        // --------------- Get physical devices ---------------
 
-        uint32_t physicalDeviceCount = 0;
         vku::err_check(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr));
 
         if (physicalDeviceCount == 0)
         {
-            std::cerr << "Error: Could not find a suitable Device that supports Vulkan!"
-                      << std::endl;
+            vku::err("Could not find a suitable Device that supports Vulkan!");
             exit(EXIT_FAILURE);
         }
 
-        VkPhysicalDevice* physicalDevices = new VkPhysicalDevice[physicalDeviceCount];
-        vku::err_check(
-            vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices));
+        physicalDevices = new VkPhysicalDevice[physicalDeviceCount];
+        vku::err_check(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices));
+        
+        bestDevice = vku::select_physical_device(physicalDevices, physicalDeviceCount);
+    }
 
-        for (uint32_t i = 0; i < physicalDeviceCount; ++i)
-        {
-            vku::print_device(physicalDevices[i]);
-        }
-
-        // --------------- Decide on best device ---------------
-
-        vku::BestDevice bestDevice =
-            vku::get_best_device_info(physicalDevices, physicalDeviceCount);
-        std::cout << "Best Device Nr. " << (bestDevice.deviceIndex + 1) << "\n"
-                  << "Best Queue Family: " << (bestDevice.queueFamilyIndex + 1)
-                  << " with queue count: " << bestDevice.queueCount << "\n";
-
+    void VulkanContext::create_logical_device()
+    {
         // --------------- Create Queue ---------------
 
         float queuePriorities[] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -269,13 +227,12 @@ namespace elemd
         deviceQueueCreateInfo.queueCount = bestDevice.queueCount;
         deviceQueueCreateInfo.pQueuePriorities = queuePriorities;
 
+
         // --------------- Create Device create info ---------------
 
         VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
 
-        const std::vector<const char*> deviceExtensions = {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME
-        };
+        const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
         VkDeviceCreateInfo deviceCreateInfo;
         deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -289,17 +246,51 @@ namespace elemd
         deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
         deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
 
+
         // --------------- Create Device ---------------
 
-        vku::err_check(vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo,
-                                      nullptr, &device));
+        vku::err_check(
+            vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo, nullptr, &device));
 
-        if (gladLoaderLoadVulkan(instance, physicalDevices[bestDevice.deviceIndex],
-                                 device) <= 0)
+        if (gladLoaderLoadVulkan(instance, physicalDevices[bestDevice.deviceIndex], device) <= 0)
         {
-            std::cerr << "Error: Could not load the Vulkan device!" << std::endl;
+            vku::err("Could not load the Vulkan device!");
             exit(EXIT_FAILURE);
         }
+    }
+
+
+
+    VulkanContext::VulkanContext(Window* window)
+    {
+        _window = (WindowImpl*)window;
+
+        if (gladLoaderLoadVulkan(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE) <= 0)
+        {
+            std::cerr << "Error: Could not load Vulkan!" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        uint32_t uWidth = (uint32_t)_window->getWidth();
+        uint32_t uHeight = (uint32_t)_window->getHeight();        
+
+
+        create_instance();
+        
+        vku::print_layers();
+        vku::print_extensions();
+
+        create_surface();
+        
+        create_physical_devices();
+
+        vku::print_physical_devices(physicalDevices, physicalDeviceCount);
+        vku::print_selected_device(bestDevice);
+
+        create_logical_device();
+
+
+
 
         // --------------- Create Surface Capabilities ---------------
         VkSurfaceCapabilitiesKHR surfaceCapabilities;
@@ -439,8 +430,8 @@ namespace elemd
 
         fragShaderModule = new VkShaderModule();
         vertShaderModule = new VkShaderModule();
-        createShaderModule("../../res/shader/shader.frag.spv", fragShaderModule);
-        createShaderModule("../../res/shader/shader.vert.spv", vertShaderModule);
+        create_shader_module("../../res/shader/shader.frag.spv", fragShaderModule);
+        create_shader_module("../../res/shader/shader.vert.spv", vertShaderModule);
 
 
         VkPipelineShaderStageCreateInfo shaderStageCreateInfoVert;
@@ -486,8 +477,8 @@ namespace elemd
         VkViewport viewport;
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = (float)window->getWidth();
-        viewport.height = (float)window->getHeight();
+        viewport.width = (float)_window->getWidth();
+        viewport.height = (float)_window->getHeight();
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
@@ -743,9 +734,6 @@ namespace elemd
 
         delete[] swapchainImages;
         delete[] surfaceFormats;
-        delete[] physicalDevices;
-        delete[] extensionProperties;
-        delete[] layerProperties;
     }
 
     VulkanContext::~VulkanContext()
@@ -781,17 +769,13 @@ namespace elemd
         delete vertShaderModule;
         delete fragShaderModule;
         delete[] imageViews;
+        delete[] physicalDevices;
     }
 
-    void VulkanContext::createInstance()
-    {
-
-    }
-
-    void VulkanContext::createShaderModule(const std::string& filename,
+    void VulkanContext::create_shader_module(const std::string& filename,
                                            VkShaderModule* shaderModule)
     {
-        std::vector<char> spirvCode = readShader(filename);
+        std::vector<char> spirvCode = read_shader(filename);
 
         VkShaderModuleCreateInfo shaderModuleCreateInfo;
         shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -803,7 +787,7 @@ namespace elemd
         vku::err_check(vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, shaderModule));
     }
 
-    std::vector<char> VulkanContext::readShader(const std::string& filename)
+    std::vector<char> VulkanContext::read_shader(const std::string& filename)
     {
         std::ifstream file(filename, std::ios::binary | std::ios::ate);
         if (file)
