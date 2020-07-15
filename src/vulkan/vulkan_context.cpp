@@ -783,7 +783,13 @@ namespace elemd
         delete[] imageViews;
     }
 
-    void VulkanContext::createShaderModule(const std::string& filename, VkShaderModule* shaderModule)
+    void VulkanContext::createInstance()
+    {
+
+    }
+
+    void VulkanContext::createShaderModule(const std::string& filename,
+                                           VkShaderModule* shaderModule)
     {
         std::vector<char> spirvCode = readShader(filename);
 

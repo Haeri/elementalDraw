@@ -16,6 +16,7 @@ namespace elemd
         VulkanContext(Window* window);
         ~VulkanContext();
 
+        void createInstance();
         void createShaderModule(const std::string& filename, VkShaderModule* shaderModule);
         std::vector<char> readShader(const std::string& filename);
 
