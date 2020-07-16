@@ -198,7 +198,7 @@ namespace vku
                   << "\t\"deviceIndex\": " << bestDevice.deviceIndex << ",\n"
                   << "\t\"queueCount\": " << bestDevice.queueCount << ",\n"
                   << "\t\"queueFamilyIndex\": " << bestDevice.queueFamilyIndex << "\n"
-                  << "},\n";
+                  << "}\n";
     }
 
 	inline bool err_check(const VkResult& result)

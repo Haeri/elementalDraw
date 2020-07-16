@@ -6,7 +6,13 @@
 
 int main()
 {
-    elemd::WindowConfig wc{"UI Application", 600, 500};
+#if defined(_WIN32) && !defined(NDEBUG)
+    int flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+    flag |= _CRTDBG_LEAK_CHECK_DF;
+    _CrtSetDbgFlag(flag);
+#endif
+
+    elemd::WindowConfig wc{"UI Application [Vulkan]", 600, 500};
     wc.resizeable = false;
     wc.transparent = true;
     elemd::Window* w = elemd::Window::create(wc);

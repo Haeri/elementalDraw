@@ -143,9 +143,18 @@ namespace elemd
     /* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
 
 
+    void VulkanContext::preload_vulkan()
+    {
+        if (gladLoaderLoadVulkan(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE) <= 0)
+        {
+            vku::err("Could not load Vulkan!");
+            exit(EXIT_FAILURE);
+        }
+    }
+
     void VulkanContext::create_instance()
     {
-        // --------------- Create application Info ---------------
+        // --------------- Create Application Info ---------------
 
         VkApplicationInfo applicationInfo;
         applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -158,6 +167,8 @@ namespace elemd
         applicationInfo.apiVersion = VK_API_VERSION_1_2;
 
 
+        // --------------- Get Required Instance Extensions ---------------
+
         std::vector<const char*> extensions = {};
         uint32_t extensionCount = 0;
         const char** requiredExtensions = glfwGetRequiredInstanceExtensions(&extensionCount);
@@ -167,7 +178,7 @@ namespace elemd
         }
 
 
-        // --------------- Create Instance create info ---------------
+        // --------------- Create Instance Create Info ---------------
 
         const std::vector<const char*> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};
 
@@ -189,7 +200,7 @@ namespace elemd
 
     void VulkanContext::create_surface()
     {
-        // --------------- Create Surface ---------------
+        // --------------- Create WIndow Surface ---------------
 
         vku::err_check(glfwCreateWindowSurface(instance, _window->getGLFWWindow(),
                                                nullptr, &surface));
@@ -197,7 +208,7 @@ namespace elemd
 
     void VulkanContext::create_physical_devices()
     {
-        // --------------- Get physical devices ---------------
+        // --------------- Get Physical Devices ---------------
 
         vku::err_check(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr));
 
@@ -210,12 +221,30 @@ namespace elemd
         physicalDevices = new VkPhysicalDevice[physicalDeviceCount];
         vku::err_check(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices));
         
+        
+        // --------------- Select Best Physical Device ---------------
+
         bestDevice = vku::select_physical_device(physicalDevices, physicalDeviceCount);
+    }
+
+    void VulkanContext::check_surface_support()
+    {
+        // --------------- Check Surface Support ---------------
+
+        VkBool32 surfaceSupport = false;
+        vku::err_check(vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevices[bestDevice.deviceIndex],
+                                                            bestDevice.queueFamilyIndex, surface,
+                                                            &surfaceSupport));
+        if (!surfaceSupport)
+        {
+            std::cerr << "Error: Swapchain not supported on your Device!" << std::endl;
+            exit(EXIT_FAILURE);
+        }
     }
 
     void VulkanContext::create_logical_device()
     {
-        // --------------- Create Queue ---------------
+        // --------------- Create Device Queue Create Info ---------------
 
         float queuePriorities[] = {1.0f, 1.0f, 1.0f, 1.0f};
 
@@ -228,7 +257,7 @@ namespace elemd
         deviceQueueCreateInfo.pQueuePriorities = queuePriorities;
 
 
-        // --------------- Create Device create info ---------------
+        // --------------- Create Device Create Info ---------------
 
         VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
 
@@ -251,6 +280,11 @@ namespace elemd
 
         vku::err_check(
             vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo, nullptr, &device));
+    }
+
+    void VulkanContext::load_vulkan()
+    {
+        // --------------- Load Vulkan ---------------
 
         if (gladLoaderLoadVulkan(instance, physicalDevices[bestDevice.deviceIndex], device) <= 0)
         {
@@ -259,40 +293,17 @@ namespace elemd
         }
     }
 
-
-
-    VulkanContext::VulkanContext(Window* window)
+    void VulkanContext::create_queue()
     {
-        _window = (WindowImpl*)window;
+        // --------------- Get Device Queue ---------------
 
-        if (gladLoaderLoadVulkan(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE) <= 0)
-        {
-            std::cerr << "Error: Could not load Vulkan!" << std::endl;
-            exit(EXIT_FAILURE);
-        }
+        vkGetDeviceQueue(device, bestDevice.queueFamilyIndex, 0, &queue);
+    }
 
-        uint32_t uWidth = (uint32_t)_window->getWidth();
-        uint32_t uHeight = (uint32_t)_window->getHeight();        
+    void VulkanContext::create_swapchain()
+    {
+        // --------------- Get Surface Capabilities ---------------
 
-
-        create_instance();
-        
-        vku::print_layers();
-        vku::print_extensions();
-
-        create_surface();
-        
-        create_physical_devices();
-
-        vku::print_physical_devices(physicalDevices, physicalDeviceCount);
-        vku::print_selected_device(bestDevice);
-
-        create_logical_device();
-
-
-
-
-        // --------------- Create Surface Capabilities ---------------
         VkSurfaceCapabilitiesKHR surfaceCapabilities;
         vku::err_check(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
             physicalDevices[bestDevice.deviceIndex], surface, &surfaceCapabilities));
@@ -302,12 +313,44 @@ namespace elemd
 
         uint32_t surfaceFormatCount = 0;
         vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[bestDevice.deviceIndex],
-                                                            surface, &surfaceFormatCount,
-                                                            nullptr));
+                                                            surface, &surfaceFormatCount, nullptr));
         VkSurfaceFormatKHR* surfaceFormats = new VkSurfaceFormatKHR[surfaceFormatCount];
-        vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[bestDevice.deviceIndex],
-                                                            surface, &surfaceFormatCount,
-                                                            surfaceFormats));
+        vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(
+            physicalDevices[bestDevice.deviceIndex], surface, &surfaceFormatCount, surfaceFormats));
+
+
+        // --------------- Select Image Count ---------------
+
+        uint32_t selectedImageCount = surfaceCapabilities.minImageCount + 1;
+        if (selectedImageCount > surfaceCapabilities.maxImageCount)
+            selectedImageCount = surfaceCapabilities.maxImageCount;
+
+
+        // --------------- Select Image Format and Colorspace ---------------
+
+        selectedImageFormat = surfaceFormats[0].format;
+        VkColorSpaceKHR selectedImageColorSpace = surfaceFormats[0].colorSpace;
+        for (uint32_t i = 0; i < surfaceFormatCount; ++i)
+        {
+            if (surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB &&
+                surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            {
+                selectedImageFormat = surfaceFormats[i].format;
+                selectedImageColorSpace = surfaceFormats[i].colorSpace;
+            }
+        }
+
+
+        // --------------- Select Extents ---------------    
+
+        VkExtent2D selectedImageExtent = {width, height};
+        selectedImageExtent.width =
+            std::max(surfaceCapabilities.minImageExtent.width,
+                     std::min(surfaceCapabilities.maxImageExtent.width, selectedImageExtent.width));
+        selectedImageExtent.height =
+            std::max(surfaceCapabilities.minImageExtent.height,
+                     std::min(surfaceCapabilities.maxImageExtent.height, selectedImageExtent.height));
+        
 
 
         // --------------- Get Present Modes ---------------
@@ -317,72 +360,32 @@ namespace elemd
             physicalDevices[bestDevice.deviceIndex], surface, &presentModeCount, nullptr));
         VkPresentModeKHR* presentModes = new VkPresentModeKHR[presentModeCount];
         vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(
-            physicalDevices[bestDevice.deviceIndex], surface, &presentModeCount,
-            presentModes));
+            physicalDevices[bestDevice.deviceIndex], surface, &presentModeCount, presentModes));
 
-        // --------------- Create Queue ---------------
 
-        vkGetDeviceQueue(device, bestDevice.queueFamilyIndex, 0, &queue);
-
-        VkBool32 surfaceSupport = false;
-        vku::err_check(vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevices[bestDevice.deviceIndex],
-                                             bestDevice.queueFamilyIndex, surface,
-                                             &surfaceSupport));
-
-        if (!surfaceSupport)
-        {
-            std::cerr << "Error: Swapchain not supported on your Device!" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-        // --------------- Create SwapchainCreateInfo ---------------
-        
-        uint32_t chosenImageCount = surfaceCapabilities.minImageCount + 1;
-        if (chosenImageCount > surfaceCapabilities.maxImageCount)
-            chosenImageCount = surfaceCapabilities.maxImageCount;
-
-        
-        VkFormat chosenFormat = surfaceFormats[0].format;
-        VkColorSpaceKHR chosenColorSpace = surfaceFormats[0].colorSpace;
-        for (uint32_t i = 0; i < surfaceFormatCount; ++i)
-        {
-            if (surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB &&
-                surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-            {
-                chosenFormat = surfaceFormats[i].format;
-                chosenColorSpace = surfaceFormats[i].colorSpace;
-            }
-        }
-
-        VkExtent2D chosenExtent = {uWidth, uHeight};
-        chosenExtent.width =
-            std::max(surfaceCapabilities.minImageExtent.width,
-                     std::min(surfaceCapabilities.maxImageExtent.width, chosenExtent.width));
-        chosenExtent.height =
-            std::max(surfaceCapabilities.minImageExtent.height,
-                     std::min(surfaceCapabilities.maxImageExtent.height, chosenExtent.height));
-        
-
-     
-        VkPresentModeKHR chosenPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+        // --------------- Select Present Mode ---------------
+            
+        VkPresentModeKHR selectedPresentMode = VK_PRESENT_MODE_FIFO_KHR;
         for (uint32_t i = 0; i < presentModeCount; ++i)
         {
             if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
             {
-                chosenPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+                selectedPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
             }
         }
 
+
+        // --------------- Create Swapchain Create Info ---------------
 
         VkSwapchainCreateInfoKHR swapchainCreateInfo;
         swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         swapchainCreateInfo.pNext = nullptr;
         swapchainCreateInfo.flags = 0;
         swapchainCreateInfo.surface = surface;
-        swapchainCreateInfo.minImageCount = chosenImageCount;
-        swapchainCreateInfo.imageFormat = chosenFormat;
-        swapchainCreateInfo.imageColorSpace = chosenColorSpace;
-        swapchainCreateInfo.imageExtent = chosenExtent;
+        swapchainCreateInfo.minImageCount = selectedImageCount;
+        swapchainCreateInfo.imageFormat = selectedImageFormat;
+        swapchainCreateInfo.imageColorSpace = selectedImageColorSpace;
+        swapchainCreateInfo.imageExtent = selectedImageExtent;
         swapchainCreateInfo.imageArrayLayers = 1;
         swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -390,20 +393,34 @@ namespace elemd
         swapchainCreateInfo.pQueueFamilyIndices = nullptr;
         swapchainCreateInfo.preTransform = surfaceCapabilities.currentTransform;
         swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-        swapchainCreateInfo.presentMode = chosenPresentMode;
+        swapchainCreateInfo.presentMode = selectedPresentMode;
         swapchainCreateInfo.clipped = VK_TRUE;
         swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
 
+        // --------------- Create Swapchain ---------------
+
+        vku::err_check(vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain));
+
+
+        // --------------- Cleanup ---------------
+
+        delete[] presentModes;
+        delete[] surfaceFormats;
+    }
+
+    void VulkanContext::create_image_views()
+    {
+        // --------------- Get Swapchain Image ---------------
+
         vku::err_check(
-            vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain));
-
-
-        vku::err_check(vkGetSwapchainImagesKHR(device, swapchain, &actualSwapchainImageCount,
-                                nullptr));
+            vkGetSwapchainImagesKHR(device, swapchain, &actualSwapchainImageCount, nullptr));
         VkImage* swapchainImages = new VkImage[actualSwapchainImageCount];
-        vku::err_check(vkGetSwapchainImagesKHR(device, swapchain,
-                                               &actualSwapchainImageCount, swapchainImages));
+        vku::err_check(vkGetSwapchainImagesKHR(device, swapchain, &actualSwapchainImageCount,
+                                               swapchainImages));
+
+        
+        // --------------- Create Image Views ---------------
 
         imageViews = new VkImageView[actualSwapchainImageCount];
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
@@ -414,7 +431,7 @@ namespace elemd
             imageViewCreateInfo.flags = 0;
             imageViewCreateInfo.image = swapchainImages[i];
             imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            imageViewCreateInfo.format = chosenFormat;
+            imageViewCreateInfo.format = selectedImageFormat;
             imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
             imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
             imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -425,14 +442,97 @@ namespace elemd
             imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
             imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-            vku::err_check(vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]));
+            vku::err_check(
+                vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]));
         }
+
+        
+        // --------------- Cleanup ---------------
+
+        delete[] swapchainImages;
+    }
+
+    void VulkanContext::create_render_pass()
+    {
+        // --------------- Create Attachment Description ---------------
+
+        VkAttachmentDescription attachmentDescription;
+        attachmentDescription.flags = 0;
+        attachmentDescription.format = selectedImageFormat;
+        attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+        attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+
+        // --------------- Create Attachment Reference ---------------
+
+        VkAttachmentReference attachmentReference;
+        attachmentReference.attachment = 0;
+        attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        
+        // --------------- Create Subpass Desciption ---------------
+
+        VkSubpassDescription subpassDescription;
+        subpassDescription.flags = 0;
+        subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpassDescription.inputAttachmentCount = 0;
+        subpassDescription.pInputAttachments = nullptr;
+        subpassDescription.colorAttachmentCount = 1;
+        subpassDescription.pColorAttachments = &attachmentReference;
+        subpassDescription.pResolveAttachments = nullptr;
+        subpassDescription.pDepthStencilAttachment = nullptr;
+        subpassDescription.preserveAttachmentCount = 0;
+        subpassDescription.pPreserveAttachments = nullptr;
+
+
+        // --------------- Create Subpass Dependency ---------------
+
+        VkSubpassDependency subpassDependency;
+        subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        subpassDependency.dstSubpass = 0;
+        subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        subpassDependency.srcAccessMask = 0;
+        subpassDependency.dstAccessMask =
+            VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        subpassDependency.dependencyFlags = 0;
+
+        
+        // --------------- Create Render Pass Create Info ---------------
+
+        VkRenderPassCreateInfo renderPassCreateInfo;
+        renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassCreateInfo.pNext = nullptr;
+        renderPassCreateInfo.flags = 0;
+        renderPassCreateInfo.attachmentCount = 1;
+        renderPassCreateInfo.pAttachments = &attachmentDescription;
+        renderPassCreateInfo.subpassCount = 1;
+        renderPassCreateInfo.pSubpasses = &subpassDescription;
+        renderPassCreateInfo.dependencyCount = 1;
+        renderPassCreateInfo.pDependencies = &subpassDependency;
+
+
+        // --------------- Create Render Pass ---------------
+
+        vku::err_check(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass));
+    }
+
+    void VulkanContext::create_pipeline()
+    {
+        // --------------- Load Shader ---------------
 
         fragShaderModule = new VkShaderModule();
         vertShaderModule = new VkShaderModule();
         create_shader_module("../../res/shader/shader.frag.spv", fragShaderModule);
         create_shader_module("../../res/shader/shader.vert.spv", vertShaderModule);
 
+
+        // --------------- Create Pipeline Shader Stage Create Info ---------------
 
         VkPipelineShaderStageCreateInfo shaderStageCreateInfoVert;
         shaderStageCreateInfoVert.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -442,7 +542,10 @@ namespace elemd
         shaderStageCreateInfoVert.module = *vertShaderModule;
         shaderStageCreateInfoVert.pName = "main";
         shaderStageCreateInfoVert.pSpecializationInfo = nullptr;
+
         
+        // --------------- Create Pipeline Shader Stage Create Info ---------------
+
         VkPipelineShaderStageCreateInfo shaderStageCreateInfoFrag;
         shaderStageCreateInfoFrag.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStageCreateInfoFrag.pNext = nullptr;
@@ -455,6 +558,8 @@ namespace elemd
         VkPipelineShaderStageCreateInfo shaderStages[] = {shaderStageCreateInfoVert,
                                                           shaderStageCreateInfoFrag};
 
+        
+        // --------------- Create Pipeline Vertex Input State Create Info ---------------
 
         VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo;
         pipelineVertexInputStateCreateInfo.sType =
@@ -466,6 +571,9 @@ namespace elemd
         pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
         pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
 
+
+        // --------------- Create Pipeline Input Assembly State Create Info ---------------
+
         VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo;
         pipelineInputAssemblyStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -474,20 +582,24 @@ namespace elemd
         pipelineInputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
+
+        // --------------- Create Pipeline Viewport State Create Info ---------------
+
         VkViewport viewport;
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = (float)_window->getWidth();
-        viewport.height = (float)_window->getHeight();
+        viewport.width = (float)width;
+        viewport.height = (float)height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
         VkRect2D scissor;
-        scissor.offset = { 0, 0 };
-        scissor.extent = { uWidth, uHeight };
+        scissor.offset = {0, 0};
+        scissor.extent = {width, height};
 
         VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo;
-        pipelineViewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        pipelineViewportStateCreateInfo.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         pipelineViewportStateCreateInfo.pNext = nullptr;
         pipelineViewportStateCreateInfo.flags = 0;
         pipelineViewportStateCreateInfo.viewportCount = 1;
@@ -495,8 +607,12 @@ namespace elemd
         pipelineViewportStateCreateInfo.scissorCount = 1;
         pipelineViewportStateCreateInfo.pScissors = &scissor;
 
+
+        // --------------- Create Pipeline Rasterization State Create Info ---------------
+
         VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo;
-        pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+        pipelineRasterizationStateCreateInfo.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         pipelineRasterizationStateCreateInfo.pNext = nullptr;
         pipelineRasterizationStateCreateInfo.flags = 0;
         pipelineRasterizationStateCreateInfo.depthClampEnable = VK_FALSE;
@@ -510,8 +626,12 @@ namespace elemd
         pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
         pipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
 
+
+        // --------------- Create Pipeline Multisample State Create Info ---------------
+
         VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo;
-        pipelineMultisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        pipelineMultisampleStateCreateInfo.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         pipelineMultisampleStateCreateInfo.pNext = nullptr;
         pipelineMultisampleStateCreateInfo.flags = 0;
         pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
@@ -520,6 +640,9 @@ namespace elemd
         pipelineMultisampleStateCreateInfo.pSampleMask = nullptr;
         pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = VK_TRUE;
         pipelineMultisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
+
+        
+        // --------------- Create Pipeline Color Blend Attachment State ---------------
 
         VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState;
         pipelineColorBlendAttachmentState.blendEnable = VK_TRUE;
@@ -534,8 +657,11 @@ namespace elemd
             VK_COLOR_COMPONENT_A_BIT;
 
 
+        // --------------- Create Pipeline Color Blend State Create Info ---------------
+
         VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo;
-        pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        pipelineColorBlendStateCreateInfo.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
         pipelineColorBlendStateCreateInfo.pNext = nullptr;
         pipelineColorBlendStateCreateInfo.flags = 0;
         pipelineColorBlendStateCreateInfo.logicOpEnable = VK_FALSE;
@@ -548,6 +674,8 @@ namespace elemd
         pipelineColorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
 
+        // --------------- Create Pipeline Layout Create Info ---------------
+
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutCreateInfo.pNext = nullptr;
@@ -557,62 +685,14 @@ namespace elemd
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
         pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
-        vku::err_check(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr,
-                               &pipelineLayout));
+
+        // --------------- Create Pipeline Layout ---------------
+
+        vku::err_check(
+            vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
 
 
-
-        VkAttachmentDescription attachmentDescription;
-        attachmentDescription.flags = 0;
-        attachmentDescription.format = chosenFormat;
-        attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
-        attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        VkAttachmentReference attachmentReference;
-        attachmentReference.attachment = 0;
-        attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subpassDescription;
-        subpassDescription.flags = 0;
-        subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpassDescription.inputAttachmentCount = 0;
-        subpassDescription.pInputAttachments = nullptr;
-        subpassDescription.colorAttachmentCount = 1;
-        subpassDescription.pColorAttachments = &attachmentReference;
-        subpassDescription.pResolveAttachments = nullptr;
-        subpassDescription.pDepthStencilAttachment = nullptr;
-        subpassDescription.preserveAttachmentCount = 0;
-        subpassDescription.pPreserveAttachments = nullptr;
-
-        VkSubpassDependency subpassDependency;
-        subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        subpassDependency.dstSubpass = 0;
-        subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        subpassDependency.srcAccessMask = 0;
-        subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        subpassDependency.dependencyFlags = 0;
-
-
-        VkRenderPassCreateInfo renderPassCreateInfo;
-        renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassCreateInfo.pNext = nullptr;
-        renderPassCreateInfo.flags = 0;
-        renderPassCreateInfo.attachmentCount = 1;
-        renderPassCreateInfo.pAttachments = &attachmentDescription;
-        renderPassCreateInfo.subpassCount = 1;
-        renderPassCreateInfo.pSubpasses = &subpassDescription;
-        renderPassCreateInfo.dependencyCount = 1;
-        renderPassCreateInfo.pDependencies = &subpassDependency;
-
-
-        vku::err_check(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass));
-
+        // --------------- Create Graphics Pipeline Create Info ---------------
 
         VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo;
         graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -636,11 +716,15 @@ namespace elemd
         graphicsPipelineCreateInfo.basePipelineIndex = -1;
 
 
+        // --------------- Create Graphics Pipeline ---------------
+
         vku::err_check(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1,
-                                                 &graphicsPipelineCreateInfo, nullptr,
-                                                 &pipeline));
+                                                 &graphicsPipelineCreateInfo, nullptr, &pipeline));
+    }
 
-
+    void VulkanContext::create_framebuffer()
+    {
+        // --------------- Create Framebuffers ---------------
 
         frameBuffers = new VkFramebuffer[actualSwapchainImageCount];
 
@@ -653,16 +737,18 @@ namespace elemd
             frameBufferCreateInfo.renderPass = renderPass;
             frameBufferCreateInfo.attachmentCount = 1;
             frameBufferCreateInfo.pAttachments = &(imageViews[i]);
-            frameBufferCreateInfo.width = uWidth;
-            frameBufferCreateInfo.height = uHeight;
+            frameBufferCreateInfo.width = width;
+            frameBufferCreateInfo.height = height;
             frameBufferCreateInfo.layers = 1;
 
-            vku::err_check(vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr,
-                                &(frameBuffers[i])));
+            vku::err_check(
+                vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &(frameBuffers[i])));
         }
+    }
 
-
-        // --------------- Command Buffer ---------------
+    void VulkanContext::create_command_pool()
+    {
+        // --------------- Create Command Pool Create Info ---------------
 
         VkCommandPoolCreateInfo commandPoolCreateInfo;
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -671,8 +757,14 @@ namespace elemd
         commandPoolCreateInfo.queueFamilyIndex = bestDevice.queueFamilyIndex;
 
 
-        vku::err_check(vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &commandPool));
+        // --------------- Create Command Pool ---------------
 
+        vku::err_check(vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &commandPool));
+    }
+
+    void VulkanContext::create_command_buffers()
+    {
+        // --------------- Create Command Buffer Allocate Info ---------------
 
         VkCommandBufferAllocateInfo commandBufferAllocateInfo;
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -682,17 +774,22 @@ namespace elemd
         commandBufferAllocateInfo.commandBufferCount = actualSwapchainImageCount;
 
 
+        // --------------- Allocate Command Buffers ---------------
+
         commandBuffers = new VkCommandBuffer[actualSwapchainImageCount];
-        vku::err_check(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, commandBuffers));
+        vku::err_check(
+            vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, commandBuffers));
+    }
 
-
+    void VulkanContext::record_command_buffers()
+    {
+        // --------------- Create Command Buffer Begin Info ---------------
 
         VkCommandBufferBeginInfo commandBufferBeginInfo;
         commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         commandBufferBeginInfo.pNext = nullptr;
         commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
         commandBufferBeginInfo.pInheritanceInfo = nullptr;
-
 
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
@@ -704,7 +801,7 @@ namespace elemd
             renderPassBeginInfo.renderPass = renderPass;
             renderPassBeginInfo.framebuffer = frameBuffers[i];
             renderPassBeginInfo.renderArea.offset = {0, 0};
-            renderPassBeginInfo.renderArea.extent = {uWidth, uHeight};
+            renderPassBeginInfo.renderArea.extent = {width, height};
             renderPassBeginInfo.clearValueCount = 1;
             renderPassBeginInfo.pClearValues = &clearValue;
 
@@ -718,7 +815,11 @@ namespace elemd
             vkCmdEndRenderPass(commandBuffers[i]);
             vku::err_check(vkEndCommandBuffer(commandBuffers[i]));
         }
+    }
 
+    void VulkanContext::create_semaphores()
+    {
+        // --------------- Create Semaphore Create Info ---------------
 
         VkSemaphoreCreateInfo semaphoreCreateInfo;
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -726,14 +827,47 @@ namespace elemd
         semaphoreCreateInfo.flags = 0;
 
 
-        vku::err_check(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreImageAvailable));
-        vku::err_check(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreRenderingComplete));
+        // --------------- Create Semaphores ---------------
 
+        vku::err_check(
+            vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreImageAvailable));
+        vku::err_check(
+            vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreRenderingComplete));
+    }
 
+    VulkanContext::VulkanContext(Window* window)
+    {
+        _window = (WindowImpl*)window;
 
+        width = (uint32_t)_window->getWidth();
+        height = (uint32_t)_window->getHeight();        
 
-        delete[] swapchainImages;
-        delete[] surfaceFormats;
+        preload_vulkan();
+        create_instance();
+        create_surface();
+        create_physical_devices();
+        check_surface_support();
+        create_logical_device();
+        load_vulkan();
+        create_queue();
+        create_swapchain();
+        create_image_views();
+        create_render_pass();
+        create_pipeline();
+        create_framebuffer();
+        create_command_pool();
+        create_command_buffers();
+        record_command_buffers();
+        create_semaphores();
+
+#ifndef NDEBUG
+        std::cout << "{\n";
+        vku::print_layers();
+        vku::print_extensions();
+        vku::print_physical_devices(physicalDevices, physicalDeviceCount);
+        vku::print_selected_device(bestDevice);
+        std::cout << "}\n";
+#endif
     }
 
     VulkanContext::~VulkanContext()

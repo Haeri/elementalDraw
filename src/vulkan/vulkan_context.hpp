@@ -18,21 +18,38 @@ namespace elemd
         VulkanContext(Window* window);
         ~VulkanContext();
 
+        void preload_vulkan();
         void create_instance();
         void create_surface();
         void create_physical_devices();
         void create_logical_device();
+        void load_vulkan();
+        void create_queue();
+        void create_swapchain();
+        void check_surface_support();
+        void create_image_views();
+        void create_render_pass();
+        void create_pipeline();
+        void create_framebuffer();
+        void create_command_pool();
+        void create_command_buffers();
+        void record_command_buffers();
+        void create_semaphores();
 
         void create_shader_module(const std::string& filename, VkShaderModule* shaderModule);
         std::vector<char> read_shader(const std::string& filename);
 
         WindowImpl* _window;
 
+        uint32_t width = 0;
+        uint32_t height = 0;
+
         uint32_t actualSwapchainImageCount = 0;
         uint32_t physicalDeviceCount = 0;
         VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 0.3f};
 
         PhysicalDeviceComposite bestDevice;
+        VkFormat selectedImageFormat;
 
         VkInstance instance;
         VkSurfaceKHR surface;
