@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <atomic>
 
 #include "vulkan_utils.hpp"
 #include "../window_impl.hpp"
@@ -43,7 +44,9 @@ namespace elemd
 
         WindowImpl* _window;
 
-        bool resizing = false;
+        std::atomic<bool> resizing = false;
+        std::atomic<bool> rendering = false;
+
         uint32_t width = 0;
         uint32_t height = 0;
 

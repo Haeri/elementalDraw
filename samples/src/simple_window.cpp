@@ -1,5 +1,4 @@
 #include <iostream>
-#include <thread>  
 
 #include <elemd/window.hpp>
 #include <elemd/context.hpp>
@@ -15,23 +14,41 @@ int main()
     elemd::WindowConfig wc{"UI Application [Vulkan]", 600, 500};
     wc.resizeable = true;
     wc.transparent = true;
+    wc.vsync = false;
     elemd::Window* w = elemd::Window::create(wc);
-    elemd::Context* c = w->createContext();
-    c->set_clear_color({0, 0, 0, 0});
+    elemd::Context* c = w->create_context();
     
-    std::thread t([c, w]()
-		{
-            //while (w->isRunning())
-            {
-                c->clear();
-                //c->set_clear_color({255, 0, 0, 255});
-                c->draw_frame();
-            }
+    double delta_time = 0;
+    double current_time = 0;
+    double last_time = 0;
+    double accum_time = 0;
+    int frames = 0;
+    
+    while (w->is_running())
+    {
+        // Timing
+        current_time = elemd::Window::now();
+        delta_time = (current_time - last_time);
+        last_time = current_time;
+        accum_time += delta_time;
+
+        if (accum_time >= 1.0)
+        {
+            std::cout << frames << std::endl;
+            frames = 0;
+            accum_time = 0;
         }
-    );
-    w->mainLoop();
+
+        // Poll Events
+        w->poll_events();
+
+        // Rendering
+        c->clear();
+        //c->set_clear_color({255, 0, 0, 255});
+        c->draw_frame();
+        ++frames;
+    }
     
-    t.join();
     delete w;
 	return 0;
 }

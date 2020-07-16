@@ -24,6 +24,7 @@ namespace elemd
         bool transparent = false;
         bool resizeable = true;
         bool visible = true;
+        bool vsync = true;
     };
 
     class ELEMD_API Window
@@ -32,20 +33,25 @@ namespace elemd
         static Window* create(WindowConfig config);
         virtual ~Window() = default;
 
-        Context* createContext();
+        Context* create_context();
         Context* getContext();
 
         void setTitle(const std::string& title);
         void setPosition(int x, int y);
         void setSize(int width, int height);
+
+        void set_vsync(bool vsync);
         void minimize();
         void maximize();
         void terminate();
+
         int getWidth();
         int getHeight();
 
-        void mainLoop();
-        bool isRunning();
+        void poll_events();
+        bool is_running();
+
+        static double now();
 
     protected:
         Window() = default;

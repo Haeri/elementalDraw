@@ -1,8 +1,6 @@
 #include "window_impl.hpp"
 
 #include <iostream>
-#include <thread>
-#include <chrono>
 
 #include "elemd/context.hpp"
 
@@ -42,6 +40,11 @@ void Window::setPosition(int x, int y)
     glfwSetWindowPos(impl->_window, x, y);
 }
 
+void Window::set_vsync(bool vsync)
+{
+    glfwSwapInterval((int)vsync);
+}
+
 void Window::terminate()
 {
 	glfwTerminate();
@@ -63,24 +66,23 @@ int Window::getHeight()
     return h;
 }
 
-bool Window::isRunning()
+bool Window::is_running()
 {
     WindowImpl* impl = getImpl(this);
     return !glfwWindowShouldClose(impl->_window);
 }
 
-void Window::mainLoop()
+double Window::now()
 {
-	using namespace std::chrono_literals;
-    WindowImpl* impl = getImpl(this);
-    while (isRunning())
-    {
-        glfwPollEvents();
-        std::this_thread::sleep_for(16ms);
-    }
+    return glfwGetTime();
 }
 
-Context* Window::createContext()
+void Window::poll_events()
+{
+    glfwPollEvents();
+}
+
+Context* Window::create_context()
 {
     WindowImpl* impl = getImpl(this);
     _context = Context::create(this);
@@ -101,8 +103,16 @@ Context* Window::getContext()
 
 WindowImpl::WindowImpl(WindowConfig config)
 {
-	setup();
+    if (_windowCount == 0)
+    {
+        if (!glfwInit())
+        {
+            std::cerr << "Failed to initialize GLFW!" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    }
 	
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_DECORATED,	config.decorated);
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, config.transparent);
 	glfwWindowHint(GLFW_RESIZABLE,	config.resizeable);
@@ -130,20 +140,6 @@ GLFWwindow* WindowImpl::getGLFWWindow()
     return _window;
 }
 
-void WindowImpl::setup()
-{
-	if (_windowCount == 0)
-	{
-		if (!glfwInit())
-		{
-			std::cerr << "Failed to initialize GLFW!" << std::endl;
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-}
-
 void WindowImpl::create_window(WindowConfig config)
 {
     if (config.width == 0 || config.height == 0) 
@@ -160,6 +156,8 @@ void WindowImpl::create_window(WindowConfig config)
 		exit(EXIT_FAILURE);
 	}
 	++_windowCount;
+
+	glfwSwapInterval((int)config.visible);
 
 	if (config.position_x != -1 && config.position_y != -1) 
 	{

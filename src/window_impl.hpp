@@ -17,9 +17,7 @@ namespace elemd
         uint32_t _windowCount = 0;
 
         GLFWwindow* getGLFWWindow();
-        void setup();
         void create_window(WindowConfig config);
-        //void on_window_resize(GLFWwindow* window, int width, int height);
     };
 
 } // namespace elemd

@@ -106,6 +106,8 @@ namespace elemd
     void Context::draw_frame()
     {
         VulkanContext* impl = getImpl(this);
+        if (impl->rendering) return;
+        impl->rendering = true;
 
         uint32_t imageIndex;
         vku::err_check(vkAcquireNextImageKHR(impl->device, impl->swapchain, std::numeric_limits<uint64_t>::max(),
@@ -137,7 +139,8 @@ namespace elemd
         presentInfoKHR.pResults = nullptr;
 
         vku::err_check(vkQueuePresentKHR(impl->queue, &presentInfoKHR));
-
+        
+        impl->rendering = false;
     }
 
     void Context::resize_context(int width, int height)
@@ -147,7 +150,6 @@ namespace elemd
     }
 
     /* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
-
 
     void VulkanContext::preload_vulkan()
     {
@@ -679,6 +681,18 @@ namespace elemd
         pipelineColorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
 
+        VkDynamicState dynamicStates[] = {
+            VK_DYNAMIC_STATE_VIEWPORT,
+            VK_DYNAMIC_STATE_SCISSOR
+        };
+
+        VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo;
+        pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+        pipelineDynamicStateCreateInfo.pNext = nullptr;
+        pipelineDynamicStateCreateInfo.flags = 0;
+        pipelineDynamicStateCreateInfo.dynamicStateCount = 2;
+        pipelineDynamicStateCreateInfo.pDynamicStates = dynamicStates;
+
         // --------------- Create Pipeline Layout Create Info ---------------
 
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
@@ -713,7 +727,7 @@ namespace elemd
         graphicsPipelineCreateInfo.pMultisampleState = &pipelineMultisampleStateCreateInfo;
         graphicsPipelineCreateInfo.pDepthStencilState = nullptr;
         graphicsPipelineCreateInfo.pColorBlendState = &pipelineColorBlendStateCreateInfo;
-        graphicsPipelineCreateInfo.pDynamicState = nullptr;
+        graphicsPipelineCreateInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
         graphicsPipelineCreateInfo.layout = pipelineLayout;
         graphicsPipelineCreateInfo.renderPass = renderPass;
         graphicsPipelineCreateInfo.subpass = 0;
@@ -815,6 +829,21 @@ namespace elemd
 
             vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
+            VkViewport viewport;
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = (float)width;
+            viewport.height = (float)height;
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+
+            VkRect2D scissor;
+            scissor.offset = { 0, 0 };
+            scissor.extent = { width, height };
+
+            vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
+            vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
+
             vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
@@ -856,11 +885,7 @@ namespace elemd
         {
             vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
         }
-        vkDestroyPipeline(device, pipeline, nullptr);
         vkDestroyRenderPass(device, renderPass, nullptr);
-        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-        vkDestroyShaderModule(device, *vertShaderModule, nullptr);
-        vkDestroyShaderModule(device, *fragShaderModule, nullptr);
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
             vkDestroyImageView(device, imageViews[i], nullptr);
@@ -868,8 +893,6 @@ namespace elemd
         
         delete[] commandBuffers;
         delete[] frameBuffers;
-        delete vertShaderModule;
-        delete fragShaderModule;
         delete[] imageViews;
 
         VkSwapchainKHR oldSwapchain = swapchain;
@@ -877,7 +900,6 @@ namespace elemd
         create_swapchain();
         create_image_views();
         create_render_pass();
-        create_pipeline();
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
