@@ -140,6 +140,12 @@ namespace elemd
 
     }
 
+    void Context::resize_context(int width, int height)
+    {
+        VulkanContext* impl = getImpl(this);
+        impl->regenerate_swapchain((uint32_t)width, (uint32_t)height);
+    }
+
     /* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
 
 
@@ -350,7 +356,6 @@ namespace elemd
         selectedImageExtent.height =
             std::max(surfaceCapabilities.minImageExtent.height,
                      std::min(surfaceCapabilities.maxImageExtent.height, selectedImageExtent.height));
-        
 
 
         // --------------- Get Present Modes ---------------
@@ -395,7 +400,7 @@ namespace elemd
         swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         swapchainCreateInfo.presentMode = selectedPresentMode;
         swapchainCreateInfo.clipped = VK_TRUE;
-        swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+        swapchainCreateInfo.oldSwapchain = swapchain;
 
 
         // --------------- Create Swapchain ---------------
@@ -833,6 +838,55 @@ namespace elemd
             vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreImageAvailable));
         vku::err_check(
             vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreRenderingComplete));
+    }
+
+    void VulkanContext::regenerate_swapchain(uint32_t width, uint32_t height)
+    {
+        if (resizing) return;
+        resizing = true;
+
+        this->width = width;
+        this->height = height;        
+
+        vkDeviceWaitIdle(device);
+
+        vkFreeCommandBuffers(device, commandPool, actualSwapchainImageCount, commandBuffers);
+        vkDestroyCommandPool(device, commandPool, nullptr);
+        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        {
+            vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
+        }
+        vkDestroyPipeline(device, pipeline, nullptr);
+        vkDestroyRenderPass(device, renderPass, nullptr);
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        vkDestroyShaderModule(device, *vertShaderModule, nullptr);
+        vkDestroyShaderModule(device, *fragShaderModule, nullptr);
+        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        {
+            vkDestroyImageView(device, imageViews[i], nullptr);
+        }
+        
+        delete[] commandBuffers;
+        delete[] frameBuffers;
+        delete vertShaderModule;
+        delete fragShaderModule;
+        delete[] imageViews;
+
+        VkSwapchainKHR oldSwapchain = swapchain;
+
+        create_swapchain();
+        create_image_views();
+        create_render_pass();
+        create_pipeline();
+        create_framebuffer();
+        create_command_pool();
+        create_command_buffers();
+        record_command_buffers();
+
+        vkDestroySwapchainKHR(device, oldSwapchain, nullptr);
+
+        draw_frame();
+        resizing = false;
     }
 
     VulkanContext::VulkanContext(Window* window)

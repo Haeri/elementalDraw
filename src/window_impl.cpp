@@ -23,6 +23,8 @@ inline const WindowImpl* getImpl(const Window* ptr)
 
 /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
+void on_window_resize(GLFWwindow* window, int width, int height);
+
 Window* Window::create(WindowConfig config)
 {
     return new WindowImpl(config);
@@ -80,7 +82,12 @@ void Window::mainLoop()
 
 Context* Window::createContext()
 {
+    WindowImpl* impl = getImpl(this);
     _context = Context::create(this);
+
+	glfwSetWindowUserPointer(impl->_window, _context);
+    glfwSetWindowSizeCallback(impl->_window, on_window_resize);
+
     return _context;
 }
 
@@ -158,10 +165,14 @@ void WindowImpl::create_window(WindowConfig config)
 	{
         setPosition(config.position_x, config.position_y);
 	}
-	else
-	{
-        glfwGetWindowPos(_window, &config.position_x, &config.position_y);
-	}
+}
+
+void on_window_resize(GLFWwindow* window, int width, int height)
+{
+    if (width <= 0 || height <= 0) return;
+
+	Context* context = (Context*)glfwGetWindowUserPointer(window);
+	context->resize_context(width, height);
 }
 
 } // namespace elemd

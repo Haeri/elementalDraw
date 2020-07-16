@@ -48,6 +48,7 @@ namespace elemd
 
         void draw_frame();
 
+        void resize_context(int width, int height);
     protected:
         Context() = default;
 

@@ -13,7 +13,7 @@ int main()
 #endif
 
     elemd::WindowConfig wc{"UI Application [Vulkan]", 600, 500};
-    wc.resizeable = false;
+    wc.resizeable = true;
     wc.transparent = true;
     elemd::Window* w = elemd::Window::create(wc);
     elemd::Context* c = w->createContext();
@@ -21,7 +21,7 @@ int main()
     
     std::thread t([c, w]()
 		{
-            while (w->isRunning())
+            //while (w->isRunning())
             {
                 c->clear();
                 //c->set_clear_color({255, 0, 0, 255});

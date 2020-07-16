@@ -36,11 +36,14 @@ namespace elemd
         void record_command_buffers();
         void create_semaphores();
 
+        void regenerate_swapchain(uint32_t width, uint32_t height);
+
         void create_shader_module(const std::string& filename, VkShaderModule* shaderModule);
         std::vector<char> read_shader(const std::string& filename);
 
         WindowImpl* _window;
 
+        bool resizing = false;
         uint32_t width = 0;
         uint32_t height = 0;
 
@@ -56,7 +59,7 @@ namespace elemd
         VkPhysicalDevice* physicalDevices;
         VkDevice device;
         VkQueue queue;
-        VkSwapchainKHR swapchain;
+        VkSwapchainKHR swapchain = VK_NULL_HANDLE;
         VkImageView* imageViews;
         VkShaderModule* fragShaderModule;
         VkShaderModule* vertShaderModule;

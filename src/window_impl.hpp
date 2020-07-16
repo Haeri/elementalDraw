@@ -19,6 +19,7 @@ namespace elemd
         GLFWwindow* getGLFWWindow();
         void setup();
         void create_window(WindowConfig config);
+        //void on_window_resize(GLFWwindow* window, int width, int height);
     };
 
 } // namespace elemd
