@@ -14,7 +14,7 @@ int main()
 
     elemd::WindowConfig wc{"UI Application [Vulkan]", 600, 500};
     wc.resizeable = true;
-    wc.transparent = true;
+    wc.transparent = false;
     wc.vsync = false;
     elemd::Window* w = elemd::Window::create(wc);
     elemd::Context* c = w->create_context();
@@ -26,7 +26,7 @@ int main()
     int frames = 0;
     
     elemd::color clear("#1b262c");
-    c->set_clear_color(clear); // 0.10588 0.14901 0.17254
+    c->set_clear_color(clear);
     std::cout << "initial: #1b262c"
               << "\nauto: " << clear << "\nhex: " << clear.hex() << "\nrgba: " << clear.rgba()
               << "\nfloats: " << clear.rf() << ", " << clear.gf() << ", " << clear.bf() << ", "

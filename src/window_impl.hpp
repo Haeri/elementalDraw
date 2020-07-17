@@ -10,14 +10,15 @@ namespace elemd
     class WindowImpl : public Window
     {
     public:
-        WindowImpl(WindowConfig config);
+        WindowImpl(const WindowConfig& config);
         ~WindowImpl();
 
         GLFWwindow* _window = nullptr;
         uint32_t _windowCount = 0;
 
         GLFWwindow* getGLFWWindow();
-        void create_window(WindowConfig config);
+        void create_window(const WindowConfig& config);
+        void load_icon(const WindowConfig& config);
     };
 
 } // namespace elemd

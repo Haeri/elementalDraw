@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <array>
 #include <atomic>
 
 #include "elemd/vec2.hpp"
@@ -33,9 +34,9 @@ namespace elemd
                 return vertexInputBindingDescription;
             }
 
-            static std::vector<VkVertexInputAttributeDescription> gerAttributeDescriptions()
+            static std::array<VkVertexInputAttributeDescription, 2> gerAttributeDescriptions()
             {
-                std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+                std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions;
                 attributeDescriptions[0].location = 0;
                 attributeDescriptions[0].binding = 0;
                 attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
@@ -77,17 +78,17 @@ namespace elemd
         void create_shader_module(const std::string& filename, VkShaderModule* shaderModule);
         std::vector<char> read_shader(const std::string& filename);
 
-        std::vector<vertex> vertices = {
-            {{0.0f, -0.5f}, color(50, 130, 184, 255)},
-            {{0.5f, 0.5f}, color(50, 130, 184, 255)},
-            {{-0.5f, 0.5f}, color(50, 130, 184, 255)}
+        std::array<vertex, 3> vertices = {{
+            {vec2(0.0f, -0.5f), color(50, 130, 184, 255)},
+            {vec2(0.5f, 0.5f), color(184, 50, 130, 255)},
+            {vec2(-0.5f, 0.5f), color(130, 184, 50, 255)}
             /*
             {{ 0.0f, 0.0f}, color(50, 130, 184, 255)},
             {{ 0.0f,-0.5f}, color(50, 130, 184, 255)},
             {{ 0.5f, 0.0f}, color(50, 130, 184, 255)},
             {{ 0.5f,-0.5f}, color(50, 130, 184, 255)}
             */
-        };
+        }};
 
         WindowImpl* _window;
 
@@ -99,7 +100,7 @@ namespace elemd
 
         uint32_t actualSwapchainImageCount = 0;
         uint32_t physicalDeviceCount = 0;
-        VkClearValue clearValue = {0.0f, 1.0f, 0.0f, 1.0f};
+        VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
         PhysicalDeviceComposite bestDevice;
         VkFormat selectedImageFormat;

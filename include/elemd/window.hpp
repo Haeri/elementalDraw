@@ -9,6 +9,7 @@
 namespace elemd
 {
     class Context;
+    const std::string ELEMD_ICON = "../../res/elemd_icon.png";
 
     struct ELEMD_API WindowConfig
     {
@@ -25,6 +26,8 @@ namespace elemd
         bool resizeable = true;
         bool visible = true;
         bool vsync = true;
+
+        std::string icon_file = ELEMD_ICON;
     };
 
     class ELEMD_API Window

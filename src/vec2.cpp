@@ -1,5 +1,7 @@
 #include "elemd/vec2.hpp"
 
+#include <math.h>
+
 namespace elemd
 {
     const vec2 vec2::ZERO = {0.0f, 0.0f};

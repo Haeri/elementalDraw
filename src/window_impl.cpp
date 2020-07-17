@@ -1,6 +1,8 @@
 #include "window_impl.hpp"
 
 #include <iostream>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include "elemd/context.hpp"
 
@@ -101,7 +103,7 @@ Context* Window::getContext()
 
 /* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
 
-WindowImpl::WindowImpl(WindowConfig config)
+WindowImpl::WindowImpl(const WindowConfig& config)
 {
     if (_windowCount == 0)
     {
@@ -134,13 +136,12 @@ WindowImpl::~WindowImpl()
 	}
 }
 
-
 GLFWwindow* WindowImpl::getGLFWWindow()
 {
     return _window;
 }
 
-void WindowImpl::create_window(WindowConfig config)
+void WindowImpl::create_window(const WindowConfig& config)
 {
     if (config.width == 0 || config.height == 0) 
 	{
@@ -157,12 +158,40 @@ void WindowImpl::create_window(WindowConfig config)
 	}
 	++_windowCount;
 
+    // TODO: Doesn't seem to be working. Since we don't 
+    // perform bufferswap from glfw but directly from vulkan,
+    // it could be that we have to perform vsync through vulkan
 	glfwSwapInterval((int)config.visible);
+
+    load_icon(config);
 
 	if (config.position_x != -1 && config.position_y != -1) 
 	{
         setPosition(config.position_x, config.position_y);
 	}
+}
+
+void WindowImpl::load_icon(const WindowConfig& config)
+{
+    GLFWimage icon[1];
+    int numComponents;
+    icon[0].pixels =
+        stbi_load((config.icon_file).c_str(), &icon[0].width, &icon[0].height, &numComponents, 4);
+
+    if (icon[0].pixels == NULL)
+    {
+        std::cerr << "Error: Unable to load Icon: " << config.icon_file << "\n";
+
+        // Fallback to default
+        if (config.icon_file.compare(ELEMD_ICON) != 0)
+        {
+            icon[0].pixels =
+                stbi_load((ELEMD_ICON).c_str(), &icon[0].width, &icon[0].height, &numComponents, 4);
+        }
+    }
+
+    glfwSetWindowIcon(_window, 1, icon);
+    stbi_image_free(icon[0].pixels);
 }
 
 void on_window_resize(GLFWwindow* window, int width, int height)

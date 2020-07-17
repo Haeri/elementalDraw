@@ -566,7 +566,7 @@ namespace elemd
 
 
         VkVertexInputBindingDescription vertexInputBindingDescription = vertex::getBindingDescription();
-        std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescription =
+        std::array<VkVertexInputAttributeDescription, 2> vertexInputAttributeDescription =
             vertex::gerAttributeDescriptions();
 
         
