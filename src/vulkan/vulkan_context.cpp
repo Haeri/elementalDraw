@@ -2,10 +2,10 @@
 
 #include <algorithm>
 #include <fstream>
+#include <cstring>
 #include <GLFW/glfw3.h>
 
 #include "../window_impl.hpp"
-
 
 namespace elemd
 {
@@ -849,7 +849,7 @@ namespace elemd
 
         void* rawData;
         vkMapMemory(device, vertexBufferDeviceMemory, 0, bufferCreateInfo.size, 0, &rawData);
-        memcpy(rawData, vertices.data(), bufferCreateInfo.size);
+        std::memcpy(rawData, vertices.data(), bufferCreateInfo.size);
         vkUnmapMemory(device, vertexBufferDeviceMemory);
     }
 
