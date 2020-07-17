@@ -2,6 +2,7 @@
 
 #include <elemd/window.hpp>
 #include <elemd/context.hpp>
+#include <elemd/color.hpp>
 
 int main()
 {
@@ -24,6 +25,7 @@ int main()
     double accum_time = 0;
     int frames = 0;
     
+    c->set_clear_color({"#1b262c"}); // 0.10588 0.14901 0.17254
     while (w->is_running())
     {
         // Timing

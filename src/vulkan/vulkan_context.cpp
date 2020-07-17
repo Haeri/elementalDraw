@@ -87,12 +87,11 @@ namespace elemd
     {
     }
 
-    void Context::set_clear_color(Color&& color)
+    void Context::set_clear_color(color&& color)
     {
         VulkanContext* impl = getImpl(this);
         _clear_color = color;
-        impl->clearValue = {color.r() / 255.0f, color.g() / 255.0f, color.b() / 255.0f,
-                            color.a() / 255.0f};
+        impl->clearValue = {color.r(), color.g(), color.b(), color.a()};
     }
 
     void Context::clear()
@@ -565,6 +564,11 @@ namespace elemd
         VkPipelineShaderStageCreateInfo shaderStages[] = {shaderStageCreateInfoVert,
                                                           shaderStageCreateInfoFrag};
 
+
+        VkVertexInputBindingDescription vertexInputBindingDescription = vertex::getBindingDescription();
+        std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescription =
+            vertex::gerAttributeDescriptions();
+
         
         // --------------- Create Pipeline Vertex Input State Create Info ---------------
 
@@ -573,10 +577,13 @@ namespace elemd
             VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         pipelineVertexInputStateCreateInfo.pNext = nullptr;
         pipelineVertexInputStateCreateInfo.flags = 0;
-        pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
-        pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr;
-        pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
-        pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
+        pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
+        pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions =
+            &vertexInputBindingDescription;
+        pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount =
+            (uint32_t)vertexInputAttributeDescription.size();
+        pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions =
+            vertexInputAttributeDescription.data();
 
 
         // --------------- Create Pipeline Input Assembly State Create Info ---------------
@@ -800,6 +807,52 @@ namespace elemd
             vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, commandBuffers));
     }
 
+    void VulkanContext::create_vertex_buffer()
+    {
+        // --------------- Create Buffer Create Info ---------------
+
+        VkBufferCreateInfo bufferCreateInfo;
+        bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferCreateInfo.pNext = nullptr;
+        bufferCreateInfo.flags = 0;
+        bufferCreateInfo.size = sizeof(vertex) * vertices.size();
+        bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        bufferCreateInfo.queueFamilyIndexCount = 0;
+        bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+
+        // --------------- Create Vertex Buffer ---------------
+
+        vku::err_check(vkCreateBuffer(device, &bufferCreateInfo, nullptr, &vertexBuffer));
+
+
+        VkMemoryRequirements memoryRequirements;
+        vkGetBufferMemoryRequirements(device, vertexBuffer, &memoryRequirements);
+
+
+        VkMemoryAllocateInfo memoryAllocateInfo;
+        memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        memoryAllocateInfo.pNext = nullptr;
+        memoryAllocateInfo.allocationSize = memoryRequirements.size;
+        memoryAllocateInfo.memoryTypeIndex = vku::find_memory_type_index(
+            physicalDevices[bestDevice.deviceIndex], memoryRequirements.memoryTypeBits,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+
+        // --------------- Allocate Memory ---------------
+
+        vku::err_check(
+            vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &vertexBufferDeviceMemory));
+
+        vkBindBufferMemory(device, vertexBuffer, vertexBufferDeviceMemory, 0);
+
+        void* rawData;
+        vkMapMemory(device, vertexBufferDeviceMemory, 0, bufferCreateInfo.size, 0, &rawData);
+        memcpy(rawData, vertices.data(), bufferCreateInfo.size);
+        vkUnmapMemory(device, vertexBufferDeviceMemory);
+    }
+
     void VulkanContext::record_command_buffers()
     {
         // --------------- Create Command Buffer Begin Info ---------------
@@ -844,6 +897,8 @@ namespace elemd
             vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
             vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
 
+            VkDeviceSize offsets[] = { 0 };
+            vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
             vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
@@ -878,6 +933,9 @@ namespace elemd
         this->height = height;        
 
         vkDeviceWaitIdle(device);
+        
+        vkFreeMemory(device, vertexBufferDeviceMemory, nullptr);
+        vkDestroyBuffer(device, vertexBuffer, nullptr);
 
         vkFreeCommandBuffers(device, commandPool, actualSwapchainImageCount, commandBuffers);
         vkDestroyCommandPool(device, commandPool, nullptr);
@@ -903,6 +961,7 @@ namespace elemd
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
+        create_vertex_buffer();
         record_command_buffers();
 
         vkDestroySwapchainKHR(device, oldSwapchain, nullptr);
@@ -933,6 +992,7 @@ namespace elemd
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
+        create_vertex_buffer();
         record_command_buffers();
         create_semaphores();
 
@@ -952,6 +1012,10 @@ namespace elemd
 
         vkDestroySemaphore(device, semaphoreImageAvailable, nullptr);
         vkDestroySemaphore(device, semaphoreRenderingComplete, nullptr);
+
+        vkFreeMemory(device, vertexBufferDeviceMemory, nullptr);
+        vkDestroyBuffer(device, vertexBuffer, nullptr);
+
         vkFreeCommandBuffers(device, commandPool, actualSwapchainImageCount,
                              commandBuffers);
         vkDestroyCommandPool(device, commandPool, nullptr);
@@ -959,15 +1023,21 @@ namespace elemd
         {
           vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
         }
+
         vkDestroyPipeline(device, pipeline, nullptr);
+        
         vkDestroyRenderPass(device, renderPass, nullptr);
+        
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+
         vkDestroyShaderModule(device, *vertShaderModule, nullptr);
         vkDestroyShaderModule(device, *fragShaderModule, nullptr);
+        
         for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
         {
             vkDestroyImageView(device, imageViews[i], nullptr);
         }
+        
         vkDestroySwapchainKHR(device, swapchain, nullptr);
         vkDestroyDevice(device, nullptr);
         vkDestroySurfaceKHR(instance, surface, nullptr);

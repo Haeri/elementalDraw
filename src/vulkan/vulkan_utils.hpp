@@ -7,7 +7,7 @@
 #include "vulkan_context.hpp"
 #include "physical_device_composite.hpp"
 
-namespace vku 
+namespace elemd::vku 
 {
 	inline void err(std::string message)
 	{
@@ -70,6 +70,21 @@ namespace vku
 		}
 
 		return elemd::PhysicalDeviceComposite{bestDeviceIndex, bestQueuFamily, maxQueueCount};
+	}
+
+	inline uint32_t find_memory_type_index(const VkPhysicalDevice& physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties)
+    {
+        VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+        vkGetPhysicalDeviceMemoryProperties(physicalDevice, &physicalDeviceMemoryProperties);
+        for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; ++i)
+        {
+			if ((typeFilter & (1 << i)) && (physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+                return i;
+			}
+        }
+
+		err("Selected memory properties not supported on the physical device!");
+        return -1;
 	}
 
 	inline void print_layers()

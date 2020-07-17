@@ -5,13 +5,13 @@
 
 namespace elemd
 {
-    class ELEMD_API Vec2
+    class ELEMD_API vec2
     {
     public:
-        Vec2() : _x(0), _y(0)
+        vec2() : _x(0), _y(0)
         {
         }
-        Vec2(float x, float y) : _x(x), _y(y)
+        vec2(float x, float y) : _x(x), _y(y)
         {
         }
 

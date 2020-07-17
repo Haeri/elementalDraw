@@ -3,32 +3,39 @@
 
 #include <elemd/elemental_draw.hpp>
 #include <cstdint>
+#include <string>
 
 namespace elemd
 {
-    class ELEMD_API Color
+    class ELEMD_API color
     {
     public:
-        Color() : _r(0), _g(0), _b(0), _a(255)
+        color() : _r(0.0f), _g(0.0f), _b(0.0f), _a(1.0f)
         {
         }
-        Color(uint8_t r, uint8_t g, uint8_t b) : _r(r), _g(g), _b(b), _a(255)
+        color(float r, float g, float b)
+            : _r(r), _g(g), _b(b), _a(1.0f)
         {
         }
-        Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : _r(r), _g(g), _b(b), _a(a)
+        color(float r, float g, float b, float a)
+            : _r(r), _g(g), _b(b), _a(a)
         {
         }
+        color(int r, int g, int b);
+        color(int r, int g, int b, int a);
+        color(int hex);
+        color(std::string hex);
 
-        uint8_t r();
-        uint8_t g();
-        uint8_t b();
-        uint8_t a();
+        float r();
+        float g();
+        float b();
+        float a();
 
     private:
-        uint8_t _r;
-        uint8_t _g;
-        uint8_t _b;
-        uint8_t _a;
+        float _r;
+        float _g;
+        float _b;
+        float _a;
     };
 } // namespace elemd
 

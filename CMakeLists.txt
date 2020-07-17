@@ -54,7 +54,7 @@ endif()
 add_custom_command(
     TARGET ${PROJECT_NAME}
     PRE_BUILD
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/convert_assets_${CONVERTER_POSTFIX}
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/convert_assets_${CONVERTER_POSTFIX} -s
 )
 
 

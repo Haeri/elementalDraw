@@ -7,6 +7,8 @@
 #include <vector>
 #include <atomic>
 
+#include "elemd/vec2.hpp"
+#include "elemd/color.hpp"
 #include "vulkan_utils.hpp"
 #include "../window_impl.hpp"
 
@@ -15,6 +17,38 @@ namespace elemd
     class VulkanContext : public Context
     {
     public:
+
+        struct vertex
+        {
+            vec2 pos;
+            color col;
+
+            static VkVertexInputBindingDescription getBindingDescription()
+            {
+                VkVertexInputBindingDescription vertexInputBindingDescription;
+                vertexInputBindingDescription.binding = 0;
+                vertexInputBindingDescription.stride = sizeof(vertex);
+                vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+                return vertexInputBindingDescription;
+            }
+
+            static std::vector<VkVertexInputAttributeDescription> gerAttributeDescriptions()
+            {
+                std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+                attributeDescriptions[0].location = 0;
+                attributeDescriptions[0].binding = 0;
+                attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+                attributeDescriptions[0].offset = offsetof(vertex, pos);
+                
+                attributeDescriptions[1].location = 1;
+                attributeDescriptions[1].binding = 0;
+                attributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+                attributeDescriptions[1].offset = offsetof(vertex, col);
+
+                return attributeDescriptions;
+            }
+        };
 
         VulkanContext(Window* window);
         ~VulkanContext();
@@ -34,6 +68,7 @@ namespace elemd
         void create_framebuffer();
         void create_command_pool();
         void create_command_buffers();
+        void create_vertex_buffer();
         void record_command_buffers();
         void create_semaphores();
 
@@ -41,6 +76,18 @@ namespace elemd
 
         void create_shader_module(const std::string& filename, VkShaderModule* shaderModule);
         std::vector<char> read_shader(const std::string& filename);
+
+        std::vector<vertex> vertices = {
+            {{0.0f, -0.5f}, color(50, 130, 184, 255)},
+            {{0.5f, 0.5f}, color(50, 130, 184, 255)},
+            {{-0.5f, 0.5f}, color(50, 130, 184, 255)}
+            /*
+            {{ 0.0f, 0.0f}, color(50, 130, 184, 255)},
+            {{ 0.0f,-0.5f}, color(50, 130, 184, 255)},
+            {{ 0.5f, 0.0f}, color(50, 130, 184, 255)},
+            {{ 0.5f,-0.5f}, color(50, 130, 184, 255)}
+            */
+        };
 
         WindowImpl* _window;
 
@@ -52,7 +99,7 @@ namespace elemd
 
         uint32_t actualSwapchainImageCount = 0;
         uint32_t physicalDeviceCount = 0;
-        VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 0.3f};
+        VkClearValue clearValue = {0.0f, 1.0f, 0.0f, 1.0f};
 
         PhysicalDeviceComposite bestDevice;
         VkFormat selectedImageFormat;
@@ -71,6 +118,8 @@ namespace elemd
         VkPipeline pipeline;
         VkFramebuffer* frameBuffers;
         VkCommandPool commandPool;
+        VkBuffer vertexBuffer;
+        VkDeviceMemory vertexBufferDeviceMemory;
         VkCommandBuffer* commandBuffers;
 
         VkSemaphore semaphoreImageAvailable;
