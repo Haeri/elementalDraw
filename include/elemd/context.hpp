@@ -38,9 +38,9 @@ namespace elemd
         void draw_rounded_image(float x, float y, float width, float height, uint32_t image,
                                 float radius_nw, float radius_ne, float radius_se, float radius_sw);
 
-        void set_clear_color(color&& color);
-        void set_fill_color(color&& color) { _fill_color = color; };
-        void set_stroke_color(color&& color) { _fill_color = color; };
+        void set_clear_color(color color);
+        void set_fill_color(color color) { _fill_color = color; };
+        void set_stroke_color(color color) { _fill_color = color; };
         void set_line_width(float width) { _line_width = width; };
 
         void clear();

@@ -87,11 +87,11 @@ namespace elemd
     {
     }
 
-    void Context::set_clear_color(color&& color)
+    void Context::set_clear_color(color color)
     {
         VulkanContext* impl = getImpl(this);
         _clear_color = color;
-        impl->clearValue = {color.r(), color.g(), color.b(), color.a()};
+        impl->clearValue = {color.rf(), color.gf(), color.bf(), color.af()};
     }
 
     void Context::clear()

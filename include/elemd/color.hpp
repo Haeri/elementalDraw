@@ -26,10 +26,21 @@ namespace elemd
         color(int hex);
         color(std::string hex);
 
-        float r();
-        float g();
-        float b();
-        float a();
+        uint8_t r();
+        uint8_t g();
+        uint8_t b();
+        uint8_t a();
+
+        float rf();
+        float gf();
+        float bf();
+        float af();
+
+        std::string hex();
+        std::string rgb();
+        std::string rgba();
+
+        friend std::ostream& operator<<(std::ostream& os, color c);
 
     private:
         float _r;
