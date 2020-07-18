@@ -9,6 +9,11 @@
 
 namespace elemd::vku 
 {
+	inline bool err_check(const VkResult& result);
+    inline uint32_t find_memory_type_index(const VkPhysicalDevice& physicalDevice,
+                                           uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+
 	inline void err(std::string message)
 	{
 		std::cerr << "VK ERROR: " << message << std::endl;
@@ -72,6 +77,96 @@ namespace elemd::vku
 		return elemd::PhysicalDeviceComposite{bestDeviceIndex, bestQueuFamily, maxQueueCount};
 	}
 
+	inline void create_buffer(const VkDevice& device, const VkPhysicalDevice& physicalDevice, const VkDeviceSize& deviceSize, const VkBufferUsageFlags& bufferUsageFlags, VkBuffer& buffer, const VkMemoryPropertyFlags& memoryPropertyFlags, VkDeviceMemory& deviceMemory)
+    {
+        // --------------- Create Buffer Create Info ---------------
+
+        VkBufferCreateInfo bufferCreateInfo;
+        bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferCreateInfo.pNext = nullptr;
+        bufferCreateInfo.flags = 0;
+        bufferCreateInfo.size = deviceSize;
+        bufferCreateInfo.usage = bufferUsageFlags;
+        bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        bufferCreateInfo.queueFamilyIndexCount = 0;
+        bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+        // --------------- Create Vertex Buffer ---------------
+
+        vku::err_check(vkCreateBuffer(device, &bufferCreateInfo, nullptr, &buffer));
+
+        VkMemoryRequirements memoryRequirements;
+        vkGetBufferMemoryRequirements(device, buffer, &memoryRequirements);
+
+        VkMemoryAllocateInfo memoryAllocateInfo;
+        memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        memoryAllocateInfo.pNext = nullptr;
+        memoryAllocateInfo.allocationSize = memoryRequirements.size;
+        memoryAllocateInfo.memoryTypeIndex = vku::find_memory_type_index(
+            physicalDevice, memoryRequirements.memoryTypeBits, memoryPropertyFlags);
+
+        // --------------- Allocate Memory ---------------
+
+        vku::err_check(
+            vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &deviceMemory));
+
+        vkBindBufferMemory(device, buffer, deviceMemory, 0);
+	}
+
+	inline void copy_buffer(const VkBuffer& src, VkBuffer& dest, const VkDeviceSize& deviceSize, const VkCommandPool& commandPool, const VkDevice& device, const VkQueue& queue)
+    {
+        // --------------- Create Command Buffer Allocate Info ---------------
+
+        VkCommandBufferAllocateInfo commandBufferAllocateInfo;
+        commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        commandBufferAllocateInfo.pNext = nullptr;
+        commandBufferAllocateInfo.commandPool = commandPool;
+        commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        commandBufferAllocateInfo.commandBufferCount = 1;
+
+        // --------------- Allocate Command Buffer ---------------
+
+        VkCommandBuffer commandBuffer;
+        vku::err_check(
+            vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer));
+
+
+		VkCommandBufferBeginInfo commandBufferBeginInfo;
+        commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        commandBufferBeginInfo.pNext = nullptr;
+        commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        commandBufferBeginInfo.pInheritanceInfo = nullptr;
+
+		err_check(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+
+
+		VkBufferCopy bufferCopy;
+        bufferCopy.srcOffset = 0;
+        bufferCopy.dstOffset = 0;
+        bufferCopy.size = deviceSize;
+
+		vkCmdCopyBuffer(commandBuffer, src, dest, 1, &bufferCopy);
+
+		vku::err_check(vkEndCommandBuffer(commandBuffer));
+
+		VkSubmitInfo submitInfo;
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.pNext = nullptr;
+        submitInfo.waitSemaphoreCount = 0;
+        submitInfo.pWaitSemaphores = nullptr;
+        submitInfo.pWaitDstStageMask = nullptr;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+        submitInfo.signalSemaphoreCount = 0;
+        submitInfo.pSignalSemaphores = nullptr;
+
+        vku::err_check(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
+
+		vkQueueWaitIdle(queue);
+
+		vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+    }
+
 	inline uint32_t find_memory_type_index(const VkPhysicalDevice& physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties)
     {
         VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
@@ -85,6 +180,41 @@ namespace elemd::vku
 
 		err("Selected memory properties not supported on the physical device!");
         return -1;
+	}
+
+	inline VkPresentModeKHR select_present_mode(const VkPresentModeKHR* presentModes,
+                                                uint32_t presentModeCount, bool vsync)
+    {
+        VkPresentModeKHR selectedPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+
+        if (vsync)
+        {
+            bool mailbox = false;
+            bool fifo = false;
+
+            for (uint32_t i = 0; i < presentModeCount; ++i)
+            {
+                if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+                {
+                    mailbox = true;
+                }
+                else if (presentModes[i] == VK_PRESENT_MODE_FIFO_KHR)
+                {
+                    fifo = true;
+                }
+            }
+
+            if (mailbox)
+            {
+                selectedPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+            }
+            else if (fifo)
+            {
+                selectedPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+            }
+        }
+
+        return selectedPresentMode;
 	}
 
 	inline void print_layers()

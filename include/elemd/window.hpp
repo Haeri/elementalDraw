@@ -44,6 +44,7 @@ namespace elemd
         void setSize(int width, int height);
 
         void set_vsync(bool vsync);
+        bool get_vsync();
         void minimize();
         void maximize();
         void terminate();
@@ -60,6 +61,7 @@ namespace elemd
         Window() = default;
 
         Context* _context = nullptr;
+        bool _vsync = true;
     };
 
 } // namespace elemd

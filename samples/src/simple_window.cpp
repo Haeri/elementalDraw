@@ -24,13 +24,6 @@ int main()
     double last_time = 0;
     double accum_time = 0;
     int frames = 0;
-    
-    elemd::color clear("#1b262c");
-    c->set_clear_color(clear);
-    std::cout << "initial: #1b262c"
-              << "\nauto: " << clear << "\nhex: " << clear.hex() << "\nrgba: " << clear.rgba()
-              << "\nfloats: " << clear.rf() << ", " << clear.gf() << ", " << clear.bf() << ", "
-              << clear.af() << "\n";
 
     while (w->is_running())
     {

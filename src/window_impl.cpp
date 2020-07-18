@@ -44,7 +44,14 @@ void Window::setPosition(int x, int y)
 
 void Window::set_vsync(bool vsync)
 {
-    glfwSwapInterval((int)vsync);
+    WindowImpl* impl = getImpl(this);
+    _vsync = vsync;
+    _context->resize_context(impl->getWidth(), impl->getHeight());
+}
+
+bool Window::get_vsync()
+{
+    return _vsync;
 }
 
 void Window::terminate()
@@ -158,10 +165,7 @@ void WindowImpl::create_window(const WindowConfig& config)
 	}
 	++_windowCount;
 
-    // TODO: Doesn't seem to be working. Since we don't 
-    // perform bufferswap from glfw but directly from vulkan,
-    // it could be that we have to perform vsync through vulkan
-	glfwSwapInterval((int)config.visible);
+	_vsync = config.vsync;
 
     load_icon(config);
 

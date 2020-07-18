@@ -371,14 +371,8 @@ namespace elemd
 
         // --------------- Select Present Mode ---------------
             
-        VkPresentModeKHR selectedPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-        for (uint32_t i = 0; i < presentModeCount; ++i)
-        {
-            if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
-            {
-                selectedPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-            }
-        }
+        VkPresentModeKHR selectedPresentMode =
+            vku::select_present_mode(presentModes, presentModeCount, _window->get_vsync());
 
 
         // --------------- Create Swapchain Create Info ---------------
@@ -809,48 +803,39 @@ namespace elemd
 
     void VulkanContext::create_vertex_buffer()
     {
-        // --------------- Create Buffer Create Info ---------------
+        // --------------- Create Vertex Staging Buffer and Memory ---------------
 
-        VkBufferCreateInfo bufferCreateInfo;
-        bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferCreateInfo.pNext = nullptr;
-        bufferCreateInfo.flags = 0;
-        bufferCreateInfo.size = sizeof(vertex) * vertices.size();
-        bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        bufferCreateInfo.queueFamilyIndexCount = 0;
-        bufferCreateInfo.pQueueFamilyIndices = nullptr;
-
-
-        // --------------- Create Vertex Buffer ---------------
-
-        vku::err_check(vkCreateBuffer(device, &bufferCreateInfo, nullptr, &vertexBuffer));
-
-
-        VkMemoryRequirements memoryRequirements;
-        vkGetBufferMemoryRequirements(device, vertexBuffer, &memoryRequirements);
-
-
-        VkMemoryAllocateInfo memoryAllocateInfo;
-        memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        memoryAllocateInfo.pNext = nullptr;
-        memoryAllocateInfo.allocationSize = memoryRequirements.size;
-        memoryAllocateInfo.memoryTypeIndex = vku::find_memory_type_index(
-            physicalDevices[bestDevice.deviceIndex], memoryRequirements.memoryTypeBits,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-
-        // --------------- Allocate Memory ---------------
-
-        vku::err_check(
-            vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &vertexBufferDeviceMemory));
-
-        vkBindBufferMemory(device, vertexBuffer, vertexBufferDeviceMemory, 0);
-
+        VkDeviceSize bufferSize = sizeof(vertex) * vertices.size();
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferDeviceMemory;
+        
+        vku::create_buffer(device, physicalDevices[bestDevice.deviceIndex], bufferSize,
+                           VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer,
+                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                           stagingBufferDeviceMemory);
+        
         void* rawData;
-        vkMapMemory(device, vertexBufferDeviceMemory, 0, bufferCreateInfo.size, 0, &rawData);
-        std::memcpy(rawData, vertices.data(), bufferCreateInfo.size);
-        vkUnmapMemory(device, vertexBufferDeviceMemory);
+        vkMapMemory(device, stagingBufferDeviceMemory, 0, bufferSize, 0, &rawData);
+        std::memcpy(rawData, vertices.data(), bufferSize);
+        vkUnmapMemory(device, stagingBufferDeviceMemory);
+
+
+        // --------------- Create Vertex Buffer and Memory ---------------
+
+        vku::create_buffer(device, physicalDevices[bestDevice.deviceIndex], bufferSize,
+                           VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                           vertexBuffer, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                           vertexBufferDeviceMemory);
+        
+
+        vku::copy_buffer(stagingBuffer, vertexBuffer, bufferSize, commandPool, device, queue);
+
+
+        // --------------- Cleanup ---------------
+
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferDeviceMemory, nullptr);
     }
 
     void VulkanContext::record_command_buffers()
