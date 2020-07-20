@@ -11,6 +11,7 @@
 #include "elemd/vec2.hpp"
 #include "elemd/color.hpp"
 #include "vulkan_utils.hpp"
+#include "vertex.hpp"
 #include "../window_impl.hpp"
 
 namespace elemd
@@ -19,37 +20,47 @@ namespace elemd
     {
     public:
 
-        struct vertex
-        {
-            vec2 pos;
-            color col;
+        std::vector<vertex> vertices = {};
+        std::vector<uint32_t> indices = {};
 
-            static VkVertexInputBindingDescription getBindingDescription()
-            {
-                VkVertexInputBindingDescription vertexInputBindingDescription;
-                vertexInputBindingDescription.binding = 0;
-                vertexInputBindingDescription.stride = sizeof(vertex);
-                vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        WindowImpl* _window;
 
-                return vertexInputBindingDescription;
-            }
+        std::atomic<bool> resizing = false;
+        std::atomic<bool> rendering = false;
 
-            static std::array<VkVertexInputAttributeDescription, 2> gerAttributeDescriptions()
-            {
-                std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions;
-                attributeDescriptions[0].location = 0;
-                attributeDescriptions[0].binding = 0;
-                attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-                attributeDescriptions[0].offset = offsetof(vertex, pos);
-                
-                attributeDescriptions[1].location = 1;
-                attributeDescriptions[1].binding = 0;
-                attributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-                attributeDescriptions[1].offset = offsetof(vertex, col);
+        uint32_t width = 0;
+        uint32_t height = 0;
 
-                return attributeDescriptions;
-            }
-        };
+        uint32_t actualSwapchainImageCount = 0;
+        uint32_t physicalDeviceCount = 0;
+        VkClearValue clearValue = {};
+
+        PhysicalDeviceComposite bestDevice;
+        VkFormat selectedImageFormat;
+
+        VkInstance instance;
+        VkSurfaceKHR surface;
+        VkPhysicalDevice* physicalDevices;
+        VkDevice device;
+        VkQueue queue;
+        VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+        VkImageView* imageViews;
+        VkShaderModule* fragShaderModule;
+        VkShaderModule* vertShaderModule;
+        VkPipelineLayout pipelineLayout;
+        VkRenderPass renderPass;
+        VkPipeline pipeline;
+        VkFramebuffer* frameBuffers;
+        VkCommandPool commandPool;
+        VkCommandBuffer* commandBuffers;
+
+        VkBuffer vertexBuffer;
+        VkDeviceMemory vertexBufferDeviceMemory;
+        VkBuffer indexBuffer;
+        VkDeviceMemory indexBufferDeviceMemory;
+
+        VkSemaphore semaphoreImageAvailable;
+        VkSemaphore semaphoreRenderingComplete;
 
         VulkanContext(Window* window);
         ~VulkanContext();
@@ -69,63 +80,51 @@ namespace elemd
         void create_framebuffer();
         void create_command_pool();
         void create_command_buffers();
-        void create_vertex_buffer();
+        void create_mesh_buffers();
         void record_command_buffers();
         void create_semaphores();
+        void destroy_mesh_buffers();
 
         void regenerate_swapchain(uint32_t width, uint32_t height);
 
         void create_shader_module(const std::string& filename, VkShaderModule* shaderModule);
         std::vector<char> read_shader(const std::string& filename);
 
-        std::array<vertex, 3> vertices = {{
-            {vec2(0.0f, -0.5f), color(50, 130, 184, 255)},
-            {vec2(0.5f, 0.5f), color(184, 50, 130, 255)},
-            {vec2(-0.5f, 0.5f), color(130, 184, 50, 255)}
-            /*
-            {{ 0.0f, 0.0f}, color(50, 130, 184, 255)},
-            {{ 0.0f,-0.5f}, color(50, 130, 184, 255)},
-            {{ 0.5f, 0.0f}, color(50, 130, 184, 255)},
-            {{ 0.5f,-0.5f}, color(50, 130, 184, 255)}
-            */
-        }};
+    private:
+        template<typename T>
+        void create_and_upload_buffer(std::vector<T> data, const VkBufferUsageFlags& usageFlags, VkBuffer& buffer, VkDeviceMemory& deviceMemory) {
 
-        WindowImpl* _window;
+            // --------------- Create Staging Buffer and Memory ---------------
 
-        std::atomic<bool> resizing = false;
-        std::atomic<bool> rendering = false;
+            VkDeviceSize bufferSize = sizeof(T) * data.size();
+            VkBuffer stagingBuffer;
+            VkDeviceMemory stagingBufferDeviceMemory;
 
-        uint32_t width = 0;
-        uint32_t height = 0;
+            vku::create_buffer(device, physicalDevices[bestDevice.deviceIndex], bufferSize,
+                               VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer,
+                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                               stagingBufferDeviceMemory);
 
-        uint32_t actualSwapchainImageCount = 0;
-        uint32_t physicalDeviceCount = 0;
-        VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+            void* rawData;
+            vkMapMemory(device, stagingBufferDeviceMemory, 0, bufferSize, 0, &rawData);
+            std::memcpy(rawData, data.data(), bufferSize);
+            vkUnmapMemory(device, stagingBufferDeviceMemory);
 
-        PhysicalDeviceComposite bestDevice;
-        VkFormat selectedImageFormat;
+            // --------------- Create Buffer and Memory ---------------
 
-        VkInstance instance;
-        VkSurfaceKHR surface;
-        VkPhysicalDevice* physicalDevices;
-        VkDevice device;
-        VkQueue queue;
-        VkSwapchainKHR swapchain = VK_NULL_HANDLE;
-        VkImageView* imageViews;
-        VkShaderModule* fragShaderModule;
-        VkShaderModule* vertShaderModule;
-        VkPipelineLayout pipelineLayout;
-        VkRenderPass renderPass;
-        VkPipeline pipeline;
-        VkFramebuffer* frameBuffers;
-        VkCommandPool commandPool;
-        VkBuffer vertexBuffer;
-        VkDeviceMemory vertexBufferDeviceMemory;
-        VkCommandBuffer* commandBuffers;
+            vku::create_buffer(device, physicalDevices[bestDevice.deviceIndex], bufferSize,
+                               usageFlags | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                               buffer, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                               deviceMemory);
 
-        VkSemaphore semaphoreImageAvailable;
-        VkSemaphore semaphoreRenderingComplete;
+            vku::copy_buffer(stagingBuffer, buffer, bufferSize, commandPool, device, queue);
 
+            // --------------- Cleanup ---------------
+
+            vkDestroyBuffer(device, stagingBuffer, nullptr);
+            vkFreeMemory(device, stagingBufferDeviceMemory, nullptr);
+        }
     };
 
 } // namespace elemd

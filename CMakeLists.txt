@@ -79,3 +79,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 if (ELEMD_BUILD_EXAMPLES)
     add_subdirectory(samples)
 endif()
+
+
+install(TARGETS ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}
+        RUNTIME DESTINATION "bin"
+        ARCHIVE DESTINATION "lib"
+        LIBRARY DESTINATION "lib/static")

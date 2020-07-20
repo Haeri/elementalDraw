@@ -55,6 +55,21 @@ namespace elemd
 
     void Context::fill_rect(float x, float y, float width, float height)
     {
+        VulkanContext* impl = getImpl(this);
+        float xf = (x / impl->width) * 2 - 1;
+        float yf = (y / impl->height) * 2 - 1;
+        float widhtf = (width / impl->width);
+        float heightf = (height / impl->height);
+        
+        uint32_t cnt = (uint32_t)impl->vertices.size();
+
+        impl->vertices.push_back({vec2(xf,          yf),            vec2(0, 0), _fill_color});
+        impl->vertices.push_back({vec2(xf + widhtf, yf),            vec2(1, 0), _fill_color});
+        impl->vertices.push_back({vec2(xf,          yf + heightf),  vec2(0, 1), _fill_color});
+        impl->vertices.push_back({vec2(xf + widhtf, yf + heightf),  vec2(1, 1), _fill_color});
+
+        impl->indices.insert(impl->indices.end(),
+                             {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
     }
 
     void Context::fill_rounded_rect(float x, float y, float width, float height, float tl, float tr,
@@ -91,7 +106,7 @@ namespace elemd
     {
         VulkanContext* impl = getImpl(this);
         _clear_color = color;
-        impl->clearValue = {color.rf(), color.gf(), color.bf(), color.af()};
+        impl->clearValue.color = {color.rf(), color.gf(), color.bf(), color.af()};
     }
 
     void Context::clear()
@@ -107,6 +122,13 @@ namespace elemd
         VulkanContext* impl = getImpl(this);
         if (impl->rendering) return;
         impl->rendering = true;
+
+        
+
+        impl->create_mesh_buffers();
+        impl->record_command_buffers();
+
+
 
         uint32_t imageIndex;
         vku::err_check(vkAcquireNextImageKHR(impl->device, impl->swapchain, std::numeric_limits<uint64_t>::max(),
@@ -139,6 +161,8 @@ namespace elemd
 
         vku::err_check(vkQueuePresentKHR(impl->queue, &presentInfoKHR));
         
+        impl->vertices.clear();
+
         impl->rendering = false;
     }
 
@@ -560,7 +584,7 @@ namespace elemd
 
 
         VkVertexInputBindingDescription vertexInputBindingDescription = vertex::getBindingDescription();
-        std::array<VkVertexInputAttributeDescription, 2> vertexInputAttributeDescription =
+        std::array<VkVertexInputAttributeDescription, 3> vertexInputAttributeDescription =
             vertex::gerAttributeDescriptions();
 
         
@@ -801,45 +825,10 @@ namespace elemd
             vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, commandBuffers));
     }
 
-    void VulkanContext::create_vertex_buffer()
-    {
-        // --------------- Create Vertex Staging Buffer and Memory ---------------
-
-        VkDeviceSize bufferSize = sizeof(vertex) * vertices.size();
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferDeviceMemory;
-        
-        vku::create_buffer(device, physicalDevices[bestDevice.deviceIndex], bufferSize,
-                           VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer,
-                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                           stagingBufferDeviceMemory);
-        
-        void* rawData;
-        vkMapMemory(device, stagingBufferDeviceMemory, 0, bufferSize, 0, &rawData);
-        std::memcpy(rawData, vertices.data(), bufferSize);
-        vkUnmapMemory(device, stagingBufferDeviceMemory);
-
-
-        // --------------- Create Vertex Buffer and Memory ---------------
-
-        vku::create_buffer(device, physicalDevices[bestDevice.deviceIndex], bufferSize,
-                           VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-                           vertexBuffer, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                           vertexBufferDeviceMemory);
-        
-
-        vku::copy_buffer(stagingBuffer, vertexBuffer, bufferSize, commandPool, device, queue);
-
-
-        // --------------- Cleanup ---------------
-
-        vkDestroyBuffer(device, stagingBuffer, nullptr);
-        vkFreeMemory(device, stagingBufferDeviceMemory, nullptr);
-    }
-
     void VulkanContext::record_command_buffers()
     {
+        if (vertices.size() == 0)
+            return;
         // --------------- Create Command Buffer Begin Info ---------------
 
         VkCommandBufferBeginInfo commandBufferBeginInfo;
@@ -884,7 +873,9 @@ namespace elemd
 
             VkDeviceSize offsets[] = { 0 };
             vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
-            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+            vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+            
+            vkCmdDrawIndexed(commandBuffers[i], (uint32_t)indices.size(), 1, 0, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             vku::err_check(vkEndCommandBuffer(commandBuffers[i]));
@@ -918,9 +909,8 @@ namespace elemd
         this->height = height;        
 
         vkDeviceWaitIdle(device);
-        
-        vkFreeMemory(device, vertexBufferDeviceMemory, nullptr);
-        vkDestroyBuffer(device, vertexBuffer, nullptr);
+
+        destroy_mesh_buffers();
 
         vkFreeCommandBuffers(device, commandPool, actualSwapchainImageCount, commandBuffers);
         vkDestroyCommandPool(device, commandPool, nullptr);
@@ -946,12 +936,12 @@ namespace elemd
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
-        create_vertex_buffer();
+        create_mesh_buffers();
         record_command_buffers();
 
         vkDestroySwapchainKHR(device, oldSwapchain, nullptr);
 
-        draw_frame();
+        //draw_frame();
         resizing = false;
     }
 
@@ -959,8 +949,9 @@ namespace elemd
     {
         _window = (WindowImpl*)window;
 
-        width = (uint32_t)_window->getWidth();
-        height = (uint32_t)_window->getHeight();        
+        width = (uint32_t)window->getWidth();
+        height = (uint32_t)window->getHeight();        
+
 
         preload_vulkan();
         create_instance();
@@ -977,7 +968,7 @@ namespace elemd
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
-        create_vertex_buffer();
+        create_mesh_buffers();
         record_command_buffers();
         create_semaphores();
 
@@ -998,8 +989,7 @@ namespace elemd
         vkDestroySemaphore(device, semaphoreImageAvailable, nullptr);
         vkDestroySemaphore(device, semaphoreRenderingComplete, nullptr);
 
-        vkFreeMemory(device, vertexBufferDeviceMemory, nullptr);
-        vkDestroyBuffer(device, vertexBuffer, nullptr);
+        destroy_mesh_buffers();
 
         vkFreeCommandBuffers(device, commandPool, actualSwapchainImageCount,
                              commandBuffers);
@@ -1066,6 +1056,28 @@ namespace elemd
         }
         
         return std::vector<char>();
+    }
+
+    void VulkanContext::create_mesh_buffers()
+    {
+        if (vertices.size() > 0)
+        {
+            create_and_upload_buffer(vertices, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertexBuffer,
+                                     vertexBufferDeviceMemory);
+            create_and_upload_buffer(indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indexBuffer,
+                                     indexBufferDeviceMemory);
+        }
+    }
+
+    void VulkanContext::destroy_mesh_buffers()
+    {
+        if (vertices.size() > 0)
+        {
+            vkFreeMemory(device, indexBufferDeviceMemory, nullptr);
+            vkDestroyBuffer(device, indexBuffer, nullptr);
+            vkFreeMemory(device, vertexBufferDeviceMemory, nullptr);
+            vkDestroyBuffer(device, vertexBuffer, nullptr);
+        }
     }
 
 } // namespace elemd

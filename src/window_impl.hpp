@@ -13,7 +13,7 @@ namespace elemd
         WindowImpl(const WindowConfig& config);
         ~WindowImpl();
 
-        GLFWwindow* _window = nullptr;
+        GLFWwindow* _glfw_window = nullptr;
         uint32_t _windowCount = 0;
 
         GLFWwindow* getGLFWWindow();

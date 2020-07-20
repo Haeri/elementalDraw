@@ -33,13 +33,13 @@ Window* Window::create(WindowConfig config)
 void Window::setTitle(const std::string& title)
 {
     WindowImpl* impl = getImpl(this);
-    glfwSetWindowTitle(impl->_window, title.c_str());
+    glfwSetWindowTitle(impl->_glfw_window, title.c_str());
 }
 
 void Window::setPosition(int x, int y)
 {
     WindowImpl* impl = getImpl(this);
-    glfwSetWindowPos(impl->_window, x, y);
+    glfwSetWindowPos(impl->_glfw_window, x, y);
 }
 
 void Window::set_vsync(bool vsync)
@@ -63,7 +63,7 @@ int Window::getWidth()
 {
     WindowImpl* impl = getImpl(this);
     int w, h;
-    glfwGetWindowSize(impl->_window, &w, &h);
+    glfwGetWindowSize(impl->_glfw_window, &w, &h);
     return w;
 }
 
@@ -71,14 +71,14 @@ int Window::getHeight()
 {
     WindowImpl* impl = getImpl(this);
     int w, h;
-    glfwGetWindowSize(impl->_window, &w, &h);
+    glfwGetWindowSize(impl->_glfw_window, &w, &h);
     return h;
 }
 
 bool Window::is_running()
 {
     WindowImpl* impl = getImpl(this);
-    return !glfwWindowShouldClose(impl->_window);
+    return !glfwWindowShouldClose(impl->_glfw_window);
 }
 
 double Window::now()
@@ -96,8 +96,8 @@ Context* Window::create_context()
     WindowImpl* impl = getImpl(this);
     _context = Context::create(this);
 
-	glfwSetWindowUserPointer(impl->_window, _context);
-    glfwSetWindowSizeCallback(impl->_window, on_window_resize);
+	glfwSetWindowUserPointer(impl->_glfw_window, _context);
+    glfwSetWindowSizeCallback(impl->_glfw_window, on_window_resize);
 
     return _context;
 }
@@ -132,7 +132,7 @@ WindowImpl::WindowImpl(const WindowConfig& config)
 
 WindowImpl::~WindowImpl()
 {
-	glfwDestroyWindow(_window);
+	glfwDestroyWindow(_glfw_window);
 	--_windowCount;
 
 	delete _context;
@@ -145,7 +145,7 @@ WindowImpl::~WindowImpl()
 
 GLFWwindow* WindowImpl::getGLFWWindow()
 {
-    return _window;
+    return _glfw_window;
 }
 
 void WindowImpl::create_window(const WindowConfig& config)
@@ -156,8 +156,8 @@ void WindowImpl::create_window(const WindowConfig& config)
 		exit(EXIT_FAILURE);
 	}
 
-	_window = glfwCreateWindow(config.width, config.height, config.title.c_str(), NULL, NULL);
-	if (!_window)
+	_glfw_window = glfwCreateWindow(config.width, config.height, config.title.c_str(), NULL, NULL);
+	if (!_glfw_window)
 	{
 		std::cerr << "Failed to create a window!" << std::endl;
 		glfwTerminate();
@@ -194,7 +194,7 @@ void WindowImpl::load_icon(const WindowConfig& config)
         }
     }
 
-    glfwSetWindowIcon(_window, 1, icon);
+    glfwSetWindowIcon(_glfw_window, 1, icon);
     stbi_image_free(icon[0].pixels);
 }
 
