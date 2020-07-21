@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <cstring>
 #include <GLFW/glfw3.h>
 
 #include "../window_impl.hpp"
@@ -56,17 +55,19 @@ namespace elemd
     void Context::fill_rect(float x, float y, float width, float height)
     {
         VulkanContext* impl = getImpl(this);
-        float xf = (x / impl->width) * 2 - 1;
-        float yf = (y / impl->height) * 2 - 1;
+        float xf = (x / impl->width);
+        float yf = (y / impl->height);
         float widhtf = (width / impl->width);
         float heightf = (height / impl->height);
         
         uint32_t cnt = (uint32_t)impl->vertices.size();
 
-        impl->vertices.push_back({vec2(xf,          yf),            vec2(0, 0), _fill_color});
-        impl->vertices.push_back({vec2(xf + widhtf, yf),            vec2(1, 0), _fill_color});
-        impl->vertices.push_back({vec2(xf,          yf + heightf),  vec2(0, 1), _fill_color});
-        impl->vertices.push_back({vec2(xf + widhtf, yf + heightf),  vec2(1, 1), _fill_color});
+        impl->vertices.push_back({vec2(xf, yf) * 2.0f - vec2(1), vec2(0, 0), _fill_color});
+        impl->vertices.push_back({vec2(xf + widhtf, yf) * 2.0f - vec2(1), vec2(1, 0), _fill_color});
+        impl->vertices.push_back(
+            {vec2(xf, yf + heightf) * 2.0f - vec2(1), vec2(0, 1), _fill_color});
+        impl->vertices.push_back(
+            {vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1), vec2(1, 1), _fill_color});
 
         impl->indices.insert(impl->indices.end(),
                              {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});

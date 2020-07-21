@@ -9,16 +9,16 @@ layout(location = 0) out vec4 outColor;
 void main()
 {
     float a = 1;
-    float r = 0.25;
+    float r = 0;
     if(
-    (distance(uv_varying, vec2(r))          > r && uv_varying.x     < r && uv_varying.y        < r) ||
-    (distance(uv_varying, vec2(1-r, r))     > r && uv_varying.x - 1 < r && uv_varying.y        < r) ||
-    (distance(uv_varying, vec2(r,   1-r))   > r && uv_varying.x     < r && uv_varying.y - 1    < r) ||
-    (distance(uv_varying, vec2(1-r, 1-r))   > r && uv_varying.x - 1 < r && uv_varying.y - 1    < r)
+    (distance(uv_varying, vec2(r,   r))     > r &&      uv_varying.x < r &&     uv_varying.y < r) ||
+    (distance(uv_varying, vec2(1-r, r))     > r && 1 -  uv_varying.x < r &&     uv_varying.y < r) ||
+    (distance(uv_varying, vec2(r,   1-r))   > r &&      uv_varying.x < r && 1 - uv_varying.y < r) ||
+    (distance(uv_varying, vec2(1-r, 1-r))   > r && 1 -  uv_varying.x < r && 1 - uv_varying.y < r)
     )
     {
         a = 0;
     }
 
-    outColor = vec4(vec3(a), 1);
+    outColor = vec4(color_varying.rgb, a);
 }

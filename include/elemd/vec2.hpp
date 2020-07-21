@@ -16,6 +16,9 @@ namespace elemd
         vec2() : _x(0), _y(0)
         {
         }
+        vec2(float xy) : _x(xy), _y(xy)
+        {
+        }
         vec2(float x, float y) : _x(x), _y(y)
         {
         }
@@ -25,14 +28,14 @@ namespace elemd
         float lengthSqrd();
         float distance(const vec2& other);
         float distanceSqrd(const vec2& other);
-        inline vec2 normalize() const;
+        vec2 normalize() const;
 
-        inline bool operator==(const vec2& other) const;
-        inline bool operator!=(const vec2& other) const;
-        inline vec2 operator/(const float& scalar) const;
-        inline vec2 operator*(const float& scalar) const;
-        inline vec2 operator-(const vec2& other) const;
-        inline vec2 operator+(const vec2& other) const;
+        bool operator==(const vec2& other) const;
+        bool operator!=(const vec2& other) const;
+        vec2 operator/(const float& scalar) const;
+        vec2 operator*(const float& scalar) const;
+        vec2 operator-(const vec2& other) const;
+        vec2 operator+(const vec2& other) const;
 
         static vec2 lerp(vec2 start, vec2 target, float percent);
 
@@ -45,6 +48,46 @@ namespace elemd
         float _x;
         float _y;
     };
+
+
+    inline vec2 vec2::normalize() const
+    {
+        vec2 ret = *this;
+        return ret / ret.length();
+    }
+
+    inline bool vec2::operator==(const vec2& other) const
+    {
+        return (_x == other._x && _y == other._y);
+    }
+
+    inline bool vec2::operator!=(const vec2& other) const
+    {
+        return (_x != other._x && _y != other._y);
+    }
+
+    inline vec2 vec2::operator/(const float& scalar) const
+    {
+        return vec2(_x / scalar, _y / scalar);
+    }
+
+    inline vec2 vec2::operator*(const float& scalar) const
+    {
+        return vec2(_x * scalar, _y * scalar);
+    }
+
+    inline vec2 vec2::operator-(const vec2& other) const
+    {
+        return vec2(_x - other._x, _y - other._y);
+    }
+
+    inline vec2 vec2::operator+(const vec2& other) const
+    {
+        return vec2(_x + other._x, _y + other._y);
+    }
+
+
+
 } // namespace elemd
 
 #endif // ELEMD_VEC2_HPP

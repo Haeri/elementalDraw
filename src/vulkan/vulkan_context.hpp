@@ -7,6 +7,7 @@
 #include <vector>
 #include <array>
 #include <atomic>
+#include <cstring>
 
 #include "elemd/vec2.hpp"
 #include "elemd/color.hpp"
