@@ -11,8 +11,9 @@
 
 #include "elemd/vec2.hpp"
 #include "elemd/color.hpp"
-#include "vulkan_utils.hpp"
 #include "vertex.hpp"
+#include "vulkan_shared_info.hpp"
+#include "vulkan_utils.hpp"
 #include "../window_impl.hpp"
 
 namespace elemd
