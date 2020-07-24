@@ -12,13 +12,13 @@ namespace elemd
         return vertexInputBindingDescription;
     }
 
-    std::array<VkVertexInputAttributeDescription, 3> vertex::gerAttributeDescriptions()
+    std::array<VkVertexInputAttributeDescription, 4> vertex::gerAttributeDescriptions()
     {
-        std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions;
+        std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions;
         attributeDescriptions[0].location = 0;
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[0].offset = offsetof(vertex, pos);
+        attributeDescriptions[0].offset = offsetof(vertex, position);
 
         attributeDescriptions[1].location = 1;
         attributeDescriptions[1].binding = 0;
@@ -28,7 +28,12 @@ namespace elemd
         attributeDescriptions[2].location = 2;
         attributeDescriptions[2].binding = 0;
         attributeDescriptions[2].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-        attributeDescriptions[2].offset = offsetof(vertex, col);
+        attributeDescriptions[2].offset = offsetof(vertex, color);
+
+        attributeDescriptions[3].location = 3;
+        attributeDescriptions[3].binding = 0;
+        attributeDescriptions[3].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        attributeDescriptions[3].offset = offsetof(vertex, border_radius);
 
         return attributeDescriptions;
     }

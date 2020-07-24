@@ -55,7 +55,7 @@ namespace elemd
         color _clear_color;
         color _fill_color;
         color _stroke_color;
-        float _line_width;
+        float _line_width = 1;
 
     };
 } // namespace elemd

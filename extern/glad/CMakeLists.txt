@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.3)
 
 set(PROJECT_NAME glad)
-project(${PROJECT_NAME} VERSION 2.0.0 LANGUAGES CXX)
+project(${PROJECT_NAME} VERSION 2.0.0 LANGUAGES C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB_RECURSE SOURCE_FILES
         include/glad/*.h
-        src/*.cpp)
+        src/*.c)
 
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
 

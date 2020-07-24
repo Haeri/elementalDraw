@@ -5,6 +5,7 @@
 #include "stb_image.h"
 
 #include "elemd/context.hpp"
+#include "vulkan/vulkan_shared_info.hpp"
 
 namespace elemd
 {
@@ -137,6 +138,7 @@ namespace elemd
 
         if (_windowCount == 0)
         {
+            VulkanSharedInfo::destroy();
             glfwTerminate();
         }
     }

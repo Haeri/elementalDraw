@@ -4,6 +4,7 @@
 #include <fstream>
 #include <GLFW/glfw3.h>
 
+#include "vulkan_shared_info.hpp"
 #include "../window_impl.hpp"
 
 namespace elemd
@@ -125,14 +126,15 @@ namespace elemd
         impl->rendering = true;
 
         
-
+        
         impl->create_mesh_buffers();
         impl->record_command_buffers();
-
+        
 
 
         uint32_t imageIndex;
-        vku::err_check(vkAcquireNextImageKHR(impl->device, impl->swapchain, std::numeric_limits<uint64_t>::max(),
+        vku::err_check(vkAcquireNextImageKHR(VulkanSharedInfo::getInstance()->device,
+                                             impl->swapchain, std::numeric_limits<uint64_t>::max(),
                               impl->semaphoreImageAvailable, VK_NULL_HANDLE, &imageIndex));
 
         VkPipelineStageFlags waitStageMask[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
@@ -175,97 +177,31 @@ namespace elemd
 
     /* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
 
-    void VulkanContext::preload_vulkan()
-    {
-        if (gladLoaderLoadVulkan(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE) <= 0)
-        {
-            vku::err("Could not load Vulkan!");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    void VulkanContext::create_instance()
-    {
-        // --------------- Create Application Info ---------------
-
-        VkApplicationInfo applicationInfo;
-        applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        applicationInfo.pNext = nullptr;
-        applicationInfo.pApplicationName = "UI Application"; // TODO: Pass down from application
-        applicationInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        applicationInfo.pEngineName = ELEMD_LIBRARY_NAME;
-        applicationInfo.engineVersion =
-            VK_MAKE_VERSION(ELEMD_VERSION_MAJOR, ELEMD_VERSION_MINOR, ELEMD_VERSION_PATCH);
-        applicationInfo.apiVersion = VK_API_VERSION_1_2;
-
-
-        // --------------- Get Required Instance Extensions ---------------
-
-        std::vector<const char*> extensions = {};
-        uint32_t extensionCount = 0;
-        const char** requiredExtensions = glfwGetRequiredInstanceExtensions(&extensionCount);
-        for (uint32_t i = 0; i < extensionCount; ++i)
-        {
-            extensions.push_back(requiredExtensions[i]);
-        }
-
-
-        // --------------- Create Instance Create Info ---------------
-
-        const std::vector<const char*> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};
-
-        VkInstanceCreateInfo instanceCreateInfo;
-        instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        instanceCreateInfo.pNext = nullptr;
-        instanceCreateInfo.flags = 0;
-        instanceCreateInfo.pApplicationInfo = &applicationInfo;
-        instanceCreateInfo.enabledLayerCount = (uint32_t)validationLayers.size();
-        instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
-        instanceCreateInfo.enabledExtensionCount = (uint32_t)extensions.size();
-        instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
-
-
-        // --------------- Create Instance ---------------
-
-        vku::err_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
-    }
-
     void VulkanContext::create_surface()
     {
         // --------------- Create WIndow Surface ---------------
 
-        vku::err_check(glfwCreateWindowSurface(instance, _window->getGLFWWindow(),
-                                               nullptr, &surface));
+        vku::err_check(
+            glfwCreateWindowSurface(VulkanSharedInfo::getInstance()->instance, _window->getGLFWWindow(), nullptr, &surface));
     }
 
-    void VulkanContext::create_physical_devices()
+    void VulkanContext::create_queue()
     {
-        // --------------- Get Physical Devices ---------------
+        // --------------- Get Device Queue ---------------
 
-        vku::err_check(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr));
-
-        if (physicalDeviceCount == 0)
-        {
-            vku::err("Could not find a suitable Device that supports Vulkan!");
-            exit(EXIT_FAILURE);
-        }
-
-        physicalDevices = new VkPhysicalDevice[physicalDeviceCount];
-        vku::err_check(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices));
-        
-        
-        // --------------- Select Best Physical Device ---------------
-
-        bestDevice = vku::select_physical_device(physicalDevices, physicalDeviceCount);
+        vkGetDeviceQueue(VulkanSharedInfo::getInstance()->device,
+                         VulkanSharedInfo::getInstance()->queueFamilyIndex, 0,
+                         &queue);
     }
-
+    
     void VulkanContext::check_surface_support()
     {
         // --------------- Check Surface Support ---------------
 
         VkBool32 surfaceSupport = false;
-        vku::err_check(vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevices[bestDevice.deviceIndex],
-                                                            bestDevice.queueFamilyIndex, surface,
+        vku::err_check(vkGetPhysicalDeviceSurfaceSupportKHR(
+            VulkanSharedInfo::getInstance()->bestPhysicalDevice,
+            VulkanSharedInfo::getInstance()->queueFamilyIndex, surface,
                                                             &surfaceSupport));
         if (!surfaceSupport)
         {
@@ -274,81 +210,23 @@ namespace elemd
         }
     }
 
-    void VulkanContext::create_logical_device()
-    {
-        // --------------- Create Device Queue Create Info ---------------
-
-        float queuePriorities[] = {1.0f, 1.0f, 1.0f, 1.0f};
-
-        VkDeviceQueueCreateInfo deviceQueueCreateInfo;
-        deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        deviceQueueCreateInfo.pNext = nullptr;
-        deviceQueueCreateInfo.flags = 0;
-        deviceQueueCreateInfo.queueFamilyIndex = bestDevice.queueFamilyIndex;
-        deviceQueueCreateInfo.queueCount = bestDevice.queueCount;
-        deviceQueueCreateInfo.pQueuePriorities = queuePriorities;
-
-
-        // --------------- Create Device Create Info ---------------
-
-        VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
-
-        const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-
-        VkDeviceCreateInfo deviceCreateInfo;
-        deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        deviceCreateInfo.pNext = nullptr;
-        deviceCreateInfo.flags = 0;
-        deviceCreateInfo.queueCreateInfoCount = 1;
-        deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
-        deviceCreateInfo.enabledLayerCount = 0;
-        deviceCreateInfo.ppEnabledLayerNames = nullptr;
-        deviceCreateInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
-        deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
-        deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
-
-
-        // --------------- Create Device ---------------
-
-        vku::err_check(
-            vkCreateDevice(physicalDevices[bestDevice.deviceIndex], &deviceCreateInfo, nullptr, &device));
-    }
-
-    void VulkanContext::load_vulkan()
-    {
-        // --------------- Load Vulkan ---------------
-
-        if (gladLoaderLoadVulkan(instance, physicalDevices[bestDevice.deviceIndex], device) <= 0)
-        {
-            vku::err("Could not load the Vulkan device!");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    void VulkanContext::create_queue()
-    {
-        // --------------- Get Device Queue ---------------
-
-        vkGetDeviceQueue(device, bestDevice.queueFamilyIndex, 0, &queue);
-    }
-
     void VulkanContext::create_swapchain()
     {
         // --------------- Get Surface Capabilities ---------------
 
         VkSurfaceCapabilitiesKHR surfaceCapabilities;
         vku::err_check(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-            physicalDevices[bestDevice.deviceIndex], surface, &surfaceCapabilities));
+            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &surfaceCapabilities));
 
 
         // --------------- Get Surface Formats ---------------
 
         uint32_t surfaceFormatCount = 0;
-        vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevices[bestDevice.deviceIndex],
+        vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(VulkanSharedInfo::getInstance()->bestPhysicalDevice,
                                                             surface, &surfaceFormatCount, nullptr));
         VkSurfaceFormatKHR* surfaceFormats = new VkSurfaceFormatKHR[surfaceFormatCount];
         vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(
-            physicalDevices[bestDevice.deviceIndex], surface, &surfaceFormatCount, surfaceFormats));
+            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &surfaceFormatCount, surfaceFormats));
 
 
         // --------------- Select Image Count ---------------
@@ -364,7 +242,7 @@ namespace elemd
         VkColorSpaceKHR selectedImageColorSpace = surfaceFormats[0].colorSpace;
         for (uint32_t i = 0; i < surfaceFormatCount; ++i)
         {
-            if (surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB &&
+            if (surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM &&
                 surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
             {
                 selectedImageFormat = surfaceFormats[i].format;
@@ -388,10 +266,10 @@ namespace elemd
 
         uint32_t presentModeCount = 0;
         vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(
-            physicalDevices[bestDevice.deviceIndex], surface, &presentModeCount, nullptr));
+            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &presentModeCount, nullptr));
         VkPresentModeKHR* presentModes = new VkPresentModeKHR[presentModeCount];
         vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(
-            physicalDevices[bestDevice.deviceIndex], surface, &presentModeCount, presentModes));
+            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &presentModeCount, presentModes));
 
 
         // --------------- Select Present Mode ---------------
@@ -425,7 +303,8 @@ namespace elemd
 
         // --------------- Create Swapchain ---------------
 
-        vku::err_check(vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain));
+        vku::err_check(vkCreateSwapchainKHR(VulkanSharedInfo::getInstance()->device,
+                                            &swapchainCreateInfo, nullptr, &swapchain));
 
 
         // --------------- Cleanup ---------------
@@ -438,17 +317,17 @@ namespace elemd
     {
         // --------------- Get Swapchain Image ---------------
 
-        vku::err_check(
-            vkGetSwapchainImagesKHR(device, swapchain, &actualSwapchainImageCount, nullptr));
-        VkImage* swapchainImages = new VkImage[actualSwapchainImageCount];
-        vku::err_check(vkGetSwapchainImagesKHR(device, swapchain, &actualSwapchainImageCount,
+        vku::err_check(vkGetSwapchainImagesKHR(VulkanSharedInfo::getInstance()->device, swapchain,
+                                               &VulkanSharedInfo::getInstance()->actualSwapchainImageCount, nullptr));
+        VkImage* swapchainImages = new VkImage[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
+        vku::err_check(vkGetSwapchainImagesKHR(VulkanSharedInfo::getInstance()->device, swapchain, &VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
                                                swapchainImages));
 
         
         // --------------- Create Image Views ---------------
 
-        imageViews = new VkImageView[actualSwapchainImageCount];
-        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        imageViews = new VkImageView[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
+        for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
             VkImageViewCreateInfo imageViewCreateInfo;
             imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -468,7 +347,7 @@ namespace elemd
             imageViewCreateInfo.subresourceRange.layerCount = 1;
 
             vku::err_check(
-                vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]));
+                vkCreateImageView(VulkanSharedInfo::getInstance()->device, &imageViewCreateInfo, nullptr, &imageViews[i]));
         }
 
         
@@ -544,7 +423,7 @@ namespace elemd
 
         // --------------- Create Render Pass ---------------
 
-        vku::err_check(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass));
+        vku::err_check(vkCreateRenderPass(VulkanSharedInfo::getInstance()->device, &renderPassCreateInfo, nullptr, &renderPass));
     }
 
     void VulkanContext::create_pipeline()
@@ -585,7 +464,7 @@ namespace elemd
 
 
         VkVertexInputBindingDescription vertexInputBindingDescription = vertex::getBindingDescription();
-        std::array<VkVertexInputAttributeDescription, 3> vertexInputAttributeDescription =
+        std::array<VkVertexInputAttributeDescription, 4> vertexInputAttributeDescription =
             vertex::gerAttributeDescriptions();
 
         
@@ -734,7 +613,7 @@ namespace elemd
         // --------------- Create Pipeline Layout ---------------
 
         vku::err_check(
-            vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
+            vkCreatePipelineLayout(VulkanSharedInfo::getInstance()->device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
 
 
         // --------------- Create Graphics Pipeline Create Info ---------------
@@ -763,7 +642,7 @@ namespace elemd
 
         // --------------- Create Graphics Pipeline ---------------
 
-        vku::err_check(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1,
+        vku::err_check(vkCreateGraphicsPipelines(VulkanSharedInfo::getInstance()->device, VK_NULL_HANDLE, 1,
                                                  &graphicsPipelineCreateInfo, nullptr, &pipeline));
     }
 
@@ -771,9 +650,9 @@ namespace elemd
     {
         // --------------- Create Framebuffers ---------------
 
-        frameBuffers = new VkFramebuffer[actualSwapchainImageCount];
+        frameBuffers = new VkFramebuffer[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
 
-        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
             VkFramebufferCreateInfo frameBufferCreateInfo;
             frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -787,7 +666,7 @@ namespace elemd
             frameBufferCreateInfo.layers = 1;
 
             vku::err_check(
-                vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &(frameBuffers[i])));
+                vkCreateFramebuffer(VulkanSharedInfo::getInstance()->device, &frameBufferCreateInfo, nullptr, &(frameBuffers[i])));
         }
     }
 
@@ -799,12 +678,12 @@ namespace elemd
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         commandPoolCreateInfo.pNext = nullptr;
         commandPoolCreateInfo.flags = 0;
-        commandPoolCreateInfo.queueFamilyIndex = bestDevice.queueFamilyIndex;
+        commandPoolCreateInfo.queueFamilyIndex = VulkanSharedInfo::getInstance()->queueFamilyIndex;
 
 
         // --------------- Create Command Pool ---------------
 
-        vku::err_check(vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &commandPool));
+        vku::err_check(vkCreateCommandPool(VulkanSharedInfo::getInstance()->device, &commandPoolCreateInfo, nullptr, &commandPool));
     }
 
     void VulkanContext::create_command_buffers()
@@ -816,14 +695,14 @@ namespace elemd
         commandBufferAllocateInfo.pNext = nullptr;
         commandBufferAllocateInfo.commandPool = commandPool;
         commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        commandBufferAllocateInfo.commandBufferCount = actualSwapchainImageCount;
+        commandBufferAllocateInfo.commandBufferCount = VulkanSharedInfo::getInstance()->actualSwapchainImageCount;
 
 
         // --------------- Allocate Command Buffers ---------------
 
-        commandBuffers = new VkCommandBuffer[actualSwapchainImageCount];
+        commandBuffers = new VkCommandBuffer[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
         vku::err_check(
-            vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, commandBuffers));
+            vkAllocateCommandBuffers(VulkanSharedInfo::getInstance()->device, &commandBufferAllocateInfo, commandBuffers));
     }
 
     void VulkanContext::record_command_buffers()
@@ -838,7 +717,7 @@ namespace elemd
         commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
         commandBufferBeginInfo.pInheritanceInfo = nullptr;
 
-        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
             vku::err_check(vkBeginCommandBuffer(commandBuffers[i], &commandBufferBeginInfo));
 
@@ -896,9 +775,9 @@ namespace elemd
         // --------------- Create Semaphores ---------------
 
         vku::err_check(
-            vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreImageAvailable));
+            vkCreateSemaphore(VulkanSharedInfo::getInstance()->device, &semaphoreCreateInfo, nullptr, &semaphoreImageAvailable));
         vku::err_check(
-            vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreRenderingComplete));
+            vkCreateSemaphore(VulkanSharedInfo::getInstance()->device, &semaphoreCreateInfo, nullptr, &semaphoreRenderingComplete));
     }
 
     void VulkanContext::regenerate_swapchain(uint32_t width, uint32_t height)
@@ -909,20 +788,20 @@ namespace elemd
         this->width = width;
         this->height = height;        
 
-        vkDeviceWaitIdle(device);
+        vkDeviceWaitIdle(VulkanSharedInfo::getInstance()->device);
 
         destroy_mesh_buffers();
 
-        vkFreeCommandBuffers(device, commandPool, actualSwapchainImageCount, commandBuffers);
-        vkDestroyCommandPool(device, commandPool, nullptr);
-        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool, VulkanSharedInfo::getInstance()->actualSwapchainImageCount, commandBuffers);
+        vkDestroyCommandPool(VulkanSharedInfo::getInstance()->device, commandPool, nullptr);
+        for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-            vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
+            vkDestroyFramebuffer(VulkanSharedInfo::getInstance()->device, frameBuffers[i], nullptr);
         }
-        vkDestroyRenderPass(device, renderPass, nullptr);
-        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        vkDestroyRenderPass(VulkanSharedInfo::getInstance()->device, renderPass, nullptr);
+        for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-            vkDestroyImageView(device, imageViews[i], nullptr);
+            vkDestroyImageView(VulkanSharedInfo::getInstance()->device, imageViews[i], nullptr);
         }
         
         delete[] commandBuffers;
@@ -940,7 +819,7 @@ namespace elemd
         create_mesh_buffers();
         record_command_buffers();
 
-        vkDestroySwapchainKHR(device, oldSwapchain, nullptr);
+        vkDestroySwapchainKHR(VulkanSharedInfo::getInstance()->device, oldSwapchain, nullptr);
 
         //draw_frame();
         resizing = false;
@@ -954,70 +833,70 @@ namespace elemd
         height = (uint32_t)window->getHeight();        
 
 
-        preload_vulkan();
-        create_instance();
+        VulkanSharedInfo::getInstance();
         create_surface();
-        create_physical_devices();
         check_surface_support();
-        create_logical_device();
-        load_vulkan();
         create_queue();
+
         create_swapchain();
         create_image_views();
         create_render_pass();
+
         create_pipeline();
+        
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
         create_mesh_buffers();
         record_command_buffers();
+
         create_semaphores();
 
 #ifndef NDEBUG
         std::cout << "{\n";
         vku::print_layers();
         vku::print_extensions();
-        vku::print_physical_devices(physicalDevices, physicalDeviceCount);
-        vku::print_selected_device(bestDevice);
-        std::cout << "}\n";
+        vku::print_physical_devices();
+        vku::print_selected_device();
+        std::cout << "}\n";      
 #endif
     }
 
     VulkanContext::~VulkanContext()
     {
-        vkDeviceWaitIdle(device);
+        vkDeviceWaitIdle(VulkanSharedInfo::getInstance()->device);
 
-        vkDestroySemaphore(device, semaphoreImageAvailable, nullptr);
-        vkDestroySemaphore(device, semaphoreRenderingComplete, nullptr);
+        vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreImageAvailable, nullptr);
+        vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreRenderingComplete, nullptr);
 
         destroy_mesh_buffers();
 
-        vkFreeCommandBuffers(device, commandPool, actualSwapchainImageCount,
+        vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool, VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
                              commandBuffers);
-        vkDestroyCommandPool(device, commandPool, nullptr);
-        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        vkDestroyCommandPool(VulkanSharedInfo::getInstance()->device, commandPool, nullptr);
+        for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-          vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
+          vkDestroyFramebuffer(VulkanSharedInfo::getInstance()->device, frameBuffers[i], nullptr);
         }
 
-        vkDestroyPipeline(device, pipeline, nullptr);
+        vkDestroyPipeline(VulkanSharedInfo::getInstance()->device, pipeline, nullptr);
         
-        vkDestroyRenderPass(device, renderPass, nullptr);
+        vkDestroyRenderPass(VulkanSharedInfo::getInstance()->device, renderPass, nullptr);
         
-        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        vkDestroyPipelineLayout(VulkanSharedInfo::getInstance()->device, pipelineLayout, nullptr);
 
-        vkDestroyShaderModule(device, *vertShaderModule, nullptr);
-        vkDestroyShaderModule(device, *fragShaderModule, nullptr);
+        vkDestroyShaderModule(VulkanSharedInfo::getInstance()->device, *vertShaderModule, nullptr);
+        vkDestroyShaderModule(VulkanSharedInfo::getInstance()->device, *fragShaderModule, nullptr);
         
-        for (uint32_t i = 0; i < actualSwapchainImageCount; ++i)
+        for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-            vkDestroyImageView(device, imageViews[i], nullptr);
+            vkDestroyImageView(VulkanSharedInfo::getInstance()->device, imageViews[i], nullptr);
         }
         
-        vkDestroySwapchainKHR(device, swapchain, nullptr);
-        vkDestroyDevice(device, nullptr);
-        vkDestroySurfaceKHR(instance, surface, nullptr);
-        vkDestroyInstance(instance, nullptr);
+        vkDestroySwapchainKHR(VulkanSharedInfo::getInstance()->device, swapchain, nullptr);
+        vkDestroyDevice(VulkanSharedInfo::getInstance()->device, nullptr);
+        vkDestroySurfaceKHR(VulkanSharedInfo::getInstance()->instance, surface, nullptr);
+        vkDestroyInstance(VulkanSharedInfo::getInstance()->instance, nullptr);
 
         
         delete[] commandBuffers;
@@ -1025,7 +904,6 @@ namespace elemd
         delete vertShaderModule;
         delete fragShaderModule;
         delete[] imageViews;
-        delete[] physicalDevices;
     }
 
     void VulkanContext::create_shader_module(const std::string& filename,
@@ -1040,7 +918,7 @@ namespace elemd
         shaderModuleCreateInfo.codeSize = spirvCode.size();
         shaderModuleCreateInfo.pCode = (uint32_t*)spirvCode.data();
 
-        vku::err_check(vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, shaderModule));
+        vku::err_check(vkCreateShaderModule(VulkanSharedInfo::getInstance()->device, &shaderModuleCreateInfo, nullptr, shaderModule));
     }
 
     std::vector<char> VulkanContext::read_shader(const std::string& filename)
@@ -1074,10 +952,10 @@ namespace elemd
     {
         if (vertices.size() > 0)
         {
-            vkFreeMemory(device, indexBufferDeviceMemory, nullptr);
-            vkDestroyBuffer(device, indexBuffer, nullptr);
-            vkFreeMemory(device, vertexBufferDeviceMemory, nullptr);
-            vkDestroyBuffer(device, vertexBuffer, nullptr);
+            vkFreeMemory(VulkanSharedInfo::getInstance()->device, indexBufferDeviceMemory, nullptr);
+            vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, indexBuffer, nullptr);
+            vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory, nullptr);
+            vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer, nullptr);
         }
     }
 

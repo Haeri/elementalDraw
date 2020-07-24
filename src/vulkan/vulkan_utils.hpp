@@ -5,10 +5,17 @@
 #include <glad/vulkan.h>
 
 #include "vulkan_context.hpp"
-#include "physical_device_composite.hpp"
+#include "vulkan_shared_info.hpp"
 
 namespace elemd::vku 
 {
+    struct best_device_info
+    {
+        int deviceIndex;
+        uint32_t queueFamilyIndex;
+        uint32_t queueCount;
+    };
+
 	inline bool err_check(const VkResult& result);
     inline uint32_t find_memory_type_index(const VkPhysicalDevice& physicalDevice,
                                            uint32_t typeFilter, VkMemoryPropertyFlags properties);
@@ -45,7 +52,7 @@ namespace elemd::vku
 		return dtype;
 	}
 
-	inline elemd::PhysicalDeviceComposite select_physical_device(
+	inline best_device_info select_physical_device(
         VkPhysicalDevice* physicalDevices, uint32_t count)
 	{	
 		int bestDeviceIndex = 0;
@@ -74,7 +81,7 @@ namespace elemd::vku
 			delete[] queueFamilyProperties;
 		}
 
-		return elemd::PhysicalDeviceComposite{bestDeviceIndex, bestQueuFamily, maxQueueCount};
+		return best_device_info{bestDeviceIndex, bestQueuFamily, maxQueueCount};
 	}
 
 	inline void create_buffer(const VkDevice& device, const VkPhysicalDevice& physicalDevice, const VkDeviceSize& deviceSize, const VkBufferUsageFlags& bufferUsageFlags, VkBuffer& buffer, const VkMemoryPropertyFlags& memoryPropertyFlags, VkDeviceMemory& deviceMemory)
@@ -260,15 +267,16 @@ namespace elemd::vku
 		delete[] extensionProperties;
     }
 
-	inline void print_physical_devices(VkPhysicalDevice* physicalDevices, uint32_t count)
+	inline void print_physical_devices()
 	{
         std::cout << "\"VkPhysicalDevices\": [\n";
-        for (uint32_t i = 0; i < count; ++i)
+        for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->physicalDeviceCount; ++i)
         {
             std::cout << "\t{\n";
 
             VkPhysicalDeviceProperties properties;
-            vkGetPhysicalDeviceProperties(physicalDevices[i], &properties);
+            vkGetPhysicalDeviceProperties(VulkanSharedInfo::getInstance()->physicalDevices[i],
+                                          &properties);
 
             std::cout << "\t\"VkPhysicalDeviceProperties\": {\n"
                       << "\t\t\"apiVersion\": \"" << VK_VERSION_MAJOR(properties.apiVersion) << "."
@@ -286,7 +294,8 @@ namespace elemd::vku
                       << "\t},\n";
 
             VkPhysicalDeviceFeatures features;
-            vkGetPhysicalDeviceFeatures(physicalDevices[i], &features);
+            vkGetPhysicalDeviceFeatures(VulkanSharedInfo::getInstance()->physicalDevices[i],
+                                        &features);
 
             std::cout << "\t\"VkPhysicalDeviceFeatures\": {\n"
                       << "\t\t\"geometryShader\": " << std::boolalpha << features.geometryShader
@@ -296,16 +305,18 @@ namespace elemd::vku
                       << "\t},\n";
 
             VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
-            vkGetPhysicalDeviceMemoryProperties(physicalDevices[i],
+            vkGetPhysicalDeviceMemoryProperties(VulkanSharedInfo::getInstance()->physicalDevices[i],
                                                 &physicalDeviceMemoryProperties);
 
             uint32_t queueFamilyPropertyCount;
-            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[i], &queueFamilyPropertyCount,
+            vkGetPhysicalDeviceQueueFamilyProperties(
+                VulkanSharedInfo::getInstance()->physicalDevices[i], &queueFamilyPropertyCount,
                                                      NULL);
 
             VkQueueFamilyProperties* queueFamilyProperties =
                 new VkQueueFamilyProperties[queueFamilyPropertyCount];
-            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[i], &queueFamilyPropertyCount,
+            vkGetPhysicalDeviceQueueFamilyProperties(
+                VulkanSharedInfo::getInstance()->physicalDevices[i], &queueFamilyPropertyCount,
                                                      queueFamilyProperties);
 
             std::cout << "\t\"VkQueueFamilyProperties\": [\n";
@@ -329,7 +340,7 @@ namespace elemd::vku
             }
             std::cout << "\t]\n";
 
-			std::cout << "\t}" << (i + 1 == count ? "\n" : ",\n");
+			std::cout << "\t}" << (i + 1 == VulkanSharedInfo::getInstance()->physicalDeviceCount ? "\n" : ",\n");
 		
 			delete[] queueFamilyProperties;
         }
@@ -337,12 +348,12 @@ namespace elemd::vku
 		std::cout << "],\n";
 	}
 
-	inline void print_selected_device(const elemd::PhysicalDeviceComposite& bestDevice)
+	inline void print_selected_device()
     {
         std::cout << "\"selected_device\": {\n"
-                  << "\t\"deviceIndex\": " << bestDevice.deviceIndex << ",\n"
-                  << "\t\"queueCount\": " << bestDevice.queueCount << ",\n"
-                  << "\t\"queueFamilyIndex\": " << bestDevice.queueFamilyIndex << "\n"
+                  << "\t\"queueCount\": " << VulkanSharedInfo::getInstance()->queueCount << ",\n"
+                  << "\t\"queueFamilyIndex\": "
+                  << VulkanSharedInfo::getInstance()->queueFamilyIndex << "\n"
                   << "}\n";
     }
 
