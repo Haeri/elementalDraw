@@ -1,5 +1,9 @@
 #include "vulkan_shared_info.hpp"
 
+#include <vector>
+
+#include "elemd/elemental_draw.hpp"
+#include "GLFW/glfw3.h"
 #include "vulkan_utils.hpp"
 
 namespace elemd

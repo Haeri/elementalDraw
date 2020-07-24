@@ -34,13 +34,7 @@ namespace elemd
         uint32_t height = 0;
 
         VkClearValue clearValue = {};
-
-        //PhysicalDeviceComposite bestDevice;
         VkFormat selectedImageFormat;
-
-        //static VkInstance instance;
-        //static VkPhysicalDevice* physicalDevices;
-        //static VkDevice device;
 
         VkSurfaceKHR surface;
         VkQueue queue;
@@ -66,13 +60,7 @@ namespace elemd
         VulkanContext(Window* window);
         ~VulkanContext();
 
-        //void preload_vulkan();
-        //void create_instance();
         void create_surface();
-        //void create_physical_devices();
-        //void create_logical_device();
-        //void load_vulkan();
-
         void create_queue();
         void create_swapchain();
         void check_surface_support();

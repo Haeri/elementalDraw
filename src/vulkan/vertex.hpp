@@ -14,7 +14,7 @@ namespace elemd
     public:
         vec2 position;
         vec2 uv;
-        color color;
+        color background_color;
         float border_radius[4];
 
         static VkVertexInputBindingDescription getBindingDescription();
