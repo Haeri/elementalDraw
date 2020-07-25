@@ -61,17 +61,25 @@ namespace elemd
         float widhtf = (width / impl->width);
         float heightf = (height / impl->height);
         
-        uint32_t cnt = (uint32_t)impl->rect_vertices.size();
+        impl->uniforms.push_back({{
+                vec2(xf, yf) * 2.0f - vec2(1), 
+                vec2(xf + widhtf, yf) * 2.0f - vec2(1), 
+                vec2(xf, yf + heightf) * 2.0f - vec2(1), 
+                vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)
+            }, {vec2(0), vec2(0), vec2(0), vec2(0)}});
+        
+        //uint32_t cnt = (uint32_t)impl->rect_vertices.size();
 
+        /*
         impl->rect_vertices.push_back({vec2(xf, yf) * 2.0f - vec2(1), _fill_color});
         impl->rect_vertices.push_back({vec2(xf + widhtf, yf) * 2.0f - vec2(1), _fill_color});
         impl->rect_vertices.push_back(
             {vec2(xf, yf + heightf) * 2.0f - vec2(1), _fill_color});
         impl->rect_vertices.push_back(
             {vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1), _fill_color});
-
-        impl->rect_indices.insert(impl->rect_indices.end(),
-                             {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
+            */
+        //impl->rect_indices.insert(impl->rect_indices.end(),
+         //                    {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
     }
 
     void Context::fill_rounded_rect(float x, float y, float width, float height,
@@ -89,11 +97,23 @@ namespace elemd
         float yf = (y / impl->height);
         float widhtf = (width / impl->width);
         float heightf = (height / impl->height);
-        float nwf = (radius_nw / impl->width);
-        float nef = (radius_ne / impl->height);
-        float sef = (radius_se / impl->width);
-        float swf = (radius_sw / impl->height);
+        float nwxf = (radius_nw / impl->width);
+        float nwyf = (radius_nw / impl->height);
+        float nexf = (radius_ne / impl->width);
+        float neyf = (radius_ne / impl->height);
+        float sexf = (radius_se / impl->width);        
+        float seyf = (radius_se / impl->height);
+        float swxf = (radius_sw / impl->width);
+        float swyf = (radius_sw / impl->height);
 
+        impl->uniforms.push_back(
+            {{vec2(xf, yf) * 2.0f - vec2(1), 
+              vec2(xf + widhtf, yf) * 2.0f - vec2(1),
+              vec2(xf, yf + heightf) * 2.0f - vec2(1),
+              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
+             {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)}});
+
+        /*
         uint32_t cnt = (uint32_t)impl->rect_vertices.size();
 
         impl->rect_vertices.push_back({vec2(xf, yf) * 2.0f - vec2(1), _fill_color});
@@ -106,6 +126,7 @@ namespace elemd
 
         impl->rect_indices.insert(impl->rect_indices.end(),
                              {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
+                             */
     }
 
     void Context::fill_circle(float x, float y, float radius)
@@ -117,6 +138,15 @@ namespace elemd
         float heightf = ((radius*2) / impl->height);
         float radf = 0.5f;
 
+        impl->uniforms.push_back(
+            {{vec2(xf, yf) * 2.0f - vec2(1), 
+              vec2(xf + widhtf, yf) * 2.0f - vec2(1),
+              vec2(xf, yf + heightf) * 2.0f - vec2(1),
+              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
+             {vec2(radf), vec2(radf), vec2(radf), vec2(radf)}});
+
+
+        /*
         uint32_t cnt = (uint32_t)impl->rect_vertices.size();
 
         impl->rect_vertices.push_back(
@@ -130,6 +160,7 @@ namespace elemd
 
         impl->rect_indices.insert(impl->rect_indices.end(),
                                   {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
+                                  */
     }
 
     void Context::fill_ellipse(float x, float y, float width, float height)
@@ -175,10 +206,11 @@ namespace elemd
         impl->rendering = true;
 
         
-        
-        impl->destroy_mesh_buffers();
-        impl->create_mesh_buffers();
+        impl->update_uniforms();
+        //impl->destroy_mesh_buffers();
+        //impl->create_mesh_buffers();
         impl->record_command_buffers();
+        impl->uniforms.clear();
         
 
 
@@ -214,7 +246,7 @@ namespace elemd
 
         vku::err_check(vkQueuePresentKHR(impl->queue, &presentInfoKHR));
         
-        impl->rect_vertices.clear();
+        //impl->rect_vertices.clear();
 
         impl->rendering = false;
     }
@@ -537,7 +569,7 @@ namespace elemd
 
 
         VkVertexInputBindingDescription vertexInputBindingDescription = vertex::getBindingDescription();
-        std::array<VkVertexInputAttributeDescription, 2> vertexInputAttributeDescription =
+        std::array<VkVertexInputAttributeDescription, 1> vertexInputAttributeDescription =
             vertex::gerAttributeDescriptions();
 
         
@@ -750,7 +782,7 @@ namespace elemd
         VkCommandPoolCreateInfo commandPoolCreateInfo;
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         commandPoolCreateInfo.pNext = nullptr;
-        commandPoolCreateInfo.flags = 0;
+        commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         commandPoolCreateInfo.queueFamilyIndex = VulkanSharedInfo::getInstance()->queueFamilyIndex;
 
 
@@ -782,6 +814,10 @@ namespace elemd
     {
         if (rect_vertices.size() == 0)
             return;
+
+        // TODO: Maybe do a double buffer so that we can start recording the second buffer
+        // whilst the first one might still be in use for rendering
+
         // --------------- Create Command Buffer Begin Info ---------------
 
         VkCommandBufferBeginInfo commandBufferBeginInfo;
@@ -828,7 +864,10 @@ namespace elemd
             vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
             vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
             
-            vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(), 1, 0, 0, 0);
+            vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+
+            vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(), uniforms.size(), 0, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             vku::err_check(vkEndCommandBuffer(commandBuffers[i]));
@@ -1032,7 +1071,7 @@ namespace elemd
 
     void VulkanContext::create_uniform_buffer()
     {
-        VkDeviceSize bufferSize = sizeof(uniform_rect);
+        VkDeviceSize bufferSize = sizeof(uniform_rect) * UNIFORM_BUFFER_ARRAY_MAX_COUNT;
         vku::create_buffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer,
                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -1072,7 +1111,7 @@ namespace elemd
         VkDescriptorBufferInfo descriptorBufferInfo;
         descriptorBufferInfo.buffer = uniformBuffer;
         descriptorBufferInfo.offset = 0;
-        descriptorBufferInfo.range = sizeof(uniform_rect);
+        descriptorBufferInfo.range = sizeof(uniform_rect) * UNIFORM_BUFFER_ARRAY_MAX_COUNT;
         
         VkWriteDescriptorSet writeDescriptorSet;
         writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1105,13 +1144,14 @@ namespace elemd
 
     void VulkanContext::update_uniforms()
     {
-        void* data;
+        VkDeviceSize bufferSize = sizeof(uniform_rect) * uniforms.size();
+
+        void* rawData;
         vkMapMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory, 0,
-                    sizeof(uniform_rect), 0, &data);
+                    bufferSize, 0, &rawData);
 
-         std::memcpy(data, data, 1);
+        std::memcpy(rawData, uniforms.data(), bufferSize);
         vkUnmapMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory);
-
     }
 
 } // namespace elemd 

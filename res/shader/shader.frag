@@ -6,11 +6,15 @@ layout(location = 1) in vec4 color_varying;
 
 layout(location = 0) out vec4 outColor;
 
-layout(binding = 0) uniform UBO
+struct UniformData
 {
-    //vec2 context_dimensions;
-    //mat3 transform_matrix;
-    vec2 border_radius[4];
+  vec2 vertices[4];
+  vec2 border_radius[4];
+};
+
+layout(set = 0, binding = 0) uniform UBO
+{
+  UniformData payload[20];
 } ubo;
 
 void main()

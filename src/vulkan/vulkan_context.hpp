@@ -21,15 +21,18 @@ namespace elemd
     class VulkanContext : public Context
     {
     public:
+        const uint32_t UNIFORM_BUFFER_ARRAY_MAX_COUNT = 20;
+
         struct uniform_rect
         {
+            vec2 vertices[4];
             vec2 border_radius[4];
         };
 
-        const size_t VERTEX_BUFFER_SIZE = 1024 * sizeof(vertex);
+        std::vector<vertex> rect_vertices = {{vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
+        std::vector<uint32_t> rect_indices = {0, 1, 2, 1, 3, 2};
 
-        std::vector<vertex> rect_vertices = {};
-        std::vector<uint32_t> rect_indices = {};
+        std::vector<uniform_rect> uniforms = {};
 
         WindowImpl* _window;
 
