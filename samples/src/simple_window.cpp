@@ -87,16 +87,13 @@ int main()
         {
             // Rendering
             ctx->set_fill_color(c1);
-            ctx->fill_rect(0, 0, WIDTH, HEIGHT / 4.0f);
+            ctx->fill_rect(10, 10, 150, 100);
             
             ctx->set_fill_color(c2);
-            ctx->fill_rect(0, (HEIGHT / 4.0f)*1, WIDTH, HEIGHT / 4.0f);
+            ctx->fill_rounded_rect(180, 10, 150, 100, 20);
 
             ctx->set_fill_color(c3);
-            ctx->fill_rect(0, (HEIGHT / 4.0f)*2, WIDTH, HEIGHT / 4.0f);
-
-            ctx->set_fill_color(c4);
-            ctx->fill_rect(0, (HEIGHT / 4.0f)*3, WIDTH, HEIGHT / 4.0f);
+            ctx->fill_circle(400, 60, 50);
 
             ctx->draw_frame();
             ++frames;

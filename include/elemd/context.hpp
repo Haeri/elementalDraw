@@ -27,6 +27,7 @@ namespace elemd
         void stroke_polygon(float x, float y);
 
         void fill_rect(float x, float y, float width, float height);
+        void fill_rounded_rect(float x, float y, float width, float height, float border_radius);
         void fill_rounded_rect(float x, float y, float width, float height, float radius_nw, float radius_ne,
                                float radius_se, float radius_sw);
         void fill_circle(float x, float y, float radius);

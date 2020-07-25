@@ -21,10 +21,15 @@ namespace elemd
     class VulkanContext : public Context
     {
     public:
+        struct uniform_rect
+        {
+            vec2 border_radius[4];
+        };
+
         const size_t VERTEX_BUFFER_SIZE = 1024 * sizeof(vertex);
 
-        std::vector<vertex> vertices = {};
-        std::vector<uint32_t> indices = {};
+        std::vector<vertex> rect_vertices = {};
+        std::vector<uint32_t> rect_indices = {};
 
         WindowImpl* _window;
 
@@ -50,10 +55,17 @@ namespace elemd
         VkCommandPool commandPool;
         VkCommandBuffer* commandBuffers;
 
-        VkBuffer vertexBuffer;
+        VkBuffer vertexBuffer = VK_NULL_HANDLE;
         VkDeviceMemory vertexBufferDeviceMemory;
         VkBuffer indexBuffer;
         VkDeviceMemory indexBufferDeviceMemory;
+
+        VkBuffer uniformBuffer;
+        VkDeviceMemory uniformBufferDeviceMemory;
+
+        VkDescriptorSetLayout descriptorSetLayout;
+        VkDescriptorPool descriptorPool;
+        VkDescriptorSet descriptorSet;
 
         VkSemaphore semaphoreImageAvailable;
         VkSemaphore semaphoreRenderingComplete;
@@ -67,19 +79,25 @@ namespace elemd
         void check_surface_support();
         void create_image_views();
         void create_render_pass();
+        void create_descriptor_set_layout();
         void create_pipeline();
         void create_framebuffer();
         void create_command_pool();
         void create_command_buffers();
         void create_mesh_buffers();
+        void create_uniform_buffer();
+        void create_descriptor_pool();
+        void create_descriptor_set();
         void record_command_buffers();
         void create_semaphores();
         void destroy_mesh_buffers();
 
+        void update_uniforms();
+
         void regenerate_swapchain(uint32_t width, uint32_t height);
 
         void create_shader_module(const std::string& filename, VkShaderModule* shaderModule);
-        std::vector<char> read_shader(const std::string& filename);;
+        std::vector<char> read_shader(const std::string& filename);
 
     private:
         template<typename T>
@@ -91,11 +109,7 @@ namespace elemd
             VkBuffer stagingBuffer;
             VkDeviceMemory stagingBufferDeviceMemory;
 
-            vku::create_buffer(
-                VulkanSharedInfo::getInstance()->device,
-                VulkanSharedInfo::getInstance()->bestPhysicalDevice,
-                bufferSize,
-                               VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer,
+            vku::create_buffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer,
                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                    VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                stagingBufferDeviceMemory);
@@ -108,15 +122,10 @@ namespace elemd
 
             // --------------- Create Buffer and Memory ---------------
 
-            vku::create_buffer(VulkanSharedInfo::getInstance()->device,
-                VulkanSharedInfo::getInstance()->bestPhysicalDevice,
-                bufferSize,
-                               usageFlags | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-                               buffer, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                               deviceMemory);
+            vku::create_buffer(bufferSize, usageFlags | VK_BUFFER_USAGE_TRANSFER_DST_BIT, buffer,
+                               VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, deviceMemory);
 
-            vku::copy_buffer(stagingBuffer, buffer, bufferSize, commandPool,
-                             VulkanSharedInfo::getInstance()->device, queue);
+            vku::copy_buffer(stagingBuffer, buffer, bufferSize, commandPool, queue);
 
             // --------------- Cleanup ---------------
 

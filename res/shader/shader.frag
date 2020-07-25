@@ -6,10 +6,17 @@ layout(location = 1) in vec4 color_varying;
 
 layout(location = 0) out vec4 outColor;
 
+layout(binding = 0) uniform UBO
+{
+    //vec2 context_dimensions;
+    //mat3 transform_matrix;
+    vec2 border_radius[4];
+} ubo;
+
 void main()
 {
     float a = 1;
-    float r = 0;
+    float r = 0.1;
     if(
     (distance(uv_varying, vec2(r,   r))     > r &&      uv_varying.x < r &&     uv_varying.y < r) ||
     (distance(uv_varying, vec2(1-r, r))     > r && 1 -  uv_varying.x < r &&     uv_varying.y < r) ||

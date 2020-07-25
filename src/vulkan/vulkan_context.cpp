@@ -61,26 +61,75 @@ namespace elemd
         float widhtf = (width / impl->width);
         float heightf = (height / impl->height);
         
-        uint32_t cnt = (uint32_t)impl->vertices.size();
+        uint32_t cnt = (uint32_t)impl->rect_vertices.size();
 
-        impl->vertices.push_back({vec2(xf, yf) * 2.0f - vec2(1), vec2(0, 0), _fill_color});
-        impl->vertices.push_back({vec2(xf + widhtf, yf) * 2.0f - vec2(1), vec2(1, 0), _fill_color});
-        impl->vertices.push_back(
-            {vec2(xf, yf + heightf) * 2.0f - vec2(1), vec2(0, 1), _fill_color});
-        impl->vertices.push_back(
-            {vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1), vec2(1, 1), _fill_color});
+        impl->rect_vertices.push_back({vec2(xf, yf) * 2.0f - vec2(1), _fill_color});
+        impl->rect_vertices.push_back({vec2(xf + widhtf, yf) * 2.0f - vec2(1), _fill_color});
+        impl->rect_vertices.push_back(
+            {vec2(xf, yf + heightf) * 2.0f - vec2(1), _fill_color});
+        impl->rect_vertices.push_back(
+            {vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1), _fill_color});
 
-        impl->indices.insert(impl->indices.end(),
+        impl->rect_indices.insert(impl->rect_indices.end(),
                              {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
     }
 
-    void Context::fill_rounded_rect(float x, float y, float width, float height, float tl, float tr,
-                                    float br, float bl)
+    void Context::fill_rounded_rect(float x, float y, float width, float height,
+                                    float border_radius)
     {
+        fill_rounded_rect(x, y, width, height, border_radius, border_radius, border_radius,
+                          border_radius);
+    }
+
+    void Context::fill_rounded_rect(float x, float y, float width, float height, float radius_nw,
+                                    float radius_ne, float radius_se, float radius_sw)
+    {
+        VulkanContext* impl = getImpl(this);
+        float xf = (x / impl->width);
+        float yf = (y / impl->height);
+        float widhtf = (width / impl->width);
+        float heightf = (height / impl->height);
+        float nwf = (radius_nw / impl->width);
+        float nef = (radius_ne / impl->height);
+        float sef = (radius_se / impl->width);
+        float swf = (radius_sw / impl->height);
+
+        uint32_t cnt = (uint32_t)impl->rect_vertices.size();
+
+        impl->rect_vertices.push_back({vec2(xf, yf) * 2.0f - vec2(1), _fill_color});
+        impl->rect_vertices.push_back(
+            {vec2(xf + widhtf, yf) * 2.0f - vec2(1), _fill_color});
+        impl->rect_vertices.push_back(
+            {vec2(xf, yf + heightf) * 2.0f - vec2(1), _fill_color});
+        impl->rect_vertices.push_back(
+            {vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1), _fill_color});
+
+        impl->rect_indices.insert(impl->rect_indices.end(),
+                             {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
     }
 
     void Context::fill_circle(float x, float y, float radius)
     {
+        VulkanContext* impl = getImpl(this);
+        float xf = ((x - radius) / impl->width);
+        float yf = ((y - radius) / impl->height);
+        float widhtf = ((radius*2) / impl->width);
+        float heightf = ((radius*2) / impl->height);
+        float radf = 0.5f;
+
+        uint32_t cnt = (uint32_t)impl->rect_vertices.size();
+
+        impl->rect_vertices.push_back(
+            {vec2(xf, yf) * 2.0f - vec2(1), _fill_color});
+        impl->rect_vertices.push_back(
+            {vec2(xf + widhtf, yf) * 2.0f - vec2(1), _fill_color});
+        impl->rect_vertices.push_back(
+            {vec2(xf, yf + heightf) * 2.0f - vec2(1), _fill_color});
+        impl->rect_vertices.push_back(
+            {vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1), _fill_color});
+
+        impl->rect_indices.insert(impl->rect_indices.end(),
+                                  {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
     }
 
     void Context::fill_ellipse(float x, float y, float width, float height)
@@ -127,6 +176,7 @@ namespace elemd
 
         
         
+        impl->destroy_mesh_buffers();
         impl->create_mesh_buffers();
         impl->record_command_buffers();
         
@@ -164,7 +214,7 @@ namespace elemd
 
         vku::err_check(vkQueuePresentKHR(impl->queue, &presentInfoKHR));
         
-        impl->vertices.clear();
+        impl->rect_vertices.clear();
 
         impl->rendering = false;
     }
@@ -426,6 +476,29 @@ namespace elemd
         vku::err_check(vkCreateRenderPass(VulkanSharedInfo::getInstance()->device, &renderPassCreateInfo, nullptr, &renderPass));
     }
 
+    void VulkanContext::create_descriptor_set_layout()
+    {
+        VkDescriptorSetLayoutBinding descriptorSetLayoutBinding;
+        descriptorSetLayoutBinding.binding = 0;
+        descriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorSetLayoutBinding.descriptorCount = 1;
+        descriptorSetLayoutBinding.stageFlags =
+            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        descriptorSetLayoutBinding.pImmutableSamplers = nullptr;
+
+        VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
+        descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        descriptorSetLayoutCreateInfo.pNext = nullptr;
+        descriptorSetLayoutCreateInfo.flags = 0;
+        descriptorSetLayoutCreateInfo.bindingCount = 1;
+        descriptorSetLayoutCreateInfo.pBindings = &descriptorSetLayoutBinding;
+
+        vku::err_check(vkCreateDescriptorSetLayout(VulkanSharedInfo::getInstance()->device,
+                                                   &descriptorSetLayoutCreateInfo, nullptr,
+                                                   &descriptorSetLayout));
+
+    }
+
     void VulkanContext::create_pipeline()
     {
         // --------------- Load Shader ---------------
@@ -464,7 +537,7 @@ namespace elemd
 
 
         VkVertexInputBindingDescription vertexInputBindingDescription = vertex::getBindingDescription();
-        std::array<VkVertexInputAttributeDescription, 4> vertexInputAttributeDescription =
+        std::array<VkVertexInputAttributeDescription, 2> vertexInputAttributeDescription =
             vertex::gerAttributeDescriptions();
 
         
@@ -604,8 +677,8 @@ namespace elemd
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutCreateInfo.pNext = nullptr;
         pipelineLayoutCreateInfo.flags = 0;
-        pipelineLayoutCreateInfo.setLayoutCount = 0;
-        pipelineLayoutCreateInfo.pSetLayouts = nullptr;
+        pipelineLayoutCreateInfo.setLayoutCount = 1;
+        pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
         pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
@@ -707,7 +780,7 @@ namespace elemd
 
     void VulkanContext::record_command_buffers()
     {
-        if (vertices.size() == 0)
+        if (rect_vertices.size() == 0)
             return;
         // --------------- Create Command Buffer Begin Info ---------------
 
@@ -755,7 +828,7 @@ namespace elemd
             vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
             vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
             
-            vkCmdDrawIndexed(commandBuffers[i], (uint32_t)indices.size(), 1, 0, 0, 0);
+            vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(), 1, 0, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             vku::err_check(vkEndCommandBuffer(commandBuffers[i]));
@@ -842,12 +915,17 @@ namespace elemd
         create_image_views();
         create_render_pass();
 
+        create_descriptor_set_layout();
+
         create_pipeline();
         
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
         create_mesh_buffers();
+        create_uniform_buffer();
+        create_descriptor_pool();
+        create_descriptor_set();
         record_command_buffers();
 
         create_semaphores();
@@ -865,6 +943,12 @@ namespace elemd
     VulkanContext::~VulkanContext()
     {
         vkDeviceWaitIdle(VulkanSharedInfo::getInstance()->device);
+
+        vkDestroyDescriptorSetLayout(VulkanSharedInfo::getInstance()->device, descriptorSetLayout,
+                                     nullptr);
+        vkDestroyDescriptorPool(VulkanSharedInfo::getInstance()->device, descriptorPool, nullptr);
+        vkFreeMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory, nullptr);
+        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, uniformBuffer, nullptr);
 
         vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreImageAvailable, nullptr);
         vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreRenderingComplete, nullptr);
@@ -894,9 +978,7 @@ namespace elemd
         }
         
         vkDestroySwapchainKHR(VulkanSharedInfo::getInstance()->device, swapchain, nullptr);
-        vkDestroyDevice(VulkanSharedInfo::getInstance()->device, nullptr);
         vkDestroySurfaceKHR(VulkanSharedInfo::getInstance()->instance, surface, nullptr);
-        vkDestroyInstance(VulkanSharedInfo::getInstance()->instance, nullptr);
 
         
         delete[] commandBuffers;
@@ -939,24 +1021,97 @@ namespace elemd
 
     void VulkanContext::create_mesh_buffers()
     {
-        if (vertices.size() > 0)
+        if (rect_vertices.size() > 0)
         {
-            create_and_upload_buffer(vertices, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertexBuffer,
+            create_and_upload_buffer(rect_vertices, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertexBuffer,
                                      vertexBufferDeviceMemory);
-            create_and_upload_buffer(indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indexBuffer,
+            create_and_upload_buffer(rect_indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indexBuffer,
                                      indexBufferDeviceMemory);
         }
     }
 
+    void VulkanContext::create_uniform_buffer()
+    {
+        VkDeviceSize bufferSize = sizeof(uniform_rect);
+        vku::create_buffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer,
+                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                           uniformBufferDeviceMemory);
+    }
+
+    void VulkanContext::create_descriptor_pool()
+    {
+        VkDescriptorPoolSize descriptorPoolSize;
+        descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorPoolSize.descriptorCount = 1;
+
+        VkDescriptorPoolCreateInfo descriptorPoolCreateInfo;
+        descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        descriptorPoolCreateInfo.pNext = nullptr;
+        descriptorPoolCreateInfo.flags = 0;
+        descriptorPoolCreateInfo.maxSets = 1;
+        descriptorPoolCreateInfo.poolSizeCount = 1;
+        descriptorPoolCreateInfo.pPoolSizes = &descriptorPoolSize;
+
+        vku::err_check(vkCreateDescriptorPool(VulkanSharedInfo::getInstance()->device,
+                                              &descriptorPoolCreateInfo, nullptr, &descriptorPool));
+    }
+
+    void VulkanContext::create_descriptor_set()
+    {
+        VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
+        descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        descriptorSetAllocateInfo.pNext = nullptr;
+        descriptorSetAllocateInfo.descriptorPool = descriptorPool;
+        descriptorSetAllocateInfo.descriptorSetCount = 1;
+        descriptorSetAllocateInfo.pSetLayouts = &descriptorSetLayout;
+
+        vku::err_check(vkAllocateDescriptorSets(VulkanSharedInfo::getInstance()->device,
+                                                &descriptorSetAllocateInfo, &descriptorSet));
+
+        VkDescriptorBufferInfo descriptorBufferInfo;
+        descriptorBufferInfo.buffer = uniformBuffer;
+        descriptorBufferInfo.offset = 0;
+        descriptorBufferInfo.range = sizeof(uniform_rect);
+        
+        VkWriteDescriptorSet writeDescriptorSet;
+        writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writeDescriptorSet.pNext = nullptr;
+        writeDescriptorSet.dstSet = descriptorSet;
+        writeDescriptorSet.dstBinding = 0;
+        writeDescriptorSet.dstArrayElement = 0;
+        writeDescriptorSet.descriptorCount = 1;
+        writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        writeDescriptorSet.pImageInfo = nullptr;
+        writeDescriptorSet.pBufferInfo = &descriptorBufferInfo;
+        writeDescriptorSet.pTexelBufferView = nullptr;
+
+        vkUpdateDescriptorSets(VulkanSharedInfo::getInstance()->device, 1, &writeDescriptorSet, 0,
+                               nullptr);
+
+    }
+
     void VulkanContext::destroy_mesh_buffers()
     {
-        if (vertices.size() > 0)
+        if (rect_vertices.size() > 0 && vertexBuffer != VK_NULL_HANDLE)
         {
             vkFreeMemory(VulkanSharedInfo::getInstance()->device, indexBufferDeviceMemory, nullptr);
             vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, indexBuffer, nullptr);
+
             vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory, nullptr);
             vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer, nullptr);
         }
     }
 
-} // namespace elemd
+    void VulkanContext::update_uniforms()
+    {
+        void* data;
+        vkMapMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory, 0,
+                    sizeof(uniform_rect), 0, &data);
+
+         std::memcpy(data, data, 1);
+        vkUnmapMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory);
+
+    }
+
+} // namespace elemd 

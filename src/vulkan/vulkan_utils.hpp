@@ -19,17 +19,14 @@ namespace elemd::vku
 
     best_device_info select_physical_device(VkPhysicalDevice* physicalDevices, uint32_t count);
 
-    void create_buffer(const VkDevice& device, const VkPhysicalDevice& physicalDevice,
-                       const VkDeviceSize& deviceSize, const VkBufferUsageFlags& bufferUsageFlags,
+    void create_buffer(const VkDeviceSize& deviceSize, const VkBufferUsageFlags& bufferUsageFlags,
                        VkBuffer& buffer, const VkMemoryPropertyFlags& memoryPropertyFlags,
                        VkDeviceMemory& deviceMemory);
 
     void copy_buffer(const VkBuffer& src, VkBuffer& dest, const VkDeviceSize& deviceSize,
-                     const VkCommandPool& commandPool, const VkDevice& device,
-                     const VkQueue& queue);
+                     const VkCommandPool& commandPool, const VkQueue& queue);
 
-    uint32_t find_memory_type_index(const VkPhysicalDevice& physicalDevice, uint32_t typeFilter,
-                                    VkMemoryPropertyFlags properties);
+    uint32_t find_memory_type_index(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
     VkPresentModeKHR select_present_mode(const VkPresentModeKHR* presentModes,
                                          uint32_t presentModeCount, bool vsync);

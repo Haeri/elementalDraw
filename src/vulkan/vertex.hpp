@@ -13,12 +13,12 @@ namespace elemd
     {
     public:
         vec2 position;
-        vec2 uv;
-        color background_color;
-        float border_radius[4];
+        //vec2 uv;
+        color fill_color;
+        //float border_radius;
 
         static VkVertexInputBindingDescription getBindingDescription();
-        static std::array<VkVertexInputAttributeDescription, 4> gerAttributeDescriptions();
+        static std::array<VkVertexInputAttributeDescription, 2> gerAttributeDescriptions();
     };
 
 } // namespace elemd

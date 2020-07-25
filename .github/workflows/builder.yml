@@ -23,8 +23,6 @@ jobs:
       run: ./tools/generate_project_win.bat -s
     - name: Build
       run: MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
-    - name: Convert Assets
-      run: ./tools/convert_assets_win.bat -s
     
   build-linux:
    name: Linux Build
@@ -48,8 +46,6 @@ jobs:
       run: |
         cd ./build
         sudo make config=${{ matrix.conf }}
-    - name: Convert Assets
-      run: ./tools/convert_assets_linux.sh
 
   build-mac:
    name: Mac Build
@@ -71,5 +67,3 @@ jobs:
       run: |
         cd ./build
         make config=${{ matrix.conf }}
-    - name: Convert Assets
-      run: ./tools/convert_assets_mac.sh

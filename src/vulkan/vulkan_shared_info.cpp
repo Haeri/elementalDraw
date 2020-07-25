@@ -21,6 +21,9 @@ namespace elemd
 
     VulkanSharedInfo::~VulkanSharedInfo()
     {
+        vkDestroyDevice(device, nullptr);
+        vkDestroyInstance(instance, nullptr);
+
         delete[] physicalDevices;
     }
 

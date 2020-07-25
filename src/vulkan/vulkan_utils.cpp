@@ -71,8 +71,7 @@ namespace elemd::vku
         return best_device_info{bestDeviceIndex, bestQueuFamily, maxQueueCount};
     }
 
-    void create_buffer(const VkDevice& device, const VkPhysicalDevice& physicalDevice,
-                       const VkDeviceSize& deviceSize, const VkBufferUsageFlags& bufferUsageFlags,
+    void create_buffer(const VkDeviceSize& deviceSize, const VkBufferUsageFlags& bufferUsageFlags,
                        VkBuffer& buffer, const VkMemoryPropertyFlags& memoryPropertyFlags,
                        VkDeviceMemory& deviceMemory)
     {
@@ -90,27 +89,29 @@ namespace elemd::vku
 
         // --------------- Create Vertex Buffer ---------------
 
-        vku::err_check(vkCreateBuffer(device, &bufferCreateInfo, nullptr, &buffer));
+        vku::err_check(vkCreateBuffer(VulkanSharedInfo::getInstance()->device, &bufferCreateInfo, nullptr, &buffer));
 
         VkMemoryRequirements memoryRequirements;
-        vkGetBufferMemoryRequirements(device, buffer, &memoryRequirements);
+        vkGetBufferMemoryRequirements(VulkanSharedInfo::getInstance()->device, buffer,
+                                      &memoryRequirements);
 
         VkMemoryAllocateInfo memoryAllocateInfo;
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         memoryAllocateInfo.pNext = nullptr;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
-        memoryAllocateInfo.memoryTypeIndex = vku::find_memory_type_index(
-            physicalDevice, memoryRequirements.memoryTypeBits, memoryPropertyFlags);
+        memoryAllocateInfo.memoryTypeIndex =
+            vku::find_memory_type_index(memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 
         // --------------- Allocate Memory ---------------
 
-        vku::err_check(vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &deviceMemory));
+        vku::err_check(vkAllocateMemory(VulkanSharedInfo::getInstance()->device,
+                                        &memoryAllocateInfo, nullptr, &deviceMemory));
 
-        vkBindBufferMemory(device, buffer, deviceMemory, 0);
+        vkBindBufferMemory(VulkanSharedInfo::getInstance()->device, buffer, deviceMemory, 0);
     }
 
     void copy_buffer(const VkBuffer& src, VkBuffer& dest, const VkDeviceSize& deviceSize,
-                     const VkCommandPool& commandPool, const VkDevice& device, const VkQueue& queue)
+                     const VkCommandPool& commandPool, const VkQueue& queue)
     {
         // --------------- Create Command Buffer Allocate Info ---------------
 
@@ -124,8 +125,8 @@ namespace elemd::vku
         // --------------- Allocate Command Buffer ---------------
 
         VkCommandBuffer commandBuffer;
-        vku::err_check(
-            vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer));
+        vku::err_check(vkAllocateCommandBuffers(VulkanSharedInfo::getInstance()->device,
+                                                &commandBufferAllocateInfo, &commandBuffer));
 
         VkCommandBufferBeginInfo commandBufferBeginInfo;
         commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -159,14 +160,16 @@ namespace elemd::vku
 
         vkQueueWaitIdle(queue);
 
-        vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+        vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool, 1,
+                             &commandBuffer);
     }
 
-    uint32_t find_memory_type_index(const VkPhysicalDevice& physicalDevice, uint32_t typeFilter,
+    uint32_t find_memory_type_index(uint32_t typeFilter,
                                     VkMemoryPropertyFlags properties)
     {
         VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
-        vkGetPhysicalDeviceMemoryProperties(physicalDevice, &physicalDeviceMemoryProperties);
+        vkGetPhysicalDeviceMemoryProperties(VulkanSharedInfo::getInstance()->bestPhysicalDevice,
+                                            &physicalDeviceMemoryProperties);
         for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; ++i)
         {
             if ((typeFilter & (1 << i)) &&
