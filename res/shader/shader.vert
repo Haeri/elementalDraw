@@ -6,9 +6,6 @@ out gl_PerVertex{
 };
 
 layout(location = 0) in vec2 position;
-//layout(location = 1) in vec2 uv;
-//layout(location = 1) in vec4 colors;
-//layout(location = 2) in vec4 border_radius;
 
 layout(location = 0) out vec2 uv_varying;
 layout(location = 1) out vec4 color_varying;
@@ -38,7 +35,7 @@ vec2 _positions[4] = vec2[](
     vec2(1, 1)
 );
 
-vec2 uvs[4] = vec2[](
+vec2 _uvs[4] = vec2[](
     vec2(0.0),
     vec2(1, 0),
     vec2(0, 1),
@@ -48,8 +45,8 @@ vec2 uvs[4] = vec2[](
 void main()
 {
     //gl_Position = vec4(position, 0.0, 1.0);
-    gl_Position = vec4(ubo.payload[gl_InstanceIndex].vertices[gl_VertexIndex], 0.0, 1.0);
-    uv_varying = uvs[gl_VertexIndex];
-    //color_varying = colors;
+    gl_Position = vec4(_positions[gl_VertexIndex], 0.0, 1.0);
+    //gl_Position = vec4(ubo.payload[gl_InstanceIndex].vertices[gl_VertexIndex], 0.0, 1.0);
+    uv_varying = _uvs[gl_VertexIndex];
     color_varying = _colors[gl_VertexIndex];
 }

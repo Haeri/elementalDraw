@@ -67,19 +67,6 @@ namespace elemd
                 vec2(xf, yf + heightf) * 2.0f - vec2(1), 
                 vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)
             }, {vec2(0), vec2(0), vec2(0), vec2(0)}});
-        
-        //uint32_t cnt = (uint32_t)impl->rect_vertices.size();
-
-        /*
-        impl->rect_vertices.push_back({vec2(xf, yf) * 2.0f - vec2(1), _fill_color});
-        impl->rect_vertices.push_back({vec2(xf + widhtf, yf) * 2.0f - vec2(1), _fill_color});
-        impl->rect_vertices.push_back(
-            {vec2(xf, yf + heightf) * 2.0f - vec2(1), _fill_color});
-        impl->rect_vertices.push_back(
-            {vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1), _fill_color});
-            */
-        //impl->rect_indices.insert(impl->rect_indices.end(),
-         //                    {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
     }
 
     void Context::fill_rounded_rect(float x, float y, float width, float height,

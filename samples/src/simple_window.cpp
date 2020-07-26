@@ -86,14 +86,14 @@ int main()
         if (render_accumulator >= target_render_ms)
         {
             // Rendering
-            ctx->set_fill_color(c1);
-            ctx->fill_rect(10, 10, 150, 100);
-            
+            //ctx->set_fill_color(c1);
+            //ctx->fill_rect(10, 10, 150, 100);
+            //
             ctx->set_fill_color(c2);
-            ctx->fill_rounded_rect(180, 10, 150, 100, 20);
+            ctx->fill_rounded_rect(WIDTH / 2, HEIGHT / 2, WIDTH / 2, HEIGHT / 2, 20);
 
-            ctx->set_fill_color(c3);
-            ctx->fill_circle(400, 60, 50);
+            //ctx->set_fill_color(c3);
+            //ctx->fill_circle(400, 60, 50);
 
             ctx->draw_frame();
             ++frames;
