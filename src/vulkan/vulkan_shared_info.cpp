@@ -87,8 +87,13 @@ namespace elemd
         instanceCreateInfo.pNext = nullptr;
         instanceCreateInfo.flags = 0;
         instanceCreateInfo.pApplicationInfo = &applicationInfo;
+#ifdef NDEBUG
+        instanceCreateInfo.enabledLayerCount = 0;
+        instanceCreateInfo.ppEnabledLayerNames = nullptr;
+#else
         instanceCreateInfo.enabledLayerCount = (uint32_t)validationLayers.size();
         instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+#endif // DEBUG
         instanceCreateInfo.enabledExtensionCount = (uint32_t)extensions.size();
         instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 

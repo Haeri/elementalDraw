@@ -34,7 +34,6 @@ namespace elemd
     {
     public:
         static Window* create(WindowConfig config);
-        virtual ~Window() = default;
 
         Context* create_context();
         Context* getContext();
@@ -47,7 +46,7 @@ namespace elemd
         bool get_vsync();
         void minimize();
         void maximize();
-        void terminate();
+        void destroy();
 
         int getWidth();
         int getHeight();
@@ -59,6 +58,7 @@ namespace elemd
 
     protected:
         Window() = default;
+        virtual ~Window() = default;
 
         Context* _context = nullptr;
         bool _vsync = true;

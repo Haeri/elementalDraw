@@ -5,28 +5,22 @@ out gl_PerVertex{
     vec4 gl_Position;
 };
 
-layout(location = 0) in vec2 position;
+//layout(location = 0) in vec2 position;
 
 layout(location = 0) out vec2 uv_varying;
-layout(location = 1) out vec4 color_varying;
+layout(location = 1) out flat int instance_index;
 
 struct UniformData
 {
-  vec2 vertices[4];
-  vec2 border_radius[4];
+    vec4 fill_color;
+    vec4 vertices[2];
+    vec4 border_radius[2];
 };
 
-layout(set = 0, binding = 0) uniform UBO
+layout(set = 0, binding = 0, std140) uniform UBO
 {
-  UniformData payload[20];
+    UniformData payload[1024];
 } ubo;
-
-vec4 _colors[4] = vec4[](
-    vec4(1, 0, 0, 1),
-    vec4(0, 1, 0, 1),
-    vec4(0, 0, 1, 1),
-    vec4(0, 1, 1, 1)
-);
 
 vec2 _positions[4] = vec2[](
     vec2(0, 0),
@@ -44,9 +38,14 @@ vec2 _uvs[4] = vec2[](
 
 void main()
 {
-    //gl_Position = vec4(position, 0.0, 1.0);
-    gl_Position = vec4(_positions[gl_VertexIndex], 0.0, 1.0);
-    //gl_Position = vec4(ubo.payload[gl_InstanceIndex].vertices[gl_VertexIndex], 0.0, 1.0);
+    vec2 verts[4] = {
+        ubo.payload[gl_InstanceIndex].vertices[0].xy,
+        ubo.payload[gl_InstanceIndex].vertices[0].zw,
+        ubo.payload[gl_InstanceIndex].vertices[1].xy,
+        ubo.payload[gl_InstanceIndex].vertices[1].zw
+    };
+
+    instance_index = gl_InstanceIndex;
+    gl_Position = vec4(verts[gl_VertexIndex].xy, 0.0, 1.0);
     uv_varying = _uvs[gl_VertexIndex];
-    color_varying = _colors[gl_VertexIndex];
 }

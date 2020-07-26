@@ -54,9 +54,9 @@ namespace elemd
         return _vsync;
     }
 
-    void Window::terminate()
+    void Window::destroy()
     {
-        glfwTerminate();
+        delete this;
     }
 
     int Window::getWidth()
@@ -134,7 +134,7 @@ namespace elemd
         glfwDestroyWindow(_glfw_window);
         --_windowCount;
 
-        delete _context;
+        _context->destroy();
 
         if (_windowCount == 0)
         {

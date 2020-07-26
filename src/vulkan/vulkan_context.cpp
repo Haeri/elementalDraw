@@ -61,12 +61,12 @@ namespace elemd
         float widhtf = (width / impl->width);
         float heightf = (height / impl->height);
         
-        impl->uniforms.push_back({{
-                vec2(xf, yf) * 2.0f - vec2(1), 
-                vec2(xf + widhtf, yf) * 2.0f - vec2(1), 
-                vec2(xf, yf + heightf) * 2.0f - vec2(1), 
-                vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)
-            }, {vec2(0), vec2(0), vec2(0), vec2(0)}});
+        impl->uniforms.push_back(
+            {_fill_color,
+             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
+              vec2(xf, yf + heightf) * 2.0f - vec2(1),
+              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
+             {vec2(0), vec2(0), vec2(0), vec2(0)}});
     }
 
     void Context::fill_rounded_rect(float x, float y, float width, float height,
@@ -82,38 +82,23 @@ namespace elemd
         VulkanContext* impl = getImpl(this);
         float xf = (x / impl->width);
         float yf = (y / impl->height);
-        float widhtf = (width / impl->width);
+        float widthf = (width / impl->width);
         float heightf = (height / impl->height);
-        float nwxf = (radius_nw / impl->width);
-        float nwyf = (radius_nw / impl->height);
-        float nexf = (radius_ne / impl->width);
-        float neyf = (radius_ne / impl->height);
-        float sexf = (radius_se / impl->width);        
-        float seyf = (radius_se / impl->height);
-        float swxf = (radius_sw / impl->width);
-        float swyf = (radius_sw / impl->height);
+        float nwxf = (radius_nw / width);
+        float nexf = (radius_ne / width);
+        float sexf = (radius_se / width);        
+        float swxf = (radius_sw / width);
+        float nwyf = (radius_nw / height);
+        float neyf = (radius_ne / height);
+        float seyf = (radius_se / height);
+        float swyf = (radius_sw / height);
 
         impl->uniforms.push_back(
-            {{vec2(xf, yf) * 2.0f - vec2(1), 
-              vec2(xf + widhtf, yf) * 2.0f - vec2(1),
+            {_fill_color,
+             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
-              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
+              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
              {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)}});
-
-        /*
-        uint32_t cnt = (uint32_t)impl->rect_vertices.size();
-
-        impl->rect_vertices.push_back({vec2(xf, yf) * 2.0f - vec2(1), _fill_color});
-        impl->rect_vertices.push_back(
-            {vec2(xf + widhtf, yf) * 2.0f - vec2(1), _fill_color});
-        impl->rect_vertices.push_back(
-            {vec2(xf, yf + heightf) * 2.0f - vec2(1), _fill_color});
-        impl->rect_vertices.push_back(
-            {vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1), _fill_color});
-
-        impl->rect_indices.insert(impl->rect_indices.end(),
-                             {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
-                             */
     }
 
     void Context::fill_circle(float x, float y, float radius)
@@ -126,28 +111,13 @@ namespace elemd
         float radf = 0.5f;
 
         impl->uniforms.push_back(
-            {{vec2(xf, yf) * 2.0f - vec2(1), 
+            {_fill_color,
+            {vec2(xf, yf) * 2.0f - vec2(1), 
               vec2(xf + widhtf, yf) * 2.0f - vec2(1),
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
              {vec2(radf), vec2(radf), vec2(radf), vec2(radf)}});
-
-
-        /*
-        uint32_t cnt = (uint32_t)impl->rect_vertices.size();
-
-        impl->rect_vertices.push_back(
-            {vec2(xf, yf) * 2.0f - vec2(1), _fill_color});
-        impl->rect_vertices.push_back(
-            {vec2(xf + widhtf, yf) * 2.0f - vec2(1), _fill_color});
-        impl->rect_vertices.push_back(
-            {vec2(xf, yf + heightf) * 2.0f - vec2(1), _fill_color});
-        impl->rect_vertices.push_back(
-            {vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1), _fill_color});
-
-        impl->rect_indices.insert(impl->rect_indices.end(),
-                                  {cnt + 0, cnt + 1, cnt + 2, cnt + 1, cnt + 3, cnt + 2});
-                                  */
+   
     }
 
     void Context::fill_ellipse(float x, float y, float width, float height)
@@ -194,12 +164,9 @@ namespace elemd
 
         
         impl->update_uniforms();
-        //impl->destroy_mesh_buffers();
-        //impl->create_mesh_buffers();
         impl->record_command_buffers();
         impl->uniforms.clear();
-        
-
+       
 
         uint32_t imageIndex;
         vku::err_check(vkAcquireNextImageKHR(VulkanSharedInfo::getInstance()->device,
@@ -233,8 +200,6 @@ namespace elemd
 
         vku::err_check(vkQueuePresentKHR(impl->queue, &presentInfoKHR));
         
-        //impl->rect_vertices.clear();
-
         impl->rendering = false;
     }
 
@@ -242,6 +207,11 @@ namespace elemd
     {
         VulkanContext* impl = getImpl(this);
         impl->regenerate_swapchain((uint32_t)width, (uint32_t)height);
+    }
+
+    void VulkanContext::destroy()
+    {
+        delete this;
     }
 
     /* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
@@ -799,9 +769,6 @@ namespace elemd
 
     void VulkanContext::record_command_buffers()
     {
-        if (rect_vertices.size() == 0)
-            return;
-
         // TODO: Maybe do a double buffer so that we can start recording the second buffer
         // whilst the first one might still be in use for rendering
 
@@ -854,7 +821,8 @@ namespace elemd
             vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
                                     pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
-            vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(), uniforms.size(), 0, 0, 0);
+            vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
+                             (uint32_t)uniforms.size(), 0, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             vku::err_check(vkEndCommandBuffer(commandBuffers[i]));
@@ -920,7 +888,6 @@ namespace elemd
 
         vkDestroySwapchainKHR(VulkanSharedInfo::getInstance()->device, oldSwapchain, nullptr);
 
-        //draw_frame();
         resizing = false;
     }
 
@@ -1047,13 +1014,10 @@ namespace elemd
 
     void VulkanContext::create_mesh_buffers()
     {
-        if (rect_vertices.size() > 0)
-        {
-            create_and_upload_buffer(rect_vertices, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertexBuffer,
-                                     vertexBufferDeviceMemory);
-            create_and_upload_buffer(rect_indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indexBuffer,
-                                     indexBufferDeviceMemory);
-        }
+        create_and_upload_buffer(rect_vertices, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertexBuffer,
+                                    vertexBufferDeviceMemory);
+        create_and_upload_buffer(rect_indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indexBuffer,
+                                    indexBufferDeviceMemory);
     }
 
     void VulkanContext::create_uniform_buffer()
@@ -1118,15 +1082,12 @@ namespace elemd
     }
 
     void VulkanContext::destroy_mesh_buffers()
-    {
-        if (rect_vertices.size() > 0 && vertexBuffer != VK_NULL_HANDLE)
-        {
-            vkFreeMemory(VulkanSharedInfo::getInstance()->device, indexBufferDeviceMemory, nullptr);
-            vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, indexBuffer, nullptr);
+    { 
+        vkFreeMemory(VulkanSharedInfo::getInstance()->device, indexBufferDeviceMemory, nullptr);
+        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, indexBuffer, nullptr);
 
-            vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory, nullptr);
-            vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer, nullptr);
-        }
+        vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory, nullptr);
+        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer, nullptr);  
     }
 
     void VulkanContext::update_uniforms()

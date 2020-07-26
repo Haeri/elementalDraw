@@ -16,7 +16,6 @@ namespace elemd
     {
     public:
         static Context* create(Window* window);
-        virtual ~Context() = default;
 
         void stroke_rect(float x, float y, float width, float height);
         void stroke_rounded_rect(float x, float y, float width, float height, float radius_nw, float radius_ne,
@@ -50,8 +49,11 @@ namespace elemd
         void draw_frame();
 
         void resize_context(int width, int height);
+
+        virtual void destroy() = 0;
     protected:
         Context() = default;
+        virtual ~Context() = default;
 
         color _clear_color;
         color _fill_color;

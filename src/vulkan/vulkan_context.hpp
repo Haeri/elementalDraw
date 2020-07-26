@@ -21,10 +21,11 @@ namespace elemd
     class VulkanContext : public Context
     {
     public:
-        const uint32_t UNIFORM_BUFFER_ARRAY_MAX_COUNT = 20;
+        const uint32_t UNIFORM_BUFFER_ARRAY_MAX_COUNT = 1024;
 
         struct uniform_rect
         {
+            color fill_color;
             vec2 vertices[4];
             vec2 border_radius[4];
         };
@@ -102,6 +103,7 @@ namespace elemd
         void create_shader_module(const std::string& filename, VkShaderModule* shaderModule);
         std::vector<char> read_shader(const std::string& filename);
 
+        void destroy() override;
     private:
         template<typename T>
         void create_and_upload_buffer(std::vector<T> data, const VkBufferUsageFlags& usageFlags, VkBuffer& buffer, VkDeviceMemory& deviceMemory) {
