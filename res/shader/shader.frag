@@ -23,6 +23,12 @@ bool ellipse_check(vec2 uv, vec2 center, vec2 dims)
     return pow((uv.x-center.x),2)/pow(dims.x,2) + pow((uv.y-center.y),2)/pow(dims.y,2) <= 1;
 }
 
+
+float ellipse_check2(vec2 uv, vec2 center, vec2 dims)
+{
+    return pow((uv.x-center.x),2)/pow(dims.x,2) + pow((uv.y-center.y),2)/pow(dims.y,2);
+}
+
 void main()
 {
     float a = ubo.payload[instance_index].fill_color.a;
@@ -31,16 +37,25 @@ void main()
     vec2 ne = ubo.payload[instance_index].border_radius[0].zw;
     vec2 se = ubo.payload[instance_index].border_radius[1].xy;
     vec2 sw = ubo.payload[instance_index].border_radius[1].zw;
-
-    if(
-    (     uv_varying.x < nw.x &&     uv_varying.y < nw.y && !ellipse_check(uv_varying, nw,                     nw)) ||
-    (1 -  uv_varying.x < ne.x &&     uv_varying.y < ne.y && !ellipse_check(uv_varying, vec2(1-ne.x, ne.y),     ne)) ||
-    (     uv_varying.x < sw.x && 1 - uv_varying.y < sw.y && !ellipse_check(uv_varying, vec2(sw.x, 1-sw.y),     sw)) ||
-    (1 -  uv_varying.x < se.x && 1 - uv_varying.y < se.y && !ellipse_check(uv_varying, vec2(1-se.x, 1-se.y),   se))
-    )
-    {
-        a = 0;
-    }
     
+    float dist = 0.0;
+
+    if(uv_varying.x < nw.x && uv_varying.y < nw.y)
+    { 
+        dist = ellipse_check2(uv_varying, nw, nw);
+    }
+    else if (1 -  uv_varying.x < ne.x &&     uv_varying.y < ne.y){
+        dist = ellipse_check2(uv_varying, vec2(1-ne.x, ne.y), ne);
+    }
+    else if (uv_varying.x < sw.x && 1 - uv_varying.y < sw.y){
+        dist = ellipse_check2(uv_varying, vec2(sw.x, 1-sw.y), sw);
+    }
+    else if (1 -  uv_varying.x < se.x && 1 - uv_varying.y < se.y){
+        dist = ellipse_check2(uv_varying, vec2(1-se.x, 1-se.y), se);
+    }
+
+    float delta = fwidth(dist);
+    a = smoothstep(1+delta, 1, dist); 
+
     outColor = vec4(ubo.payload[instance_index].fill_color.rgb, a);
 }

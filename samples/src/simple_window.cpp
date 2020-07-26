@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <array>
 #include <elemd/window.hpp>
 #include <elemd/context.hpp>
 #include <elemd/color.hpp>
@@ -13,9 +14,9 @@ int main()
 #endif
 
     // Constants
-    const int TARGET_RENDER_FPS = 1000;
+    const int TARGET_RENDER_FPS = 120;
     const int TARGET_POLL_FPS = 30;
-    const int WIDTH = 600;
+    const int WIDTH = 470;
     const int HEIGHT = 500;
     
 
@@ -38,6 +39,9 @@ int main()
     elemd::color c3("#f1faee");
     elemd::color c4("#e63946");
 
+    std::array<elemd::color, 10> cool = {"#54478c", "#2c699a", "#048ba8", "#0db39e", "#16db93",
+                                         "#83e377", "#b9e769", "#efea5a", "#f1c453", "#f29e4c"};
+
     
     // Create Window
     elemd::WindowConfig winc{"UI Application [Vulkan]", WIDTH, HEIGHT};
@@ -46,6 +50,9 @@ int main()
     elemd::Context* ctx = win->create_context();
     ctx->set_clear_color(bg);
 
+
+    float pong = 0;
+    float velocity = 1;
 
     // Main Loop
     while (win->is_running())
@@ -83,18 +90,33 @@ int main()
             ctx->set_fill_color(c3);
             ctx->fill_circle(400, 60, 50);
 
-            ctx->set_fill_color(c4);
-            ctx->fill_rounded_rect(10, 130, 450, 100, 0, 10, 0, 10);
+            ctx->set_fill_color(c1);
+            ctx->fill_rounded_rect(10, 130, 450, 100, 0, 40, 0, 20);
 
 
-            for (size_t i = 0; i < 25; ++i)
+            for (size_t i = 0; i < 22; ++i)
             {
-                for (size_t j = 0; j < 10; j++)
+                for (size_t j = 0; j < 8; j++)
                 {
-                    ctx->set_fill_color(elemd::color(rand() % 255, rand() % 255, rand() % 255));
-                    ctx->fill_rect(i*20, 260+j*20, 19, 19);
+                    ctx->set_fill_color(cool[rand() % cool.size()]);
+                    ctx->fill_rect(10+i*20, 320+j*20, 19, 19);
                 }
             }
+
+            if (pong > WIDTH - 30)
+            {
+                velocity = -1;
+            }
+            else if (pong <= 0 + 30)
+            {
+                velocity = 1;
+            }
+
+            pong = pong + render_accumulator * 800.0f * velocity;
+            
+
+            ctx->set_fill_color(c4);
+            ctx->fill_circle(pong, 270, 30);
 
             ctx->draw_frame();
             ++frames;
