@@ -3,8 +3,6 @@
 #include <iostream>
 #include <fstream>
 
-#include "vulkan_shared_info.hpp"
-
 namespace elemd::vku
 {
     void err(std::string message)

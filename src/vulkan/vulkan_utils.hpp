@@ -3,7 +3,9 @@
 
 #include <string>
 #include <vector>
-#include <glad/vulkan.h>
+#include <cstring>
+
+#include "vulkan_shared_info.hpp"
 
 namespace elemd::vku 
 {

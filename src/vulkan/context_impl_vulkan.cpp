@@ -1,6 +1,7 @@
 #include "context_impl_vulkan.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <GLFW/glfw3.h>
 
 #include "vulkan_shared_info.hpp"
