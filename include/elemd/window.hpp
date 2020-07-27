@@ -9,7 +9,7 @@
 namespace elemd
 {
     class Context;
-    const std::string ELEMD_ICON = "../../res/elemd_icon.png";
+    const std::string ELEMD_ICON = "./elemd_res/elemd_icon.png";
 
     struct ELEMD_API WindowConfig
     {
@@ -36,23 +36,21 @@ namespace elemd
         static Window* create(WindowConfig config);
 
         Context* create_context();
-        Context* getContext();
-
-        void setTitle(const std::string& title);
-        void setPosition(int x, int y);
-        void setSize(int width, int height);
-
-        void set_vsync(bool vsync);
+        Context* get_context();
         bool get_vsync();
+        int get_width();
+        int get_height();
+        bool is_running();
+
+        void set_title(const std::string& title);
+        void set_position(int x, int y);
+        void set_size(int width, int height);
+        void set_vsync(bool vsync);
+        
         void minimize();
         void maximize();
         void destroy();
-
-        int getWidth();
-        int getHeight();
-
         void poll_events();
-        bool is_running();
 
         static double now();
 

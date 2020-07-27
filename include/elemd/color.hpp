@@ -1,9 +1,10 @@
 #ifndef ELEMD_COLOR_HPP
 #define ELEMD_COLOR_HPP
 
-#include <elemd/elemental_draw.hpp>
 #include <cstdint>
 #include <string>
+
+#include <elemd/elemental_draw.hpp>
 
 namespace elemd
 {

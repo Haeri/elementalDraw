@@ -1,6 +1,7 @@
 #include "vulkan_utils.hpp"
 
 #include <iostream>
+#include <fstream>
 
 #include "vulkan_shared_info.hpp"
 
@@ -36,6 +37,37 @@ namespace elemd::vku
         }
 
         return dtype;
+    }
+
+    void create_shader_module(const std::string& filename, VkShaderModule* shaderModule)
+    {
+        std::vector<char> spirvCode = read_shader(filename);
+
+        VkShaderModuleCreateInfo shaderModuleCreateInfo;
+        shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        shaderModuleCreateInfo.pNext = nullptr;
+        shaderModuleCreateInfo.flags = 0;
+        shaderModuleCreateInfo.codeSize = spirvCode.size();
+        shaderModuleCreateInfo.pCode = (uint32_t*)spirvCode.data();
+
+        vku::err_check(vkCreateShaderModule(VulkanSharedInfo::getInstance()->device,
+                                            &shaderModuleCreateInfo, nullptr, shaderModule));
+    }
+
+    std::vector<char> read_shader(const std::string& filename)
+    {
+        std::ifstream file(filename, std::ios::binary | std::ios::ate);
+        if (file)
+        {
+            size_t fileSize = (size_t)file.tellg();
+            std::vector<char> fileBuffer(fileSize);
+            file.seekg(0);
+            file.read(fileBuffer.data(), fileSize);
+            file.close();
+            return fileBuffer;
+        }
+
+        return std::vector<char>();
     }
 
     best_device_info select_physical_device(VkPhysicalDevice* physicalDevices, uint32_t count)

@@ -1,7 +1,6 @@
-#include "vulkan_context.hpp"
+#include "context_impl_vulkan.hpp"
 
 #include <algorithm>
-#include <fstream>
 #include <GLFW/glfw3.h>
 
 #include "vulkan_shared_info.hpp"
@@ -12,20 +11,20 @@ namespace elemd
 
     /* ------------------------ DOWNCAST ------------------------ */
 
-    inline VulkanContext* getImpl(Context* ptr)
+    inline ContextImplVulkan* getImpl(Context* ptr)
     {
-        return (VulkanContext*)ptr;
+        return (ContextImplVulkan*)ptr;
     }
-    inline const VulkanContext* getImpl(const Context* ptr)
+    inline const ContextImplVulkan* getImpl(const Context* ptr)
     {
-        return (const VulkanContext*)ptr;
+        return (const ContextImplVulkan*)ptr;
     }
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
     Context* Context::create(Window* window)
     {
-        return new VulkanContext(window);
+        return new ContextImplVulkan(window);
     }
 
     void Context::stroke_rect(float x, float y, float width, float height)
@@ -55,7 +54,7 @@ namespace elemd
 
     void Context::fill_rect(float x, float y, float width, float height)
     {
-        VulkanContext* impl = getImpl(this);
+        ContextImplVulkan* impl = getImpl(this);
         float xf = (x / impl->width);
         float yf = (y / impl->height);
         float widhtf = (width / impl->width);
@@ -79,7 +78,7 @@ namespace elemd
     void Context::fill_rounded_rect(float x, float y, float width, float height, float radius_nw,
                                     float radius_ne, float radius_se, float radius_sw)
     {
-        VulkanContext* impl = getImpl(this);
+        ContextImplVulkan* impl = getImpl(this);
         float xf = (x / impl->width);
         float yf = (y / impl->height);
         float widthf = (width / impl->width);
@@ -103,7 +102,7 @@ namespace elemd
 
     void Context::fill_circle(float x, float y, float radius)
     {
-        VulkanContext* impl = getImpl(this);
+        ContextImplVulkan* impl = getImpl(this);
         float xf = ((x - radius) / impl->width);
         float yf = ((y - radius) / impl->height);
         float widhtf = ((radius*2) / impl->width);
@@ -143,7 +142,7 @@ namespace elemd
 
     void Context::set_clear_color(color color)
     {
-        VulkanContext* impl = getImpl(this);
+        ContextImplVulkan* impl = getImpl(this);
         _clear_color = color;
         impl->clearValue.color = {color.rf(), color.gf(), color.bf(), color.af()};
     }
@@ -158,7 +157,7 @@ namespace elemd
 
     void Context::draw_frame()
     {
-        VulkanContext* impl = getImpl(this);
+        ContextImplVulkan* impl = getImpl(this);
         if (impl->rendering) return;
         impl->rendering = true;
 
@@ -205,18 +204,18 @@ namespace elemd
 
     void Context::resize_context(int width, int height)
     {
-        VulkanContext* impl = getImpl(this);
-        impl->regenerate_swapchain((uint32_t)width, (uint32_t)height);
+        ContextImplVulkan* impl = getImpl(this);
+        impl->update_swapchain((uint32_t)width, (uint32_t)height);
     }
 
-    void VulkanContext::destroy()
+    void ContextImplVulkan::destroy()
     {
         delete this;
     }
 
     /* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
 
-    void VulkanContext::create_surface()
+    void ContextImplVulkan::create_surface()
     {
         // --------------- Create WIndow Surface ---------------
 
@@ -224,7 +223,7 @@ namespace elemd
             glfwCreateWindowSurface(VulkanSharedInfo::getInstance()->instance, _window->getGLFWWindow(), nullptr, &surface));
     }
 
-    void VulkanContext::create_queue()
+    void ContextImplVulkan::create_queue()
     {
         // --------------- Get Device Queue ---------------
 
@@ -233,7 +232,7 @@ namespace elemd
                          &queue);
     }
     
-    void VulkanContext::check_surface_support()
+    void ContextImplVulkan::check_surface_support()
     {
         // --------------- Check Surface Support ---------------
 
@@ -249,7 +248,7 @@ namespace elemd
         }
     }
 
-    void VulkanContext::create_swapchain()
+    void ContextImplVulkan::create_swapchain()
     {
         // --------------- Get Surface Capabilities ---------------
 
@@ -352,7 +351,7 @@ namespace elemd
         delete[] surfaceFormats;
     }
 
-    void VulkanContext::create_image_views()
+    void ContextImplVulkan::create_image_views()
     {
         // --------------- Get Swapchain Image ---------------
 
@@ -395,7 +394,7 @@ namespace elemd
         delete[] swapchainImages;
     }
 
-    void VulkanContext::create_render_pass()
+    void ContextImplVulkan::create_render_pass()
     {
         // --------------- Create Attachment Description ---------------
 
@@ -465,7 +464,7 @@ namespace elemd
         vku::err_check(vkCreateRenderPass(VulkanSharedInfo::getInstance()->device, &renderPassCreateInfo, nullptr, &renderPass));
     }
 
-    void VulkanContext::create_descriptor_set_layout()
+    void ContextImplVulkan::create_descriptor_set_layout()
     {
         VkDescriptorSetLayoutBinding descriptorSetLayoutBinding;
         descriptorSetLayoutBinding.binding = 0;
@@ -488,14 +487,14 @@ namespace elemd
 
     }
 
-    void VulkanContext::create_pipeline()
+    void ContextImplVulkan::create_pipeline()
     {
         // --------------- Load Shader ---------------
 
         fragShaderModule = new VkShaderModule();
         vertShaderModule = new VkShaderModule();
-        create_shader_module("../../res/shader/shader.frag.spv", fragShaderModule);
-        create_shader_module("../../res/shader/shader.vert.spv", vertShaderModule);
+        vku::create_shader_module("./elemd_res/shader/shader.frag.spv", fragShaderModule);
+        vku::create_shader_module("./elemd_res/shader/shader.vert.spv", vertShaderModule);
 
 
         // --------------- Create Pipeline Shader Stage Create Info ---------------
@@ -708,7 +707,7 @@ namespace elemd
                                                  &graphicsPipelineCreateInfo, nullptr, &pipeline));
     }
 
-    void VulkanContext::create_framebuffer()
+    void ContextImplVulkan::create_framebuffer()
     {
         // --------------- Create Framebuffers ---------------
 
@@ -732,7 +731,7 @@ namespace elemd
         }
     }
 
-    void VulkanContext::create_command_pool()
+    void ContextImplVulkan::create_command_pool()
     {
         // --------------- Create Command Pool Create Info ---------------
 
@@ -748,7 +747,7 @@ namespace elemd
         vku::err_check(vkCreateCommandPool(VulkanSharedInfo::getInstance()->device, &commandPoolCreateInfo, nullptr, &commandPool));
     }
 
-    void VulkanContext::create_command_buffers()
+    void ContextImplVulkan::create_command_buffers()
     {
         // --------------- Create Command Buffer Allocate Info ---------------
 
@@ -767,7 +766,7 @@ namespace elemd
             vkAllocateCommandBuffers(VulkanSharedInfo::getInstance()->device, &commandBufferAllocateInfo, commandBuffers));
     }
 
-    void VulkanContext::record_command_buffers()
+    void ContextImplVulkan::record_command_buffers()
     {
         // TODO: Maybe do a double buffer so that we can start recording the second buffer
         // whilst the first one might still be in use for rendering
@@ -829,7 +828,7 @@ namespace elemd
         }
     }
 
-    void VulkanContext::create_semaphores()
+    void ContextImplVulkan::create_semaphores()
     {
         // --------------- Create Semaphore Create Info ---------------
 
@@ -847,7 +846,7 @@ namespace elemd
             vkCreateSemaphore(VulkanSharedInfo::getInstance()->device, &semaphoreCreateInfo, nullptr, &semaphoreRenderingComplete));
     }
 
-    void VulkanContext::regenerate_swapchain(uint32_t width, uint32_t height)
+    void ContextImplVulkan::update_swapchain(uint32_t width, uint32_t height)
     {
         if (resizing) return;
         resizing = true;
@@ -856,8 +855,6 @@ namespace elemd
         this->height = height;        
 
         vkDeviceWaitIdle(VulkanSharedInfo::getInstance()->device);
-
-        destroy_mesh_buffers();
 
         vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool, VulkanSharedInfo::getInstance()->actualSwapchainImageCount, commandBuffers);
         vkDestroyCommandPool(VulkanSharedInfo::getInstance()->device, commandPool, nullptr);
@@ -883,7 +880,6 @@ namespace elemd
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
-        create_mesh_buffers();
         record_command_buffers();
 
         vkDestroySwapchainKHR(VulkanSharedInfo::getInstance()->device, oldSwapchain, nullptr);
@@ -891,12 +887,12 @@ namespace elemd
         resizing = false;
     }
 
-    VulkanContext::VulkanContext(Window* window)
+    ContextImplVulkan::ContextImplVulkan(Window* window)
     {
         _window = (WindowImpl*)window;
 
-        width = (uint32_t)window->getWidth();
-        height = (uint32_t)window->getHeight();        
+        width = (uint32_t)window->get_width();
+        height = (uint32_t)window->get_height();        
 
 
         VulkanSharedInfo::getInstance();
@@ -915,7 +911,8 @@ namespace elemd
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
-        create_mesh_buffers();
+        create_vertex_buffers();
+        create_index_buffers();
         create_uniform_buffer();
         create_descriptor_pool();
         create_descriptor_set();
@@ -933,7 +930,7 @@ namespace elemd
 #endif
     }
 
-    VulkanContext::~VulkanContext()
+    ContextImplVulkan::~ContextImplVulkan()
     {
         vkDeviceWaitIdle(VulkanSharedInfo::getInstance()->device);
 
@@ -946,7 +943,11 @@ namespace elemd
         vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreImageAvailable, nullptr);
         vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreRenderingComplete, nullptr);
 
-        destroy_mesh_buffers();
+        vkFreeMemory(VulkanSharedInfo::getInstance()->device, indexBufferDeviceMemory, nullptr);
+        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, indexBuffer, nullptr);
+
+        vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory, nullptr);
+        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer, nullptr);  
 
         vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool, VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
                              commandBuffers);
@@ -981,46 +982,20 @@ namespace elemd
         delete[] imageViews;
     }
 
-    void VulkanContext::create_shader_module(const std::string& filename,
-                                           VkShaderModule* shaderModule)
+    void ContextImplVulkan::create_vertex_buffers()
     {
-        std::vector<char> spirvCode = read_shader(filename);
-
-        VkShaderModuleCreateInfo shaderModuleCreateInfo;
-        shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        shaderModuleCreateInfo.pNext = nullptr;
-        shaderModuleCreateInfo.flags = 0;
-        shaderModuleCreateInfo.codeSize = spirvCode.size();
-        shaderModuleCreateInfo.pCode = (uint32_t*)spirvCode.data();
-
-        vku::err_check(vkCreateShaderModule(VulkanSharedInfo::getInstance()->device, &shaderModuleCreateInfo, nullptr, shaderModule));
+        vku::create_and_upload_buffer(rect_vertices, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                                      vertexBuffer, vertexBufferDeviceMemory, commandPool, queue);
     }
 
-    std::vector<char> VulkanContext::read_shader(const std::string& filename)
+     void ContextImplVulkan::create_index_buffers()
     {
-        std::ifstream file(filename, std::ios::binary | std::ios::ate);
-        if (file)
-        {
-            size_t fileSize = (size_t)file.tellg();
-            std::vector<char> fileBuffer(fileSize);
-            file.seekg(0);
-            file.read(fileBuffer.data(), fileSize);
-            file.close();
-            return fileBuffer;
-        }
-        
-        return std::vector<char>();
+        vku::create_and_upload_buffer(rect_indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indexBuffer,
+                                      indexBufferDeviceMemory, commandPool, queue);
     }
 
-    void VulkanContext::create_mesh_buffers()
-    {
-        create_and_upload_buffer(rect_vertices, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertexBuffer,
-                                    vertexBufferDeviceMemory);
-        create_and_upload_buffer(rect_indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indexBuffer,
-                                    indexBufferDeviceMemory);
-    }
 
-    void VulkanContext::create_uniform_buffer()
+    void ContextImplVulkan::create_uniform_buffer()
     {
         VkDeviceSize bufferSize = sizeof(uniform_rect) * UNIFORM_BUFFER_ARRAY_MAX_COUNT;
         vku::create_buffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer,
@@ -1029,7 +1004,7 @@ namespace elemd
                            uniformBufferDeviceMemory);
     }
 
-    void VulkanContext::create_descriptor_pool()
+    void ContextImplVulkan::create_descriptor_pool()
     {
         VkDescriptorPoolSize descriptorPoolSize;
         descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1047,7 +1022,7 @@ namespace elemd
                                               &descriptorPoolCreateInfo, nullptr, &descriptorPool));
     }
 
-    void VulkanContext::create_descriptor_set()
+    void ContextImplVulkan::create_descriptor_set()
     {
         VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
         descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -1081,16 +1056,7 @@ namespace elemd
 
     }
 
-    void VulkanContext::destroy_mesh_buffers()
-    { 
-        vkFreeMemory(VulkanSharedInfo::getInstance()->device, indexBufferDeviceMemory, nullptr);
-        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, indexBuffer, nullptr);
-
-        vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory, nullptr);
-        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer, nullptr);  
-    }
-
-    void VulkanContext::update_uniforms()
+    void ContextImplVulkan::update_uniforms()
     {
         VkDeviceSize bufferSize = sizeof(uniform_rect) * uniforms.size();
 

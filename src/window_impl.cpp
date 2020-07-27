@@ -30,23 +30,41 @@ namespace elemd
         return new WindowImpl(config);
     }
 
-    void Window::setTitle(const std::string& title)
+    void Window::set_title(const std::string& title)
     {
         WindowImpl* impl = getImpl(this);
         glfwSetWindowTitle(impl->_glfw_window, title.c_str());
     }
 
-    void Window::setPosition(int x, int y)
+    void Window::set_position(int x, int y)
     {
         WindowImpl* impl = getImpl(this);
         glfwSetWindowPos(impl->_glfw_window, x, y);
+    }
+
+    void Window::set_size(int width, int height)
+    {
+        WindowImpl* impl = getImpl(this);
+        glfwSetWindowSize(impl->_glfw_window, width, height);
     }
 
     void Window::set_vsync(bool vsync)
     {
         WindowImpl* impl = getImpl(this);
         _vsync = vsync;
-        _context->resize_context(impl->getWidth(), impl->getHeight());
+        _context->resize_context(impl->get_width(), impl->get_height());
+    }
+
+    void Window::minimize()
+    {
+        WindowImpl* impl = getImpl(this);
+        glfwIconifyWindow(impl->_glfw_window);
+    }
+
+    void Window::maximize()
+    {
+        WindowImpl* impl = getImpl(this);
+        glfwMaximizeWindow(impl->_glfw_window);
     }
 
     bool Window::get_vsync()
@@ -59,7 +77,7 @@ namespace elemd
         delete this;
     }
 
-    int Window::getWidth()
+    int Window::get_width()
     {
         WindowImpl* impl = getImpl(this);
         int w, h;
@@ -67,7 +85,7 @@ namespace elemd
         return w;
     }
 
-    int Window::getHeight()
+    int Window::get_height()
     {
         WindowImpl* impl = getImpl(this);
         int w, h;
@@ -102,7 +120,7 @@ namespace elemd
         return _context;
     }
 
-    Context* Window::getContext()
+    Context* Window::get_context()
     {
         return _context;
     }
@@ -172,7 +190,7 @@ namespace elemd
 
         if (config.position_x != -1 && config.position_y != -1)
         {
-            setPosition(config.position_x, config.position_y);
+            set_position(config.position_x, config.position_y);
         }
     }
 

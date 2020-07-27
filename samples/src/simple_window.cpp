@@ -4,6 +4,7 @@
 #include <elemd/window.hpp>
 #include <elemd/context.hpp>
 #include <elemd/color.hpp>
+#include <elemd/image.hpp>
 
 int main()
 {
@@ -39,17 +40,24 @@ int main()
     elemd::color c3("#f1faee");
     elemd::color c4("#e63946");
 
-    std::array<elemd::color, 10> cool = {"#54478c", "#2c699a", "#048ba8", "#0db39e", "#16db93",
-                                         "#83e377", "#b9e769", "#efea5a", "#f1c453", "#f29e4c"};
+    std::array<elemd::color, 10> cool = {elemd::color("#54478c"), elemd::color("#2c699a"),
+                                         elemd::color("#048ba8"), elemd::color("#0db39e"),
+                                         elemd::color("#16db93"), elemd::color("#83e377"),
+                                         elemd::color("#b9e769"), elemd::color("#efea5a"),
+                                         elemd::color("#f1c453"), elemd::color("#f29e4c")};
 
     
     // Create Window
     elemd::WindowConfig winc{"UI Application [Vulkan]", WIDTH, HEIGHT};
+    winc.decorated = true;
+    winc.transparent = true;
     winc.vsync = false;
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
-    ctx->set_clear_color(bg);
+    ctx->set_clear_color(elemd::color(0, 0, 0, 0));
 
+
+    elemd::image* img = elemd::image::create("./res/wallpaper.jpg");
 
     float pong = 0;
     float velocity = 1;
@@ -94,9 +102,9 @@ int main()
             ctx->fill_rounded_rect(10, 130, 450, 100, 0, 40, 0, 20);
 
 
-            for (size_t i = 0; i < 22; ++i)
+            for (float i = 0; i < 22; ++i)
             {
-                for (size_t j = 0; j < 8; j++)
+                for (float j = 0; j < 8; j++)
                 {
                     ctx->set_fill_color(cool[rand() % cool.size()]);
                     ctx->fill_rect(10+i*20, 320+j*20, 19, 19);
@@ -112,7 +120,7 @@ int main()
                 velocity = 1;
             }
 
-            pong = pong + render_accumulator * 800.0f * velocity;
+            pong = pong + (float)render_accumulator * 800.0f * velocity;
             
 
             ctx->set_fill_color(c4);
@@ -124,6 +132,7 @@ int main()
         }
     }
     
+    img->destroy();
     win->destroy();
 	return 0;
 }
