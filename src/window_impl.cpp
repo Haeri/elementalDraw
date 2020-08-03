@@ -248,7 +248,7 @@ namespace elemd
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
         winImpl->get_context()->resize_context(width, height);
 
-        for each(auto& var in winImpl->_resize_callbacks)
+        for(auto& var : winImpl->_resize_callbacks)
         {
                 var(width, height);
         }
