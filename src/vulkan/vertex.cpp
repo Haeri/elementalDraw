@@ -2,23 +2,23 @@
 
 namespace elemd
 {
-    VkVertexInputBindingDescription vertex::getBindingDescription()
+    VkVertexInputBindingDescription point_vertex::getBindingDescription()
     {
         VkVertexInputBindingDescription vertexInputBindingDescription;
         vertexInputBindingDescription.binding = 0;
-        vertexInputBindingDescription.stride = sizeof(vertex);
+        vertexInputBindingDescription.stride = sizeof(point_vertex);
         vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
         return vertexInputBindingDescription;
     }
 
-    std::array<VkVertexInputAttributeDescription, 1> vertex::gerAttributeDescriptions()
+    std::array<VkVertexInputAttributeDescription, 1> point_vertex::gerAttributeDescriptions()
     {
         std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions;
         attributeDescriptions[0].location = 0;
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[0].offset = offsetof(vertex, position);
+        attributeDescriptions[0].offset = offsetof(point_vertex, position);
 
         //attributeDescriptions[1].location = 1;
         //attributeDescriptions[1].binding = 0;

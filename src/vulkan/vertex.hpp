@@ -9,7 +9,7 @@
 
 namespace elemd
 {
-    class vertex
+    class point_vertex
     {
     public:
         vec2 position;

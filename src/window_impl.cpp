@@ -24,6 +24,8 @@ namespace elemd
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
     void on_window_resize(GLFWwindow* window, int width, int height);
+    void cursor_position_callback(GLFWwindow* window, double x, double y);
+    void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
     Window* Window::create(WindowConfig config)
     {
@@ -53,6 +55,12 @@ namespace elemd
         WindowImpl* impl = getImpl(this);
         _vsync = vsync;
         _context->resize_context(impl->get_width(), impl->get_height());
+    }
+
+    void Window::add_resize_listener(std::function<void(int, int)> callback)
+    {
+        WindowImpl* impl = getImpl(this);
+        impl->_resize_callbacks.push_back(callback);
     }
 
     void Window::minimize()
@@ -106,7 +114,20 @@ namespace elemd
 
     void Window::poll_events()
     {
+        WindowImpl* impl = getImpl(this);      
         glfwPollEvents();
+
+        if (impl->buttonEvent == 1)
+        {
+            int w_posx, w_posy;
+            glfwGetWindowPos(impl->_glfw_window, &w_posx, &w_posy);
+            glfwSetWindowPos(impl->_glfw_window, w_posx + impl->offset_cpx,
+                             w_posy + impl->offset_cpy);
+            impl->offset_cpx = 0;
+            impl->offset_cpy = 0;
+            impl->cp_x += impl->offset_cpx;
+            impl->cp_y += impl->offset_cpy;
+        }
     }
 
     Context* Window::create_context()
@@ -114,8 +135,10 @@ namespace elemd
         WindowImpl* impl = getImpl(this);
         _context = Context::create(this);
 
-        glfwSetWindowUserPointer(impl->_glfw_window, _context);
+        glfwSetWindowUserPointer(impl->_glfw_window, impl);
         glfwSetWindowSizeCallback(impl->_glfw_window, on_window_resize);
+        glfwSetCursorPosCallback(impl->_glfw_window, cursor_position_callback);
+        glfwSetMouseButtonCallback(impl->_glfw_window, mouse_button_callback);
 
         return _context;
     }
@@ -222,8 +245,47 @@ namespace elemd
         if (width <= 0 || height <= 0)
             return;
 
-        Context* context = (Context*)glfwGetWindowUserPointer(window);
-        context->resize_context(width, height);
+        WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
+        winImpl->get_context()->resize_context(width, height);
+
+        for each(auto& var in winImpl->_resize_callbacks)
+        {
+                var(width, height);
+        }
+    }
+
+
+    
+    
+    void cursor_position_callback(GLFWwindow* window, double x, double y)
+    {
+        WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
+
+        if (winImpl->buttonEvent == 1)
+        {
+            winImpl->offset_cpx = x - winImpl->cp_x;
+            winImpl->offset_cpy = y - winImpl->cp_y;
+        }
+    }
+
+    void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+    {
+        WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
+
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        {
+            winImpl->buttonEvent = 1;
+            double x, y;
+            glfwGetCursorPos(window, &x, &y);
+            winImpl->cp_x = floor(x);
+            winImpl->cp_y = floor(y);
+        }
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+        {
+            winImpl->buttonEvent = 0;
+            winImpl->cp_x = 0;
+            winImpl->cp_y = 0;
+        }
     }
 
 } // namespace elemd

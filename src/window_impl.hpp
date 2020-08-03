@@ -16,9 +16,18 @@ namespace elemd
         GLFWwindow* _glfw_window = nullptr;
         uint32_t _windowCount = 0;
 
+        int buttonEvent;
+        int cp_x;
+        int cp_y;
+        int offset_cpx;
+        int offset_cpy;
+
+        std::vector<std::function<void(int, int)>> _resize_callbacks;
+
         GLFWwindow* getGLFWWindow();
         void create_window(const WindowConfig& config);
         void load_icon(const WindowConfig& config);
+
     };
 
 } // namespace elemd

@@ -17,8 +17,6 @@ int main()
     // Constants
     const int TARGET_RENDER_FPS = 120;
     const int TARGET_POLL_FPS = 30;
-    const int WIDTH = 470;
-    const int HEIGHT = 500;
     
 
     // Variables
@@ -31,6 +29,8 @@ int main()
     double render_accumulator = 0;
     double poll_accumulator = 0;
     int frames = 0;
+    int WIDTH = 470;
+    int HEIGHT = 500;
 
 
     // Color Palette
@@ -49,12 +49,17 @@ int main()
     
     // Create Window
     elemd::WindowConfig winc{"UI Application [Vulkan]", WIDTH, HEIGHT};
-    winc.decorated = true;
+    winc.decorated = false;
     winc.transparent = true;
     winc.vsync = false;
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
     ctx->set_clear_color(elemd::color(0, 0, 0, 0));
+
+    win->add_resize_listener([&](int w, int h) {
+        WIDTH = w;
+        HEIGHT = h;
+    });
 
 
     elemd::image* img = elemd::image::create("./res/wallpaper.jpg");
@@ -88,6 +93,7 @@ int main()
 
         if (render_accumulator >= target_render_ms)
         {
+            /*
             // Rendering
             ctx->set_fill_color(c1);
             ctx->fill_rect(10, 10, 150, 100);
@@ -125,6 +131,29 @@ int main()
 
             ctx->set_fill_color(c4);
             ctx->fill_circle(pong, 270, 30);
+            */
+
+
+            // Title Bar
+            ctx->set_fill_color(elemd::color(28, 28, 30, 200));
+            ctx->fill_rounded_rect(0, 0, WIDTH, 40, 10, 10, 0, 0);
+
+            ctx->set_fill_color(elemd::color(44, 44, 46, 200));
+            ctx->fill_rounded_rect(0, 40, WIDTH, HEIGHT - 40, 0, 0, 10, 10);
+
+
+
+            // Close
+            ctx->set_fill_color(elemd::color(255, 69, 58));
+            ctx->fill_circle(WIDTH - 10 - 20, 20, 8);
+
+            // Fullscreen
+            ctx->set_fill_color(elemd::color(255, 214, 10));
+            ctx->fill_circle(WIDTH - 10*4 - 20, 20, 8);
+
+            // Mninimize
+            ctx->set_fill_color(elemd::color(48, 209, 88));
+            ctx->fill_circle(WIDTH - 10 * 7 - 20, 20, 8);
 
             ctx->draw_frame();
             ++frames;

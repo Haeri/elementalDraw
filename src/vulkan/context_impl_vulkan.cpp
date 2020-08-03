@@ -32,8 +32,17 @@ namespace elemd
     {
     }
 
+    void Context::stroke_rounded_rect(float x, float y, float width, float height,
+                                      float border_radius)
+    {
+    }
+
     void Context::stroke_rounded_rect(float x, float y, float width, float height, float tl,
                                       float tr, float br, float bl)
+    {
+    }
+
+    void Context::draw_point(float x, float y)
     {
     }
 
@@ -494,8 +503,8 @@ namespace elemd
 
         fragShaderModule = new VkShaderModule();
         vertShaderModule = new VkShaderModule();
-        vku::create_shader_module("./elemd_res/shader/shader.frag.spv", fragShaderModule);
-        vku::create_shader_module("./elemd_res/shader/shader.vert.spv", vertShaderModule);
+        vku::create_shader_module("./elemd_res/shader/rounded_rect.frag.spv", fragShaderModule);
+        vku::create_shader_module("./elemd_res/shader/rounded_rect.vert.spv", vertShaderModule);
 
 
         // --------------- Create Pipeline Shader Stage Create Info ---------------
@@ -525,10 +534,11 @@ namespace elemd
                                                           shaderStageCreateInfoFrag};
 
 
+        /*
         VkVertexInputBindingDescription vertexInputBindingDescription = vertex::getBindingDescription();
         std::array<VkVertexInputAttributeDescription, 1> vertexInputAttributeDescription =
             vertex::gerAttributeDescriptions();
-
+            */
         
         // --------------- Create Pipeline Vertex Input State Create Info ---------------
 
@@ -537,6 +547,7 @@ namespace elemd
             VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         pipelineVertexInputStateCreateInfo.pNext = nullptr;
         pipelineVertexInputStateCreateInfo.flags = 0;
+        /*
         pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
         pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions =
             &vertexInputBindingDescription;
@@ -544,6 +555,11 @@ namespace elemd
             (uint32_t)vertexInputAttributeDescription.size();
         pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions =
             vertexInputAttributeDescription.data();
+        */
+        pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
+        pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr; 
+        pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
+        pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
 
 
         // --------------- Create Pipeline Input Assembly State Create Info ---------------
@@ -815,7 +831,7 @@ namespace elemd
             vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
 
             VkDeviceSize offsets[] = { 0 };
-            vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
+            //vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
             vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
             
             vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -947,8 +963,8 @@ namespace elemd
         vkFreeMemory(VulkanSharedInfo::getInstance()->device, indexBufferDeviceMemory, nullptr);
         vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, indexBuffer, nullptr);
 
-        vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory, nullptr);
-        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer, nullptr);  
+//        vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory, nullptr);
+//        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer, nullptr);  
 
         vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool, VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
                              commandBuffers);
@@ -985,8 +1001,10 @@ namespace elemd
 
     void ContextImplVulkan::create_vertex_buffers()
     {
+        /*
         vku::create_and_upload_buffer(rect_vertices, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                                       vertexBuffer, vertexBufferDeviceMemory, commandPool, queue);
+        */
     }
 
      void ContextImplVulkan::create_index_buffers()

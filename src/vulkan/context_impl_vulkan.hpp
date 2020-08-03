@@ -29,8 +29,12 @@ namespace elemd
             vec2 border_radius[4];
         };
 
-        std::vector<vertex> rect_vertices = {{vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
+        //std::vector<vertex> rect_vertices = {{vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
         std::vector<uint32_t> rect_indices = {0, 1, 2, 1, 3, 2};
+        
+        std::vector<point_vertex> point_vertices = {
+            {vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
+
 
         std::vector<uniform_rect> uniforms = {};
 
@@ -58,8 +62,8 @@ namespace elemd
         VkCommandPool commandPool;
         VkCommandBuffer* commandBuffers;
 
-        VkBuffer vertexBuffer = VK_NULL_HANDLE;
-        VkDeviceMemory vertexBufferDeviceMemory;
+        //VkBuffer vertexBuffer = VK_NULL_HANDLE;
+        //VkDeviceMemory vertexBufferDeviceMemory;
         VkBuffer indexBuffer;
         VkDeviceMemory indexBufferDeviceMemory;
 

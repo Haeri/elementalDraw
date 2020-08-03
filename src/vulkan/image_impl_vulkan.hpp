@@ -20,8 +20,12 @@ namespace elemd
         VkDeviceMemory _deviceMemory;
         VkImageView _immageView;
         VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-        VkDevice _device;
+        //VkDevice _device;
         VkSampler _sampler;
+
+        void upload(const VkCommandPool& commandPool, const VkQueue& queue);
+
+        void changeLayout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout);
     };
 
 } // namespace elemd

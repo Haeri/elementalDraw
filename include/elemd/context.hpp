@@ -17,13 +17,14 @@ namespace elemd
     public:
         static Context* create(Window* window);
 
-        void stroke_rect(float x, float y, float width, float height);
-        void stroke_rounded_rect(float x, float y, float width, float height, float radius_nw, float radius_ne,
-                                 float radius_se, float radius_sw);
-        void stroke_line(float x, float y);
+        void stroke_line(float x, float y);                                                                                     // VK_PRIMITIVE_TOPOLOGY_LINE_LIST, line_vertex
+        void stroke_rect(float x, float y, float width, float height);                                                          // 
+        void stroke_rounded_rect(float x, float y, float width, float height, float border_radius);
+        void stroke_rounded_rect(float x, float y, float width, float height, float radius_nw,
+                                 float radius_ne, float radius_se, float radius_sw);
         void stroke_circle(float x, float y, float radius);
         void stroke_ellipse(float x, float y, float width, float height);
-        void stroke_polygon(float x, float y);
+        void stroke_polygon(float x, float y);                                                                                  // VK_PRIMITIVE_TOPOLOGY_LINE_STRIP
 
         void fill_rect(float x, float y, float width, float height);
         void fill_rounded_rect(float x, float y, float width, float height, float border_radius);
@@ -33,6 +34,7 @@ namespace elemd
         void fill_ellipse(float x, float y, float width, float height);
         void fill_polygon(float x, float y);
 
+        void draw_point(float x, float y);                                                                                      // VK_PRIMITIVE_TOPOLOGY_POINT_LIST
         void draw_text(float x, float y, char* text);
         void draw_image(float x, float y, float width, float height, uint32_t image);
         void draw_rounded_image(float x, float y, float width, float height, uint32_t image,

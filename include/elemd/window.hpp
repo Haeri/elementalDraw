@@ -5,6 +5,7 @@
 
 #include <string>
 #include <cstdint>
+#include <functional>
 
 namespace elemd
 {
@@ -47,6 +48,8 @@ namespace elemd
         void set_size(int width, int height);
         void set_vsync(bool vsync);
         
+        void add_resize_listener(std::function<void(int, int)>callback);
+        
         void minimize();
         void maximize();
         void destroy();
@@ -57,6 +60,7 @@ namespace elemd
     protected:
         Window() = default;
         virtual ~Window() = default;
+
 
         Context* _context = nullptr;
         bool _vsync = true;
