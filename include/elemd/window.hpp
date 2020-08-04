@@ -49,7 +49,10 @@ namespace elemd
         void set_vsync(bool vsync);
         
         void add_resize_listener(std::function<void(int, int)>callback);
-        
+        void add_mouse_move_listener(std::function<void(int, int)> callback);
+        void add_mouse_click_listener(std::function<void(int, int, int)> callback);
+        void add_key_listener(std::function<void(int, int, int, int)> callback);
+
         void minimize();
         void maximize();
         void destroy();

@@ -93,7 +93,7 @@ int main()
 
         if (render_accumulator >= target_render_ms)
         {
-            /*
+            
             // Rendering
             ctx->set_fill_color(c1);
             ctx->fill_rect(10, 10, 150, 100);
@@ -131,14 +131,14 @@ int main()
 
             ctx->set_fill_color(c4);
             ctx->fill_circle(pong, 270, 30);
-            */
+            
 
 
             // Title Bar
-            ctx->set_fill_color(elemd::color(28, 28, 30, 200));
+            ctx->set_fill_color(elemd::color(28, 28, 30));
             ctx->fill_rounded_rect(0, 0, WIDTH, 40, 10, 10, 0, 0);
 
-            ctx->set_fill_color(elemd::color(44, 44, 46, 200));
+            ctx->set_fill_color(elemd::color(44, 44, 46));
             ctx->fill_rounded_rect(0, 40, WIDTH, HEIGHT - 40, 0, 0, 10, 10);
 
 

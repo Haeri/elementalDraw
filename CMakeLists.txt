@@ -77,7 +77,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 # ---------------- EXAMPLES ---------------------#
 
 if (ELEMD_BUILD_EXAMPLES)
-    add_subdirectory(samples)
+    add_subdirectory(samples/window_app)
 endif()
 
 

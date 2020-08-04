@@ -24,8 +24,10 @@ namespace elemd
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
     void on_window_resize(GLFWwindow* window, int width, int height);
-    void cursor_position_callback(GLFWwindow* window, double x, double y);
+    void mouse_position_callback(GLFWwindow* window, double x, double y);
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+    void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 
     Window* Window::create(WindowConfig config)
     {
@@ -61,6 +63,24 @@ namespace elemd
     {
         WindowImpl* impl = getImpl(this);
         impl->_resize_callbacks.push_back(callback);
+    }
+
+    void Window::add_mouse_move_listener(std::function<void(int, int)> callback)
+    {
+        WindowImpl* impl = getImpl(this);
+        impl->_mouse_move_callbacks.push_back(callback);
+    }
+
+    void Window::add_mouse_click_listener(std::function<void(int, int, int)> callback)
+    {
+        WindowImpl* impl = getImpl(this);
+        impl->_mouse_click_callbacks.push_back(callback);
+    }
+    
+    void Window::add_key_listener(std::function<void(int, int, int, int)> callback)
+    {
+        WindowImpl* impl = getImpl(this);
+        impl->_key_callbacks.push_back(callback);
     }
 
     void Window::minimize()
@@ -137,8 +157,9 @@ namespace elemd
 
         glfwSetWindowUserPointer(impl->_glfw_window, impl);
         glfwSetWindowSizeCallback(impl->_glfw_window, on_window_resize);
-        glfwSetCursorPosCallback(impl->_glfw_window, cursor_position_callback);
+        glfwSetCursorPosCallback(impl->_glfw_window, mouse_position_callback);
         glfwSetMouseButtonCallback(impl->_glfw_window, mouse_button_callback);
+        glfwSetKeyCallback(impl->_glfw_window, key_callback);
 
         return _context;
     }
@@ -240,6 +261,16 @@ namespace elemd
         stbi_image_free(icon[0].pixels);
     }
 
+
+
+
+
+
+
+
+
+    /* ------------------------ EVENTS ------------------------ */
+
     void on_window_resize(GLFWwindow* window, int width, int height)
     {
         if (width <= 0 || height <= 0)
@@ -248,23 +279,32 @@ namespace elemd
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
         winImpl->get_context()->resize_context(width, height);
 
+        std::cout << "event: resize "
+                  << "width: " << width << " height: " << height << std::endl;
+
         for(auto& var : winImpl->_resize_callbacks)
         {
                 var(width, height);
         }
     }
-
-
     
-    
-    void cursor_position_callback(GLFWwindow* window, double x, double y)
+    void mouse_position_callback(GLFWwindow* window, double x, double y)
     {
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
 
+        /*
         if (winImpl->buttonEvent == 1)
         {
             winImpl->offset_cpx = x - winImpl->cp_x;
             winImpl->offset_cpy = y - winImpl->cp_y;
+        }
+        */
+
+        std::cout << "event: mouse_position " << "x: " << x << " y: " << y << std::endl;
+
+        for (auto& var : winImpl->_mouse_move_callbacks)
+        {
+            var(x, y);
         }
     }
 
@@ -272,6 +312,7 @@ namespace elemd
     {
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
 
+        /*
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
         {
             winImpl->buttonEvent = 1;
@@ -285,6 +326,29 @@ namespace elemd
             winImpl->buttonEvent = 0;
             winImpl->cp_x = 0;
             winImpl->cp_y = 0;
+        }
+        */
+        std::cout << "event: mouse_button "
+                  << "button: " << button << " action: " << action << " mods: " << mods
+                  << std::endl;
+
+        for (auto& var : winImpl->_mouse_click_callbacks)
+        {
+            var(button, action, mods);
+        }
+    }
+
+    void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
+
+        std::cout << "event: key "
+                  << "key: " << key << " scancode: " << scancode << " action: " << action
+                  << " mods: " << mods << std::endl;
+
+        for (auto& var : winImpl->_key_callbacks)
+        {
+            var(key, scancode, action, mods);
         }
     }
 

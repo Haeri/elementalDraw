@@ -23,6 +23,9 @@ namespace elemd
         int offset_cpy;
 
         std::vector<std::function<void(int, int)>> _resize_callbacks;
+        std::vector<std::function<void(int, int)>> _mouse_move_callbacks;
+        std::vector<std::function<void(int, int, int)>> _mouse_click_callbacks;
+        std::vector<std::function<void(int, int, int, int)>> _key_callbacks;
 
         GLFWwindow* getGLFWWindow();
         void create_window(const WindowConfig& config);
