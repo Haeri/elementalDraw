@@ -5,7 +5,8 @@ file(GLOB_RECURSE SOURCE_FILES
         src/*.hpp
         src/*.cpp)
 
-add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+#add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
 # Make res folder available inside the cmake build
 set (lib_src "${CMAKE_SOURCE_DIR}/res")
