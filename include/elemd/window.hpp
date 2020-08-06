@@ -1,7 +1,8 @@
 #ifndef ELEMD_WINDOW_HPP
 #define ELEMD_WINDOW_HPP
 
-#include <elemd/elemental_draw.hpp>
+#include "elemd/elemental_draw.hpp"
+#include "elemd/event.hpp"
 
 #include <string>
 #include <cstdint>
@@ -49,8 +50,8 @@ namespace elemd
         void set_vsync(bool vsync);
         
         void add_resize_listener(std::function<void(int, int)>callback);
-        void add_mouse_move_listener(std::function<void(int, int)> callback);
-        void add_mouse_click_listener(std::function<void(int, int, int)> callback);
+        void add_mouse_move_listener(std::function<void(mouse_move_event)> callback);
+        void add_mouse_click_listener(std::function<void(mouse_button_event)> callback);
         void add_key_listener(std::function<void(int, int, int, int)> callback);
 
         void minimize();

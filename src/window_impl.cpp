@@ -21,13 +21,16 @@ namespace elemd
         return (const WindowImpl*)ptr;
     }
 
-    /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
+
+    /* ------------------------ FUNCTION DECLARATION ------------------------ */
 
     void on_window_resize(GLFWwindow* window, int width, int height);
     void mouse_position_callback(GLFWwindow* window, double x, double y);
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
     void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    
 
+    /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
     Window* Window::create(WindowConfig config)
     {
@@ -65,16 +68,16 @@ namespace elemd
         impl->_resize_callbacks.push_back(callback);
     }
 
-    void Window::add_mouse_move_listener(std::function<void(int, int)> callback)
+    void Window::add_mouse_move_listener(std::function<void(mouse_move_event)> callback)
     {
         WindowImpl* impl = getImpl(this);
         impl->_mouse_move_callbacks.push_back(callback);
     }
 
-    void Window::add_mouse_click_listener(std::function<void(int, int, int)> callback)
+    void Window::add_mouse_click_listener(std::function<void(mouse_button_event)> callback)
     {
         WindowImpl* impl = getImpl(this);
-        impl->_mouse_click_callbacks.push_back(callback);
+        impl->_mouse_button_callbacks.push_back(callback);
     }
     
     void Window::add_key_listener(std::function<void(int, int, int, int)> callback)
@@ -136,18 +139,6 @@ namespace elemd
     {
         WindowImpl* impl = getImpl(this);      
         glfwPollEvents();
-
-        if (impl->buttonEvent == 1)
-        {
-            int w_posx, w_posy;
-            glfwGetWindowPos(impl->_glfw_window, &w_posx, &w_posy);
-            glfwSetWindowPos(impl->_glfw_window, w_posx + impl->offset_cpx,
-                             w_posy + impl->offset_cpy);
-            impl->offset_cpx = 0;
-            impl->offset_cpy = 0;
-            impl->cp_x += impl->offset_cpx;
-            impl->cp_y += impl->offset_cpy;
-        }
     }
 
     Context* Window::create_context()
@@ -304,7 +295,7 @@ namespace elemd
 
         for (auto& var : winImpl->_mouse_move_callbacks)
         {
-            var(x, y);
+            var({x, y});
         }
     }
 
@@ -332,9 +323,12 @@ namespace elemd
                   << "button: " << button << " action: " << action << " mods: " << mods
                   << std::endl;
 
-        for (auto& var : winImpl->_mouse_click_callbacks)
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+
+        for (auto& var : winImpl->_mouse_button_callbacks)
         {
-            var(button, action, mods);
+            var({(mouse_button)button, (mouse_action)action, (mouse_mod)mods, x, y});
         }
     }
 

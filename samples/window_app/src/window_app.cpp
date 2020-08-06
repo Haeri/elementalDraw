@@ -7,7 +7,7 @@
 #include <elemd/image.hpp>
 
 // Constants
-const int TARGET_RENDER_FPS = 120;
+const int TARGET_RENDER_FPS = 60;
 const int TARGET_POLL_FPS = 30;
 
 // Variables
@@ -23,6 +23,10 @@ int frames = 0;
 int WIDTH = 470;
 int HEIGHT = 500;
 bool reload = false;
+
+double mouse_x = -100;
+double mouse_y = -100;
+bool mouse_click = false;
 
 // Color Palette
 elemd::color bg("#1d3557");
@@ -43,20 +47,37 @@ extern "C"
     { 
     }
 
+    __declspec(dllexport) void reload_notify()
+    {
+        reload = true;
+    }
+
     __declspec(dllexport) int app_run(elemd::Window* win, elemd::Context* ctx)
     {
-        ctx->set_clear_color(elemd::color(0, 0, 0, 0));
+        WIDTH = win->get_width();
+        HEIGHT = win->get_height();
+
+        ctx->set_clear_color(elemd::color(20, 20, 30, 255));
 
         win->add_resize_listener([&](int w, int h) {
             WIDTH = w;
             HEIGHT = h;
         });
 
-        win->add_key_listener([&](int key, int scancode, int action, int mods) {
-            if (key == 82 && action == 1)
+        win->add_mouse_click_listener([&](elemd::mouse_button_event event) { 
+            if (event.button == elemd::MOUSE_BUTTON_LEFT && (event.action == elemd::MOUSE_ACTION_PRESS || event.action == elemd::MOUSE_ACTION_REPEAT))
             {
-                reload = true;
+                mouse_click = true;
             }
+            else
+            {
+                mouse_click = false;
+            }
+        });
+
+         win->add_mouse_move_listener([&](elemd::mouse_move_event event) {            
+            mouse_x = event.x;
+            mouse_y = event.y;
         });
 
         elemd::image* img = elemd::image::create("./res/wallpaper.jpg");
@@ -89,45 +110,7 @@ extern "C"
             }
 
             if (render_accumulator >= target_render_ms)
-            {
-
-                // Rendering
-                ctx->set_fill_color(c1);
-                ctx->fill_rect(10, 10, 150, 100);
-
-                ctx->set_fill_color(c2);
-                ctx->fill_rounded_rect(180, 10, 150, 100, 20);
-
-                ctx->set_fill_color(c3);
-                ctx->fill_circle(400, 60, 50);
-
-                ctx->set_fill_color(c1);
-                ctx->fill_rounded_rect(10, 130, 450, 100, 0, 40, 0, 20);
-
-                for (float i = 0; i < 22; ++i)
-                {
-                    for (float j = 0; j < 8; j++)
-                    {
-                        ctx->set_fill_color(cool[rand() % cool.size()]);
-                        ctx->fill_rect(10 + i * 20, 320 + j * 20, 19, 19);
-                    }
-                }
-
-                if (pong > WIDTH - 30)
-                {
-                    velocity = -1;
-                }
-                else if (pong <= 0 + 30)
-                {
-                    velocity = 1;
-                }
-
-                pong = pong + (float)render_accumulator * 800.0f * velocity;
-
-                ctx->set_fill_color(c4);
-                ctx->fill_circle(pong, 270, 30);
-
-                /*
+            {   
                 // Title Bar
                 ctx->set_fill_color(elemd::color(28, 28, 30));
                 ctx->fill_rounded_rect(0, 0, WIDTH, 40, 10, 10, 0, 0);
@@ -146,10 +129,69 @@ extern "C"
                 // Mninimize
                 ctx->set_fill_color(elemd::color(48, 209, 88));
                 ctx->fill_circle(WIDTH - 10 * 7 - 20, 20, 8);
-                */
 
+
+
+                int top_offset = 50;
+
+                // Rendering
+                ctx->set_fill_color(c1);
+                ctx->fill_rect(10, 10+ top_offset, 150, 100);
+
+                ctx->set_fill_color(c2);
+                ctx->fill_rounded_rect(180, 10+ top_offset, 150, 100, 20);
+
+                ctx->set_fill_color(c3);
+                ctx->fill_circle(400, 60+ top_offset, 50);
+
+                ctx->set_fill_color(c4);
+                ctx->fill_rounded_rect(10, 130+ top_offset, 450, 100, 0, 0, 0, 0);
+
+                int grid_x = 32;
+                int grid_y = 29;
+
+                int tmp = 200;
+
+                for (float i = 0; i < grid_x; ++i)
+                {
+                    for (float j = 0; j < grid_y; j++)
+                    {
+                        ctx->set_fill_color(cool[rand() % cool.size()]);
+                        ctx->fill_rounded_rect(10 + i * 20, 320 + j * 20 + top_offset, 19, 19, 19/2.0f);
+                    }
+                }
+
+
+                int ball_radius = 30;
+                if (pong > WIDTH - ball_radius)
+                {
+                    velocity = -1;
+                }
+                else if (pong <= ball_radius)
+                {
+                    velocity = 1;
+                }
+
+                pong = pong + (float)render_accumulator * 800.0f * velocity;
+
+                ctx->set_fill_color(elemd::color(1.0f, 0.0f, 0.f));
+                ctx->fill_circle(pong, 270 + top_offset, ball_radius);
+                
+
+                if (mouse_click)
+                {
+                    ctx->set_fill_color(elemd::color(210, 20, 30, 0));
+                    ctx->fill_circle(mouse_x, mouse_y, 20);
+                }
+                else
+                {
+                    ctx->set_fill_color(elemd::color(30, 200, 30));
+                    ctx->fill_circle(mouse_x, mouse_y, 15);
+                }
+                
 
                 ctx->draw_frame();
+
                 ++frames;
                 render_accumulator = 0;
             }

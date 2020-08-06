@@ -16,15 +16,17 @@ namespace elemd
         GLFWwindow* _glfw_window = nullptr;
         uint32_t _windowCount = 0;
 
+        /*
         int buttonEvent;
         int cp_x;
         int cp_y;
         int offset_cpx;
         int offset_cpy;
+        */
 
         std::vector<std::function<void(int, int)>> _resize_callbacks;
-        std::vector<std::function<void(int, int)>> _mouse_move_callbacks;
-        std::vector<std::function<void(int, int, int)>> _mouse_click_callbacks;
+        std::vector<std::function<void(mouse_move_event)>> _mouse_move_callbacks;
+        std::vector<std::function<void(mouse_button_event)>> _mouse_button_callbacks;
         std::vector<std::function<void(int, int, int, int)>> _key_callbacks;
 
         GLFWwindow* getGLFWWindow();
