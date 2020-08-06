@@ -28,7 +28,7 @@ namespace elemd
     void mouse_position_callback(GLFWwindow* window, double x, double y);
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
     void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    
+    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
@@ -62,7 +62,7 @@ namespace elemd
         _context->resize_context(impl->get_width(), impl->get_height());
     }
 
-    void Window::add_resize_listener(std::function<void(int, int)> callback)
+    void Window::add_resize_listener(std::function<void(resize_event)> callback)
     {
         WindowImpl* impl = getImpl(this);
         impl->_resize_callbacks.push_back(callback);
@@ -80,10 +80,16 @@ namespace elemd
         impl->_mouse_button_callbacks.push_back(callback);
     }
     
-    void Window::add_key_listener(std::function<void(int, int, int, int)> callback)
+    void Window::add_key_listener(std::function<void(key_event)> callback)
     {
         WindowImpl* impl = getImpl(this);
         impl->_key_callbacks.push_back(callback);
+    }
+
+    void Window::add_scroll_listener(std::function<void(scroll_event)> callback)
+    {
+        WindowImpl* impl = getImpl(this);
+        impl->_scroll_callbacks.push_back(callback);
     }
 
     void Window::minimize()
@@ -151,6 +157,7 @@ namespace elemd
         glfwSetCursorPosCallback(impl->_glfw_window, mouse_position_callback);
         glfwSetMouseButtonCallback(impl->_glfw_window, mouse_button_callback);
         glfwSetKeyCallback(impl->_glfw_window, key_callback);
+        glfwSetScrollCallback(impl->_glfw_window, scroll_callback);
 
         return _context;
     }
@@ -273,9 +280,9 @@ namespace elemd
         std::cout << "event: resize "
                   << "width: " << width << " height: " << height << std::endl;
 
-        for(auto& var : winImpl->_resize_callbacks)
+        for (auto& var : winImpl->_resize_callbacks)
         {
-                var(width, height);
+            var({width, height});
         }
     }
     
@@ -328,7 +335,7 @@ namespace elemd
 
         for (auto& var : winImpl->_mouse_button_callbacks)
         {
-            var({(mouse_button)button, (mouse_action)action, (mouse_mod)mods, x, y});
+            var({(mouse_button)button, (input_action)action, (mouse_mod)mods, x, y});
         }
     }
 
@@ -342,7 +349,20 @@ namespace elemd
 
         for (auto& var : winImpl->_key_callbacks)
         {
-            var(key, scancode, action, mods);
+            var({(keyboard_key)key, scancode, (input_action)action, (keyboard_mod)mods});
+        }
+    }
+
+    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+    {
+        WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
+
+        std::cout << "event: scroll "
+                  << "xoffset: " << xoffset << " yoffset: " << yoffset << std::endl;
+
+        for (auto& var : winImpl->_scroll_callbacks)
+        {
+            var({xoffset, yoffset});
         }
     }
 

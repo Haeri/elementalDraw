@@ -30,9 +30,6 @@ int WIDTH = 470;
 int HEIGHT = 500;
 
 
-int reload_module();
-void init_window();
-
 class SharedLibrary : public IReloadableFile
 {
 public:
@@ -154,6 +151,17 @@ int loadFunctions(SharedLibrary& app)
     }
 }
 
+void init_window()
+{
+    // Create Window
+    elemd::WindowConfig winc{"UI Application [Vulkan]", WIDTH, HEIGHT};
+    // winc.decorated = false;
+    // winc.transparent = true;
+    winc.vsync = false;
+    win = elemd::Window::create(winc);
+    ctx = win->create_context();
+}
+
 int main(void)
 {
 #if defined(_WIN32) && !defined(NDEBUG)
@@ -192,7 +200,6 @@ int main(void)
                 success = true;
                 break;
             }
-        
         }
 
         if (!success)
@@ -202,76 +209,8 @@ int main(void)
         }
     }
 
-    /*
-    library = load_shared_library("window_app");
-
-    if (library == nullptr)
-    {
-        std::cerr << "Could not load the app module!" << std::endl;
-        return 1;
-    }
-
-    app_init_address = (app_init)get_function(library, "app_init");
-    app_run_address = (app_run)get_function(library, "app_run");
-
-    if (nullptr == app_init_address || nullptr == app_run_address)
-    {
-        std::cerr << "Coul not load app functions!" << std::endl;
-        return 1;
-    }
-
-    init_window();
-    app_init_address();
-
-    while (app_run_address(win, ctx) != 0)
-    {
-        std::cout << "reloading.." << std::endl;
-        
-        if (reload_module() != 0)
-        {
-            return 1;
-        }   
-    }
-  */ 
+    
     FileWatch::stopCheckInterval();
 
     return 0;
-}
-/*
-int reload_module() 
-{
-    if (library != NULL)
-    {
-        free_shared_library(library);
-    }
-
-    library = load_shared_library("window_app");
-
-    if (library == NULL)
-    {
-        std::cerr << "Could not load the app module!" << std::endl;
-        return 1;
-    }
-    
-    app_run_address = (app_run)get_function(library, "app_run");
-
-    if (nullptr == app_run_address)
-    {
-        std::cerr << "Coul not load app functions!" << std::endl;
-        return 1;
-    }
-    
-    return 0;
-}
-*/
-
-void init_window()
-{
-    // Create Window
-    elemd::WindowConfig winc{"UI Application [Vulkan]", WIDTH, HEIGHT};
-    // winc.decorated = false;
-    // winc.transparent = true;
-    winc.vsync = false;
-    win = elemd::Window::create(winc);
-    ctx = win->create_context();
 }

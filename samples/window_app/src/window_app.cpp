@@ -59,13 +59,13 @@ extern "C"
 
         ctx->set_clear_color(elemd::color(20, 20, 30, 255));
 
-        win->add_resize_listener([&](int w, int h) {
-            WIDTH = w;
-            HEIGHT = h;
+        win->add_resize_listener([&](elemd::resize_event event) {
+            WIDTH = event.width;
+            HEIGHT = event.height;
         });
 
         win->add_mouse_click_listener([&](elemd::mouse_button_event event) { 
-            if (event.button == elemd::MOUSE_BUTTON_LEFT && (event.action == elemd::MOUSE_ACTION_PRESS || event.action == elemd::MOUSE_ACTION_REPEAT))
+            if (event.button == elemd::MOUSE_BUTTON_LEFT && (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT))
             {
                 mouse_click = true;
             }
