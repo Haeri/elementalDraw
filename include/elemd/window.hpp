@@ -54,6 +54,7 @@ namespace elemd
         void add_mouse_click_listener(std::function<void(mouse_button_event)> callback);
         void add_key_listener(std::function<void(key_event)> callback);
         void add_scroll_listener(std::function<void(scroll_event)> callback);
+        void reset_listener();
 
         void minimize();
         void maximize();

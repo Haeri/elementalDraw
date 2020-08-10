@@ -92,6 +92,16 @@ namespace elemd
         impl->_scroll_callbacks.push_back(callback);
     }
 
+    void Window::reset_listener()
+    {
+        WindowImpl* impl = getImpl(this);
+        impl->_resize_callbacks.clear();
+        impl->_mouse_move_callbacks.clear();
+        impl->_mouse_button_callbacks.clear();
+        impl->_key_callbacks.clear();
+        impl->_scroll_callbacks.clear();
+    }
+
     void Window::minimize()
     {
         WindowImpl* impl = getImpl(this);

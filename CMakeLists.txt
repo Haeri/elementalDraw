@@ -79,6 +79,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 if (ELEMD_BUILD_EXAMPLES)
     add_subdirectory(samples/runtime)
     add_subdirectory(samples/window_app)
+    add_subdirectory(samples/brick_breaker)
 endif()
 
 

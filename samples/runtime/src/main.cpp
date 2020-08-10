@@ -26,7 +26,7 @@ app_runf app_run;
 elemd::Window* win;
 elemd::Context* ctx;
 
-int WIDTH = 470;
+int WIDTH = 420;
 int HEIGHT = 500;
 
 
@@ -170,7 +170,8 @@ int main(void)
     _CrtSetDbgFlag(flag);
 #endif
 
-    SharedLibrary app("../window_app/Debug/window_app");
+    //SharedLibrary app("../window_app/Debug/window_app");
+    SharedLibrary app("../brick_breaker/Debug/brick_breaker");
     app.load();
     if (loadFunctions(app) != 0)
     {
@@ -180,7 +181,9 @@ int main(void)
 
     app.setReloadCallback(reload_notify);
 
-    FileWatch::addToWatchList("../window_app/Debug/window_app.dll", &app);
+    //FileWatch::addToWatchList("../window_app/Debug/window_app.dll", &app);
+    FileWatch::addToWatchList("../brick_breaker/Debug/brick_breaker.dll", &app);
+    
     FileWatch::startCheckInterval();
 
     app_init();
@@ -207,6 +210,9 @@ int main(void)
             std::cerr << "could not revive the aplication" << std::endl;
             return 1;
         }
+
+        win->reset_listener();
+
     }
 
     

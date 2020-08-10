@@ -107,6 +107,7 @@ extern "C"
             {
                 // Poll Events
                 win->poll_events();
+                poll_accumulator = 0;
             }
 
             if (render_accumulator >= target_render_ms)

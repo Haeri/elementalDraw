@@ -38,12 +38,22 @@ namespace elemd
                         start.y() + percent * (target.y() - start.y()));
     }
 
-    float vec2::x()
+    float vec2::get_x()
     {
         return _x;
     }
 
-    float vec2::y()
+    float vec2::get_y()
+    {
+        return _y;
+    }
+
+    float& vec2::x()
+    {
+        return _x;
+    }
+
+    float& vec2::y()
     {
         return _y;
     }
