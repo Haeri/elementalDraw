@@ -28,7 +28,6 @@ bool reload = false;
 // Color Palette
 elemd::color bg_color(30, 30, 30);
 elemd::color puck_color("#00bcd4");
-elemd::color brick_color("#24a19c");
 elemd::color ball_color("#d92027");
 
 
@@ -153,7 +152,7 @@ void loadLevel()
             {
             case BRICK:
                 bricks.push_back(
-                    {BRICK, elemd::vec2(10 + i * 40, 10 + j * 20), 1, elemd::color("#3797a4")});
+                    {BRICK, elemd::vec2(10 + i * 40, 10 + j * 20), 1, elemd::color("#b6eb7a")});
                 break;
             case DOUBLE_BRICK:
                 bricks.push_back({DOUBLE_BRICK, elemd::vec2(10 + i * 40, 10 + j * 20), 2,

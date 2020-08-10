@@ -1,6 +1,7 @@
 #include "file_watch.hpp"
 
 #include <iostream>
+#include <sys/stat.h>
 
 std::atomic<bool> FileWatch::_checking = false;
 std::atomic<bool> FileWatch::_shouldRun = false;
