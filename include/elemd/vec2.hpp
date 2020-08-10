@@ -41,8 +41,10 @@ namespace elemd
 
         friend std::ostream& operator<<(std::ostream& os, vec2 m);
 
-        float x();
-        float y();
+        float get_x();
+        float get_y();
+        float& x();
+        float& y();
 
     private:
         float _x;

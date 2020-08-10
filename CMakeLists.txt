@@ -8,7 +8,7 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 # Options
-option(BUILD_SHARED_LIBS "Build as shared/dynamic library" OFF)
+option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
 
 # Settings
@@ -77,7 +77,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 # ---------------- EXAMPLES ---------------------#
 
 if (ELEMD_BUILD_EXAMPLES)
+    add_subdirectory(samples/runtime)
     add_subdirectory(samples/window_app)
+    add_subdirectory(samples/brick_breaker)
 endif()
 
 

@@ -1,4 +1,4 @@
-set(PROJECT_NAME window_app)
+set(PROJECT_NAME brick_breaker)
 project(${PROJECT_NAME})
 
 file(GLOB_RECURSE SOURCE_FILES
