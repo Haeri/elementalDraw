@@ -11,5 +11,6 @@ file(GLOB_RECURSE SOURCE_FILES
         src/*.c)
 
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
+set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(${PROJECT_NAME} PUBLIC include)

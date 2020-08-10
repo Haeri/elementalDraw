@@ -26,8 +26,8 @@ int frames = 0;
 bool reload = false;
 
 // Color Palette
-elemd::color bg_color("#1b262c");
-elemd::color puck_color("#ff5f40");
+elemd::color bg_color(30, 30, 30);
+elemd::color puck_color("#00bcd4");
 elemd::color brick_color("#24a19c");
 elemd::color ball_color("#d92027");
 
@@ -45,10 +45,11 @@ struct brick
 {
     brick_types type;
     elemd::vec2 pos;
-    int hit = 0;
+    int hitpoints = 0;
     elemd::color color;
 };
 
+int lifes = 3;
 float brick_width = 38;
 float brick_height = 18;
 
@@ -98,8 +99,8 @@ void brickToBall()
             {
                 ball_velocity.x() *= -1;
             }
-            --b.hit;
-            if (b.hit <= 0)
+            --b.hitpoints;
+            if (b.hitpoints <= 0)
             {
                 bricks.erase(bricks.begin() + i);
             }
@@ -128,15 +129,21 @@ void puckToBall()
     }
 }
 
-void loadLevel()
+void resetBall()
 {
-    bricks.clear();
-
-    puck_pos.y() = HEIGHT - 10 - puck_height;
+    puck_pos.y() = HEIGHT - 15 - puck_height;
     puck_pos.x() = WIDTH / 2.0f - puck_width / 2.0f;
 
     ball_pos = elemd::vec2(WIDTH / 2.0f - ball_radius, HEIGHT - 10 - puck_height - 20);
     ball_velocity = elemd::vec2(1) * ball_speed;
+}
+
+void loadLevel()
+{
+    bricks.clear();
+    lifes = 3;
+
+    resetBall();
 
     for (int i = 0; i < MAP_ELEMENTS_X; ++i)
     {
@@ -160,6 +167,7 @@ void loadLevel()
         }
     }
 }
+
 
 extern "C"
 {
@@ -245,6 +253,7 @@ extern "C"
                 ctx->set_fill_color(puck_color);
                 ctx->fill_rect(puck_pos.x(), puck_pos.y(), puck_width, puck_height);
 
+
                 // Ball
 
                 ball_pos = ball_pos + ball_velocity;
@@ -265,7 +274,15 @@ extern "C"
                 }
                 else if (ball_pos.get_y() > HEIGHT - ball_radius)
                 {
-                    loadLevel();
+                    --lifes;
+                    if (lifes <= 0)
+                    {
+                        loadLevel();
+                    }
+                    else
+                    {
+                        resetBall();
+                    }
                 }
                 
                 brickToBall();
@@ -274,6 +291,13 @@ extern "C"
                 ctx->set_fill_color(ball_color);
                 ctx->fill_circle(ball_pos.x(), ball_pos.y(), ball_radius);
 
+
+                // Lifes
+                ctx->set_fill_color(ball_color);
+                for (int i = 0; i < lifes; ++i)
+                {
+                    ctx->fill_circle(WIDTH - 5 - (i*8), HEIGHT - 5, 3);    
+                }
 
                 ctx->draw_frame();
 
