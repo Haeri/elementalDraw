@@ -2,6 +2,7 @@
 #define ELEMD_WINDOW_IMPL_HPP
 
 #include "elemd/window.hpp"
+#include "elemd/event.hpp"
 #include <GLFW/glfw3.h>
 
 namespace elemd

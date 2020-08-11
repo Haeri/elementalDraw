@@ -36,7 +36,7 @@ public:
 #if defined(_MSC_VER) // Microsoft compiler
         return (T)GetProcAddress((HINSTANCE)_library, function_name.c_str());
 #elif defined(__GNUC__) // GNU compiler
-        return (T*)dlsym(_library, function_name.c_str());
+        return (T)dlsym(_library, function_name.c_str());
 #endif
     }
 

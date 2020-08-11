@@ -1,5 +1,3 @@
-
-
 #include <elemd/window.hpp>
 #include <elemd/context.hpp>
 
