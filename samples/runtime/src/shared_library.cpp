@@ -1,5 +1,4 @@
 #include "shared_library.hpp"
-#pragma once
 
 SharedLibrary::SharedLibrary(std::string libraryName)
 {

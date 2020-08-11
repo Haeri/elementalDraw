@@ -1,8 +1,9 @@
 #ifndef ELEMD_WINDOW_IMPL_HPP
 #define ELEMD_WINDOW_IMPL_HPP
 
+#include <vector>
+
 #include "elemd/window.hpp"
-#include "elemd/event.hpp"
 #include <GLFW/glfw3.h>
 
 namespace elemd
