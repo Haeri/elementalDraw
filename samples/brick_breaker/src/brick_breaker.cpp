@@ -48,6 +48,10 @@ enum brick_types
     DIAMOND_BRICK = 3
 };
 
+enum power_up_type { 
+    EXTTRA_LIFE = 0 
+};
+
 struct brick
 {
     brick_types type;
@@ -56,14 +60,22 @@ struct brick
     elemd::color color;
 };
 
+struct power_up
+{
+    power_up_type type;
+    elemd::vec2 pos;
+    elemd::color color;
+};
+
 int lifes = 3;
+int level = 0;
 float brick_width = 38;
 float brick_height = 18;
 
 elemd::vec2 puck_pos;
 elemd::vec2 puck_velocity;
 float puck_speed = 100.0f;
-float puck_width = 60;
+float puck_width = 300;
 float puck_height = 10;
 
 elemd::vec2 ball_pos;
@@ -77,18 +89,12 @@ int HEIGHT = 500;
 const int MAP_ELEMENTS_X = 10;
 const int MAP_ELEMENTS_Y = 8;
 
-int brick_map[MAP_ELEMENTS_Y][MAP_ELEMENTS_X] = {
-    {0, 0, 1, 1, 1, 1, 1, 1, 0, 0},
-    {0, 1, 1, 1, 2, 2, 1, 1, 1, 0}, 
-    {1, 1, 1, 2, 3, 3, 2, 1, 1, 1},
-    {1, 1, 1, 1, 2, 2, 1, 1, 1, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 
-    {1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-    {0, 1, 0, 1, 0, 1, 0, 1, 0, 0}
-};
-
+std::vector<std::vector<int>> levels;
 std::vector<brick> bricks;
+std::vector<power_up> power_pus;
+
+
+void loadLevel();
 
 void brickToBall()
 {
@@ -111,7 +117,18 @@ void brickToBall()
             --b.hitpoints;
             if (b.hitpoints <= 0)
             {
+                if (b.type == BRICK)
+                {
+                    power_pus.push_back({EXTTRA_LIFE, b.pos, elemd::color(200, 20, 20)});
+                }
                 bricks.erase(bricks.begin() + i);
+
+                // Check win state
+                if (bricks.size() <= 0)
+                {
+                    ++level;
+                    loadLevel();
+                }
             }
             return;
         }
@@ -147,18 +164,23 @@ void resetBall()
     ball_velocity = elemd::vec2(1) * ball_speed;
 }
 
+void gameReset()
+{
+    lifes = 5;
+    loadLevel();
+}
+
 void loadLevel()
 {
     bricks.clear();
-    lifes = 3;
-
+    power_pus.clear();
     resetBall();
 
     for (int i = 0; i < MAP_ELEMENTS_X; ++i)
     {
         for (int j = 0; j < MAP_ELEMENTS_Y; j++)
         {
-            switch (brick_map[j][i])
+            switch (levels[level][j * MAP_ELEMENTS_X + i])
             {
             case BRICK:
                 bricks.push_back(
@@ -181,7 +203,24 @@ void loadLevel()
 extern "C"
 {
     EXPORT_API void app_init()
-    { 
+    {
+        levels.push_back({0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
+                          0, 1, 1, 1, 2, 2, 1, 1, 1, 0,
+                          1, 1, 1, 2, 3, 3, 2, 1, 1, 1,
+                          1, 1, 1, 1, 2, 2, 1, 1, 1, 1,
+                          1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                          1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
+                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 1, 0, 1, 0, 1, 0, 1, 0, 0});
+
+        levels.push_back({0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
+                          0, 1, 1, 1, 2, 2, 1, 1, 1, 0,
+                          1, 1, 1, 2, 3, 3, 2, 1, 1, 1,
+                          1, 1, 1, 1, 2, 2, 1, 1, 1, 1,
+                          1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                          1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
+                          2, 3, 2, 3, 2, 3, 2, 3, 2, 3,
+                          0, 1, 0, 0, 0, 1, 0, 0, 0, 0});
     }
 
     EXPORT_API void reload_notify()
@@ -263,6 +302,28 @@ extern "C"
                 ctx->fill_rect(puck_pos.x(), puck_pos.y(), puck_width, puck_height);
 
 
+                // Power Up
+
+                int pcnt = 0;
+                for (power_up& pu : power_pus)
+                {
+                    pu.pos = pu.pos + elemd::vec2(0, 80) * render_accumulator;
+
+
+                    ctx->set_fill_color(pu.color);
+                    ctx->fill_rounded_rect(pu.pos.x(), pu.pos.y(), 20, 10, 1);
+                }
+
+                for (int i = power_pus.size()-1; i >= 0; --i)
+                {
+                    if (power_pus[i].pos.y() > HEIGHT)
+                    {
+                        power_pus.erase(power_pus.begin() + i);
+                    }
+
+                }
+
+
                 // Ball
 
                 ball_pos = ball_pos + ball_velocity;
@@ -286,13 +347,15 @@ extern "C"
                     --lifes;
                     if (lifes < 0)
                     {
-                        loadLevel();
+                        gameReset();
                     }
                     else
                     {
                         resetBall();
                     }
                 }
+
+                
                 
                 brickToBall();
                 puckToBall();
