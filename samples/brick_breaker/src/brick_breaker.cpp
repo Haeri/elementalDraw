@@ -6,6 +6,7 @@
 
 
 #include <iostream>
+#include <vector>
 #include <array>
 #include <math.h> 
 
