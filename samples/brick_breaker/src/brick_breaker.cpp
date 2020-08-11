@@ -75,7 +75,7 @@ int WIDTH = 2 * 10 + 40 * 10;
 int HEIGHT = 500;
 
 const int MAP_ELEMENTS_X = 10;
-const int MAP_ELEMENTS_Y = 6;
+const int MAP_ELEMENTS_Y = 8;
 
 int brick_map[MAP_ELEMENTS_Y][MAP_ELEMENTS_X] = {
     {0, 0, 1, 1, 1, 1, 1, 1, 0, 0},
@@ -83,7 +83,9 @@ int brick_map[MAP_ELEMENTS_Y][MAP_ELEMENTS_X] = {
     {1, 1, 1, 2, 3, 3, 2, 1, 1, 1},
     {1, 1, 1, 1, 2, 2, 1, 1, 1, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 
-    {1, 1, 1, 0, 0, 0, 0, 1, 1, 1}
+    {1, 1, 1, 0, 0, 0, 0, 1, 1, 1},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
+    {0, 1, 0, 1, 0, 1, 0, 1, 0, 0}
 };
 
 std::vector<brick> bricks;
@@ -282,7 +284,7 @@ extern "C"
                 else if (ball_pos.get_y() > HEIGHT - ball_radius)
                 {
                     --lifes;
-                    if (lifes <= 0)
+                    if (lifes < 0)
                     {
                         loadLevel();
                     }
