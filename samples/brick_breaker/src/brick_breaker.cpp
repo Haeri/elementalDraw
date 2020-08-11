@@ -26,9 +26,9 @@ int frames = 0;
 bool reload = false;
 
 // Color Palette
-elemd::color bg_color(30, 30, 30);
-elemd::color puck_color("#00bcd4");
-elemd::color ball_color("#d92027");
+elemd::color bg_color("#212121");
+elemd::color puck_color("#03A9F4");
+elemd::color ball_color("#D32F2F");
 
 
 // Game
@@ -152,15 +152,15 @@ void loadLevel()
             {
             case BRICK:
                 bricks.push_back(
-                    {BRICK, elemd::vec2(10 + i * 40, 10 + j * 20), 1, elemd::color("#b6eb7a")});
+                    {BRICK, elemd::vec2(10 + i * 40, 10 + j * 20), 1, elemd::color("#607D8B")});
                 break;
             case DOUBLE_BRICK:
                 bricks.push_back({DOUBLE_BRICK, elemd::vec2(10 + i * 40, 10 + j * 20), 2,
-                                  elemd::color("#d92027")});
+                                  elemd::color("#9C27B0")});
                 break;
             case DIAMOND_BRICK:
                 bricks.push_back({DOUBLE_BRICK, elemd::vec2(10 + i * 40, 10 + j * 20), 4,
-                                  elemd::color("#35d0ba")});
+                                  elemd::color("#7C4DFF")});
                 break;
             }
         }
