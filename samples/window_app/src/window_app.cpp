@@ -1,3 +1,9 @@
+#ifdef _MSC_VER
+    #define EXPORT_API __declspec(dllexport)
+#else
+    #define EXPORT_API __attribute__((visibility("default")))
+#endif
+
 #include <iostream>
 
 #include <array>
@@ -43,16 +49,16 @@ std::array<elemd::color, 10> cool = {elemd::color("#54478c"), elemd::color("#2c6
 
 extern "C"
 {
-    __declspec(dllexport) void app_init()
+    EXPORT_API void app_init()
     { 
     }
 
-    __declspec(dllexport) void reload_notify()
+    EXPORT_API void reload_notify()
     {
         reload = true;
     }
 
-    __declspec(dllexport) int app_run(elemd::Window* win, elemd::Context* ctx)
+    EXPORT_API int app_run(elemd::Window* win, elemd::Context* ctx)
     {
         WIDTH = win->get_width();
         HEIGHT = win->get_height();

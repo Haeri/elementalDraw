@@ -1,8 +1,11 @@
 #include "shared_library.hpp"
 
+#ifndef _MSC_VER
+    #include <dlfcn.h>
+#endif
+
 SharedLibrary::SharedLibrary(std::string libraryName)
 {
-
 #if defined(_MSC_VER) // Microsoft compiler
     libraryName += ".dll";
 #elif defined(__GNUC__) // GNU compiler
@@ -31,7 +34,6 @@ void SharedLibrary::reload()
 
 void SharedLibrary::load(int iMode)
 {
-
     copyLibrary();
 
 #if defined(_MSC_VER) // Microsoft compiler
