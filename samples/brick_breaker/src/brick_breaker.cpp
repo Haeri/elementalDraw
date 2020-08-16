@@ -35,7 +35,7 @@ bool reload = false;
 
 // Color Palette
 elemd::color bg_color("#212121");
-elemd::color puck_color("#03A9F4");
+elemd::color paddle_color("#03A9F4");
 elemd::color ball_color("#D32F2F");
 
 
@@ -48,7 +48,8 @@ enum brick_types
     DIAMOND_BRICK = 3
 };
 
-enum power_up_type { 
+enum power_up_type 
+{
     EXTTRA_LIFE = 0 
 };
 
@@ -71,12 +72,13 @@ int lifes = 3;
 int level = 0;
 float brick_width = 38;
 float brick_height = 18;
+bool start_game = false;
 
-elemd::vec2 puck_pos;
-elemd::vec2 puck_velocity;
-float puck_speed = 100.0f;
-float puck_width = 300;
-float puck_height = 10;
+elemd::vec2 paddle_pos;
+elemd::vec2 paddle_velocity;
+float paddle_speed = 100.0f;
+float paddle_width = 80;
+float paddle_height = 10;
 
 elemd::vec2 ball_pos;
 elemd::vec2 ball_velocity;
@@ -95,6 +97,44 @@ std::vector<power_up> power_pus;
 
 
 void loadLevel();
+
+struct rect
+{
+    elemd::vec2 pos;
+    float width;
+    float height;
+};
+
+void ball2rect(elemd::vec2 rect_pos, float rect_widtt, float rect_height)
+{
+    if ((ball_pos.x() + ball_radius > rect_pos.x()) &&
+        (ball_pos.x() - ball_radius < rect_pos.x() + rect_widtt) &&
+        (ball_pos.y() + ball_radius > rect_pos.y()) &&
+        (ball_pos.y() - ball_radius < rect_pos.y() + rect_height))
+    {
+        if (ball_pos.y() < rect_pos.y() || ball_pos.y() > rect_pos.y() + rect_height)
+        {
+            ball_velocity.y() *= -1;
+        }
+        if (ball_pos.x() < rect_pos.x() || ball_pos.x() > rect_pos.x() + rect_widtt)
+        {
+            ball_velocity.x() *= -1;
+        }
+    }
+}
+
+bool rect2rect(rect a, rect b)
+{
+    if ((a.pos.x() < b.pos.x() + b.width) && 
+        (a.pos.x() + a.width > b.pos.x()) &&
+        (a.pos.y() < b.pos.y() + b.height) &&
+        (a.pos.y() + a.height> b.pos.y()))
+    {
+        return true;
+    }
+
+    return false;
+}
 
 void brickToBall()
 {
@@ -117,9 +157,9 @@ void brickToBall()
             --b.hitpoints;
             if (b.hitpoints <= 0)
             {
-                if (b.type == BRICK)
+                if (b.type == DIAMOND_BRICK)
                 {
-                    power_pus.push_back({EXTTRA_LIFE, b.pos, elemd::color(200, 20, 20)});
+                    power_pus.push_back({EXTTRA_LIFE, b.pos + (brick_width-20)/2.0f, elemd::color(200, 20, 20)});
                 }
                 bricks.erase(bricks.begin() + i);
 
@@ -137,18 +177,18 @@ void brickToBall()
 
 }
 
-void puckToBall()
+void paddleToBall()
 {
-    if ((ball_pos.x() + ball_radius > puck_pos.x()) &&
-        (ball_pos.x() - ball_radius < puck_pos.x() + puck_width) &&
-        (ball_pos.y() + ball_radius > puck_pos.y()) &&
-        (ball_pos.y() - ball_radius < puck_pos.y() + puck_height))
+    if ((ball_pos.x() + ball_radius > paddle_pos.x()) &&
+        (ball_pos.x() - ball_radius < paddle_pos.x() + paddle_width) &&
+        (ball_pos.y() + ball_radius > paddle_pos.y()) &&
+        (ball_pos.y() - ball_radius < paddle_pos.y() + paddle_height))
     {
-        if (ball_pos.y() < puck_pos.y() || ball_pos.y() > puck_pos.y() + brick_height)
+        if (ball_pos.y() < paddle_pos.y() || ball_pos.y() > paddle_pos.y() + paddle_height)
         {
             ball_velocity.y() *= -1;
         }
-        if (ball_pos.x() < puck_pos.x() || ball_pos.x() > puck_pos.x() + brick_width)
+        if (ball_pos.x() < paddle_pos.x() || ball_pos.x() > paddle_pos.x() + paddle_width)
         {
             ball_velocity.x() *= -1;
         }
@@ -157,11 +197,12 @@ void puckToBall()
 
 void resetBall()
 {
-    puck_pos.y() = HEIGHT - 15 - puck_height;
-    puck_pos.x() = WIDTH / 2.0f - puck_width / 2.0f;
+    paddle_pos.y() = HEIGHT - 15 - paddle_height;
+    paddle_pos.x() = WIDTH / 2.0f - paddle_width / 2.0f;
 
-    ball_pos = elemd::vec2(WIDTH / 2.0f - ball_radius, HEIGHT - 10 - puck_height - 20);
-    ball_velocity = elemd::vec2(1) * ball_speed;
+    ball_pos = elemd::vec2(WIDTH / 2.0f, HEIGHT - 10 - paddle_height - 20);
+    ball_velocity = elemd::vec2::ZERO;
+    start_game = false;
 }
 
 void gameReset()
@@ -191,7 +232,7 @@ void loadLevel()
                                   elemd::color("#9C27B0")});
                 break;
             case DIAMOND_BRICK:
-                bricks.push_back({DOUBLE_BRICK, elemd::vec2(10 + i * 40, 10 + j * 20), 4,
+                bricks.push_back({DIAMOND_BRICK, elemd::vec2(10 + i * 40, 10 + j * 20), 4,
                                   elemd::color("#7C4DFF")});
                 break;
             }
@@ -211,7 +252,7 @@ extern "C"
                           1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                           1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                          0, 1, 0, 1, 0, 1, 0, 1, 0, 0});
+                          0, 1, 3, 1, 3, 1, 3, 1, 0, 0});
 
         levels.push_back({0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
                           0, 1, 1, 1, 2, 2, 1, 1, 1, 0,
@@ -236,13 +277,23 @@ extern "C"
         ctx->set_clear_color(bg_color);
 
          win->add_key_listener([&](elemd::key_event event) {            
+            int start_vel = 0;
+
             if (event.key == elemd::KEY_LEFT)
             {
-                puck_velocity.x() += -1 * puck_speed * poll_accumulator;
+                paddle_velocity.x() += -1 * paddle_speed * poll_accumulator;
+                start_vel = -1;
             }
             else if (event.key == elemd::KEY_RIGHT)
             {
-                puck_velocity.x() += 1 * puck_speed * poll_accumulator;
+                paddle_velocity.x() += 1 * paddle_speed * poll_accumulator;
+                start_vel = 1;
+            }
+
+            if (!start_game)
+            {
+                ball_velocity = elemd::vec2(start_vel, -1) * ball_speed;
+                start_game = true;
             }
         });
 
@@ -284,44 +335,52 @@ extern "C"
                 }
 
 
-                // Puck
-                puck_velocity.x() = puck_velocity.x() / (70.0f * render_accumulator);
-                puck_pos = puck_pos + puck_velocity;
-                if (puck_pos.get_x() > WIDTH - puck_width)
+                // paddle
+                paddle_velocity.x() = paddle_velocity.x() / (70.0f * render_accumulator);
+                paddle_pos = paddle_pos + paddle_velocity;
+                if (paddle_pos.get_x() > WIDTH - paddle_width)
                 {
-                    puck_pos.x() = WIDTH - puck_width;
-                    puck_velocity.x() = 0;
+                    paddle_pos.x() = WIDTH - paddle_width;
+                    paddle_velocity.x() = 0;
                 }
-                else if (puck_pos.get_x() < 0)
+                else if (paddle_pos.get_x() < 0)
                 {
-                    puck_pos.x() = 0;
-                    puck_velocity.x() = 0;
+                    paddle_pos.x() = 0;
+                    paddle_velocity.x() = 0;
                 }
 
-                ctx->set_fill_color(puck_color);
-                ctx->fill_rect(puck_pos.x(), puck_pos.y(), puck_width, puck_height);
+                ctx->set_fill_color(paddle_color);
+                ctx->fill_rect(paddle_pos.x(), paddle_pos.y(), paddle_width, paddle_height);
 
 
                 // Power Up
 
-                int pcnt = 0;
+                for (int i = power_pus.size()-1; i >= 0; --i)
+                {
+                    power_pus[i].pos = power_pus[i].pos + elemd::vec2(0, 80) * render_accumulator;
+
+                    if (rect2rect(rect{paddle_pos, paddle_width, paddle_height}, rect{power_pus[i].pos, 20, 10}))
+                    {
+                        switch (power_pus[i].type)
+                        {
+                        case EXTTRA_LIFE:
+                            ++lifes;
+                            break;
+                        }
+                        power_pus.erase(power_pus.begin() + i);
+                    }
+                    else if (power_pus[i].pos.y() > HEIGHT)
+                    {
+                        power_pus.erase(power_pus.begin() + i);
+                    }
+                }
+
                 for (power_up& pu : power_pus)
                 {
-                    pu.pos = pu.pos + elemd::vec2(0, 80) * render_accumulator;
-
-
                     ctx->set_fill_color(pu.color);
                     ctx->fill_rounded_rect(pu.pos.x(), pu.pos.y(), 20, 10, 1);
                 }
 
-                for (int i = power_pus.size()-1; i >= 0; --i)
-                {
-                    if (power_pus[i].pos.y() > HEIGHT)
-                    {
-                        power_pus.erase(power_pus.begin() + i);
-                    }
-
-                }
 
 
                 // Ball
@@ -358,7 +417,7 @@ extern "C"
                 
                 
                 brickToBall();
-                puckToBall();
+                paddleToBall();
 
                 ctx->set_fill_color(ball_color);
                 ctx->fill_circle(ball_pos.x(), ball_pos.y(), ball_radius);
