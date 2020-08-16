@@ -49,8 +49,9 @@ std::array<elemd::color, 10> cool = {elemd::color("#54478c"), elemd::color("#2c6
 
 extern "C"
 {
-    EXPORT_API void app_init()
+    EXPORT_API elemd::WindowConfig app_init()
     { 
+        return elemd::WindowConfig{"Window App", WIDTH, HEIGHT};
     }
 
     EXPORT_API void reload_notify()

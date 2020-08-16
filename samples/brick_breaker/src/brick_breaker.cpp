@@ -20,6 +20,7 @@
 // Constants
 const int TARGET_RENDER_FPS = 60;
 const int TARGET_POLL_FPS = 30;
+const std::string TITLE = "Brick Breakers";
 
 // Variables
 float target_render_ms = 1.0f / TARGET_RENDER_FPS;
@@ -38,6 +39,9 @@ elemd::color bg_color("#212121");
 elemd::color paddle_color("#03A9F4");
 elemd::color ball_color("#D32F2F");
 
+
+elemd::Window* _win;
+elemd::Context* _ctx;
 
 // Game
 enum brick_types
@@ -199,6 +203,7 @@ void resetBall()
 {
     paddle_pos.y() = HEIGHT - 15 - paddle_height;
     paddle_pos.x() = WIDTH / 2.0f - paddle_width / 2.0f;
+    paddle_velocity = elemd::vec2::ZERO;
 
     ball_pos = elemd::vec2(WIDTH / 2.0f, HEIGHT - 10 - paddle_height - 20);
     ball_velocity = elemd::vec2::ZERO;
@@ -216,6 +221,8 @@ void loadLevel()
     bricks.clear();
     power_pus.clear();
     resetBall();
+
+    _win->set_title(TITLE + " (Level " + std::to_string(level+1) + ")");
 
     for (int i = 0; i < MAP_ELEMENTS_X; ++i)
     {
@@ -243,7 +250,7 @@ void loadLevel()
 
 extern "C"
 {
-    EXPORT_API void app_init()
+    EXPORT_API elemd::WindowConfig app_init()
     {
         levels.push_back({0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
                           0, 1, 1, 1, 2, 2, 1, 1, 1, 0,
@@ -262,6 +269,11 @@ extern "C"
                           1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
                           2, 3, 2, 3, 2, 3, 2, 3, 2, 3,
                           0, 1, 0, 0, 0, 1, 0, 0, 0, 0});
+
+        elemd::WindowConfig wc{TITLE, WIDTH, HEIGHT};
+        wc.transparent = true;
+        wc.resizeable = false;
+        return wc;
     }
 
     EXPORT_API void reload_notify()
@@ -271,10 +283,13 @@ extern "C"
 
     EXPORT_API int app_run(elemd::Window* win, elemd::Context* ctx)
     {
+        _win = win;
+        _ctx = ctx;
+
         WIDTH = win->get_width();
         HEIGHT = win->get_height();
 
-        ctx->set_clear_color(bg_color);
+        //ctx->set_clear_color(bg_color);
 
          win->add_key_listener([&](elemd::key_event event) {            
             int start_vel = 0;

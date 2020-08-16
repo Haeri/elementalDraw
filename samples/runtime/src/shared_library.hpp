@@ -12,23 +12,38 @@
 #endif
 
 #include "file_watch.hpp"
+#include "elemd/window.hpp"
+#include "elemd/context.hpp"
 
 class SharedLibrary : public IReloadableFile
 {
 public:
-    std::string _libraryName;
-    std::string _fullLibraryPath;
-    std::string _libraryCopyPath;
+    typedef elemd::WindowConfig (*app_initf)();
+    typedef void (*reload_notifyf)();
+    typedef int (*app_runf)(elemd::Window* win, elemd::Context* ctx);
+    
+    app_initf app_init;
+    reload_notifyf reload_notify;
+    app_runf app_run;
+
     void* _library;
-    // std::map<std::string, void*> _functionMap;
-    std::function<void()> _func;
 
     SharedLibrary(std::string libraryName);
 
     void onReload() override;
-    void setReloadCallback(std::function<void()> callback);
-    void reload();
-    void load(int iMode = 2);
+
+    bool reload();
+    bool load(int iMode = 2);
+    bool freeSharedLibrary();
+
+private:
+    std::string _libraryName;
+    std::string _fullLibraryPath;
+    std::string _libraryCopyPath;
+
+    bool copyLibrary();
+    bool loadFunctions();
+    std::string getFileName(const std::string& s);
 
     template <typename T>
     T getFunction(std::string function_name)
@@ -39,10 +54,6 @@ public:
         return (T)dlsym(_library, function_name.c_str());
 #endif
     }
-
-    bool freeSharedLibrary();
-    void copyLibrary();
-    std::string getFileName(const std::string& s);
 };
 
 #endif // SHARED_LIBRARY_HPP
