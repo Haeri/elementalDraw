@@ -55,7 +55,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: elemd-linux-${{ matrix.conf }}
-        path: ./build/${{ matrix.conf }}/elemd.so
+        path: ./build/${{ matrix.conf }}/libelemd.so
 
   build-mac:
    name: Mac Build
@@ -81,4 +81,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: elemd-mac-${{ matrix.conf }}
-        path: ./build/${{ matrix.conf }}/elemd.so
+        path: ./build/${{ matrix.conf }}/libelemd.dylib
