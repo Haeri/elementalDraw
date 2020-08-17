@@ -15,9 +15,9 @@ vcpkg_bootstraps = {
 }
 
 project_generator = {
-	"Windows": "generate_project_win.bat -s",
-	"Darwin": "generate_project_mac.sh",
-	"Linux": "generate_project_linux.sh",
+	"Windows": "./generate_project_win.bat",
+	"Darwin": "./generate_project_mac.sh",
+	"Linux": "./generate_project_linux.sh",
 }
 
 colors = {
@@ -81,7 +81,7 @@ do_step("Vcpkg setup", "📦", 0, fx+vcpkg_bootstraps[platform.system()]+fx, '()
 do_step("Install glfw3", "📚", 0, fx+vcpkg_dir + "vcpkg" + fx + " install glfw3:x64-" + platforms[platform.system()], '()', False)
 do_step("Install glslang", "📚", 0, fx+vcpkg_dir + "vcpkg" + fx + " install glslang:x64-" + platforms[platform.system()], '()', False)
 do_step("Install stb", "📚", 0, fx+vcpkg_dir + "vcpkg" + fx + " install stb:x64-" + platforms[platform.system()], '()', False)
-do_step("Generate project", "🗂️", 0, project_generator[platform.system()], '()', False)
+do_step("Generate project", "🗂️", 0, fx+project_generator[platform.system()]+fx + " -s", '()', False)
 
-print(colored(emj("✔️ ") + "Everything is ready! (The project was generated in the './build' directory)", "green"))	
+print(colored(emj("✔️ ") + "Everything is ready!\n(The project was generated in the './build' directory)", "green"))	
 exit(0)

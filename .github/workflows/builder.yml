@@ -23,6 +23,11 @@ jobs:
       run: ./tools/install_win.bat -s
     - name: Build
       run: MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: elemd-win-${{ matrix.conf }}
+        path: ./build/${{ matrix.conf }}/elemd.dll
     
   build-linux:
    name: Linux Build
@@ -46,6 +51,11 @@ jobs:
       run: |
         cd ./build
         sudo make config=${{ matrix.conf }}
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: elemd-linux-${{ matrix.conf }}
+        path: ./build/${{ matrix.conf }}/elemd.so
 
   build-mac:
    name: Mac Build
@@ -62,8 +72,13 @@ jobs:
       run: |
         sudo chmod +x ./tools/*.sh
     - name: Install
-      run: ./tools/install.sh
+      run: ./tools/install_nix.sh
     - name: Build
       run: |
         cd ./build
         make config=${{ matrix.conf }}
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: elemd-mac-${{ matrix.conf }}
+        path: ./build/${{ matrix.conf }}/elemd.so
