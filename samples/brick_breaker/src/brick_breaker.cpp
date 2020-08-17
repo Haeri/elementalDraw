@@ -289,7 +289,8 @@ extern "C"
         WIDTH = win->get_width();
         HEIGHT = win->get_height();
 
-        //ctx->set_clear_color(bg_color);
+        ctx->set_clear_color(bg_color);
+        //ctx->set_clear_color(elemd::color(255, 255, 255, 0));
 
          win->add_key_listener([&](elemd::key_event event) {            
             int start_vel = 0;

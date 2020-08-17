@@ -80,6 +80,10 @@ if (ELEMD_BUILD_EXAMPLES)
     add_subdirectory(samples/runtime)
     add_subdirectory(samples/window_app)
     add_subdirectory(samples/brick_breaker)
+
+    set_target_properties(runtime PROPERTIES FOLDER samples)
+    set_target_properties(window_app PROPERTIES FOLDER samples)
+    set_target_properties(brick_breaker PROPERTIES FOLDER samples)
 endif()
 
 
