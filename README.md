@@ -7,7 +7,6 @@ Portable c++ canvas library with a Vulkan backend.
 
 
 ## Project Setup
----
 
 ### Windows
 ```cmd

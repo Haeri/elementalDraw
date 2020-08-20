@@ -3,6 +3,7 @@
 
 #include "elemd/elemental_draw.hpp"
 #include "elemd/event.hpp"
+#include "elemd/vec2.hpp"
 
 #include <string>
 #include <cstdint>
@@ -22,6 +23,9 @@ namespace elemd
 
         int position_x = -1;
         int position_y = -1;
+
+        float x_scale = -1;
+        float y_scale = -1;
 
         bool decorated = true;
         bool transparent = false;
@@ -43,11 +47,14 @@ namespace elemd
         int get_width();
         int get_height();
         bool is_running();
+        elemd::vec2 get_scale();
 
         void set_title(const std::string& title);
         void set_position(int x, int y);
         void set_size(int width, int height);
         void set_vsync(bool vsync);
+        void set_scale(float x, float y);
+        void set_scale(float scalar);
         
         void add_resize_listener(std::function<void(resize_event)>callback);
         void add_mouse_move_listener(std::function<void(mouse_move_event)> callback);

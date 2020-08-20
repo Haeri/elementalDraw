@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-oldpath=$(pwd)
+old_path=$(pwd)
 cd $(dirname "$0")
 
 python3 ./install.py
@@ -11,4 +11,4 @@ if [ $err -ne 0 ] ; then
 	exit $err
 fi
 
-cd $oldpath
+cd $old_path

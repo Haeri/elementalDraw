@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-oldpath=$(pwd)
+old_path=$(pwd)
 cd $(dirname "$0")
 
 cd ..
@@ -10,4 +10,10 @@ cd build
 
 cmake .. -DVCPKG_TARGET_TRIPLET=x64-linux -DCMAKE_TOOLCHAIN_FILE="../extern/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
-cd $oldpath
+err=$?
+
+if [ $err -ne 0 ] ; then
+	exit $err
+fi
+
+cd $old_path

@@ -45,10 +45,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 if(APPLE)
     set(CONVERTER_POSTFIX "mac.sh")
+    set(SHARED_LIB_NAME "lib${PROJECT_NAME}.dylib")
 elseif(WIN32) 
     set(CONVERTER_POSTFIX "win.bat")
+    set(SHARED_LIB_NAME "${PROJECT_NAME}.dll")
 else()
     set(CONVERTER_POSTFIX "linux.sh")
+    set(SHARED_LIB_NAME "lib${PROJECT_NAME}.so")
 endif()
 
 add_custom_command(
@@ -84,6 +87,13 @@ if (ELEMD_BUILD_EXAMPLES)
     set_target_properties(runtime PROPERTIES FOLDER samples)
     set_target_properties(window_app PROPERTIES FOLDER samples)
     set_target_properties(brick_breaker PROPERTIES FOLDER samples)
+
+    add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        DEPENDS runtime
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} samples/runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        COMMENT "Copy library"
+    )
 endif()
 
 

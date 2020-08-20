@@ -9,6 +9,7 @@
 #include <vector>
 #include <array>
 #include <math.h> 
+#include <algorithm>
 
 #include <elemd/window.hpp>
 #include <elemd/context.hpp>
@@ -286,13 +287,10 @@ extern "C"
         _win = win;
         _ctx = ctx;
 
-        WIDTH = win->get_width();
-        HEIGHT = win->get_height();
-
         ctx->set_clear_color(bg_color);
         //ctx->set_clear_color(elemd::color(255, 255, 255, 0));
 
-         win->add_key_listener([&](elemd::key_event event) {            
+        win->add_key_listener([&](elemd::key_event event) {
             int start_vel = 0;
 
             if (event.key == elemd::KEY_LEFT)
@@ -311,6 +309,15 @@ extern "C"
                 ball_velocity = elemd::vec2(start_vel, -1) * ball_speed;
                 start_game = true;
             }
+        });
+
+        win->add_scroll_listener([&](elemd::scroll_event event) 
+        { 
+            elemd::vec2 scale = win->get_scale();
+            float deltax = std::clamp(scale.x() + (float)event.yoffset, 0.2f, 5.0f);
+            float deltay = std::clamp(scale.y() + (float)event.yoffset, 0.2f, 5.0f);
+
+            win->set_scale(deltax, deltay);
         });
 
         loadLevel();

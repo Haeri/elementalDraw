@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 
-oldpath=$(pwd)
+old_path=$(pwd)
 cd $(dirname "$0")
+script_path=$(pwd)
 
 cd ../res/shader
 for f in *.vert *.frag
-	do $oldpath"/../extern/vcpkg/installed/x64-osx/tools/glslangValidator" -V $f  -o $f.spv
+	do $script_path"/../extern/vcpkg/installed/x64-osx/tools/glslangValidator" -V $f  -o $f.spv
 done
 
-cd $oldpath
+err=$?
+
+if [ $err -ne 0 ] ; then
+	exit $err
+fi
+
+cd $old_path

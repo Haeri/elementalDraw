@@ -18,6 +18,8 @@ namespace elemd
         GLFWwindow* _glfw_window = nullptr;
         uint32_t _windowCount = 0;
 
+        float _x_scale = 1;
+        float _y_scale = 1;
         /*
         int buttonEvent;
         int cp_x;

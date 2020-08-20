@@ -62,6 +62,20 @@ namespace elemd
         _context->resize_context(impl->get_width(), impl->get_height());
     }
 
+    void Window::set_scale(float x, float y)
+    {
+        WindowImpl* impl = getImpl(this);
+        impl->_x_scale = x;
+        impl->_y_scale = y;
+    }
+
+    void Window::set_scale(float scalar)
+    {
+        WindowImpl* impl = getImpl(this);
+        impl->_x_scale = scalar;
+        impl->_y_scale = scalar;
+    }
+
     void Window::add_resize_listener(std::function<void(resize_event)> callback)
     {
         WindowImpl* impl = getImpl(this);
@@ -146,6 +160,12 @@ namespace elemd
         return !glfwWindowShouldClose(impl->_glfw_window);
     }
 
+    elemd::vec2 Window::get_scale()
+    {
+        WindowImpl* impl = getImpl(this);
+        return elemd::vec2(impl->_x_scale, impl->_y_scale);
+    }
+
     double Window::now()
     {
         return glfwGetTime();
@@ -195,6 +215,8 @@ namespace elemd
         glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, config.transparent);
         glfwWindowHint(GLFW_RESIZABLE, config.resizeable);
         glfwWindowHint(GLFW_VISIBLE, config.visible);
+        glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+
 
         create_window(config);
     }
@@ -243,6 +265,16 @@ namespace elemd
         if (config.position_x != -1 && config.position_y != -1)
         {
             set_position(config.position_x, config.position_y);
+        }
+
+        if (config.x_scale <= 0 || config.y_scale <= 0)
+        {
+            glfwGetWindowContentScale(_glfw_window, &_x_scale, &_y_scale);
+        }
+        else
+        {
+            _x_scale = config.x_scale;
+            _y_scale = config.y_scale;
         }
     }
 

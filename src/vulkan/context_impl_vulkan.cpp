@@ -65,6 +65,12 @@ namespace elemd
     void Context::fill_rect(float x, float y, float width, float height)
     {
         ContextImplVulkan* impl = getImpl(this);
+        
+        x *= impl->_window->_x_scale;
+        y *= impl->_window->_y_scale;
+        width *= impl->_window->_x_scale;
+        height *= impl->_window->_y_scale;
+
         float xf = (x / impl->width);
         float yf = (y / impl->height);
         float widhtf = (width / impl->width);
@@ -89,18 +95,24 @@ namespace elemd
                                     float radius_ne, float radius_se, float radius_sw)
     {
         ContextImplVulkan* impl = getImpl(this);
+
+        x *= impl->_window->_x_scale;
+        y *= impl->_window->_y_scale;
+        width *= impl->_window->_x_scale;
+        height *= impl->_window->_y_scale;
+
         float xf = (x / impl->width);
         float yf = (y / impl->height);
         float widthf = (width / impl->width);
         float heightf = (height / impl->height);
-        float nwxf = (radius_nw / width);
-        float nexf = (radius_ne / width);
-        float sexf = (radius_se / width);        
-        float swxf = (radius_sw / width);
-        float nwyf = (radius_nw / height);
-        float neyf = (radius_ne / height);
-        float seyf = (radius_se / height);
-        float swyf = (radius_sw / height);
+        float nwxf = (radius_nw / width) * (impl->_window->_x_scale);
+        float nexf = (radius_ne / width) * (impl->_window->_x_scale);
+        float sexf = (radius_se / width) * (impl->_window->_x_scale);
+        float swxf = (radius_sw / width) * (impl->_window->_x_scale);
+        float nwyf = (radius_nw / height) * (impl->_window->_y_scale);
+        float neyf = (radius_ne / height) * (impl->_window->_y_scale);
+        float seyf = (radius_se / height) * (impl->_window->_y_scale);
+        float swyf = (radius_sw / height) * (impl->_window->_y_scale);
 
         impl->uniforms.push_back(
             {_fill_color,
@@ -113,10 +125,14 @@ namespace elemd
     void Context::fill_circle(float x, float y, float radius)
     {
         ContextImplVulkan* impl = getImpl(this);
-        float xf = ((x - radius) / impl->width);
-        float yf = ((y - radius) / impl->height);
-        float widhtf = ((radius*2) / impl->width);
-        float heightf = ((radius*2) / impl->height);
+
+        x *= impl->_window->_x_scale;
+        y *= impl->_window->_y_scale;
+
+        float xf = ((x - radius * impl->_window->_x_scale) / impl->width);
+        float yf = ((y - radius * impl->_window->_y_scale) / impl->height);
+        float widhtf = ((radius * 2 * impl->_window->_x_scale) / impl->width);
+        float heightf = ((radius * 2 * impl->_window->_y_scale) / impl->height);
         float radf = 0.5f;
 
         impl->uniforms.push_back(
@@ -868,8 +884,8 @@ namespace elemd
         if (resizing) return;
         resizing = true;
 
-        this->width = width;
-        this->height = height;        
+        this->width = width * _window->_x_scale;
+        this->height = height * _window->_y_scale;        
 
         vkDeviceWaitIdle(VulkanSharedInfo::getInstance()->device);
 
