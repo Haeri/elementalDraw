@@ -7,6 +7,12 @@
 elemd::Window* win;
 elemd::Context* ctx;
 
+void shutdown(int err)
+{
+    FileWatch::stopCheckInterval();
+    exit(err);
+}
+
 int main(void)
 {
 #if defined(_WIN32) && !defined(NDEBUG)
@@ -15,12 +21,24 @@ int main(void)
     _CrtSetDbgFlag(flag);
 #endif
 
+#ifdef _MSC_VER
+    #ifdef NDEBUG
+        std::string bin_folder = "Debug/";
+    #else
+        std::string bin_folder = "Release/";
+    #endif
+#else
+    std::string bin_folder = "";
+#endif
+
     //SharedLibrary app("../window_app/Debug/window_app");
-    SharedLibrary app("../brick_breaker/Debug/brick_breaker");
+    //SharedLibrary app("../brick_breaker/Debug/brick_breaker");
+    SharedLibrary app("../brick_breaker/" + bin_folder +  "brick_breaker");
     
     if (!app.load())
     {
-        return 1;
+        std::cerr << "Error: Could not load " << app.getName() << std::endl;
+        shutdown(1);
     }
     
     FileWatch::startCheckInterval();
@@ -47,14 +65,14 @@ int main(void)
         if (!success)
         {
             std::cerr << "Could not revive the aplication" << std::endl;
-            return 1;
+            shutdown(1);
         }
 
         win->reset_listener();
 
     }
     
-    FileWatch::stopCheckInterval();
+
 
     return 0;
 }
