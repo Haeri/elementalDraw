@@ -20,7 +20,7 @@ SharedLibrary::SharedLibrary(std::string libraryName)
 #endif
     _fullLibraryPath = getFilePath(libraryName) + _libraryName;
 
-    FileWatch::addToWatchList(libraryName, this);
+    FileWatch::addToWatchList(_fullLibraryPath, this);
 }
 
 void SharedLibrary::onReload()

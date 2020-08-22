@@ -10,6 +10,8 @@
 #include <array>
 #include <math.h> 
 #include <algorithm>
+#include <thread>
+#include <chrono>
 
 #include <elemd/window.hpp>
 #include <elemd/context.hpp>
@@ -346,7 +348,7 @@ extern "C"
                 win->poll_events();
                 poll_accumulator = 0;
             }
-
+ 
             if (render_accumulator >= target_render_ms)
             {   
                 // Bricks
@@ -457,6 +459,14 @@ extern "C"
 
                 ++frames;
                 render_accumulator = 0;
+            }
+
+            double remainpoll = target_poll_ms - poll_accumulator;
+            double remainrender = target_render_ms - render_accumulator;
+            double sleep = std::min(remainpoll, remainrender);
+
+            if(sleep > 0){
+                std::this_thread::sleep_for(std::chrono::duration<double, std::ratio<1>>(sleep));
             }
         }
 
