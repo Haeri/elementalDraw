@@ -23,6 +23,11 @@ SharedLibrary::SharedLibrary(std::string libraryName)
     FileWatch::addToWatchList(_fullLibraryPath, this);
 }
 
+SharedLibrary::~SharedLibrary()
+{
+    freeSharedLibrary();
+}
+
 void SharedLibrary::onReload()
 {
     reload_notify();

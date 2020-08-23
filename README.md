@@ -14,6 +14,7 @@ git clone https://github.com/Haeri/ElementalDraw.git --recursive
 cd ElementalDraw
 ./tools/install_win.bat
 ```
+Start Visual Studio as administrator as the project needs to create a symlink to make the resource folder available to the executable.
 
 ### Linux
 ```bash
@@ -21,7 +22,7 @@ git clone https://github.com/Haeri/ElementalDraw.git --recursive
 cd ElementalDraw
 sudo chmod +x ./tools/*.sh
 sudo apt update
-sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
+sudo apt install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev cmake curl unzip tar
 sudo ./tools/install_nix.sh
 ```
 
@@ -31,3 +32,5 @@ git clone https://github.com/Haeri/ElementalDraw.git --recursive
 cd ElementalDraw
 ./tools/install_nix.sh
 ```
+
+## 

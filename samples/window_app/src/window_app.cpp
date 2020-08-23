@@ -13,12 +13,12 @@
 #include <elemd/image.hpp>
 
 // Constants
-const int TARGET_RENDER_FPS = 60;
-const int TARGET_POLL_FPS = 30;
+const int TARGET_RENDER_FREQUENCY = 60;
+const int TARGET_POLL_FREQUENCY = 30;
 
 // Variables
-float target_render_ms = 1.0f / TARGET_RENDER_FPS;
-float target_poll_ms = 1.0f / TARGET_POLL_FPS;
+float target_render_ms = 1.0f / TARGET_RENDER_FREQUENCY;
+float target_poll_ms = 1.0f / TARGET_POLL_FREQUENCY;
 double delta_time = 0;
 double current_time = 0;
 double last_time = 0;

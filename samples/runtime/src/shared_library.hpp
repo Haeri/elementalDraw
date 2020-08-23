@@ -28,6 +28,7 @@ public:
     void* _library;
 
     SharedLibrary(std::string libraryName);
+    ~SharedLibrary();
 
     void onReload() override;
 

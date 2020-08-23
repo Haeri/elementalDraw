@@ -19,15 +19,16 @@
 #include <elemd/image.hpp>
 #include <elemd/vec2.hpp>
 
+#include "instrumentor.hpp"
 
 // Constants
-const int TARGET_RENDER_FPS = 60;
-const int TARGET_POLL_FPS = 30;
+const int TARGET_RENDER_FREQUENCY = 60;
+const int TARGET_POLL_FREQUENCY = 30;
 const std::string TITLE = "Brick Breakers";
 
 // Variables
-float target_render_ms = 1.0f / TARGET_RENDER_FPS;
-float target_poll_ms = 1.0f / TARGET_POLL_FPS;
+float target_render_ms = 1.0f / TARGET_RENDER_FREQUENCY;
+float target_poll_ms = 1.0f / TARGET_POLL_FREQUENCY;
 double delta_time = 0;
 double current_time = 0;
 double last_time = 0;
@@ -219,6 +220,11 @@ void gameReset()
     loadLevel();
 }
 
+double dmod(double x, double y)
+{
+    return x - (int)(x / y) * y;
+}
+
 void loadLevel()
 {
     bricks.clear();
@@ -249,7 +255,6 @@ void loadLevel()
         }
     }
 }
-
 
 extern "C"
 {
@@ -286,6 +291,8 @@ extern "C"
 
     EXPORT_API int app_run(elemd::Window* win, elemd::Context* ctx)
     {
+        Instrumentor::Get().BeginSession("Session Name");  
+
         _win = win;
         _ctx = ctx;
 
@@ -327,6 +334,8 @@ extern "C"
         // Main Loop
         while (win->is_running() && !reload)
         {
+            InstrumentationTimer timer("Frame");
+
             // Timing
             current_time = elemd::Window::now();
             delta_time = (current_time - last_time);
@@ -337,28 +346,30 @@ extern "C"
 
             if (second_accumulator >= 1.0)
             {
+                InstrumentationTimer timer("Second");
                 std::cout << frames << std::endl;
                 frames = 0;
-                second_accumulator = 0;
+                second_accumulator = dmod(second_accumulator, 1);
             }
 
             if (poll_accumulator >= target_poll_ms)
             {
                 // Poll Events
+                InstrumentationTimer timer("Event Polling");
                 win->poll_events();
-                poll_accumulator = 0;
+                poll_accumulator = dmod(poll_accumulator, target_poll_ms);
             }
+            
  
             if (render_accumulator >= target_render_ms)
-            {   
+            {
                 // Bricks
-
+                InstrumentationTimer timer("Render");
                 for (brick& b : bricks)
                 {
                     ctx->set_fill_color(b.color);
                     ctx->fill_rounded_rect(b.pos.x(), b.pos.y(), brick_width, brick_height, 2);
                 }
-
 
                 // paddle
                 paddle_velocity.x() = paddle_velocity.x() / (70.0f * render_accumulator);
@@ -377,14 +388,14 @@ extern "C"
                 ctx->set_fill_color(paddle_color);
                 ctx->fill_rect(paddle_pos.x(), paddle_pos.y(), paddle_width, paddle_height);
 
-
                 // Power Up
 
-                for (int i = power_pus.size()-1; i >= 0; --i)
+                for (int i = power_pus.size() - 1; i >= 0; --i)
                 {
                     power_pus[i].pos = power_pus[i].pos + elemd::vec2(0, 80) * render_accumulator;
 
-                    if (rect2rect(rect{paddle_pos, paddle_width, paddle_height}, rect{power_pus[i].pos, 20, 10}))
+                    if (rect2rect(rect{paddle_pos, paddle_width, paddle_height},
+                                  rect{power_pus[i].pos, 20, 10}))
                     {
                         switch (power_pus[i].type)
                         {
@@ -405,8 +416,6 @@ extern "C"
                     ctx->set_fill_color(pu.color);
                     ctx->fill_rounded_rect(pu.pos.x(), pu.pos.y(), 20, 10, 1);
                 }
-
-
 
                 // Ball
 
@@ -439,36 +448,39 @@ extern "C"
                     }
                 }
 
-                
-                
                 brickToBall();
                 paddleToBall();
 
                 ctx->set_fill_color(ball_color);
                 ctx->fill_circle(ball_pos.x(), ball_pos.y(), ball_radius);
 
-
                 // Lifes
                 ctx->set_fill_color(ball_color);
                 for (int i = 0; i < lifes; ++i)
                 {
-                    ctx->fill_circle(WIDTH - 5 - (i*8), HEIGHT - 5, 3);    
+                    ctx->fill_circle(WIDTH - 5 - (i * 8), HEIGHT - 5, 3);
                 }
 
                 ctx->draw_frame();
 
                 ++frames;
-                render_accumulator = 0;
+                render_accumulator = dmod(render_accumulator, target_render_ms);
             }
+            
 
-            double remainpoll = target_poll_ms - poll_accumulator;
-            double remainrender = target_render_ms - render_accumulator;
+            double work_time = elemd::Window::now() - current_time;
+            double remainpoll = target_poll_ms - (poll_accumulator + work_time);
+            double remainrender = target_render_ms - (render_accumulator + work_time);
             double sleep = std::min(remainpoll, remainrender);
 
-            if(sleep > 0){
+
+            if (sleep > 0)
+            {
+                InstrumentationTimer timer("Sleep");
                 std::this_thread::sleep_for(std::chrono::duration<double, std::ratio<1>>(sleep));
             }
         }
+
 
         if (reload)
         {
@@ -477,6 +489,8 @@ extern "C"
 
         win->destroy();
 
+
+        Instrumentor::Get().EndSession();
         return 0;
     }
 }
