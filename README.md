@@ -6,17 +6,21 @@
 Portable c++ canvas library with a Vulkan backend.
 
 
-## Project Setup
+## Requirements
+- [CMake 3.3^](https://cmake.org/download/) 
+- [Python 3^](https://www.python.org/downloads/)
 
-### Windows
+## Setup
+
+### <img height="14" src="https://image.flaticon.com/icons/svg/888/888882.svg"> Windows
 ```cmd
 git clone https://github.com/Haeri/ElementalDraw.git --recursive
 cd ElementalDraw
 ./tools/install_win.bat
 ```
-Start Visual Studio as administrator as the project needs to create a symlink to make the resource folder available to the executable.
+<sub>Make sure to open the Visual Studio project as administrator, as it needs to perform copy operatiosn to make resources files available to the binaries.</sub>
 
-### Linux
+### <img height="16" src="https://image.flaticon.com/icons/svg/226/226772.svg"> Linux
 ```bash
 git clone https://github.com/Haeri/ElementalDraw.git --recursive
 cd ElementalDraw
@@ -26,11 +30,9 @@ sudo apt install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev cma
 sudo ./tools/install_nix.sh
 ```
 
-### MacOS
+### <img height="16" src="https://image.flaticon.com/icons/svg/2/2235.svg"> Mac
 ```bash
 git clone https://github.com/Haeri/ElementalDraw.git --recursive
 cd ElementalDraw
 ./tools/install_nix.sh
 ```
-
-## 
