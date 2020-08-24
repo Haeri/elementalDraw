@@ -45,7 +45,8 @@ void FileWatch::startCheckInterval(unsigned int milliseconds)
 void FileWatch::stopCheckInterval()
 {
     _shouldRun = false;
-    _timeThread.join();
+    if (_timeThread.joinable())
+        _timeThread.join();
 }
 
 

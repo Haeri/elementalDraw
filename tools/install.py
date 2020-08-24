@@ -24,7 +24,8 @@ colors = {
 	"white": "\x1B[0m",
 	"red": "\x1B[31m",
 	"green": "\x1B[32m",
-	"blue": "\x1B[34m"
+	"blue": "\x1B[34m",
+	"gray": "\x1B[90m"
 }
 
 platforms = {
@@ -46,42 +47,51 @@ def emj(emoji):
 	else:
 		return	""
 
-def colored(text, color):
+def clr(text, color):
 	if useColor:
 		return colors[color] + text + colors["white"]
 	else:
 		return text
 
 
-def do_step(title, emoji, indent, cmd, regex, isFile = True):
-	print(" " * indent + emj(emoji) + " " + title + " " + colored(("." * (30 - len(title) - indent)), "blue") + " "+emj("🌀"), end='', flush=True)
+def do_step(title, emoji, indent, cmd, regex, isFile = True, errfunc = None):
+	print(" " * indent + emj(emoji) + " " + title + " " + clr(("." * (30 - len(title) - indent)), "gray") + " "+emj("🌀"), end='', flush=True)
 	err, msg = subprocess.getstatusoutput(cmd)
 	print(emj("\b\b \b"), end='')
 	if err == 0:
 		m = re.search(regex, msg)
-		print(colored(emj("✔️ ") + "OK ", "green"), end="")
+		print(clr(emj("✔️ ") + "OK ", "green"), end="")
 		if len(m.groups()) >= 1:
 			print(m.group(1))
 		else:
 			print()
-		return
+		return 0
 	else:
 		if isFile:
-			print(colored(emj("❌ ") + "NOT FOUND!", "red"))
+			print(clr(emj("❌ ") + "NOT FOUND!", "red"))
 		else:
-			print(colored(emj("❌ ") + "FAILED!", "red"))
-			print(colored(msg, "red"))
-		exit(1)
+			print(clr(emj("❌ ") + "FAILED!", "red"))
+			print(clr("--------------------", "gray") + " ERROR LOGS " + clr("--------------------", "gray"))
+			print(clr(msg, "red"))
+			print(clr("---------------------------------------------------", "gray"))
+		if errfunc is not None:
+			errfunc()
+		else:
+			exit(1)
 
 
 #----------- Execution -----------
 
-do_step("CMake check", "🤖", 0, "cmake --version", 'cmake version (.*)')
-do_step("Vcpkg setup", "📦", 0, fx+vcpkg_bootstraps[platform.system()]+fx, '()', False)
-do_step("Install glfw3", "📚", 0, fx+vcpkg_dir + "vcpkg" + fx + " install glfw3:x64-" + platforms[platform.system()], '()', False)
-do_step("Install glslang", "📚", 0, fx+vcpkg_dir + "vcpkg" + fx + " install glslang:x64-" + platforms[platform.system()], '()', False)
-do_step("Install stb", "📚", 0, fx+vcpkg_dir + "vcpkg" + fx + " install stb:x64-" + platforms[platform.system()], '()', False)
+do_step("CMake check", "🛠️", 0, "cmake --version", 'cmake version (.*)')
+do_step("Vcpkg setup", "🧰", 0, fx+vcpkg_bootstraps[platform.system()]+fx, '()', False, lambda :( 
+	print(clr("Looks like you forgot to download the submodules. Let me fix that for you!","blue")), 
+	do_step("Download submodules", "📦", 3, "git submodule update --init", '()', False),
+	do_step("Vcpkg setup", "🧰", 3, fx+vcpkg_bootstraps[platform.system()]+fx, '()', False)
+))
+do_step("Install glfw3", "📦", 0, fx+vcpkg_dir + "vcpkg" + fx + " install glfw3:x64-" + platforms[platform.system()] + "-static", '()', False)
+do_step("Install glslang", "📦", 0, fx+vcpkg_dir + "vcpkg" + fx + " install glslang:x64-" + platforms[platform.system()] + "-static", '()', False)
+do_step("Install stb", "📦", 0, fx+vcpkg_dir + "vcpkg" + fx + " install stb:x64-" + platforms[platform.system()] + "-static", '()', False)
 do_step("Generate project", "🗂️", 0, fx+project_generator[platform.system()]+fx + " -s", '()', False)
 
-print(colored(emj("✔️ ") + "Everything is ready!\n(The project was generated in the './build' directory)", "green"))	
+print(clr(emj("✔️ ") + "Everything is ready!\n(The project was generated in the './build' directory)", "green"))	
 exit(0)

@@ -32,7 +32,6 @@ int main(void)
     if (!app.load())
     {
         std::cerr << "Error: Could not load " << app.getName() << std::endl;
-        FileWatch::stopCheckInterval();
         return 1;
     }
     
