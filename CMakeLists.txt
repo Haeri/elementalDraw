@@ -83,15 +83,18 @@ if (ELEMD_BUILD_EXAMPLES)
     add_subdirectory(samples/runtime)
     add_subdirectory(samples/window_app)
     add_subdirectory(samples/brick_breaker)
+    add_subdirectory(samples/painter)
 
     set_target_properties(runtime PROPERTIES FOLDER samples)
     set_target_properties(window_app PROPERTIES FOLDER samples)
     set_target_properties(brick_breaker PROPERTIES FOLDER samples)
+    set_target_properties(painter PROPERTIES FOLDER samples)
 
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
-        DEPENDS runtime
+        DEPENDS runtime painter
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} samples/runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} samples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMENT "Copy library"
     )
 endif()

@@ -344,7 +344,7 @@ namespace elemd
 
         for (auto& var : winImpl->_mouse_move_callbacks)
         {
-            var({x, y});
+            var({x / winImpl->_x_scale, y / winImpl->_y_scale});
         }
     }
 
