@@ -20,7 +20,8 @@ namespace elemd
     class ContextImplVulkan : public Context
     {
     public:
-        const uint32_t UNIFORM_BUFFER_ARRAY_MAX_COUNT = 1048576;
+        const uint32_t UNIFORM_RECT_BUFFER_ARRAY_MAX_COUNT =
+            ((int)(65536 / sizeof(uniform_rect))) * sizeof(uniform_rect);
 
         struct uniform_rect
         {

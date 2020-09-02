@@ -1,5 +1,6 @@
 #include <thread>
 #include <chrono>
+#include <vector>
 
 #include <elemd/window.hpp>
 #include <elemd/context.hpp>

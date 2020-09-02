@@ -18,14 +18,19 @@ namespace elemd
     private:
         VkImage _image;
         VkDeviceMemory _deviceMemory;
-        VkImageView _immageView;
+        VkImageView _imageView;
         VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-        //VkDevice _device;
         VkSampler _sampler;
 
-        void upload(const VkCommandPool& commandPool, const VkQueue& queue);
+        bool _loaded = false;
+        bool _uploaded = false;
 
+        void upload(const VkCommandPool& commandPool, const VkQueue& queue);
+        void writeBuffer(const VkCommandPool& commandPool, const VkQueue& queue, VkBuffer buffer);
         void changeLayout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout);
+
+        VkSampler getSampler();
+        VkImageView getImageView();
     };
 
 } // namespace elemd

@@ -15,7 +15,7 @@ struct UniformData
 
 layout(set = 0, binding = 0, std140) uniform UBO
 {
-    UniformData payload[1048576];
+    UniformData payload[65536];
 } ubo;
 
 float ellipse_distance(vec2 uv, vec2 center, vec2 dims)

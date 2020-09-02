@@ -1032,7 +1032,7 @@ namespace elemd
 
     void ContextImplVulkan::create_uniform_buffer()
     {
-        VkDeviceSize bufferSize = sizeof(uniform_rect) * UNIFORM_BUFFER_ARRAY_MAX_COUNT;
+        VkDeviceSize bufferSize = UNIFORM_RECT_BUFFER_ARRAY_MAX_COUNT;
         vku::create_buffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer,
                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -1072,7 +1072,7 @@ namespace elemd
         VkDescriptorBufferInfo descriptorBufferInfo;
         descriptorBufferInfo.buffer = uniformBuffer;
         descriptorBufferInfo.offset = 0;
-        descriptorBufferInfo.range = sizeof(uniform_rect) * UNIFORM_BUFFER_ARRAY_MAX_COUNT;
+        descriptorBufferInfo.range = UNIFORM_RECT_BUFFER_ARRAY_MAX_COUNT;
         
         VkWriteDescriptorSet writeDescriptorSet;
         writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

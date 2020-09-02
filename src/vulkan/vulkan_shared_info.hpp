@@ -3,6 +3,8 @@
 
 #include <glad/vulkan.h>
 
+#define DEFAULT_VALIDATION_LAYER "VK_LAYER_KHRONOS_validation"
+
 namespace elemd
 {
     class VulkanSharedInfo

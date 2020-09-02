@@ -1,6 +1,7 @@
 #include "vulkan_shared_info.hpp"
 
 #include <vector>
+#include <iostream>
 
 #include "elemd/elemental_draw.hpp"
 #include "GLFW/glfw3.h"
@@ -78,22 +79,43 @@ namespace elemd
             extensions.push_back(requiredExtensions[i]);
         }
 
-        // --------------- Create Instance Create Info ---------------
 
-        const std::vector<const char*> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};
+        std::vector<const char*> validationLayers = {};
+#ifndef NDEBUG
+        // --------------- Find Layer ---------------
+
+        uint32_t layerCount;
+        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+        std::vector<VkLayerProperties> availableLayers(layerCount);
+        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+        for (const VkLayerProperties& layerProperties : availableLayers)
+        {
+            if (strcmp(layerProperties.layerName, DEFAULT_VALIDATION_LAYER) == 0)
+            {
+                validationLayers.push_back(DEFAULT_VALIDATION_LAYER);
+                break;
+            }
+        }
+
+        if (validationLayers.size() == 0)
+        {
+            std::cout
+                << "Warning: The Default validation layer " << DEFAULT_VALIDATION_LAYER
+                << " was not found. Consider switching to Release mode or installing the VulkanSDK."
+                << std::endl;
+        }
+#endif
+
+        // --------------- Create Instance Create Info ---------------
 
         VkInstanceCreateInfo instanceCreateInfo;
         instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         instanceCreateInfo.pNext = nullptr;
         instanceCreateInfo.flags = 0;
         instanceCreateInfo.pApplicationInfo = &applicationInfo;
-#ifdef NDEBUG
-        instanceCreateInfo.enabledLayerCount = 0;
-        instanceCreateInfo.ppEnabledLayerNames = nullptr;
-#else
         instanceCreateInfo.enabledLayerCount = (uint32_t)validationLayers.size();
         instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
-#endif // DEBUG
         instanceCreateInfo.enabledExtensionCount = (uint32_t)extensions.size();
         instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
@@ -129,7 +151,12 @@ namespace elemd
     {
         // --------------- Create Device Queue Create Info ---------------
 
-        float queuePriorities[] = {1.0f, 1.0f, 1.0f, 1.0f};
+        std::vector<float> queuePriorities;
+
+        for (int i = 0; i < queueCount; ++i)
+        {
+            queuePriorities.push_back(1.0f);
+        }
 
         VkDeviceQueueCreateInfo deviceQueueCreateInfo;
         deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -137,7 +164,7 @@ namespace elemd
         deviceQueueCreateInfo.flags = 0;
         deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndex;
         deviceQueueCreateInfo.queueCount = queueCount;
-        deviceQueueCreateInfo.pQueuePriorities = queuePriorities;
+        deviceQueueCreateInfo.pQueuePriorities = queuePriorities.data();
 
         // --------------- Create Device Create Info ---------------
 
