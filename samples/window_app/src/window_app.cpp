@@ -13,7 +13,7 @@
 #include <elemd/image.hpp>
 
 // Constants
-const int TARGET_RENDER_FREQUENCY = 60;
+const int TARGET_RENDER_FREQUENCY = 3;
 const int TARGET_POLL_FREQUENCY = 30;
 
 // Variables
@@ -196,6 +196,13 @@ extern "C"
                     ctx->set_fill_color(elemd::color(30, 200, 30));
                     ctx->fill_circle(mouse_x, mouse_y, 15);
                 }
+
+
+
+
+                // Image
+
+                ctx->draw_image(0, 0, img->get_width() / 2, img->get_height() / 2, img);
                 
 
                 ctx->draw_frame();

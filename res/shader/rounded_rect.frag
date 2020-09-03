@@ -6,6 +6,8 @@ layout(location = 1) in flat int instance_index;
 
 layout(location = 0) out vec4 outColor;
 
+layout(binding = 1) uniform sampler2D tex;
+
 struct UniformData
 {
     vec4 fill_color;

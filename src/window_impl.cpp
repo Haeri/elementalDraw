@@ -313,9 +313,6 @@ namespace elemd
 
     void on_window_resize(GLFWwindow* window, int width, int height)
     {
-        if (width <= 0 || height <= 0)
-            return;
-
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
         winImpl->get_context()->resize_context(width, height);
 

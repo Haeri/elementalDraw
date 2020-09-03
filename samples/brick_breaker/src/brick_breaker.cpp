@@ -279,7 +279,7 @@ extern "C"
                           0, 1, 0, 0, 0, 1, 0, 0, 0, 0});
 
         elemd::WindowConfig wc{TITLE, WIDTH, HEIGHT};
-        wc.transparent = true;
+        //wc.transparent = true;
         wc.resizeable = false;
         return wc;
     }

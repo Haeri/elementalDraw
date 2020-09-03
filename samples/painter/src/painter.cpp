@@ -19,7 +19,7 @@ std::vector<elemd::vec2> points;
 
 void draw(elemd::Context* ctx)
 {
-    ctx->set_fill_color({10, 10, 10});
+    ctx->set_fill_color({210, 210, 210});
 
     for (auto& point : points)
     {
@@ -44,7 +44,7 @@ int main(void)
     _CrtSetDbgFlag(flag);
 #endif
 
-    elemd::WindowConfig winc = elemd::WindowConfig{"Window App", WIDTH, HEIGHT};
+    elemd::WindowConfig winc = elemd::WindowConfig{"Painting App", WIDTH, HEIGHT};
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
 

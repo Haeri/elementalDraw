@@ -14,14 +14,16 @@
 #include "vulkan_shared_info.hpp"
 #include "vulkan_utils.hpp"
 #include "../window_impl.hpp"
+#include "image_impl_vulkan.hpp"
 
 namespace elemd
 {
     class ContextImplVulkan : public Context
     {
     public:
-        const uint32_t UNIFORM_RECT_BUFFER_ARRAY_MAX_COUNT =
-            ((int)(65536 / sizeof(uniform_rect))) * sizeof(uniform_rect);
+        const uint32_t UNIFORM_BUFFER_ARRAY_MAX_COUNT = 65536;
+        const uint32_t UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE =
+            ((int)(UNIFORM_BUFFER_ARRAY_MAX_COUNT / sizeof(uniform_rect))) * sizeof(uniform_rect);
 
         struct uniform_rect
         {
@@ -34,8 +36,8 @@ namespace elemd
         std::vector<uint32_t> rect_indices = {0, 1, 2, 1, 3, 2};
         
         std::vector<point_vertex> point_vertices = {
-            {vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
-
+            {vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}
+        };
 
         std::vector<uniform_rect> uniforms = {};
 
@@ -43,6 +45,7 @@ namespace elemd
 
         std::atomic<bool> resizing = false;
         std::atomic<bool> rendering = false;
+        bool headless = false;
 
         uint32_t width = 0;
         uint32_t height = 0;

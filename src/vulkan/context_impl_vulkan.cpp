@@ -157,13 +157,63 @@ namespace elemd
     {
     }
 
-    void Context::draw_image(float x, float y, float width, float height, uint32_t image)
+    void Context::draw_image(float x, float y, float width, float height, image* image)
     {
+        ContextImplVulkan* impl = getImpl(this);
+        imageImplVulkan* img = (imageImplVulkan*)image;
+        if (!img->_uploaded)
+            img->upload(impl->commandPool, impl->queue);
+
+        x *= impl->_window->_x_scale;
+        y *= impl->_window->_y_scale;
+        width *= impl->_window->_x_scale;
+        height *= impl->_window->_y_scale;
+
+        float xf = (x / impl->width);
+        float yf = (y / impl->height);
+        float widhtf = (width / impl->width);
+        float heightf = (height / impl->height);
+
+        impl->uniforms.push_back(
+            {_fill_color,
+             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
+              vec2(xf, yf + heightf) * 2.0f - vec2(1),
+              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
+             {vec2(0), vec2(0), vec2(0), vec2(0)}});
     }
 
-    void Context::draw_rounded_image(float x, float y, float width, float height, uint32_t image,
-                                     float tl, float tr, float br, float bl)
+    void Context::draw_rounded_image(float x, float y, float width, float height, image* image, float radius_nw,
+                                    float radius_ne, float radius_se, float radius_sw)
     {
+        ContextImplVulkan* impl = getImpl(this);
+        imageImplVulkan* img = (imageImplVulkan*)image;
+        if (!img->_uploaded)
+            img->upload(impl->commandPool, impl->queue);
+
+        x *= impl->_window->_x_scale;
+        y *= impl->_window->_y_scale;
+        width *= impl->_window->_x_scale;
+        height *= impl->_window->_y_scale;
+
+        float xf = (x / impl->width);
+        float yf = (y / impl->height);
+        float widthf = (width / impl->width);
+        float heightf = (height / impl->height);
+        float nwxf = (radius_nw / width) * (impl->_window->_x_scale);
+        float nexf = (radius_ne / width) * (impl->_window->_x_scale);
+        float sexf = (radius_se / width) * (impl->_window->_x_scale);
+        float swxf = (radius_sw / width) * (impl->_window->_x_scale);
+        float nwyf = (radius_nw / height) * (impl->_window->_y_scale);
+        float neyf = (radius_ne / height) * (impl->_window->_y_scale);
+        float seyf = (radius_se / height) * (impl->_window->_y_scale);
+        float swyf = (radius_sw / height) * (impl->_window->_y_scale);
+
+        impl->uniforms.push_back(
+            {_fill_color,
+             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
+              vec2(xf, yf + heightf) * 2.0f - vec2(1),
+              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
+             {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)}});
     }
 
     void Context::set_clear_color(color color)
@@ -184,12 +234,12 @@ namespace elemd
     void Context::draw_frame()
     {
         ContextImplVulkan* impl = getImpl(this);
-        if (impl->rendering) return;
+        if (impl->rendering || impl->headless) return;
         impl->rendering = true;
 
         
         impl->update_uniforms();
-        impl->record_command_buffers();
+        //impl->record_command_buffers();
         impl->uniforms.clear();
        
 
@@ -231,7 +281,15 @@ namespace elemd
     void Context::resize_context(int width, int height)
     {
         ContextImplVulkan* impl = getImpl(this);
-        impl->update_swapchain((uint32_t)width, (uint32_t)height);
+        if (width == 0 || height == 0)
+        {
+            impl->headless = true;
+        }
+        else
+        {
+            impl->headless = false;
+            impl->update_swapchain((uint32_t)width, (uint32_t)height);
+        }
     }
 
     void ContextImplVulkan::destroy()
@@ -492,20 +550,33 @@ namespace elemd
 
     void ContextImplVulkan::create_descriptor_set_layout()
     {
-        VkDescriptorSetLayoutBinding descriptorSetLayoutBinding;
-        descriptorSetLayoutBinding.binding = 0;
-        descriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorSetLayoutBinding.descriptorCount = 1;
-        descriptorSetLayoutBinding.stageFlags =
+        VkDescriptorSetLayoutBinding uniformDescriptorSetLayoutBinding;
+        uniformDescriptorSetLayoutBinding.binding = 0;
+        uniformDescriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        uniformDescriptorSetLayoutBinding.descriptorCount = 1;
+        uniformDescriptorSetLayoutBinding.stageFlags =
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-        descriptorSetLayoutBinding.pImmutableSamplers = nullptr;
+        uniformDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
+
+        
+        VkDescriptorSetLayoutBinding samplerDescriptorSetLayoutBinding;
+        samplerDescriptorSetLayoutBinding.binding = 2;
+        samplerDescriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        samplerDescriptorSetLayoutBinding.descriptorCount = 1;
+        samplerDescriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        samplerDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
+
+        std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings = {
+            uniformDescriptorSetLayoutBinding, 
+            samplerDescriptorSetLayoutBinding
+        };
 
         VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
         descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         descriptorSetLayoutCreateInfo.pNext = nullptr;
         descriptorSetLayoutCreateInfo.flags = 0;
-        descriptorSetLayoutCreateInfo.bindingCount = 1;
-        descriptorSetLayoutCreateInfo.pBindings = &descriptorSetLayoutBinding;
+        descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
+        descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
 
         vku::err_check(vkCreateDescriptorSetLayout(VulkanSharedInfo::getInstance()->device,
                                                    &descriptorSetLayoutCreateInfo, nullptr,
@@ -829,32 +900,32 @@ namespace elemd
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo,
                                  VK_SUBPASS_CONTENTS_INLINE);
 
-            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+                vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
-            VkViewport viewport;
-            viewport.x = 0.0f;
-            viewport.y = 0.0f;
-            viewport.width = (float)width;
-            viewport.height = (float)height;
-            viewport.minDepth = 0.0f;
-            viewport.maxDepth = 1.0f;
+                VkViewport viewport;
+                viewport.x = 0.0f;
+                viewport.y = 0.0f;
+                viewport.width = (float)width;
+                viewport.height = (float)height;
+                viewport.minDepth = 0.0f;
+                viewport.maxDepth = 1.0f;
 
-            VkRect2D scissor;
-            scissor.offset = { 0, 0 };
-            scissor.extent = { width, height };
+                VkRect2D scissor;
+                scissor.offset = { 0, 0 };
+                scissor.extent = { width, height };
 
-            vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
-            vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
+                vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
+                vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
 
-            VkDeviceSize offsets[] = { 0 };
-            //vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
-            vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+                VkDeviceSize offsets[] = { 0 };
+                //vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
+                vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
             
-            vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+                vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
-            vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
-                             (uint32_t)uniforms.size(), 0, 0, 0);
+                vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
+                                 UNIFORM_BUFFER_ARRAY_MAX_COUNT, 0, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             vku::err_check(vkEndCommandBuffer(commandBuffers[i]));
@@ -884,8 +955,10 @@ namespace elemd
         if (resizing) return;
         resizing = true;
 
-        this->width = width * _window->_x_scale;
-        this->height = height * _window->_y_scale;        
+        this->width = width;
+        //*_window->_x_scale;
+        this->height = height;
+        //*_window->_y_scale;        
 
         vkDeviceWaitIdle(VulkanSharedInfo::getInstance()->device);
 
@@ -982,7 +1055,8 @@ namespace elemd
 //        vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory, nullptr);
 //        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer, nullptr);  
 
-        vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool, VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
+        vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool,
+                             VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
                              commandBuffers);
         vkDestroyCommandPool(VulkanSharedInfo::getInstance()->device, commandPool, nullptr);
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
@@ -1032,7 +1106,7 @@ namespace elemd
 
     void ContextImplVulkan::create_uniform_buffer()
     {
-        VkDeviceSize bufferSize = UNIFORM_RECT_BUFFER_ARRAY_MAX_COUNT;
+        VkDeviceSize bufferSize = UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE;
         vku::create_buffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer,
                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -1041,17 +1115,26 @@ namespace elemd
 
     void ContextImplVulkan::create_descriptor_pool()
     {
-        VkDescriptorPoolSize descriptorPoolSize;
-        descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorPoolSize.descriptorCount = 1;
+        VkDescriptorPoolSize uniformDescriptorPoolSize;
+        uniformDescriptorPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        uniformDescriptorPoolSize.descriptorCount = 1;
+
+        VkDescriptorPoolSize samplerDescriptorPoolSize;
+        samplerDescriptorPoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        samplerDescriptorPoolSize.descriptorCount = 1;
+
+        std::vector<VkDescriptorPoolSize> descriptorPoolSizes = {
+            uniformDescriptorPoolSize,
+            samplerDescriptorPoolSize
+        };
 
         VkDescriptorPoolCreateInfo descriptorPoolCreateInfo;
         descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         descriptorPoolCreateInfo.pNext = nullptr;
         descriptorPoolCreateInfo.flags = 0;
         descriptorPoolCreateInfo.maxSets = 1;
-        descriptorPoolCreateInfo.poolSizeCount = 1;
-        descriptorPoolCreateInfo.pPoolSizes = &descriptorPoolSize;
+        descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizes.size();
+        descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
 
         vku::err_check(vkCreateDescriptorPool(VulkanSharedInfo::getInstance()->device,
                                               &descriptorPoolCreateInfo, nullptr, &descriptorPool));
@@ -1072,23 +1155,48 @@ namespace elemd
         VkDescriptorBufferInfo descriptorBufferInfo;
         descriptorBufferInfo.buffer = uniformBuffer;
         descriptorBufferInfo.offset = 0;
-        descriptorBufferInfo.range = UNIFORM_RECT_BUFFER_ARRAY_MAX_COUNT;
+        descriptorBufferInfo.range = UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE;
         
-        VkWriteDescriptorSet writeDescriptorSet;
-        writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writeDescriptorSet.pNext = nullptr;
-        writeDescriptorSet.dstSet = descriptorSet;
-        writeDescriptorSet.dstBinding = 0;
-        writeDescriptorSet.dstArrayElement = 0;
-        writeDescriptorSet.descriptorCount = 1;
-        writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        writeDescriptorSet.pImageInfo = nullptr;
-        writeDescriptorSet.pBufferInfo = &descriptorBufferInfo;
-        writeDescriptorSet.pTexelBufferView = nullptr;
+        VkWriteDescriptorSet uniformWriteDescriptorSet;
+        uniformWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        uniformWriteDescriptorSet.pNext = nullptr;
+        uniformWriteDescriptorSet.dstSet = descriptorSet;
+        uniformWriteDescriptorSet.dstBinding = 0;
+        uniformWriteDescriptorSet.dstArrayElement = 0;
+        uniformWriteDescriptorSet.descriptorCount = 1;
+        uniformWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        uniformWriteDescriptorSet.pImageInfo = nullptr;
+        uniformWriteDescriptorSet.pBufferInfo = &descriptorBufferInfo;
+        uniformWriteDescriptorSet.pTexelBufferView = nullptr;
 
-        vkUpdateDescriptorSets(VulkanSharedInfo::getInstance()->device, 1, &writeDescriptorSet, 0,
-                               nullptr);
 
+        /*
+        VkDescriptorImageInfo descriptorImageInfo;
+        descriptorImageInfo.sampler = ;
+        descriptorImageInfo.imageView = ;
+        descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        VkWriteDescriptorSet samplerWriteDescriptorSet;
+        samplerWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        samplerWriteDescriptorSet.pNext = nullptr;
+        samplerWriteDescriptorSet.dstSet = descriptorSet;
+        samplerWriteDescriptorSet.dstBinding = 1;
+        samplerWriteDescriptorSet.dstArrayElement = 0;
+        samplerWriteDescriptorSet.descriptorCount = 1;
+        samplerWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        samplerWriteDescriptorSet.pImageInfo = &descriptorImageInfo;
+        samplerWriteDescriptorSet.pBufferInfo = nullptr;
+        samplerWriteDescriptorSet.pTexelBufferView = nullptr;
+        */
+
+
+        std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
+            uniformWriteDescriptorSet, 
+            //samplerWriteDescriptorSet
+        };
+
+        vkUpdateDescriptorSets(VulkanSharedInfo::getInstance()->device, writeDescriptorSets.size(),
+                               writeDescriptorSets.data(), 0, nullptr);
     }
 
     void ContextImplVulkan::update_uniforms()

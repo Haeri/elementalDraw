@@ -15,7 +15,6 @@ namespace elemd
         imageImplVulkan(std::string file_path);
         ~imageImplVulkan();
 
-    private:
         VkImage _image;
         VkDeviceMemory _deviceMemory;
         VkImageView _imageView;
