@@ -20,6 +20,7 @@ namespace elemd
         VkImageView _imageView;
         VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
         VkSampler _sampler;
+        int _sampler_index = -1;
 
         bool _loaded = false;
         bool _uploaded = false;

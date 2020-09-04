@@ -15,6 +15,7 @@ struct UniformData
     vec4 fill_color;
     vec4 vertices[2];
     vec4 border_radius[2];
+    vec4 sampler_index; 
 };
 
 layout(set = 0, binding = 0, std140) uniform UBO

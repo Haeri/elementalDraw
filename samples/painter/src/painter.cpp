@@ -68,6 +68,7 @@ int main(void)
     });
 
     ctx->set_clear_color({255, 255, 255});
+    ctx->_tmp_prepare();
 
     while (win->is_running())
     {

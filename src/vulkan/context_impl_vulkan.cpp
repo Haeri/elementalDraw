@@ -81,7 +81,8 @@ namespace elemd
              {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(0), vec2(0), vec2(0), vec2(0)}});
+             {vec2(0), vec2(0), vec2(0), vec2(0)},
+             {vec2(-1, 0), vec2(0)}});
     }
 
     void Context::fill_rounded_rect(float x, float y, float width, float height,
@@ -119,7 +120,8 @@ namespace elemd
              {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)}});
+             {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)},
+             {vec2(-1, 0), vec2(0)}});
     }
 
     void Context::fill_circle(float x, float y, float radius)
@@ -141,7 +143,8 @@ namespace elemd
               vec2(xf + widhtf, yf) * 2.0f - vec2(1),
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(radf), vec2(radf), vec2(radf), vec2(radf)}});
+             {vec2(radf), vec2(radf), vec2(radf), vec2(radf)},
+             {vec2(-1, 0), vec2(0)}});
    
     }
 
@@ -161,9 +164,7 @@ namespace elemd
     {
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
-        if (!img->_uploaded)
-            img->upload(impl->commandPool, impl->queue);
-
+        
         x *= impl->_window->_x_scale;
         y *= impl->_window->_y_scale;
         width *= impl->_window->_x_scale;
@@ -179,7 +180,8 @@ namespace elemd
              {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(0), vec2(0), vec2(0), vec2(0)}});
+             {vec2(0), vec2(0), vec2(0), vec2(0)},
+             {vec2(img->_sampler_index, 0), vec2(0)}});
     }
 
     void Context::draw_rounded_image(float x, float y, float width, float height, image* image, float radius_nw,
@@ -187,8 +189,6 @@ namespace elemd
     {
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
-        if (!img->_uploaded)
-            img->upload(impl->commandPool, impl->queue);
 
         x *= impl->_window->_x_scale;
         y *= impl->_window->_y_scale;
@@ -210,10 +210,11 @@ namespace elemd
 
         impl->uniforms.push_back(
             {_fill_color,
-             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
-              vec2(xf, yf + heightf) * 2.0f - vec2(1),
-              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)}});
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
+            vec2(xf, yf + heightf) * 2.0f - vec2(1),
+            vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
+                {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)}, 
+            {vec2(img->_sampler_index, 0), vec2(0)}});
     }
 
     void Context::set_clear_color(color color)
@@ -290,6 +291,30 @@ namespace elemd
             impl->headless = false;
             impl->update_swapchain((uint32_t)width, (uint32_t)height);
         }
+    }
+
+    void Context::_tmp_register_image(image* image)
+    {
+        ContextImplVulkan* impl = getImpl(this);
+        imageImplVulkan* img = (imageImplVulkan*)image;
+        if (!img->_uploaded)
+        {
+            img->upload(impl->commandPool, impl->queue);
+            img->_sampler_index = impl->images.size();
+            impl->images.push_back(*img);
+        }
+    }
+
+    void Context::_tmp_prepare()
+    {
+        ContextImplVulkan* impl = getImpl(this);
+        
+        impl->create_vertex_buffers();
+        impl->create_index_buffers();
+        impl->create_uniform_buffer();
+        impl->create_descriptor_pool();
+        impl->create_descriptor_set();
+        impl->record_command_buffers();
     }
 
     void ContextImplVulkan::destroy()
@@ -560,9 +585,9 @@ namespace elemd
 
         
         VkDescriptorSetLayoutBinding samplerDescriptorSetLayoutBinding;
-        samplerDescriptorSetLayoutBinding.binding = 2;
+        samplerDescriptorSetLayoutBinding.binding = 1;
         samplerDescriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        samplerDescriptorSetLayoutBinding.descriptorCount = 1;
+        samplerDescriptorSetLayoutBinding.descriptorCount = 32;
         samplerDescriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
         samplerDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
@@ -1017,12 +1042,6 @@ namespace elemd
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
-        create_vertex_buffers();
-        create_index_buffers();
-        create_uniform_buffer();
-        create_descriptor_pool();
-        create_descriptor_set();
-        record_command_buffers();
 
         create_semaphores();
 
@@ -1170,11 +1189,15 @@ namespace elemd
         uniformWriteDescriptorSet.pTexelBufferView = nullptr;
 
 
-        /*
-        VkDescriptorImageInfo descriptorImageInfo;
-        descriptorImageInfo.sampler = ;
-        descriptorImageInfo.imageView = ;
-        descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        
+        VkDescriptorImageInfo descriptorImageInfo[TEXTURE_ARRAY_SIZE];
+
+        for (uint32_t i = 0; i < TEXTURE_ARRAY_SIZE; ++i)
+        {
+            descriptorImageInfo[i].sampler = images[i]._sampler;
+            descriptorImageInfo[i].imageView = images[i]._imageView;
+            descriptorImageInfo[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        }
 
         VkWriteDescriptorSet samplerWriteDescriptorSet;
         samplerWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1182,17 +1205,16 @@ namespace elemd
         samplerWriteDescriptorSet.dstSet = descriptorSet;
         samplerWriteDescriptorSet.dstBinding = 1;
         samplerWriteDescriptorSet.dstArrayElement = 0;
-        samplerWriteDescriptorSet.descriptorCount = 1;
+        samplerWriteDescriptorSet.descriptorCount = TEXTURE_ARRAY_SIZE;
         samplerWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        samplerWriteDescriptorSet.pImageInfo = &descriptorImageInfo;
+        samplerWriteDescriptorSet.pImageInfo = descriptorImageInfo;
         samplerWriteDescriptorSet.pBufferInfo = nullptr;
         samplerWriteDescriptorSet.pTexelBufferView = nullptr;
-        */
 
 
         std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
             uniformWriteDescriptorSet, 
-            //samplerWriteDescriptorSet
+            samplerWriteDescriptorSet
         };
 
         vkUpdateDescriptorSets(VulkanSharedInfo::getInstance()->device, writeDescriptorSets.size(),

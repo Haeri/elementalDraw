@@ -52,6 +52,9 @@ namespace elemd
 
         void resize_context(int width, int height);
 
+        void _tmp_register_image(image* image);
+        void _tmp_prepare();
+
         virtual void destroy() = 0;
     protected:
         Context() = default;

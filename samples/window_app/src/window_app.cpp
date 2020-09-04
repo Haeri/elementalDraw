@@ -88,9 +88,12 @@ extern "C"
         });
 
         elemd::image* img = elemd::image::create("./res/wallpaper.jpg");
+        ctx->_tmp_register_image(img);
 
         float pong = 0;
         float velocity = 1;
+
+        ctx->_tmp_prepare();
 
         // Main Loop
         while (win->is_running() && !reload)
@@ -118,7 +121,9 @@ extern "C"
             }
 
             if (render_accumulator >= target_render_ms)
-            {   
+            { 
+
+                /*
                 // Title Bar
                 ctx->set_fill_color(elemd::color(28, 28, 30));
                 ctx->fill_rounded_rect(0, 0, WIDTH, 40, 10, 10, 0, 0);
@@ -197,12 +202,12 @@ extern "C"
                     ctx->fill_circle(mouse_x, mouse_y, 15);
                 }
 
-
+                */
 
 
                 // Image
 
-                ctx->draw_image(0, 0, img->get_width() / 2, img->get_height() / 2, img);
+                ctx->draw_image(0, 0, 300, 200, img);
                 
 
                 ctx->draw_frame();

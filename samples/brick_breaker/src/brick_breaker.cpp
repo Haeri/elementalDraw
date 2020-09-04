@@ -297,7 +297,7 @@ extern "C"
         _ctx = ctx;
 
         ctx->set_clear_color(bg_color);
-        //ctx->set_clear_color(elemd::color(255, 255, 255, 0));
+        //ctx->set_clear_color(elemd::color(255, 255, 255, 255));
 
         win->add_key_listener([&](elemd::key_event event) {
             int start_vel = 0;
@@ -330,6 +330,8 @@ extern "C"
         });
 
         loadLevel();
+
+        ctx->_tmp_prepare();
 
         // Main Loop
         while (win->is_running() && !reload)

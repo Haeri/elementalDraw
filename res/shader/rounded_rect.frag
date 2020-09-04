@@ -6,19 +6,20 @@ layout(location = 1) in flat int instance_index;
 
 layout(location = 0) out vec4 outColor;
 
-layout(binding = 1) uniform sampler2D tex;
-
 struct UniformData
 {
     vec4 fill_color;
     vec4 vertices[2];
     vec4 border_radius[2];
+    vec4 sampler_index;
 };
 
 layout(set = 0, binding = 0, std140) uniform UBO
 {
     UniformData payload[65536];
 } ubo;
+layout(set = 0, binding = 1) uniform sampler2D textures[1];
+
 
 float ellipse_distance(vec2 uv, vec2 center, vec2 dims)
 {
@@ -66,7 +67,15 @@ void main()
     
     float delta = fwidth(dist);
     a = smoothstep(1+delta, 1, dist); 
+    int index = int(ubo.payload[instance_index].sampler_index.r);
     
-    outColor = vec4(ubo.payload[instance_index].fill_color.rgb, a);
+    if (index <= -1)
+    {
+        outColor = vec4(ubo.payload[instance_index].fill_color.rgb, a);
+    }
+    else
+    {
+        outColor = vec4(texture(textures[index], uv_varying.xy).rgb, a);
+    }
     //outColor = vec4(vec3(a), 1);
 }
