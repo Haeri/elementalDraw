@@ -35,7 +35,7 @@ namespace elemd
             vec2 sampler_index[2];
         };
 
-        //imageImplVulkan* dummy;
+        imageImplVulkan* dummy;
         std::vector<imageImplVulkan*> images;
 
         //std::vector<vertex> rect_vertices = {{vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
@@ -108,6 +108,7 @@ namespace elemd
         void create_descriptor_set();
         void record_command_buffers();
         void create_semaphores();
+        void initialize_resources();
 
         void update_uniforms();
         void update_swapchain(uint32_t width, uint32_t height);

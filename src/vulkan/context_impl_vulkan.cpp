@@ -627,7 +627,6 @@ namespace elemd
         vku::err_check(vkCreateDescriptorSetLayout(VulkanSharedInfo::getInstance()->device,
                                                    &descriptorSetLayoutCreateInfo, nullptr,
                                                    &descriptorSetLayout));
-
     }
 
     void ContextImplVulkan::create_pipeline()
@@ -996,6 +995,12 @@ namespace elemd
             vkCreateSemaphore(VulkanSharedInfo::getInstance()->device, &semaphoreCreateInfo, nullptr, &semaphoreRenderingComplete));
     }
 
+    void ContextImplVulkan::initialize_resources()
+    {
+        dummy = new imageImplVulkan("./elemd_res/gray.png");
+        dummy->upload(commandPool, queue);
+    }
+
     void ContextImplVulkan::update_swapchain(uint32_t width, uint32_t height)
     {
         if (resizing) return;
@@ -1063,6 +1068,7 @@ namespace elemd
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
+        initialize_resources();
 
         create_semaphores();
 
@@ -1128,7 +1134,7 @@ namespace elemd
         delete fragShaderModule;
         delete[] imageViews;
 
-        //delete dummy;
+        delete dummy;
     }
 
     void ContextImplVulkan::create_vertex_buffers()
@@ -1212,20 +1218,28 @@ namespace elemd
         uniformWriteDescriptorSet.pTexelBufferView = nullptr;
 
 
-        //dummy = new imageImplVulkan("./elemd_res/gray.png");
-        //dummy->upload(commandPool, queue);
-
         
         std::vector<VkDescriptorImageInfo> descriptorImageInfos;
         //[images.size()];
 
-        for (uint32_t i = 0; i < images.size(); ++i)
+        if (images.size() <= 0)
         {
             VkDescriptorImageInfo descriptorImageInfo;
-            descriptorImageInfo.sampler = images[i]->_sampler;
-            descriptorImageInfo.imageView = images[i]->_imageView;
+            descriptorImageInfo.sampler = dummy->_sampler;
+            descriptorImageInfo.imageView = dummy->_imageView;
             descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             descriptorImageInfos.push_back(descriptorImageInfo);
+        }
+        else
+        {        
+            for (uint32_t i = 0; i < images.size(); ++i)
+            {
+                VkDescriptorImageInfo descriptorImageInfo;
+                descriptorImageInfo.sampler = images[i]->_sampler;
+                descriptorImageInfo.imageView = images[i]->_imageView;
+                descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                descriptorImageInfos.push_back(descriptorImageInfo);
+            }
         }
 
         /*

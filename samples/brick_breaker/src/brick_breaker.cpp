@@ -37,6 +37,7 @@ double render_accumulator = 0;
 double poll_accumulator = 0;
 int frames = 0;
 bool reload = false;
+float initial_scale = -1;
 
 // Color Palette
 elemd::color bg_color("#212121");
@@ -295,6 +296,7 @@ extern "C"
 
         _win = win;
         _ctx = ctx;
+        initial_scale = _win->get_scale().get_x();
 
         ctx->set_clear_color(bg_color);
         //ctx->set_clear_color(elemd::color(255, 255, 255, 255));
@@ -323,8 +325,8 @@ extern "C"
         win->add_scroll_listener([&](elemd::scroll_event event) 
         { 
             elemd::vec2 scale = win->get_scale();
-            float deltax = std::clamp(scale.x() + (float)event.yoffset, 0.2f, 5.0f);
-            float deltay = std::clamp(scale.y() + (float)event.yoffset, 0.2f, 5.0f);
+            float deltax = std::clamp(scale.x() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
+            float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
 
             win->set_scale(deltax, deltay);
         });

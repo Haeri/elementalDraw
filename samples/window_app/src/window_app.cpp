@@ -5,15 +5,16 @@
 #endif
 
 #include <iostream>
-
 #include <array>
+#include <algorithm>
+
 #include <elemd/window.hpp>
 #include <elemd/context.hpp>
 #include <elemd/color.hpp>
 #include <elemd/image.hpp>
 
 // Constants
-const int TARGET_RENDER_FREQUENCY = 3;
+const int TARGET_RENDER_FREQUENCY = 60;
 const int TARGET_POLL_FREQUENCY = 30;
 
 // Variables
@@ -29,6 +30,7 @@ int frames = 0;
 int WIDTH = 470;
 int HEIGHT = 500;
 bool reload = false;
+float initial_scale = 1;
 
 double mouse_x = -100;
 double mouse_y = -100;
@@ -63,12 +65,23 @@ extern "C"
     {
         WIDTH = win->get_width();
         HEIGHT = win->get_height();
+        initial_scale = win->get_scale().get_x();
 
         ctx->set_clear_color(elemd::color(20, 20, 30, 255));
 
         win->add_resize_listener([&](elemd::resize_event event) {
             WIDTH = event.width;
             HEIGHT = event.height;
+        });
+
+        win->add_scroll_listener([&](elemd::scroll_event event) {
+            elemd::vec2 scale = win->get_scale();
+            float deltax =
+                std::clamp(scale.x() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
+            float deltay =
+                std::clamp(scale.y() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
+
+            win->set_scale(deltax, deltay);
         });
 
         win->add_mouse_click_listener([&](elemd::mouse_button_event event) { 
