@@ -18,7 +18,7 @@ layout(set = 0, binding = 0, std140) uniform UBO
 {
     UniformData payload[65536];
 } ubo;
-layout(set = 0, binding = 1) uniform sampler2D textures[1];
+layout(set = 0, binding = 1) uniform sampler2D textures[32];
 
 
 float ellipse_distance(vec2 uv, vec2 center, vec2 dims)

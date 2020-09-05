@@ -19,7 +19,7 @@ std::vector<elemd::vec2> points;
 
 void draw(elemd::Context* ctx)
 {
-    ctx->set_fill_color({210, 210, 210});
+    ctx->set_fill_color({30, 30, 30});
 
     for (auto& point : points)
     {
@@ -67,6 +67,13 @@ int main(void)
         draw(ctx);
     });
 
+
+
+    elemd::image* img = elemd::image::create("./elemd_res/elemd_icon.png");
+
+    ctx->_tmp_register_image(img);
+
+
     ctx->set_clear_color({255, 255, 255});
     ctx->_tmp_prepare();
 
@@ -76,6 +83,9 @@ int main(void)
         std::this_thread::sleep_for(std::chrono::duration<float, std::ratio<1>>(target_poll_ms));
     }
 
+    img->destroy();
     win->destroy();
+
+
     return 0;
 }

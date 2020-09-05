@@ -88,7 +88,13 @@ extern "C"
         });
 
         elemd::image* img = elemd::image::create("./res/wallpaper.jpg");
+        elemd::image* logo = elemd::image::create("./res/logo.png");
+        elemd::image* grid = elemd::image::create("./res/grid.png");
+
+        
         ctx->_tmp_register_image(img);
+        ctx->_tmp_register_image(logo);
+        ctx->_tmp_register_image(grid);
 
         float pong = 0;
         float velocity = 1;
@@ -208,7 +214,19 @@ extern "C"
                 // Image
 
                 ctx->draw_image(0, 0, 300, 200, img);
+
+                ctx->draw_rounded_image(0, 205, 300, 200, img, 60);
+
+                ctx->draw_image(0, 410, 50, 50, logo);
+                ctx->draw_image(0, 475, 100, 100, grid);
                 
+                for (int y = 0; y < 10; ++y)
+                {
+                    for (int x = 0; x < 10; ++x)
+                    {
+                        ctx->draw_image(330 + x * 30+1, 0 + y * 30+1, 30, 30, logo);
+                    }
+                }
 
                 ctx->draw_frame();
 
@@ -223,6 +241,8 @@ extern "C"
         }
 
         img->destroy();
+        logo->destroy();
+        grid->destroy();
         win->destroy();
 
         return 0;

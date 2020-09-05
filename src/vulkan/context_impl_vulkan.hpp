@@ -16,7 +16,7 @@
 #include "../window_impl.hpp"
 #include "image_impl_vulkan.hpp"
 
-#define TEXTURE_ARRAY_SIZE 1
+#define TEXTURE_ARRAY_SIZE 32
 #define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536
 #define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE ((int)(UNIFORM_BUFFER_ARRAY_MAX_COUNT / sizeof(uniform_rect))) * sizeof(uniform_rect)
 
@@ -35,7 +35,8 @@ namespace elemd
             vec2 sampler_index[2];
         };
 
-        std::vector<imageImplVulkan> images;
+        imageImplVulkan* dummy;
+        std::vector<imageImplVulkan*> images;
 
         //std::vector<vertex> rect_vertices = {{vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
         std::vector<uint32_t> rect_indices = {0, 1, 2, 1, 3, 2};

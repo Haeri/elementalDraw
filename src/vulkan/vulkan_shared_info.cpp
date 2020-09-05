@@ -168,13 +168,22 @@ namespace elemd
 
         // --------------- Create Device Create Info ---------------
 
+        
+        /*
+        VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
+        descriptorIndexingFeatures.sType =
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+        descriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
+        */
+
         VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
+
 
         const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
         VkDeviceCreateInfo deviceCreateInfo;
         deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        deviceCreateInfo.pNext = nullptr;
+        deviceCreateInfo.pNext = nullptr; // &descriptorIndexingFeatures;
         deviceCreateInfo.flags = 0;
         deviceCreateInfo.queueCreateInfoCount = 1;
         deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;

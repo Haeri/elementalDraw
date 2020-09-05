@@ -38,6 +38,8 @@ namespace elemd
         void draw_text(float x, float y, char* text);
         void draw_image(float x, float y, float width, float height, image* image);
         void draw_rounded_image(float x, float y, float width, float height, image* image,
+                                float border_radius);
+        void draw_rounded_image(float x, float y, float width, float height, image* image,
                                 float radius_nw, float radius_ne, float radius_se, float radius_sw);
 
         void set_clear_color(color color);

@@ -184,6 +184,13 @@ namespace elemd
              {vec2(img->_sampler_index, 0), vec2(0)}});
     }
 
+    void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
+                                     float border_radius)
+    {
+        draw_rounded_image(x, y, width, height, image, border_radius, border_radius, border_radius,
+                           border_radius);
+    }
+
     void Context::draw_rounded_image(float x, float y, float width, float height, image* image, float radius_nw,
                                     float radius_ne, float radius_se, float radius_sw)
     {
@@ -301,7 +308,7 @@ namespace elemd
         {
             img->upload(impl->commandPool, impl->queue);
             img->_sampler_index = impl->images.size();
-            impl->images.push_back(*img);
+            impl->images.push_back(img);
         }
     }
 
@@ -583,11 +590,11 @@ namespace elemd
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         uniformDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
-        
         VkDescriptorSetLayoutBinding samplerDescriptorSetLayoutBinding;
         samplerDescriptorSetLayoutBinding.binding = 1;
-        samplerDescriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        samplerDescriptorSetLayoutBinding.descriptorCount = 32;
+        samplerDescriptorSetLayoutBinding.descriptorType =
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        samplerDescriptorSetLayoutBinding.descriptorCount = TEXTURE_ARRAY_SIZE;
         samplerDescriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
         samplerDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
@@ -596,9 +603,23 @@ namespace elemd
             samplerDescriptorSetLayoutBinding
         };
 
+        /*
+        std::vector<VkDescriptorBindingFlags> descriptorBindingFlags = {
+            0,
+            VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT
+        };
+
+        VkDescriptorSetLayoutBindingFlagsCreateInfo descriptorSetLayoutBindingFlagsCreateInfo;
+        descriptorSetLayoutBindingFlagsCreateInfo.sType =
+            VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+        descriptorSetLayoutBindingFlagsCreateInfo.pNext = nullptr;
+        descriptorSetLayoutBindingFlagsCreateInfo.bindingCount = descriptorBindingFlags.size();
+        descriptorSetLayoutBindingFlagsCreateInfo.pBindingFlags = descriptorBindingFlags.data();
+        */
+
         VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
         descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        descriptorSetLayoutCreateInfo.pNext = nullptr;
+        descriptorSetLayoutCreateInfo.pNext = nullptr;         //&descriptorSetLayoutBindingFlagsCreateInfo;
         descriptorSetLayoutCreateInfo.flags = 0;
         descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
         descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
@@ -1106,6 +1127,8 @@ namespace elemd
         delete vertShaderModule;
         delete fragShaderModule;
         delete[] imageViews;
+
+        delete dummy;
     }
 
     void ContextImplVulkan::create_vertex_buffers()
@@ -1189,13 +1212,24 @@ namespace elemd
         uniformWriteDescriptorSet.pTexelBufferView = nullptr;
 
 
+        dummy = new imageImplVulkan("./elemd_res/gray.png");
+        dummy->upload(commandPool, queue);
+
         
         VkDescriptorImageInfo descriptorImageInfo[TEXTURE_ARRAY_SIZE];
 
         for (uint32_t i = 0; i < TEXTURE_ARRAY_SIZE; ++i)
         {
-            descriptorImageInfo[i].sampler = images[i]._sampler;
-            descriptorImageInfo[i].imageView = images[i]._imageView;
+            if (i < images.size())
+            {
+                descriptorImageInfo[i].sampler = images[i]->_sampler;
+                descriptorImageInfo[i].imageView = images[i]->_imageView;
+            }
+            else
+            {
+                descriptorImageInfo[i].sampler = dummy->_sampler;
+                descriptorImageInfo[i].imageView = dummy->_imageView;
+            }
             descriptorImageInfo[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         }
 
