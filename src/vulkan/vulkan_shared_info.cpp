@@ -169,12 +169,12 @@ namespace elemd
         // --------------- Create Device Create Info ---------------
 
         
-        /*
+        
         VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
         descriptorIndexingFeatures.sType =
             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
         descriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
-        */
+        
 
         VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
 
@@ -183,7 +183,7 @@ namespace elemd
 
         VkDeviceCreateInfo deviceCreateInfo;
         deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        deviceCreateInfo.pNext = nullptr; // &descriptorIndexingFeatures;
+        deviceCreateInfo.pNext = &descriptorIndexingFeatures;
         deviceCreateInfo.flags = 0;
         deviceCreateInfo.queueCreateInfoCount = 1;
         deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;

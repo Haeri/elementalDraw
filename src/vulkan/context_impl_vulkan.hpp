@@ -35,7 +35,7 @@ namespace elemd
             vec2 sampler_index[2];
         };
 
-        imageImplVulkan* dummy;
+        //imageImplVulkan* dummy;
         std::vector<imageImplVulkan*> images;
 
         //std::vector<vertex> rect_vertices = {{vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};

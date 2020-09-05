@@ -603,7 +603,7 @@ namespace elemd
             samplerDescriptorSetLayoutBinding
         };
 
-        /*
+        
         std::vector<VkDescriptorBindingFlags> descriptorBindingFlags = {
             0,
             VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT
@@ -615,11 +615,11 @@ namespace elemd
         descriptorSetLayoutBindingFlagsCreateInfo.pNext = nullptr;
         descriptorSetLayoutBindingFlagsCreateInfo.bindingCount = descriptorBindingFlags.size();
         descriptorSetLayoutBindingFlagsCreateInfo.pBindingFlags = descriptorBindingFlags.data();
-        */
+        
 
         VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
         descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        descriptorSetLayoutCreateInfo.pNext = nullptr;         //&descriptorSetLayoutBindingFlagsCreateInfo;
+        descriptorSetLayoutCreateInfo.pNext = &descriptorSetLayoutBindingFlagsCreateInfo;
         descriptorSetLayoutCreateInfo.flags = 0;
         descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
         descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
@@ -1128,7 +1128,7 @@ namespace elemd
         delete fragShaderModule;
         delete[] imageViews;
 
-        delete dummy;
+        //delete dummy;
     }
 
     void ContextImplVulkan::create_vertex_buffers()
@@ -1212,26 +1212,37 @@ namespace elemd
         uniformWriteDescriptorSet.pTexelBufferView = nullptr;
 
 
-        dummy = new imageImplVulkan("./elemd_res/gray.png");
-        dummy->upload(commandPool, queue);
+        //dummy = new imageImplVulkan("./elemd_res/gray.png");
+        //dummy->upload(commandPool, queue);
 
         
-        VkDescriptorImageInfo descriptorImageInfo[TEXTURE_ARRAY_SIZE];
+        std::vector<VkDescriptorImageInfo> descriptorImageInfos;
+        //[images.size()];
 
-        for (uint32_t i = 0; i < TEXTURE_ARRAY_SIZE; ++i)
+        for (uint32_t i = 0; i < images.size(); ++i)
+        {
+            VkDescriptorImageInfo descriptorImageInfo;
+            descriptorImageInfo.sampler = images[i]->_sampler;
+            descriptorImageInfo.imageView = images[i]->_imageView;
+            descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            descriptorImageInfos.push_back(descriptorImageInfo);
+        }
+
+        /*
+        for (uint32_t i = 0; i < images.size(); ++i)
         {
             if (i < images.size())
             {
-                descriptorImageInfo[i].sampler = images[i]->_sampler;
-                descriptorImageInfo[i].imageView = images[i]->_imageView;
+                descriptorImageInfos[i].sampler = images[i]->_sampler;
+                descriptorImageInfos[i].imageView = images[i]->_imageView;
             }
             else
             {
-                descriptorImageInfo[i].sampler = dummy->_sampler;
-                descriptorImageInfo[i].imageView = dummy->_imageView;
+                descriptorImageInfos[i].sampler = dummy->_sampler;
+                descriptorImageInfos[i].imageView = dummy->_imageView;
             }
-            descriptorImageInfo[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        }
+            descriptorImageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        }*/
 
         VkWriteDescriptorSet samplerWriteDescriptorSet;
         samplerWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1239,9 +1250,9 @@ namespace elemd
         samplerWriteDescriptorSet.dstSet = descriptorSet;
         samplerWriteDescriptorSet.dstBinding = 1;
         samplerWriteDescriptorSet.dstArrayElement = 0;
-        samplerWriteDescriptorSet.descriptorCount = TEXTURE_ARRAY_SIZE;
+        samplerWriteDescriptorSet.descriptorCount = descriptorImageInfos.size();
         samplerWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        samplerWriteDescriptorSet.pImageInfo = descriptorImageInfo;
+        samplerWriteDescriptorSet.pImageInfo = descriptorImageInfos.data();
         samplerWriteDescriptorSet.pBufferInfo = nullptr;
         samplerWriteDescriptorSet.pTexelBufferView = nullptr;
 
