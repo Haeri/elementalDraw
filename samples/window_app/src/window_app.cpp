@@ -226,8 +226,8 @@ extern "C"
 
                 // Image
 
+                /*
                 ctx->draw_image(0, 0, 300, 200, img);
-
                 ctx->draw_rounded_image(0, 205, 300, 200, img, 60);
 
                 ctx->draw_image(0, 410, 50, 50, logo);
@@ -239,7 +239,22 @@ extern "C"
                     {
                         ctx->draw_image(330 + x * 30+1, 0 + y * 30+1, 30, 30, logo);
                     }
-                }
+                }*/
+
+
+                ctx->draw_image(130, 130, 100, 100, grid);
+
+                ctx->set_stroke_color({250, 30, 30});
+                ctx->set_line_width(10);
+                ctx->stroke_rect(130, 130, 100, 100);
+
+                ctx->set_stroke_color({30, 250, 30});
+                ctx->set_line_width(5);
+                ctx->stroke_rect(130, 130, 100, 100);
+
+                ctx->set_stroke_color({30, 30, 250});
+                ctx->set_line_width(1);
+                ctx->stroke_rect(130, 130, 100, 100);
 
                 ctx->draw_frame();
 

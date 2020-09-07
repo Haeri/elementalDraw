@@ -1,7 +1,5 @@
 #include "elemd/image.hpp"
 
-#include <stb_image.h>
-
 namespace elemd
 {
     std::map<std::string, image*> image::_image_index;

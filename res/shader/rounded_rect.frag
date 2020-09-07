@@ -12,6 +12,7 @@ struct UniformData
     vec4 vertices[2];
     vec4 border_radius[2];
     vec4 sampler_index;
+    vec4 stroke_size_color;	
 };
 
 layout(set = 0, binding = 0, std140) uniform UBO
@@ -35,6 +36,9 @@ void main()
     vec2 se = ubo.payload[instance_index].border_radius[1].xy;
     vec2 sw = ubo.payload[instance_index].border_radius[1].zw;
     
+    float line_width = ubo.payload[instance_index].stroke_size_color.x;
+    vec3 stroke_color = ubo.payload[instance_index].stroke_size_color.yzw;
+
     float dist = 0.0;
 
     if(uv_varying.x < nw.x && uv_varying.y < nw.y)
@@ -49,6 +53,14 @@ void main()
     }
     else if (1 -  uv_varying.x < se.x && 1 - uv_varying.y < se.y){
         dist = ellipse_distance(uv_varying, vec2(1-se.x, 1-se.y), se);
+    }
+
+
+    // Stroke Rect
+    if(line_width != 0){
+    	if(uv_varying.x > line_width && uv_varying.y > line_width && uv_varying.x < 1 - line_width && uv_varying.y < 1 - line_width){
+			dist = 1;
+    	}
     }
 
 
@@ -68,8 +80,10 @@ void main()
     float delta = fwidth(dist);
     a = smoothstep(1+delta, 1, dist); 
     int index = int(ubo.payload[instance_index].sampler_index.r);
-    
-    if (index <= -1)
+    if(line_width != 0){
+    	outColor = vec4(stroke_color, a);	
+    }
+    else if (index <= -1)
     {
         outColor = vec4(ubo.payload[instance_index].fill_color.rgb, a);
     }

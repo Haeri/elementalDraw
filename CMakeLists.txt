@@ -61,6 +61,7 @@ add_custom_command(
 )
 
 
+
 # ---------------- EXTERN ---------------------#
 
 set(EXTERN_DIR extern/)
@@ -71,9 +72,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 
 set_target_properties(glad PROPERTIES FOLDER ${EXTERN_DIR})
 
+
+
+# ---------------- DEPENDENCIES ---------------------#
+
 # glfw3
 find_package(glfw3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+
+# freetype
+find_package(freetype CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
+
 
 
 

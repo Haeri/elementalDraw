@@ -33,6 +33,8 @@ namespace elemd
             vec2 vertices[4];
             vec2 border_radius[4];
             vec2 sampler_index[2];
+            float line_size;
+            float stroke_color[3];
         };
 
         imageImplVulkan* dummy;

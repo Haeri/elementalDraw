@@ -70,6 +70,9 @@ namespace elemd
 
     void imageImplVulkan::upload(const VkCommandPool& commandPool, const VkQueue& queue)
     {
+        if (!_loaded)
+            return;
+
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkPhysicalDevice physicalDevice = VulkanSharedInfo::getInstance()->bestPhysicalDevice;
 

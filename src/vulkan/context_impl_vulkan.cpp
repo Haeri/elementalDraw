@@ -30,6 +30,29 @@ namespace elemd
 
     void Context::stroke_rect(float x, float y, float width, float height)
     {
+        ContextImplVulkan* impl = getImpl(this);
+
+        float lw = _line_width * impl->_window->_x_scale;
+        float lwnorm = lw / (width * impl->_window->_x_scale + lw);
+        x = x * impl->_window->_x_scale - lw/2.0f;
+        y = y * impl->_window->_y_scale - lw / 2.0f;
+        width = width * impl->_window->_x_scale + lw;
+        height = height * impl->_window->_y_scale + lw;
+
+        float xf = (x / impl->width);
+        float yf = (y / impl->height);
+        float widhtf = (width / impl->width);
+        float heightf = (height / impl->height);
+
+        impl->uniforms.push_back(
+            {_fill_color,
+             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
+              vec2(xf, yf + heightf) * 2.0f - vec2(1),
+              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
+             {vec2(0), vec2(0), vec2(0), vec2(0)},
+             {vec2(-1, 0), vec2(0)},
+             (lwnorm),
+             {_stroke_color.rf(), _stroke_color.gf(), _stroke_color.bf()}});
     }
 
     void Context::stroke_rounded_rect(float x, float y, float width, float height,
@@ -82,7 +105,9 @@ namespace elemd
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
              {vec2(0), vec2(0), vec2(0), vec2(0)},
-             {vec2(-1, 0), vec2(0)}});
+             {vec2(-1, 0), vec2(0)},
+             0,
+             {0,0,0}});
     }
 
     void Context::fill_rounded_rect(float x, float y, float width, float height,
@@ -121,7 +146,9 @@ namespace elemd
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
              {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)},
-             {vec2(-1, 0), vec2(0)}});
+             {vec2(-1, 0), vec2(0)},
+             0,
+             {0, 0, 0}});
     }
 
     void Context::fill_circle(float x, float y, float radius)
@@ -144,7 +171,9 @@ namespace elemd
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
              {vec2(radf), vec2(radf), vec2(radf), vec2(radf)},
-             {vec2(-1, 0), vec2(0)}});
+             {vec2(-1, 0), vec2(0)},
+             0,
+             {0, 0, 0}});
    
     }
 
@@ -181,7 +210,9 @@ namespace elemd
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
              {vec2(0), vec2(0), vec2(0), vec2(0)},
-             {vec2(img->_sampler_index, 0), vec2(0)}});
+             {vec2(img->_sampler_index, 0), vec2(0)},
+             0,
+             {0, 0, 0}});
     }
 
     void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
@@ -221,7 +252,9 @@ namespace elemd
             vec2(xf, yf + heightf) * 2.0f - vec2(1),
             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
                 {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)}, 
-            {vec2(img->_sampler_index, 0), vec2(0)}});
+            {vec2(img->_sampler_index, 0), vec2(0)},
+             0,
+             {0, 0, 0}});
     }
 
     void Context::set_clear_color(color color)
