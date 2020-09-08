@@ -22,12 +22,14 @@ namespace elemd
         static font* create(std::string file_path);
 
         std::map<char, character>& get_characters();
+        int get_size();
         void destroy();
 
     protected:
         font() = default;
         virtual ~font() = default;
 
+        const int _size = 64;
         std::map<char, character> _characters;
     };
 

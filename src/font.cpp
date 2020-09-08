@@ -10,6 +10,11 @@ namespace elemd
         return _characters;
     }
 
+    int font::get_size()
+    {
+        return _size;
+    }
+
     void font::destroy()
     {
         delete this;

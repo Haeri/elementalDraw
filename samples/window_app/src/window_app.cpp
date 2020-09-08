@@ -246,6 +246,7 @@ extern "C"
                     }
                 }*/
 
+                ctx->set_fill_color(c1);
                 ctx->draw_text(10, 10, "Hello There!");
 
 

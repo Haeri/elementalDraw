@@ -29,15 +29,18 @@ float ellipse_distance(vec2 uv, vec2 center, vec2 dims)
 
 void main()
 {
-    float a = ubo.payload[instance_index].fill_color.a;
+    //float a = ubo.payload[instance_index].fill_color.a;
     
     vec2 nw = ubo.payload[instance_index].border_radius[0].xy;
     vec2 ne = ubo.payload[instance_index].border_radius[0].zw;
     vec2 se = ubo.payload[instance_index].border_radius[1].xy;
     vec2 sw = ubo.payload[instance_index].border_radius[1].zw;
     
+    vec4 fill_color = ubo.payload[instance_index].fill_color.rgba; 
     float line_width = ubo.payload[instance_index].stroke_size_color.x;
     vec3 stroke_color = ubo.payload[instance_index].stroke_size_color.yzw;
+    int index = int(ubo.payload[instance_index].sampler_index.x);
+    int use_color = int(ubo.payload[instance_index].sampler_index.y);
 
     float dist = 0.0;
 
@@ -78,18 +81,22 @@ void main()
 
     
     float delta = fwidth(dist);
-    a = smoothstep(1+delta, 1, dist); 
-    int index = int(ubo.payload[instance_index].sampler_index.r);
+    float alpha = smoothstep(1+delta, 1, dist); 
+
     if(line_width != 0){
-    	outColor = vec4(stroke_color, a);	
+    	outColor = vec4(stroke_color, alpha);	
     }
     else if (index <= -1)
     {
-        outColor = vec4(ubo.payload[instance_index].fill_color.rgb, a);
+        outColor = vec4(fill_color.rgb, alpha);
     }
     else
     {
-        outColor = vec4(texture(textures[index], uv_varying.xy).rgb, min(a, texture(textures[index], uv_varying.xy).a));
+    	vec4 img = texture(textures[index], uv_varying.xy).rgba;
+    	if(use_color == 1){
+	        outColor = vec4((img.rgb * fill_color.rgb), min(alpha, img.a));
+    	}else{
+    		outColor = vec4((img.rgb), min(alpha, img.a));    		
+    	}
     }
-    //outColor = vec4(vec3(a), 1);
 }

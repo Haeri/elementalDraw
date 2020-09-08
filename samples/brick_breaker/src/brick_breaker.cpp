@@ -298,6 +298,10 @@ extern "C"
         _ctx = ctx;
         initial_scale = _win->get_scale().get_x();
 
+        elemd::font* urbanist = elemd::font::create("./elemd_res/font/Urbanist-Regular.ttf");
+        ctx->_tmp_register_font(urbanist);
+        ctx->set_font(urbanist);
+
         ctx->set_clear_color(bg_color);
         //ctx->set_clear_color(elemd::color(255, 255, 255, 255));
 
@@ -315,7 +319,7 @@ extern "C"
                 start_vel = 1;
             }
 
-            if (!start_game)
+            if (!start_game && start_vel != 0)
             {
                 ball_velocity = elemd::vec2(start_vel, -1) * ball_speed;
                 start_game = true;
@@ -465,6 +469,15 @@ extern "C"
                     ctx->fill_circle(WIDTH - 5 - (i * 8), HEIGHT - 5, 3);
                 }
 
+
+                // Draw Text
+                if (!start_game)
+                {
+                    ctx->set_fill_color({200, 200, 200});
+                    ctx->draw_text(WIDTH / 2 - 120, HEIGHT / 2 - 30, "Press Arrow keys\n        to start");
+                }
+
+
                 ctx->draw_frame();
 
                 ++frames;
@@ -491,6 +504,7 @@ extern "C"
             return 1;
         }
 
+        urbanist->destroy();
         win->destroy();
 
 

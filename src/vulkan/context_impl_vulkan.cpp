@@ -190,8 +190,10 @@ namespace elemd
 
     void Context::draw_text(float x, float y, std::string text)
     {
+        ContextImplVulkan* impl = getImpl(this);
+
         float initialX = x;
-        float scale = 1;
+        float scale = 0.5f;
         std::map<char, character> characters = _font->get_characters();
 
         for (auto& token : text)
@@ -200,20 +202,20 @@ namespace elemd
 
             if (token == '\n')
             {
-                y -= 48 * scale;
+                y += _font->get_size() * scale;
                 x = initialX;
                 continue;
             }
 
             float xpos = x + ch.bearing.x() * scale;
-            float ypos = y + (ch.size.y() - ch.bearing.y()) * scale;
+            float ypos = y + (64 - ch.bearing.y()) * scale;
             //std::cout << ypos << " ";
 
             float w = ch.size.x() * scale;
             float h = ch.size.y() * scale;
 
             imageImplVulkan* iiv = (imageImplVulkan*)ch.texture;
-            draw_image(xpos, ypos, w, h, iiv);
+            impl->draw_image(xpos, ypos, w, h, iiv, true);
 
             // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
             x += (ch.advance >> 6) *
@@ -225,6 +227,14 @@ namespace elemd
     }
 
     void Context::draw_image(float x, float y, float width, float height, image* image)
+    {
+        ContextImplVulkan* impl = getImpl(this);
+        impl->draw_image(x, y, width, height, image, false);
+    }
+
+
+    void ContextImplVulkan::draw_image(float x, float y, float width, float height, image* image,
+                                       bool use_fill_color)
     {
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
@@ -245,7 +255,7 @@ namespace elemd
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
              {vec2(0), vec2(0), vec2(0), vec2(0)},
-             {vec2(img->_sampler_index, 0), vec2(0)},
+             {vec2(img->_sampler_index, use_fill_color), vec2(0)},
              0,
              {0, 0, 0}});
     }
@@ -313,9 +323,18 @@ namespace elemd
         if (impl->rendering || impl->headless) return;
         impl->rendering = true;
 
+        bool rerecord = false;
+        if (impl->last_uniform_cnt != impl->uniforms.size())
+        {
+            impl->last_uniform_cnt = impl->uniforms.size();
+            rerecord = true;
+        }
         
         impl->update_uniforms();
-        //impl->record_command_buffers();
+        if (rerecord)
+        {
+            impl->record_command_buffers();
+        }
         impl->uniforms.clear();
        
 
@@ -1057,7 +1076,7 @@ namespace elemd
                                         pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
                 vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
-                                 UNIFORM_BUFFER_ARRAY_MAX_COUNT, 0, 0, 0);
+                                 uniforms.size(), 0, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             vku::err_check(vkEndCommandBuffer(commandBuffers[i]));
@@ -1223,6 +1242,7 @@ namespace elemd
 
         delete dummy;
     }
+
 
     void ContextImplVulkan::create_vertex_buffers()
     {

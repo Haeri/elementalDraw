@@ -51,7 +51,7 @@ namespace elemd
         }
         
         
-        FT_Set_Pixel_Sizes(face, 0, 48);
+        FT_Set_Pixel_Sizes(face, 0, _size);
 
         // Load first 128 characters of ASCII set
         for (int c = 0; c < 128; ++c)
@@ -102,6 +102,9 @@ namespace elemd
                 }
 
                 texture = image::create(width, height, 4, buffer);
+                //std::memcpy(buffer, line_start, buffer_size);
+//                texture = image::create(width, height, 1, buffer);
+
             }
 
             texture->set_name("font_character_" + std::to_string(int(c)));

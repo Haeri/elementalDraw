@@ -48,6 +48,7 @@ namespace elemd
         };
 
         std::vector<uniform_rect> uniforms = {};
+        int last_uniform_cnt = 0;
 
         WindowImpl* _window;
 
@@ -91,6 +92,8 @@ namespace elemd
 
         ContextImplVulkan(Window* window);
         ~ContextImplVulkan();
+
+        void draw_image(float x, float y, float width, float height, image* image, bool use_fill_color = false);
 
         void create_surface();
         void create_queue();
