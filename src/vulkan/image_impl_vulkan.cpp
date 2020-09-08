@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cstring>
 #include <stb_image.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
 
 #include "vulkan_shared_info.hpp"
 #include "vulkan_utils.hpp"
@@ -40,9 +42,11 @@ namespace elemd
         {
             _data = data;
             _image_index[file_path] = this;
-            _loaded = true;
             _managed = true;
             _components = 4;
+            _name = file_path;
+            
+            _loaded = true;
         }
         else
         {
@@ -56,7 +60,9 @@ namespace elemd
         _height = height;
         _components = components;
         _data = data;
+        _name = "noname_" + rand() % 10000;
 
+        _managed = true;
         _loaded = true;
     }
 
@@ -91,19 +97,19 @@ namespace elemd
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkPhysicalDevice physicalDevice = VulkanSharedInfo::getInstance()->bestPhysicalDevice;
 
-        VkDeviceSize imageSize = _width * _height * 4;
+        //VkDeviceSize imageSize = _width * _height * 4;
         VkDeviceSize actualImageSize = _width * _height * _components;
 
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingDeviceMemory;
 
-        vku::create_buffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer,
+        vku::create_buffer(actualImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer,
                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                            stagingDeviceMemory);
 
         void* rawData;
-        vkMapMemory(device, stagingDeviceMemory, 0, imageSize, 0, &rawData);
+        vkMapMemory(device, stagingDeviceMemory, 0, actualImageSize, 0, &rawData);
         //std::memset(rawData, 0, imageSize);
         std::memcpy(rawData, _data, actualImageSize);
         vkUnmapMemory(device, stagingDeviceMemory);
@@ -376,6 +382,14 @@ namespace elemd
         vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 
         _imageLayout = layout;
+    }
+
+    void imageImplVulkan::writeToFile()
+    {
+        if (stbi_write_png(("out_" +_name + ".png").c_str(), _width, _height, _components, _data, 0) == 0)
+        {
+            std::cerr << "error during saving" << std::endl;
+        }
     }
 
     VkSampler imageImplVulkan::getSampler()

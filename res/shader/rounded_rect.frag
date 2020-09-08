@@ -89,7 +89,7 @@ void main()
     }
     else
     {
-        outColor = vec4(texture(textures[index], uv_varying.xy).rgb, a);
+        outColor = vec4(texture(textures[index], uv_varying.xy).rgb, min(a, texture(textures[index], uv_varying.xy).a));
     }
     //outColor = vec4(vec3(a), 1);
 }

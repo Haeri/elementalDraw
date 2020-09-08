@@ -24,6 +24,11 @@ namespace elemd
         return _components;
     }
 
+    void image::set_name(std::string name)
+    {
+        _name = name;
+    }
+
     void image::destroy()
     {
         delete this;

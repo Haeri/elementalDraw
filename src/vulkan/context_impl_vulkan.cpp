@@ -206,7 +206,8 @@ namespace elemd
             }
 
             float xpos = x + ch.bearing.x() * scale;
-            float ypos = y - (ch.size.y() - ch.bearing.y()) * scale;
+            float ypos = y + (ch.size.y() - ch.bearing.y()) * scale;
+            //std::cout << ypos << " ";
 
             float w = ch.size.x() * scale;
             float h = ch.size.y() * scale;
@@ -219,6 +220,8 @@ namespace elemd
                  scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th
                         // pixels by 64 to get amount of pixels))
         }
+
+        //std::cout << std::endl;
     }
 
     void Context::draw_image(float x, float y, float width, float height, image* image)

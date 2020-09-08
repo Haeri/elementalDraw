@@ -29,6 +29,7 @@ namespace elemd
         void upload(const VkCommandPool& commandPool, const VkQueue& queue);
         void writeBuffer(const VkCommandPool& commandPool, const VkQueue& queue, VkBuffer buffer);
         void changeLayout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout);
+        void writeToFile();
 
         VkSampler getSampler();
         VkImageView getImageView();

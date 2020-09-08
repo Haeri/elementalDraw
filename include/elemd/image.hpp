@@ -18,6 +18,7 @@ namespace elemd
         int get_width();
         int get_height();
         int get_channels();
+        void set_name(std::string name);
 
         void destroy();
 
@@ -28,6 +29,8 @@ namespace elemd
         int _height = -1;
         int _components = -1;
         bool _managed = false;
+
+        std::string _name;
 
         unsigned char* _data = nullptr;
 

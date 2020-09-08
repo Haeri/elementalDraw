@@ -1,6 +1,7 @@
 #include "font_impl_vulkan.hpp"
 
 #include <iostream>
+#include <vector>
 #include <map>
 
 #include "image_impl_vulkan.hpp"
@@ -62,28 +63,63 @@ namespace elemd
                 continue;
             }
 
+            int width = (int)face->glyph->bitmap.width;
+            int height = (int)face->glyph->bitmap.rows;
+            int pitch = face->glyph->bitmap.pitch;
+            int buffer_size = width * height * 4;
+
             // Generate texture
             image* texture = nullptr;
-            unsigned char dummy[1] = {0};
-            if (face->glyph->bitmap.width <= 0 || face->glyph->bitmap.rows <= 0)
+
+
+            if (width <= 0 || height <= 0)
             {
-                texture = image::create(1, 1, 1, dummy);
+                uint8_t* buffer = new uint8_t[4];
+               buffer[0] = 0;
+               buffer[1] = 0;
+               buffer[2] = 0;
+               buffer[3] = 0;
+                texture = image::create(1, 1, 4, buffer);
             }
             else
             {
-                texture =
-                    image::create((int)face->glyph->bitmap.width, (int)face->glyph->bitmap.rows, 1,
-                                  face->glyph->bitmap.buffer);
+                uint8_t* buffer = new uint8_t[buffer_size];
+                uint8_t* line_start = face->glyph->bitmap.buffer;
+                int index = 0;
+
+                for (int y = 0; y < height; ++y)
+                {
+                    uint8_t* line_token = line_start;
+                    for (int x = 0; x < width; ++x)
+                    {
+                        buffer[index++] = 0xff;        // R
+                        buffer[index++] = 0xff;        // G
+                        buffer[index++] = 0xff;        // B
+                        buffer[index++] = *line_token; // A
+                        line_token++;
+                    }
+                    line_start += pitch;
+                }
+
+                texture = image::create(width, height, 4, buffer);
             }
+
+            texture->set_name("font_character_" + std::to_string(int(c)));
 
             // Now store character for later use
             character character = {
                 texture,
                 vec2((float)(face->glyph->bitmap.width), (float)(face->glyph->bitmap.rows)),
                 vec2((float)(face->glyph->bitmap_left), (float)(face->glyph->bitmap_top)),
-                (int)(face->glyph->advance.x)};
+                (int)(face->glyph->advance.x)
+            };
             _characters[c] = character;
+
+            //imageImplVulkan* img = (imageImplVulkan*)texture;
+            //img->writeToFile();
         }
+
+
 
         // Destroy FreeType once we're finished
         FT_Done_Face(face);
