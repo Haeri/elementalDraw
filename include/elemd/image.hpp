@@ -12,6 +12,7 @@ namespace elemd
     {
     public:
         static image* create(std::string file_path);
+        static image* create(int width, int height, int components, unsigned char* data);
 
         unsigned char* get_data();
         int get_width();
@@ -26,6 +27,7 @@ namespace elemd
         int _width = -1;
         int _height = -1;
         int _components = -1;
+        bool _managed = false;
 
         unsigned char* _data = nullptr;
 

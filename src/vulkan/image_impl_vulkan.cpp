@@ -27,6 +27,11 @@ namespace elemd
         return new imageImplVulkan(file_path);
     }
 
+    image* image::create(int width, int height, int components, unsigned char* data)
+    {
+        return new imageImplVulkan(width, height, components, data);
+    }
+
     imageImplVulkan::imageImplVulkan(std::string file_path)
     {
         stbi_uc* data =
@@ -36,8 +41,8 @@ namespace elemd
             _data = data;
             _image_index[file_path] = this;
             _loaded = true;
-
-            //upload();
+            _managed = true;
+            _components = 4;
         }
         else
         {
@@ -45,11 +50,21 @@ namespace elemd
         }
     }
 
+    imageImplVulkan::imageImplVulkan(int width, int height, int components, unsigned char* data)
+    {
+        _width = width;
+        _height = height;
+        _components = components;
+        _data = data;
+
+        _loaded = true;
+    }
+
     imageImplVulkan::~imageImplVulkan()
     {
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         
-        if (_loaded)
+        if (_loaded && _managed)
         {
             stbi_image_free(_data); 
             
@@ -76,7 +91,8 @@ namespace elemd
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkPhysicalDevice physicalDevice = VulkanSharedInfo::getInstance()->bestPhysicalDevice;
 
-        VkDeviceSize imageSize = _width * _height * get_channels();
+        VkDeviceSize imageSize = _width * _height * 4;
+        VkDeviceSize actualImageSize = _width * _height * _components;
 
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingDeviceMemory;
@@ -88,29 +104,41 @@ namespace elemd
 
         void* rawData;
         vkMapMemory(device, stagingDeviceMemory, 0, imageSize, 0, &rawData);
-        std::memcpy(rawData, _data, imageSize);
+        //std::memset(rawData, 0, imageSize);
+        std::memcpy(rawData, _data, actualImageSize);
         vkUnmapMemory(device, stagingDeviceMemory);
 
-        VkImageCreateInfo inageCreateInfo;
-        inageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        inageCreateInfo.pNext = nullptr;
-        inageCreateInfo.flags = 0;
-        inageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-        inageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
-        inageCreateInfo.extent.width = _width;
-        inageCreateInfo.extent.height = _height;
-        inageCreateInfo.extent.depth = 1;
-        inageCreateInfo.mipLevels = 1;
-        inageCreateInfo.arrayLayers = 1;
-        inageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        inageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        inageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        inageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        inageCreateInfo.queueFamilyIndexCount = 0;
-        inageCreateInfo.pQueueFamilyIndices = nullptr;
-        inageCreateInfo.initialLayout = _imageLayout;
 
-        vku::err_check(vkCreateImage(device, &inageCreateInfo, nullptr, &_image));
+        VkFormat format;
+        if (_components == 1)
+        {
+            format = VK_FORMAT_R8_UNORM;
+        }
+        else
+        {
+            format = VK_FORMAT_R8G8B8A8_UNORM;
+        }
+
+        VkImageCreateInfo imageCreateInfo;
+        imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imageCreateInfo.pNext = nullptr;
+        imageCreateInfo.flags = 0;
+        imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+        imageCreateInfo.format = format;
+        imageCreateInfo.extent.width = _width;
+        imageCreateInfo.extent.height = _height;
+        imageCreateInfo.extent.depth = 1;
+        imageCreateInfo.mipLevels = 1;
+        imageCreateInfo.arrayLayers = 1;
+        imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        imageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
+        imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        imageCreateInfo.queueFamilyIndexCount = 0;
+        imageCreateInfo.pQueueFamilyIndices = nullptr;
+        imageCreateInfo.initialLayout = _imageLayout;
+
+        vku::err_check(vkCreateImage(device, &imageCreateInfo, nullptr, &_image));
 
         VkMemoryRequirements memoryRequirements;
         vkGetImageMemoryRequirements(device, _image, &memoryRequirements);
@@ -120,7 +148,7 @@ namespace elemd
         memoryAllocateInfo.pNext = nullptr;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
         memoryAllocateInfo.memoryTypeIndex = vku::find_memory_type_index(
-            memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
         vku::err_check(vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &_deviceMemory));
 
@@ -141,7 +169,7 @@ namespace elemd
         imageViewCreateInfo.flags = 0;
         imageViewCreateInfo.image = _image;
         imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        imageViewCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+        imageViewCreateInfo.format = format;
         imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
         imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
         imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;

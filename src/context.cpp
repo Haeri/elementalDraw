@@ -16,4 +16,9 @@ namespace elemd
     {
         _line_width = width;
     }
+
+    void Context::set_font(font* font)
+    {
+        _font = font;
+    }
 }

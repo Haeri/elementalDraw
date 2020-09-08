@@ -13,6 +13,7 @@ namespace elemd
     {
     public:
         imageImplVulkan(std::string file_path);
+        imageImplVulkan(int width, int height, int components, unsigned char* data);
         ~imageImplVulkan();
 
         VkImage _image;

@@ -7,6 +7,7 @@
 
 #include "color.hpp"
 #include "image.hpp"
+#include "font.hpp"
 
 namespace elemd
 {
@@ -35,7 +36,7 @@ namespace elemd
         void fill_polygon(float x, float y);
 
         void draw_point(float x, float y);                                                                                      // VK_PRIMITIVE_TOPOLOGY_POINT_LIST
-        void draw_text(float x, float y, char* text);
+        void draw_text(float x, float y, std::string text);
         void draw_image(float x, float y, float width, float height, image* image);
         void draw_rounded_image(float x, float y, float width, float height, image* image,
                                 float border_radius);
@@ -46,6 +47,7 @@ namespace elemd
         void set_fill_color(color color);
         void set_stroke_color(color color);
         void set_line_width(float width);
+        void set_font(font* font);
 
         void clear();
         void clear_rect(float x, float y, float width, float height);
@@ -55,6 +57,7 @@ namespace elemd
         void resize_context(int width, int height);
 
         void _tmp_register_image(image* image);
+        void _tmp_register_font(font* font);
         void _tmp_prepare();
 
         virtual void destroy() = 0;
@@ -66,6 +69,7 @@ namespace elemd
         color _fill_color;
         color _stroke_color;
         float _line_width = 1;
+        font* _font = nullptr;
 
     };
 } // namespace elemd

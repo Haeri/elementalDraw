@@ -12,13 +12,13 @@ namespace elemd
     class fontImplVulkan : public font
     {
     public:
-        fontImplVulkan();
+        fontImplVulkan(std::string file_path);
         ~fontImplVulkan();
 
-    private:
-        FT_Library library; /* handle to library     */
-        FT_Face face;       /* handle to face object */
+        bool _loaded = false;
+        bool _uploaded = false;
 
+        void upload(const VkCommandPool& commandPool, const VkQueue& queue);
     };
 
 } // namespace elemd

@@ -12,6 +12,7 @@
 #include <elemd/context.hpp>
 #include <elemd/color.hpp>
 #include <elemd/image.hpp>
+#include <elemd/font.hpp>
 
 // Constants
 const int TARGET_RENDER_FREQUENCY = 60;
@@ -104,10 +105,14 @@ extern "C"
         elemd::image* logo = elemd::image::create("./res/logo.png");
         elemd::image* grid = elemd::image::create("./res/grid.png");
 
-        
         ctx->_tmp_register_image(img);
         ctx->_tmp_register_image(logo);
         ctx->_tmp_register_image(grid);
+        
+        //elemd::font* urbanist = elemd::font::create("./elemd_res/font/Urbanist-Regular.ttf");
+        elemd::font* urbanist = elemd::font::create("./elemd_res/font/OpenSans.ttf");
+        ctx->_tmp_register_font(urbanist);
+        ctx->set_font(urbanist);
 
         float pong = 0;
         float velocity = 1;
@@ -241,6 +246,8 @@ extern "C"
                     }
                 }*/
 
+                ctx->draw_text(10, 10, "Hello There!");
+
 
                 ctx->draw_image(130, 130, 100, 100, grid);
 
@@ -271,6 +278,7 @@ extern "C"
         img->destroy();
         logo->destroy();
         grid->destroy();
+        urbanist->destroy();
         win->destroy();
 
         return 0;

@@ -6,6 +6,7 @@
 
 #include "vulkan_shared_info.hpp"
 #include "../window_impl.hpp"
+#include "font_impl_vulkan.hpp"
 
 namespace elemd
 {
@@ -58,6 +59,8 @@ namespace elemd
     void Context::stroke_rounded_rect(float x, float y, float width, float height,
                                       float border_radius)
     {
+        stroke_rounded_rect(x, y, width, height, border_radius, border_radius, border_radius,
+                            border_radius);
     }
 
     void Context::stroke_rounded_rect(float x, float y, float width, float height, float tl,
@@ -185,8 +188,37 @@ namespace elemd
     {
     }
 
-    void Context::draw_text(float x, float y, char* text)
+    void Context::draw_text(float x, float y, std::string text)
     {
+        float initialX = x;
+        float scale = 1;
+        std::map<char, character> characters = _font->get_characters();
+
+        for (auto& token : text)
+        {
+            character ch = characters[token];
+
+            if (token == '\n')
+            {
+                y -= 48 * scale;
+                x = initialX;
+                continue;
+            }
+
+            float xpos = x + ch.bearing.x() * scale;
+            float ypos = y - (ch.size.y() - ch.bearing.y()) * scale;
+
+            float w = ch.size.x() * scale;
+            float h = ch.size.y() * scale;
+
+            imageImplVulkan* iiv = (imageImplVulkan*)ch.texture;
+            draw_image(xpos, ypos, w, h, iiv);
+
+            // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+            x += (ch.advance >> 6) *
+                 scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th
+                        // pixels by 64 to get amount of pixels))
+        }
     }
 
     void Context::draw_image(float x, float y, float width, float height, image* image)
@@ -342,6 +374,22 @@ namespace elemd
             img->upload(impl->commandPool, impl->queue);
             img->_sampler_index = impl->images.size();
             impl->images.push_back(img);
+        }
+    }
+
+    void Context::_tmp_register_font(font* font)
+    {
+        ContextImplVulkan* impl = getImpl(this);
+        fontImplVulkan* fiv = (fontImplVulkan*)font;
+        if (!fiv->_uploaded)
+        {
+            fiv->upload(impl->commandPool, impl->queue);
+            for (auto& c : fiv->get_characters())
+            {
+                imageImplVulkan* img = (imageImplVulkan*)c.second.texture;
+                img->_sampler_index = impl->images.size();
+                impl->images.push_back(img);
+            }
         }
     }
 
@@ -636,7 +684,10 @@ namespace elemd
             samplerDescriptorSetLayoutBinding
         };
 
-        
+        /* Since we are preallocating a big array of samplers and only supplying actually less,
+        * we have to tell Vulkan, that those slots are partially bound or else it will complain.
+        * This only applies to the samplerDescriptor and not uniformDescriptor, hence it being 0 as in default.
+        */
         std::vector<VkDescriptorBindingFlags> descriptorBindingFlags = {
             0,
             VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT

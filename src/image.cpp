@@ -21,7 +21,7 @@ namespace elemd
 
     int image::get_channels()
     {
-        return 4;
+        return _components;
     }
 
     void image::destroy()
