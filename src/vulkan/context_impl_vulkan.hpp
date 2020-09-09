@@ -89,6 +89,7 @@ namespace elemd
 
         VkSemaphore semaphoreImageAvailable;
         VkSemaphore semaphoreRenderingComplete;
+        VkFence renderFence;
 
         ContextImplVulkan(Window* window);
         ~ContextImplVulkan();
@@ -110,6 +111,7 @@ namespace elemd
         void create_descriptor_pool();
         void create_descriptor_set();
         void record_command_buffers();
+        void wait_for_render_fence();
         void create_semaphores();
         void initialize_resources();
 

@@ -334,6 +334,7 @@ namespace elemd
             rerecord = true;
         }
         
+        impl->wait_for_render_fence();
         impl->update_uniforms();
         if (rerecord)
         {
@@ -360,7 +361,7 @@ namespace elemd
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &(impl->semaphoreRenderingComplete);
 
-        vku::err_check(vkQueueSubmit(impl->queue, 1, &submitInfo, VK_NULL_HANDLE));
+        vku::err_check(vkQueueSubmit(impl->queue, 1, &submitInfo, impl->renderFence));
 
         VkPresentInfoKHR presentInfoKHR;
         presentInfoKHR.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -1084,8 +1085,25 @@ namespace elemd
         }
     }
 
+    void ContextImplVulkan::wait_for_render_fence()
+    {
+        vku::err_check(vkWaitForFences(VulkanSharedInfo::getInstance()->device, 1, &renderFence,
+                                       true, 1000000000));
+        vku::err_check(vkResetFences(VulkanSharedInfo::getInstance()->device, 1, &renderFence));
+    }
+
     void ContextImplVulkan::create_semaphores()
     {
+
+        VkFenceCreateInfo fenceCreateInfo;
+        fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceCreateInfo.pNext = nullptr;
+        fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+        vku::err_check(vkCreateFence(VulkanSharedInfo::getInstance()->device, &fenceCreateInfo,
+                                     nullptr, &renderFence));
+
+
         // --------------- Create Semaphore Create Info ---------------
 
         VkSemaphoreCreateInfo semaphoreCreateInfo;
@@ -1199,6 +1217,7 @@ namespace elemd
         vkFreeMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory, nullptr);
         vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, uniformBuffer, nullptr);
 
+        vkDestroyFence(VulkanSharedInfo::getInstance()->device, renderFence, nullptr);
         vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreImageAvailable, nullptr);
         vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreRenderingComplete, nullptr);
 
