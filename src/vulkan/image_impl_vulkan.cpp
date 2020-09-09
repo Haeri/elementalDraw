@@ -218,35 +218,8 @@ namespace elemd
     void imageImplVulkan::writeBuffer(const VkCommandPool& commandPool, const VkQueue& queue,
                                       VkBuffer buffer)
     {
-
         VkDevice device = VulkanSharedInfo::getInstance()->device;
-
-        // --------------- Create Command Buffer Allocate Info ---------------
-
-        VkCommandBufferAllocateInfo commandBufferAllocateInfo;
-        commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        commandBufferAllocateInfo.pNext = nullptr;
-        commandBufferAllocateInfo.commandPool = commandPool;
-        commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        commandBufferAllocateInfo.commandBufferCount = 1;
-
-        // --------------- Allocate Command Buffers ---------------
-
-        VkCommandBuffer commandBuffer;
-        vku::err_check(
-            vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer));
-
-        // --------------- Create Command Buffer Begin Info ---------------
-
-        VkCommandBufferBeginInfo commandBufferBeginInfo;
-        commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        commandBufferBeginInfo.pNext = nullptr;
-        commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-        commandBufferBeginInfo.pInheritanceInfo = nullptr;
-
-        vku::err_check(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
-
-
+        VkCommandBuffer commandBuffer = vku::beginSingleTimeCommands(commandPool);
 
         VkBufferImageCopy bufferImageCopy;
         bufferImageCopy.bufferOffset = 0;
@@ -259,65 +232,16 @@ namespace elemd
         bufferImageCopy.imageOffset = {0, 0, 0};
         bufferImageCopy.imageExtent = {(uint32_t)_width, (uint32_t)_height, 1};
 
-
         vkCmdCopyBufferToImage(commandBuffer, buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                1, &bufferImageCopy);
 
-
-
-
-        vkEndCommandBuffer(commandBuffer);
-
-        VkSubmitInfo submitInfo;
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.pNext = nullptr;
-        submitInfo.waitSemaphoreCount = 0;
-        submitInfo.pWaitSemaphores = nullptr;
-        submitInfo.pWaitDstStageMask = nullptr;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-        submitInfo.signalSemaphoreCount = 0;
-        submitInfo.pSignalSemaphores = nullptr;
-
-        vku::err_check(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-
-        vkQueueWaitIdle(queue);
-
-        vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
-
+        vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
     }
 
     void imageImplVulkan::changeLayout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout)
     {
         VkDevice device = VulkanSharedInfo::getInstance()->device;
-
-        // --------------- Create Command Buffer Allocate Info ---------------
-
-        VkCommandBufferAllocateInfo commandBufferAllocateInfo;
-        commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        commandBufferAllocateInfo.pNext = nullptr;
-        commandBufferAllocateInfo.commandPool = commandPool;
-        commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        commandBufferAllocateInfo.commandBufferCount = 1;
-
-        
-        // --------------- Allocate Command Buffers ---------------
-
-        VkCommandBuffer commandBuffer;
-        vku::err_check(
-            vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer));
-
-        
-        // --------------- Create Command Buffer Begin Info ---------------
-
-        VkCommandBufferBeginInfo commandBufferBeginInfo;
-        commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        commandBufferBeginInfo.pNext = nullptr;
-        commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-        commandBufferBeginInfo.pInheritanceInfo = nullptr;
-
-
-        vku::err_check(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+        VkCommandBuffer commandBuffer = vku::beginSingleTimeCommands(commandPool);
 
         VkPipelineStageFlags sourceStage;
         VkPipelineStageFlags destinationStage;
@@ -362,24 +286,7 @@ namespace elemd
                              nullptr, 1,
                              &imageMemoryBarrier);
 
-        vkEndCommandBuffer(commandBuffer);
-
-        VkSubmitInfo submitInfo;
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.pNext = nullptr;
-        submitInfo.waitSemaphoreCount = 0;
-        submitInfo.pWaitSemaphores = nullptr;
-        submitInfo.pWaitDstStageMask = nullptr;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-        submitInfo.signalSemaphoreCount = 0;
-        submitInfo.pSignalSemaphores = nullptr;
-
-        vku::err_check(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-
-        vkQueueWaitIdle(queue);
-
-        vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+        vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
 
         _imageLayout = layout;
     }

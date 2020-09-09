@@ -101,6 +101,58 @@ namespace elemd::vku
         return best_device_info{bestDeviceIndex, bestQueuFamily, maxQueueCount};
     }
 
+    VkCommandBuffer beginSingleTimeCommands(const VkCommandPool& commandPool)
+    {
+        // --------------- Create Command Buffer Allocate Info ---------------
+
+        VkCommandBufferAllocateInfo commandBufferAllocateInfo;
+        commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        commandBufferAllocateInfo.pNext = nullptr;
+        commandBufferAllocateInfo.commandPool = commandPool;
+        commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        commandBufferAllocateInfo.commandBufferCount = 1;
+
+        // --------------- Allocate Command Buffer ---------------
+
+        VkCommandBuffer commandBuffer;
+        vku::err_check(vkAllocateCommandBuffers(VulkanSharedInfo::getInstance()->device,
+                                                &commandBufferAllocateInfo, &commandBuffer));
+
+        VkCommandBufferBeginInfo commandBufferBeginInfo;
+        commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        commandBufferBeginInfo.pNext = nullptr;
+        commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        commandBufferBeginInfo.pInheritanceInfo = nullptr;
+
+        err_check(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+
+        return commandBuffer;
+    }
+
+    void endSingleTimeCommands(VkCommandBuffer commandBuffer, const VkCommandPool& commandPool,
+                               const VkQueue& queue)
+    {
+        vku::err_check(vkEndCommandBuffer(commandBuffer));
+
+        VkSubmitInfo submitInfo;
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.pNext = nullptr;
+        submitInfo.waitSemaphoreCount = 0;
+        submitInfo.pWaitSemaphores = nullptr;
+        submitInfo.pWaitDstStageMask = nullptr;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+        submitInfo.signalSemaphoreCount = 0;
+        submitInfo.pSignalSemaphores = nullptr;
+
+        vku::err_check(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
+
+        vkQueueWaitIdle(queue);
+
+        vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool, 1,
+                             &commandBuffer);
+    }
+
     void create_buffer(const VkDeviceSize& deviceSize, const VkBufferUsageFlags& bufferUsageFlags,
                        VkBuffer& buffer, const VkMemoryPropertyFlags& memoryPropertyFlags,
                        VkDeviceMemory& deviceMemory)
@@ -143,28 +195,7 @@ namespace elemd::vku
     void copy_buffer(const VkBuffer& src, VkBuffer& dest, const VkDeviceSize& deviceSize,
                      const VkCommandPool& commandPool, const VkQueue& queue)
     {
-        // --------------- Create Command Buffer Allocate Info ---------------
-
-        VkCommandBufferAllocateInfo commandBufferAllocateInfo;
-        commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        commandBufferAllocateInfo.pNext = nullptr;
-        commandBufferAllocateInfo.commandPool = commandPool;
-        commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        commandBufferAllocateInfo.commandBufferCount = 1;
-
-        // --------------- Allocate Command Buffer ---------------
-
-        VkCommandBuffer commandBuffer;
-        vku::err_check(vkAllocateCommandBuffers(VulkanSharedInfo::getInstance()->device,
-                                                &commandBufferAllocateInfo, &commandBuffer));
-
-        VkCommandBufferBeginInfo commandBufferBeginInfo;
-        commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        commandBufferBeginInfo.pNext = nullptr;
-        commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        commandBufferBeginInfo.pInheritanceInfo = nullptr;
-
-        err_check(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+        VkCommandBuffer commandBuffer = beginSingleTimeCommands(commandPool);
 
         VkBufferCopy bufferCopy;
         bufferCopy.srcOffset = 0;
@@ -173,25 +204,7 @@ namespace elemd::vku
 
         vkCmdCopyBuffer(commandBuffer, src, dest, 1, &bufferCopy);
 
-        vku::err_check(vkEndCommandBuffer(commandBuffer));
-
-        VkSubmitInfo submitInfo;
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.pNext = nullptr;
-        submitInfo.waitSemaphoreCount = 0;
-        submitInfo.pWaitSemaphores = nullptr;
-        submitInfo.pWaitDstStageMask = nullptr;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-        submitInfo.signalSemaphoreCount = 0;
-        submitInfo.pSignalSemaphores = nullptr;
-
-        vku::err_check(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-
-        vkQueueWaitIdle(queue);
-
-        vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool, 1,
-                             &commandBuffer);
+        endSingleTimeCommands(commandBuffer, commandPool, queue);
     }
 
     uint32_t find_memory_type_index(uint32_t typeFilter,

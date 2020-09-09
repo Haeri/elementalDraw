@@ -31,6 +31,10 @@ namespace elemd::vku
 
     /* --------------- GENERATOR --------------- */
 
+    VkCommandBuffer beginSingleTimeCommands(const VkCommandPool& commandPool);
+    void endSingleTimeCommands(VkCommandBuffer commandBuffer, const VkCommandPool& commandPool,
+                               const VkQueue& queue);
+
     void create_buffer(const VkDeviceSize& deviceSize, const VkBufferUsageFlags& bufferUsageFlags,
                        VkBuffer& buffer, const VkMemoryPropertyFlags& memoryPropertyFlags,
                        VkDeviceMemory& deviceMemory);

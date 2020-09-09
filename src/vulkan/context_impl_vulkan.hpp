@@ -93,8 +93,6 @@ namespace elemd
         ContextImplVulkan(Window* window);
         ~ContextImplVulkan();
 
-        void draw_image(float x, float y, float width, float height, image* image, bool use_fill_color = false);
-
         void create_surface();
         void create_queue();
         void create_swapchain();

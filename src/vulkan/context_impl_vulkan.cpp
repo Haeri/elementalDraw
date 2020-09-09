@@ -209,32 +209,36 @@ namespace elemd
 
             float xpos = x + ch.bearing.x() * scale;
             float ypos = y + (64 - ch.bearing.y()) * scale;
-            //std::cout << ypos << " ";
 
-            float w = ch.size.x() * scale;
-            float h = ch.size.y() * scale;
+            float width = ch.size.x() * scale;
+            float height = ch.size.y() * scale;
 
-            imageImplVulkan* iiv = (imageImplVulkan*)ch.texture;
-            impl->draw_image(xpos, ypos, w, h, iiv, true);
+            imageImplVulkan* img = (imageImplVulkan*)ch.texture;
+
+            float xf = (xpos * impl->_window->_x_scale / impl->width);
+            float yf = (ypos * impl->_window->_y_scale / impl->height);
+            float widhtf = (width * impl->_window->_x_scale / impl->width);
+            float heightf = (height * impl->_window->_y_scale / impl->height);
+
+            impl->uniforms.push_back(
+                {_fill_color,
+                 {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
+                  vec2(xf, yf + heightf) * 2.0f - vec2(1),
+                  vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
+                 {vec2(0), vec2(0), vec2(0), vec2(0)},
+                 {vec2(img->_sampler_index, 1), vec2(0)},
+                 0,
+                 {0, 0, 0}});
 
             // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-            x += (ch.advance >> 6) *
-                 scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th
-                        // pixels by 64 to get amount of pixels))
+            // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th
+            // pixels by 64 to get amount of pixels))
+            x += (ch.advance >> 6) * scale;
         }
-
-        //std::cout << std::endl;
     }
+
 
     void Context::draw_image(float x, float y, float width, float height, image* image)
-    {
-        ContextImplVulkan* impl = getImpl(this);
-        impl->draw_image(x, y, width, height, image, false);
-    }
-
-
-    void ContextImplVulkan::draw_image(float x, float y, float width, float height, image* image,
-                                       bool use_fill_color)
     {
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
@@ -255,7 +259,7 @@ namespace elemd
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
              {vec2(0), vec2(0), vec2(0), vec2(0)},
-             {vec2(img->_sampler_index, use_fill_color), vec2(0)},
+             {vec2(img->_sampler_index, 0), vec2(0)},
              0,
              {0, 0, 0}});
     }
@@ -1023,9 +1027,6 @@ namespace elemd
 
     void ContextImplVulkan::record_command_buffers()
     {
-        // TODO: Maybe do a double buffer so that we can start recording the second buffer
-        // whilst the first one might still be in use for rendering
-
         // --------------- Create Command Buffer Begin Info ---------------
 
         VkCommandBufferBeginInfo commandBufferBeginInfo;
@@ -1181,7 +1182,7 @@ namespace elemd
 #ifndef NDEBUG
         std::cout << "{\n";
         vku::print_layers();
-        vku::print_extensions();
+        //vku::print_extensions();
         vku::print_physical_devices();
         vku::print_selected_device();
         std::cout << "}\n";      
@@ -1397,6 +1398,11 @@ namespace elemd
 
         std::memcpy(rawData, uniforms.data(), bufferSize);
         vkUnmapMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory);
+
+
+
+
+
     }
 
 } // namespace elemd 
