@@ -9,14 +9,15 @@
 #include <cstdint>
 #include <functional>
 
+#define ELEMD_ICON "./elemd_res/elemd_icon.png"
+
 namespace elemd
 {
     class Context;
-    const std::string ELEMD_ICON = "./elemd_res/elemd_icon.png";
 
     struct ELEMD_API WindowConfig
     {
-        std::string title;
+        const char* title;
 
         int width = 500;
         int height = 600;
@@ -33,7 +34,7 @@ namespace elemd
         bool visible = true;
         bool vsync = true;
 
-        std::string icon_file = ELEMD_ICON;
+        const char* icon_file = ELEMD_ICON;
     };
 
     class ELEMD_API Window

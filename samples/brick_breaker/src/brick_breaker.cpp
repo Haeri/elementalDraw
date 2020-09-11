@@ -232,7 +232,7 @@ void loadLevel()
     power_pus.clear();
     resetBall();
 
-    _win->set_title(TITLE + " (Level " + std::to_string(level+1) + ")");
+    _win->set_title(TITLE + " (Level " + std::to_string(level + 1) + ")");
 
     for (int i = 0; i < MAP_ELEMENTS_X; ++i)
     {
@@ -279,7 +279,7 @@ extern "C"
                           2, 3, 2, 3, 2, 3, 2, 3, 2, 3,
                           0, 1, 0, 0, 0, 1, 0, 0, 0, 0});
 
-        elemd::WindowConfig wc{TITLE, WIDTH, HEIGHT};
+        elemd::WindowConfig wc{TITLE.c_str(), WIDTH, HEIGHT};
         //wc.transparent = true;
         wc.resizeable = false;
         return wc;

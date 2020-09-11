@@ -70,7 +70,7 @@ namespace elemd
         color _stroke_color;
         float _line_width = 1;
         font* _font = nullptr;
-
+        font* _default_font = nullptr;
     };
 } // namespace elemd
 

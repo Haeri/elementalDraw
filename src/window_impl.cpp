@@ -249,7 +249,7 @@ namespace elemd
         }
 
         _glfw_window =
-            glfwCreateWindow(config.width, config.height, config.title.c_str(), NULL, NULL);
+            glfwCreateWindow(config.width, config.height, config.title, NULL, NULL);
         if (!_glfw_window)
         {
             std::cerr << "Failed to create a window!" << std::endl;
@@ -282,7 +282,7 @@ namespace elemd
     {
         GLFWimage icon[1];
         int numComponents;
-        icon[0].pixels = stbi_load((config.icon_file).c_str(), &icon[0].width, &icon[0].height,
+        icon[0].pixels = stbi_load(config.icon_file, &icon[0].width, &icon[0].height,
                                    &numComponents, 4);
 
         if (icon[0].pixels == NULL)
@@ -290,9 +290,9 @@ namespace elemd
             std::cerr << "Error: Unable to load Icon: " << config.icon_file << "\n";
 
             // Fallback to default
-            if (config.icon_file.compare(ELEMD_ICON) != 0)
+            if (strcmp(config.icon_file, ELEMD_ICON) != 0)
             {
-                icon[0].pixels = stbi_load((ELEMD_ICON).c_str(), &icon[0].width, &icon[0].height,
+                icon[0].pixels = stbi_load(ELEMD_ICON, &icon[0].width, &icon[0].height,
                                            &numComponents, 4);
             }
         }

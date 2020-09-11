@@ -422,6 +422,10 @@ namespace elemd
 
     void Context::_tmp_prepare()
     {
+        //_default_font = font::create("./elemd_res/font/OpenSans.ttf");
+        //_tmp_register_font(_default_font);
+        //set_font(_default_font);
+
         ContextImplVulkan* impl = getImpl(this);
         
         impl->create_vertex_buffers();
@@ -434,6 +438,8 @@ namespace elemd
 
     void ContextImplVulkan::destroy()
     {
+        //_default_font->destroy();
+
         delete this;
     }
 
