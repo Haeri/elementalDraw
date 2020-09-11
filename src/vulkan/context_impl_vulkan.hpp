@@ -16,7 +16,7 @@
 #include "../window_impl.hpp"
 #include "image_impl_vulkan.hpp"
 
-#define TEXTURE_ARRAY_SIZE 256
+#define TEXTURE_ARRAY_SIZE 512
 #define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536
 #define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE ((int)(UNIFORM_BUFFER_ARRAY_MAX_COUNT / sizeof(uniform_rect))) * sizeof(uniform_rect)
 

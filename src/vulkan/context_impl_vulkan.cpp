@@ -399,8 +399,16 @@ namespace elemd
         if (!img->_uploaded)
         {
             img->upload(impl->commandPool, impl->queue);
-            img->_sampler_index = impl->images.size();
-            impl->images.push_back(img);
+            if (impl->images.size() > TEXTURE_ARRAY_SIZE)
+            {
+                img->_sampler_index = 0;
+                std::cerr << "Too many textures glyps loaded!" << std::endl;
+            }
+            else
+            {
+                img->_sampler_index = impl->images.size();
+                impl->images.push_back(img);
+            }
         }
     }
 
@@ -414,17 +422,26 @@ namespace elemd
             for (auto& c : fiv->get_characters())
             {
                 imageImplVulkan* img = (imageImplVulkan*)c.second.texture;
-                img->_sampler_index = impl->images.size();
-                impl->images.push_back(img);
+                if (impl->images.size() > TEXTURE_ARRAY_SIZE)
+                {
+                    img->_sampler_index = 0;
+                    std::cerr << "Too many font glyps loaded!" << std::endl;
+                }
+                else
+                {
+                    img->_sampler_index = impl->images.size();
+                    impl->images.push_back(img);
+                }
+
             }
         }
     }
 
     void Context::_tmp_prepare()
     {
-        //_default_font = font::create("./elemd_res/font/OpenSans.ttf");
-        //_tmp_register_font(_default_font);
-        //set_font(_default_font);
+        _default_font = font::create("./elemd_res/font/OpenSans.ttf");
+        _tmp_register_font(_default_font);
+        set_font(_default_font);
 
         ContextImplVulkan* impl = getImpl(this);
         
@@ -438,7 +455,7 @@ namespace elemd
 
     void ContextImplVulkan::destroy()
     {
-        //_default_font->destroy();
+        _default_font->destroy();
 
         delete this;
     }
@@ -1128,7 +1145,12 @@ namespace elemd
 
     void ContextImplVulkan::initialize_resources()
     {
-        dummy = new imageImplVulkan("./elemd_res/gray.png");
+        uint8_t* buffer = new uint8_t[4];
+        buffer[0] = 0;
+        buffer[1] = 0;
+        buffer[2] = 0;
+        buffer[3] = 0;
+        dummy = new imageImplVulkan(1, 1, 4, buffer);
         dummy->upload(commandPool, queue);
     }
 
