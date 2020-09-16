@@ -33,7 +33,6 @@ class color(Structure):
 		self.obj = lib.color_new(r, g, b, a)
 
 	def __del__(self):
-		print("Color Destructer Called")
 		return lib.color_delete(self.obj)
 
 

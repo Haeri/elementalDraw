@@ -55,6 +55,7 @@ namespace elemd
         std::atomic<bool> resizing = false;
         std::atomic<bool> rendering = false;
         bool headless = false;
+        bool dirty = true;
 
         uint32_t width = 0;
         uint32_t height = 0;
