@@ -46,7 +46,7 @@ namespace elemd
         }
         else if (error)
         {
-            std::cerr << "Error: font not foundè" << std::endl;
+            std::cerr << "Error: font not found!" << std::endl;
             exit(1);
         }
         

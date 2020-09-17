@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.3)
 
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/extern/vcpkg/scripts/buildsystems/vcpkg.cmake
+  CACHE STRING "Vcpkg toolchain file")
+
 set(PROJECT_NAME elemd)
 project(${PROJECT_NAME} LANGUAGES CXX)
 
@@ -54,10 +57,14 @@ else()
     set(SHARED_LIB_NAME "lib${PROJECT_NAME}.so")
 endif()
 
+
+find_program(GLSLANGVALIDATOR_EXECUTABLE NAMES glslangValidator PATHS ${CMAKE_SOURCE_DIR}/extern/vcpkg/installed/tools/)
+
 add_custom_command(
     TARGET ${PROJECT_NAME}
     PRE_BUILD
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/convert_assets_${CONVERTER_POSTFIX} -s
+    COMMAND ${GLSLANGVALIDATOR_EXECUTABLE} -V ${CMAKE_SOURCE_DIR}/res/shader/rounded_rect.frag -o ${CMAKE_SOURCE_DIR}/res/shader/rounded_rect.frag.spv
+    COMMAND ${GLSLANGVALIDATOR_EXECUTABLE} -V ${CMAKE_SOURCE_DIR}/res/shader/rounded_rect.vert -o ${CMAKE_SOURCE_DIR}/res/shader/rounded_rect.vert.spv
 )
 
 
