@@ -121,4 +121,5 @@ install(TARGETS ${PROJECT_NAME}
         EXPORT ${PROJECT_NAME}
         RUNTIME DESTINATION "bin"
         ARCHIVE DESTINATION "lib"
-        LIBRARY DESTINATION "lib/static")
+        LIBRARY DESTINATION "lib/static"
+        INCLUDES DESTINATION "include/${PROJECT_NAME}")

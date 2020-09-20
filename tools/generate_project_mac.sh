@@ -8,7 +8,12 @@ rm -rf build
 mkdir build
 cd build
 
-cmake .. -DVCPKG_TARGET_TRIPLET=x64-osx
+
+if [[ -z "${VCPKG_ROOT}" ]]; then
+	cmake .. -DVCPKG_TARGET_TRIPLET=x64-osx
+else
+	cmake .. -DVCPKG_TARGET_TRIPLET=x64-osx -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT"/scripts/buildsystems/vcpkg.cmake"
+fi
 
 err=$?
 

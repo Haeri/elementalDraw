@@ -1,9 +1,11 @@
 # Elemental Draw
 
 ![C++ Builder](https://github.com/Haeri/ElementalDraw/workflows/C++%20Builder/badge.svg)
+![Version](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/Haeri/ElementalDraw/master/vcpkg.json&label=version&query=$.version-string&color=blue)
 [![License](https://img.shields.io/github/license/Haeri/ElementalDraw.svg)](https://github.com/Haeri/ElementalDraw/blob/master/LICENSE)
+![Size](https://img.shields.io/github/languages/code-size/haeri/elementalDraw)
 
-Portable c++ canvas library with a Vulkan backend.
+Portable C++ canvas library with a Vulkan backend.
 
 
 ## Requirements
