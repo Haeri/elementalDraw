@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Target.cmake")
+include(CMakeFindDependencyMacro)
+
+find_dependency(glfw3 REQUIRED)
+find_dependency(freetype REQUIRED)

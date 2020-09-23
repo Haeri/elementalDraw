@@ -44,7 +44,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION 0.0.1
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_include_directories(${PROJECT_NAME} PUBLIC 
+	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
+)
 
 if(APPLE)
     set(CONVERTER_POSTFIX "mac.sh")
@@ -117,9 +120,38 @@ if (ELEMD_BUILD_EXAMPLES)
 endif()
 
 
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+  cmake/config.cmake.in
+  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+)
+
 install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}
-        RUNTIME DESTINATION "bin"
-        ARCHIVE DESTINATION "lib"
-        LIBRARY DESTINATION "lib/static"
-        INCLUDES DESTINATION "include/${PROJECT_NAME}")
+        EXPORT ${PROJECT_NAME}Target
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+
+install(
+  EXPORT ${PROJECT_NAME}Target
+  FILE  ${PROJECT_NAME}Target.cmake
+  NAMESPACE ${PROJECT_NAME}::
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY include
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+  FILES
+  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+)
