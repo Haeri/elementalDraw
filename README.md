@@ -11,7 +11,7 @@ Portable C++ canvas library with a Vulkan backend.
 ## Build Requirements
 - [CMake 3.3^](https://cmake.org/download/) 
 - [Python 3^](https://www.python.org/downloads/)
-- [Vcpkg](https://github.com/microsoft/vcpkg) (Not required. Will be downloaded if VCPKG_ROOT is not defined)
+- [Vcpkg](https://github.com/microsoft/vcpkg) (Not required. Will be downloaded if `VCPKG_ROOT` is not defined)
 
 ## Setup
 

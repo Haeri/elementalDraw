@@ -26,7 +26,7 @@ void draw(elemd::Context* ctx)
         ctx->fill_circle(point.x(), point.y(), 3);
     }
 
-    ctx->fill_circle(mouse_x, mouse_y, 4);
+    ctx->fill_circle((float)mouse_x, (float)mouse_y, 4);
 
     if (mouse_click)
     {

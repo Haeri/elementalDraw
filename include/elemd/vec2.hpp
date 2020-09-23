@@ -22,6 +22,9 @@ namespace elemd
         vec2(float x, float y) : _x(x), _y(y)
         {
         }
+        vec2(int x, int y) : _x((float)x), _y((float)y)
+        {
+        }
 
         bool equals(const vec2& other);
         float length();

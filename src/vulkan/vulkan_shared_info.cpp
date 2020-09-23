@@ -153,7 +153,7 @@ namespace elemd
 
         std::vector<float> queuePriorities;
 
-        for (int i = 0; i < queueCount; ++i)
+        for (uint32_t i = 0; i < queueCount; ++i)
         {
             queuePriorities.push_back(1.0f);
         }

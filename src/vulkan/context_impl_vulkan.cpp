@@ -330,7 +330,7 @@ namespace elemd
         bool rerecord = false;
         if (impl->last_uniform_cnt != impl->uniforms.size())
         {
-            impl->last_uniform_cnt = impl->uniforms.size();
+            impl->last_uniform_cnt = (int)impl->uniforms.size();
             rerecord = true;
         }
         
@@ -406,7 +406,7 @@ namespace elemd
             }
             else
             {
-                img->_sampler_index = impl->images.size();
+                img->_sampler_index = (int)impl->images.size();
                 impl->images.push_back(img);
             }
         }
@@ -429,7 +429,7 @@ namespace elemd
                 }
                 else
                 {
-                    img->_sampler_index = impl->images.size();
+                    img->_sampler_index = (int)impl->images.size();
                     impl->images.push_back(img);
                 }
 
@@ -747,7 +747,7 @@ namespace elemd
         descriptorSetLayoutBindingFlagsCreateInfo.sType =
             VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
         descriptorSetLayoutBindingFlagsCreateInfo.pNext = nullptr;
-        descriptorSetLayoutBindingFlagsCreateInfo.bindingCount = descriptorBindingFlags.size();
+        descriptorSetLayoutBindingFlagsCreateInfo.bindingCount = (uint32_t)descriptorBindingFlags.size();
         descriptorSetLayoutBindingFlagsCreateInfo.pBindingFlags = descriptorBindingFlags.data();
         
 
@@ -755,7 +755,7 @@ namespace elemd
         descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         descriptorSetLayoutCreateInfo.pNext = &descriptorSetLayoutBindingFlagsCreateInfo;
         descriptorSetLayoutCreateInfo.flags = 0;
-        descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
+        descriptorSetLayoutCreateInfo.bindingCount = (uint32_t)descriptorSetLayoutBindings.size();
         descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
 
         vku::err_check(vkCreateDescriptorSetLayout(VulkanSharedInfo::getInstance()->device,
@@ -1338,7 +1338,7 @@ namespace elemd
         descriptorPoolCreateInfo.pNext = nullptr;
         descriptorPoolCreateInfo.flags = 0;
         descriptorPoolCreateInfo.maxSets = 1;
-        descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizes.size();
+        descriptorPoolCreateInfo.poolSizeCount = (uint32_t)descriptorPoolSizes.size();
         descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
 
         vku::err_check(vkCreateDescriptorPool(VulkanSharedInfo::getInstance()->device,
@@ -1421,7 +1421,7 @@ namespace elemd
         samplerWriteDescriptorSet.dstSet = descriptorSet;
         samplerWriteDescriptorSet.dstBinding = 1;
         samplerWriteDescriptorSet.dstArrayElement = 0;
-        samplerWriteDescriptorSet.descriptorCount = descriptorImageInfos.size();
+        samplerWriteDescriptorSet.descriptorCount = (uint32_t)descriptorImageInfos.size();
         samplerWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         samplerWriteDescriptorSet.pImageInfo = descriptorImageInfos.data();
         samplerWriteDescriptorSet.pBufferInfo = nullptr;
@@ -1433,7 +1433,8 @@ namespace elemd
             samplerWriteDescriptorSet
         };
 
-        vkUpdateDescriptorSets(VulkanSharedInfo::getInstance()->device, writeDescriptorSets.size(),
+        vkUpdateDescriptorSets(VulkanSharedInfo::getInstance()->device,
+                               (uint32_t)writeDescriptorSets.size(),
                                writeDescriptorSets.data(), 0, nullptr);
     }
 

@@ -30,7 +30,7 @@ struct ProfileResult
 {
     std::string Name;
     long long Start, End;
-    uint32_t ThreadID;
+    size_t ThreadID;
 };
 
 struct InstrumentationSession
@@ -131,7 +131,7 @@ public:
                             .time_since_epoch()
                             .count();
 
-        uint32_t threadID = std::hash<std::thread::id>{}(std::this_thread::get_id());
+        size_t threadID = std::hash<std::thread::id>{}(std::this_thread::get_id());
         Instrumentor::Get().WriteProfile({m_Name, start, end, threadID});
 
         m_Stopped = true;
