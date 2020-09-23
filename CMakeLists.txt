@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.3)
 
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/extern/vcpkg/scripts/buildsystems/vcpkg.cmake
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake
   CACHE STRING "Vcpkg toolchain file")
 
 set(PROJECT_NAME elemd)
@@ -11,7 +11,7 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 # Options
-option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
+option(BUILD_SHARED_LIBS "Build as shared/dynamic library" OFF)
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
 
 # Settings
@@ -19,10 +19,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINE_HIDDEN YES)
-
-# Collect all binaries in one folder so no copying is necessary
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Enable folder view in solution explorer
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -61,26 +57,26 @@ else()
 endif()
 
 
-find_program(GLSLANGVALIDATOR_EXECUTABLE NAMES glslangValidator PATHS ${CMAKE_SOURCE_DIR}/extern/vcpkg/installed/tools/)
+#find_program(GLSLANGVALIDATOR_EXECUTABLE NAMES glslangValidator PATHS ${CMAKE_SOURCE_DIR}/external/vcpkg/installed/tools/)
 
-add_custom_command(
-    TARGET ${PROJECT_NAME}
-    PRE_BUILD
-    COMMAND ${GLSLANGVALIDATOR_EXECUTABLE} -V ${CMAKE_SOURCE_DIR}/res/shader/rounded_rect.frag -o ${CMAKE_SOURCE_DIR}/res/shader/rounded_rect.frag.spv
-    COMMAND ${GLSLANGVALIDATOR_EXECUTABLE} -V ${CMAKE_SOURCE_DIR}/res/shader/rounded_rect.vert -o ${CMAKE_SOURCE_DIR}/res/shader/rounded_rect.vert.spv
-)
+#add_custom_command(
+#    TARGET ${PROJECT_NAME}
+#    PRE_BUILD
+#    COMMAND ${GLSLANGVALIDATOR_EXECUTABLE} -V ${CMAKE_SOURCE_DIR}/data/shader/rounded_rect.frag -o ${CMAKE_SOURCE_DIR}/data/shader/rounded_rect.frag.spv
+#    COMMAND ${GLSLANGVALIDATOR_EXECUTABLE} -V ${CMAKE_SOURCE_DIR}/data/shader/rounded_rect.vert -o ${CMAKE_SOURCE_DIR}/data/shader/rounded_rect.vert.spv
+#)
 
 
 
-# ---------------- EXTERN ---------------------#
+# ---------------- EXTERNAL ---------------------#
 
-set(EXTERN_DIR extern/)
+set(EXTERNAL_DIR external/)
 
 # glad
-add_subdirectory(${EXTERN_DIR}glad)
+add_subdirectory(${EXTERNAL_DIR}glad)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 
-set_target_properties(glad PROPERTIES FOLDER ${EXTERN_DIR})
+set_target_properties(glad PROPERTIES FOLDER ${EXTERNAL_DIR})
 
 
 
@@ -100,21 +96,21 @@ target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
 # ---------------- EXAMPLES ---------------------#
 
 if (ELEMD_BUILD_EXAMPLES)
-    add_subdirectory(samples/runtime)
-    add_subdirectory(samples/window_app)
-    add_subdirectory(samples/brick_breaker)
-    add_subdirectory(samples/painter)
+    add_subdirectory(examples/runtime)
+    add_subdirectory(examples/window_app)
+    add_subdirectory(examples/brick_breaker)
+    add_subdirectory(examples/painter)
 
-    set_target_properties(runtime PROPERTIES FOLDER samples)
-    set_target_properties(window_app PROPERTIES FOLDER samples)
-    set_target_properties(brick_breaker PROPERTIES FOLDER samples)
-    set_target_properties(painter PROPERTIES FOLDER samples)
+    set_target_properties(runtime PROPERTIES FOLDER examples)
+    set_target_properties(window_app PROPERTIES FOLDER examples)
+    set_target_properties(brick_breaker PROPERTIES FOLDER examples)
+    set_target_properties(painter PROPERTIES FOLDER examples)
 
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         DEPENDS runtime painter
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} samples/runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} samples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMENT "Copy library"
     )
 endif()
@@ -130,11 +126,12 @@ configure_package_config_file(
   INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
 )
 
-install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}Target
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Target
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 

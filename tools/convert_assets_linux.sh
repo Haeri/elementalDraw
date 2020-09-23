@@ -4,9 +4,9 @@ old_path=$(pwd)
 cd $(dirname "$0")
 script_path=$(pwd)
 
-cd ../res/shader
+cd ../data/shader
 for f in *.vert *.frag
-	do $script_path"/../extern/vcpkg/installed/x64-linux/tools/glslangValidator" -V $f  -o $f.spv
+	do $script_path"/../external/vcpkg/installed/x64-linux/tools/glslangValidator" -V $f  -o $f.spv
 done
 
 err=$?

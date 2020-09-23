@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <functional>
 
-#define ELEMD_ICON "./elemd_res/elemd_icon.png"
+//#define ELEMD_ICON "./elemd_res/elemd_icon.png"
 
 namespace elemd
 {
@@ -34,7 +34,7 @@ namespace elemd
         bool visible = true;
         bool vsync = true;
 
-        const char* icon_file = ELEMD_ICON;
+        const char* icon_file = nullptr;
     };
 
     class ELEMD_API Window

@@ -76,6 +76,7 @@ namespace elemd::vku
     }
 
     void create_shader_module(const std::string& filename, VkShaderModule* shaderModule);
+    void create_shader_module(std::vector<unsigned char> data, VkShaderModule* shaderModule);
     std::vector<char> read_shader(const std::string& filename);
 
     /* --------------- SELECTOR --------------- */

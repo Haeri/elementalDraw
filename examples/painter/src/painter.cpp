@@ -67,13 +67,6 @@ int main(void)
         draw(ctx);
     });
 
-
-
-    elemd::image* img = elemd::image::create("./elemd_res/elemd_icon.png");
-
-    ctx->_tmp_register_image(img);
-
-
     ctx->set_clear_color({255, 255, 255});
     ctx->_tmp_prepare();
 
@@ -83,9 +76,6 @@ int main(void)
         std::this_thread::sleep_for(std::chrono::duration<float, std::ratio<1>>(target_poll_ms));
     }
 
-    img->destroy();
     win->destroy();
-
-
     return 0;
 }

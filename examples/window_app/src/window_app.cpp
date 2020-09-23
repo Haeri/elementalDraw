@@ -109,8 +109,7 @@ extern "C"
         ctx->_tmp_register_image(logo);
         ctx->_tmp_register_image(grid);
         
-        elemd::font* urbanist = elemd::font::create("./elemd_res/font/Urbanist-Regular.ttf");
-        //elemd::font* urbanist = elemd::font::create("./elemd_res/font/OpenSans.ttf");
+        elemd::font* urbanist = elemd::font::create("./res/font/Urbanist-Regular.ttf");
         ctx->_tmp_register_font(urbanist);
         ctx->set_font(urbanist);
 

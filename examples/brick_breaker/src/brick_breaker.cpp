@@ -298,7 +298,7 @@ extern "C"
         _ctx = ctx;
         initial_scale = _win->get_scale().get_x();
 
-        elemd::font* urbanist = elemd::font::create("./elemd_res/font/Urbanist-Regular.ttf");
+        elemd::font* urbanist = elemd::font::create("./res/font/Urbanist-Regular.ttf");
         ctx->_tmp_register_font(urbanist);
         ctx->set_font(urbanist);
 

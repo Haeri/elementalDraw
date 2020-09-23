@@ -10,8 +10,8 @@ cd "%~dp0"
 
 
 set scriptpath=%cd% 
-cd ../res/shader
-for %%i in (*.vert *.frag) do "%scriptpath%/../extern/vcpkg/installed/x64-windows/tools/glslangValidator.exe" -V "%%~i" -o "%%~i.spv"
+cd ../data/shader
+for %%i in (*.vert *.frag) do "%scriptpath%/../external/vcpkg/installed/x64-windows/tools/glslangValidator.exe" -V "%%~i" -o "%%~i.spv"
 set /a "err=%err%+%errorlevel%"
 
 

@@ -14,11 +14,8 @@ else()
 endif()
 
 # Make res folder available inside the cmake build
-set (lib_src "${CMAKE_SOURCE_DIR}/res")
-set (lib_dest "${CMAKE_CURRENT_BINARY_DIR}/elemd_res")
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E create_symlink ${lib_src} ${lib_dest} 
-    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/samples/window_app/res ${CMAKE_CURRENT_BINARY_DIR}/res
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/examples/window_app/res ${CMAKE_CURRENT_BINARY_DIR}/res
     COMMENT "Creating sylinks to resources folders"
 )

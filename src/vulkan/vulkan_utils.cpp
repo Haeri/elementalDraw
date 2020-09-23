@@ -52,6 +52,19 @@ namespace elemd::vku
                                             &shaderModuleCreateInfo, nullptr, shaderModule));
     }
 
+     void create_shader_module(std::vector<unsigned char> data, VkShaderModule* shaderModule)
+    {
+        VkShaderModuleCreateInfo shaderModuleCreateInfo;
+        shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        shaderModuleCreateInfo.pNext = nullptr;
+        shaderModuleCreateInfo.flags = 0;
+        shaderModuleCreateInfo.codeSize = data.size();
+        shaderModuleCreateInfo.pCode = (uint32_t*)data.data();
+
+        vku::err_check(vkCreateShaderModule(VulkanSharedInfo::getInstance()->device,
+                                            &shaderModuleCreateInfo, nullptr, shaderModule));
+    }
+
     std::vector<char> read_shader(const std::string& filename)
     {
         std::ifstream file(filename, std::ios::binary | std::ios::ate);

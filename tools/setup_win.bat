@@ -9,7 +9,7 @@ cd "%~dp0"
 
 
 
-python ./install.py
+python ./setup.py
 set /a "err=%err%+%errorlevel%"
 
 

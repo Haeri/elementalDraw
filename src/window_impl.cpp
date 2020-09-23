@@ -280,6 +280,9 @@ namespace elemd
 
     void WindowImpl::load_icon(const WindowConfig& config)
     {
+        if (config.icon_file == nullptr)
+            return;
+
         GLFWimage icon[1];
         int numComponents;
         icon[0].pixels = stbi_load(config.icon_file, &icon[0].width, &icon[0].height,
@@ -288,13 +291,7 @@ namespace elemd
         if (icon[0].pixels == NULL)
         {
             std::cerr << "Error: Unable to load Icon: " << config.icon_file << "\n";
-
-            // Fallback to default
-            if (strcmp(config.icon_file, ELEMD_ICON) != 0)
-            {
-                icon[0].pixels = stbi_load(ELEMD_ICON, &icon[0].width, &icon[0].height,
-                                           &numComponents, 4);
-            }
+            return;
         }
 
         glfwSetWindowIcon(_glfw_window, 1, icon);

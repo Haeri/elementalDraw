@@ -3,7 +3,7 @@
 old_path=$(pwd)
 cd $(dirname "$0")
 
-python3 ./install.py
+python3 ./setup.py
 
 err=$?
 
