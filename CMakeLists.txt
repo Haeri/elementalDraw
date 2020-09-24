@@ -143,7 +143,7 @@ install(
 )
 
 install(
-  DIRECTORY include
+  DIRECTORY include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
