@@ -18,14 +18,20 @@ namespace elemd
     public:
         static Context* create(Window* window);
 
-        void stroke_line(float x, float y);                                                                                     // VK_PRIMITIVE_TOPOLOGY_LINE_LIST, line_vertex
-        void stroke_rect(float x, float y, float width, float height);                                                          // 
+        // TODO: To implement
+        void stroke_line(float x, float y);
+        void stroke_rect(float x, float y, float width, float height);
+        // TODO: To implement
         void stroke_rounded_rect(float x, float y, float width, float height, float border_radius);
+        // TODO: To implement
         void stroke_rounded_rect(float x, float y, float width, float height, float radius_nw,
                                  float radius_ne, float radius_se, float radius_sw);
+        // TODO: To implement
         void stroke_circle(float x, float y, float radius);
+        // TODO: To implement
         void stroke_ellipse(float x, float y, float width, float height);
-        void stroke_polygon(float x, float y);                                                                                  // VK_PRIMITIVE_TOPOLOGY_LINE_STRIP
+        // TODO: To implement
+        void stroke_polygon(float x, float y);
 
         void fill_rect(float x, float y, float width, float height);
         void fill_rounded_rect(float x, float y, float width, float height, float border_radius);
@@ -33,9 +39,11 @@ namespace elemd
                                float radius_se, float radius_sw);
         void fill_circle(float x, float y, float radius);
         void fill_ellipse(float x, float y, float width, float height);
+        // TODO: To implement
         void fill_polygon(float x, float y);
 
-        void draw_point(float x, float y);                                                                                      // VK_PRIMITIVE_TOPOLOGY_POINT_LIST
+        // TODO: To implement
+        void draw_pixel(float x, float y);
         void draw_text(float x, float y, std::string text);
         void draw_image(float x, float y, float width, float height, image* image);
         void draw_rounded_image(float x, float y, float width, float height, image* image,
@@ -49,11 +57,22 @@ namespace elemd
         void set_line_width(float width);
         void set_font(font* font);
 
+        // TODO: To implement
+        void add_layouer();
+        // TODO: To implement
+        void change_layer();
+        // TODO: To implement
+        void add_mask();
+
+        // TODO: To implement
         void clear();
+        // TODO: To implement
         void clear_rect(float x, float y, float width, float height);
 
         void draw_frame();
 
+        int get_width();
+        int get_height();
         void resize_context(int width, int height);
 
         void _tmp_register_image(image* image);
@@ -64,6 +83,9 @@ namespace elemd
     protected:
         Context() = default;
         virtual ~Context() = default;
+
+        int _width = 0;
+        int _height = 0;
 
         color _clear_color;
         color _fill_color;

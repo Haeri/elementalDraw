@@ -21,4 +21,14 @@ namespace elemd
     {
         _font = font;
     }
+
+    int Context::get_width()
+    {
+        return _width;
+    }
+
+    int Context::get_height()
+    {
+        return _height;    
+    }
 }

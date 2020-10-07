@@ -24,9 +24,12 @@ set(CMAKE_VISIBILITY_INLINE_HIDDEN YES)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 file(GLOB_RECURSE SOURCE_FILES
-        include/${PROJECT_NAME}/*.hpp
-        src/*.hpp
-        src/*.cpp)
+    include/${PROJECT_NAME}/*.hpp
+    src/*.hpp
+    src/*.h
+    src/*.cpp
+    src/*.c
+ )
 
 if (BUILD_SHARED_LIBS)
     add_compile_definitions(ELEMD_BUILD_SHARED)
@@ -67,16 +70,6 @@ endif()
 #)
 
 
-
-# ---------------- EXTERNAL ---------------------#
-
-set(EXTERNAL_DIR external/)
-
-# glad
-add_subdirectory(${EXTERNAL_DIR}glad)
-target_link_libraries(${PROJECT_NAME} PRIVATE glad)
-
-set_target_properties(glad PROPERTIES FOLDER ${EXTERNAL_DIR})
 
 
 

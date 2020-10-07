@@ -40,10 +40,10 @@ namespace elemd
         width = width * impl->_window->_x_scale + lw;
         height = height * impl->_window->_y_scale + lw;
 
-        float xf = (x / impl->width);
-        float yf = (y / impl->height);
-        float widhtf = (width / impl->width);
-        float heightf = (height / impl->height);
+        float xf = (x / _width);
+        float yf = (y / _height);
+        float widhtf = (width / _width);
+        float heightf = (height / _height);
 
         impl->uniforms.push_back(
             {_fill_color,
@@ -68,10 +68,12 @@ namespace elemd
     {
     }
 
-    void Context::draw_point(float x, float y)
+    // VK_PRIMITIVE_TOPOLOGY_POINT_LIST
+    void Context::draw_pixel(float x, float y)
     {
     }
 
+    // VK_PRIMITIVE_TOPOLOGY_LINE_LIST, line_vertex
     void Context::stroke_line(float x, float y)
     {
     }
@@ -84,6 +86,7 @@ namespace elemd
     {
     }
 
+    // VK_PRIMITIVE_TOPOLOGY_LINE_STRIP
     void Context::stroke_polygon(float x, float y)
     {
     }
@@ -97,10 +100,10 @@ namespace elemd
         width *= impl->_window->_x_scale;
         height *= impl->_window->_y_scale;
 
-        float xf = (x / impl->width);
-        float yf = (y / impl->height);
-        float widhtf = (width / impl->width);
-        float heightf = (height / impl->height);
+        float xf = (x / _width);
+        float yf = (y / _height);
+        float widhtf = (width / _width);
+        float heightf = (height / _height);
         
         impl->uniforms.push_back(
             {_fill_color,
@@ -130,10 +133,10 @@ namespace elemd
         width *= impl->_window->_x_scale;
         height *= impl->_window->_y_scale;
 
-        float xf = (x / impl->width);
-        float yf = (y / impl->height);
-        float widthf = (width / impl->width);
-        float heightf = (height / impl->height);
+        float xf = (x / _width);
+        float yf = (y / _height);
+        float widthf = (width / _width);
+        float heightf = (height / _height);
         float nwxf = (radius_nw / width) * (impl->_window->_x_scale);
         float nexf = (radius_ne / width) * (impl->_window->_x_scale);
         float sexf = (radius_se / width) * (impl->_window->_x_scale);
@@ -161,10 +164,10 @@ namespace elemd
         x *= impl->_window->_x_scale;
         y *= impl->_window->_y_scale;
 
-        float xf = ((x - radius * impl->_window->_x_scale) / impl->width);
-        float yf = ((y - radius * impl->_window->_y_scale) / impl->height);
-        float widhtf = ((radius * 2 * impl->_window->_x_scale) / impl->width);
-        float heightf = ((radius * 2 * impl->_window->_y_scale) / impl->height);
+        float xf = ((x - radius * impl->_window->_x_scale) / _width);
+        float yf = ((y - radius * impl->_window->_y_scale) / _height);
+        float widhtf = ((radius * 2 * impl->_window->_x_scale) / _width);
+        float heightf = ((radius * 2 * impl->_window->_y_scale) / _height);
         float radf = 0.5f;
 
         impl->uniforms.push_back(
@@ -215,10 +218,10 @@ namespace elemd
 
             imageImplVulkan* img = (imageImplVulkan*)ch.texture;
 
-            float xf = (xpos * impl->_window->_x_scale / impl->width);
-            float yf = (ypos * impl->_window->_y_scale / impl->height);
-            float widhtf = (width * impl->_window->_x_scale / impl->width);
-            float heightf = (height * impl->_window->_y_scale / impl->height);
+            float xf = (xpos * impl->_window->_x_scale / _width);
+            float yf = (ypos * impl->_window->_y_scale / _height);
+            float widhtf = (width * impl->_window->_x_scale / _width);
+            float heightf = (height * impl->_window->_y_scale / _height);
 
             impl->uniforms.push_back(
                 {_fill_color,
@@ -248,10 +251,10 @@ namespace elemd
         width *= impl->_window->_x_scale;
         height *= impl->_window->_y_scale;
 
-        float xf = (x / impl->width);
-        float yf = (y / impl->height);
-        float widhtf = (width / impl->width);
-        float heightf = (height / impl->height);
+        float xf = (x / _width);
+        float yf = (y / _height);
+        float widhtf = (width / _width);
+        float heightf = (height / _height);
 
         impl->uniforms.push_back(
             {_fill_color,
@@ -282,10 +285,10 @@ namespace elemd
         width *= impl->_window->_x_scale;
         height *= impl->_window->_y_scale;
 
-        float xf = (x / impl->width);
-        float yf = (y / impl->height);
-        float widthf = (width / impl->width);
-        float heightf = (height / impl->height);
+        float xf = (x / _width);
+        float yf = (y / _height);
+        float widthf = (width / _width);
+        float heightf = (height / _height);
         float nwxf = (radius_nw / width) * (impl->_window->_x_scale);
         float nexf = (radius_ne / width) * (impl->_window->_x_scale);
         float sexf = (radius_se / width) * (impl->_window->_x_scale);
@@ -538,7 +541,7 @@ namespace elemd
 
         // --------------- Select Extents ---------------    
 
-        VkExtent2D selectedImageExtent = {width, height};
+        VkExtent2D selectedImageExtent = {_width, _height};
         selectedImageExtent.width =
             std::max(surfaceCapabilities.minImageExtent.width,
                      std::min(surfaceCapabilities.maxImageExtent.width, selectedImageExtent.width));
@@ -846,14 +849,14 @@ namespace elemd
         VkViewport viewport;
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = (float)width;
-        viewport.height = (float)height;
+        viewport.width = (float)_width;
+        viewport.height = (float)_height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
         VkRect2D scissor;
         scissor.offset = {0, 0};
-        scissor.extent = {width, height};
+        scissor.extent = {(uint32_t)_width, (uint32_t)_height};
 
         VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo;
         pipelineViewportStateCreateInfo.sType =
@@ -1007,8 +1010,8 @@ namespace elemd
             frameBufferCreateInfo.renderPass = renderPass;
             frameBufferCreateInfo.attachmentCount = 1;
             frameBufferCreateInfo.pAttachments = &(imageViews[i]);
-            frameBufferCreateInfo.width = width;
-            frameBufferCreateInfo.height = height;
+            frameBufferCreateInfo.width = _width;
+            frameBufferCreateInfo.height = _height;
             frameBufferCreateInfo.layers = 1;
 
             vku::err_check(
@@ -1071,7 +1074,7 @@ namespace elemd
             renderPassBeginInfo.renderPass = renderPass;
             renderPassBeginInfo.framebuffer = frameBuffers[i];
             renderPassBeginInfo.renderArea.offset = {0, 0};
-            renderPassBeginInfo.renderArea.extent = {width, height};
+            renderPassBeginInfo.renderArea.extent = {(uint32_t)_width, (uint32_t)_height};
             renderPassBeginInfo.clearValueCount = 1;
             renderPassBeginInfo.pClearValues = &clearValue;
 
@@ -1083,14 +1086,14 @@ namespace elemd
                 VkViewport viewport;
                 viewport.x = 0.0f;
                 viewport.y = 0.0f;
-                viewport.width = (float)width;
-                viewport.height = (float)height;
+                viewport.width = (float)_width;
+                viewport.height = (float)_height;
                 viewport.minDepth = 0.0f;
                 viewport.maxDepth = 1.0f;
 
                 VkRect2D scissor;
                 scissor.offset = { 0, 0 };
-                scissor.extent = { width, height };
+                scissor.extent = {(uint32_t)_width, (uint32_t)_height};
 
                 vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
                 vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
@@ -1161,9 +1164,9 @@ namespace elemd
         if (resizing) return;
         resizing = true;
 
-        this->width = width;
+        this->_width = width;
         //*_window->_x_scale;
-        this->height = height;
+        this->_height = height;
         //*_window->_y_scale;        
 
         vkDeviceWaitIdle(VulkanSharedInfo::getInstance()->device);
@@ -1203,8 +1206,8 @@ namespace elemd
     {
         _window = (WindowImpl*)window;
 
-        width = (uint32_t)window->get_width();
-        height = (uint32_t)window->get_height();        
+        _width = (uint32_t)window->get_width();
+        _height = (uint32_t)window->get_height();        
 
 
         VulkanSharedInfo::getInstance();

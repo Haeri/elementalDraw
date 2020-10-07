@@ -1,7 +1,7 @@
 #ifndef ELEMD_VULKAN_SHARED_INFO_HPP
 #define ELEMD_VULKAN_SHARED_INFO_HPP
 
-#include <glad/vulkan.h>
+#include "./vulkan.h"
 
 #define DEFAULT_VALIDATION_LAYER "VK_LAYER_KHRONOS_validation"
 

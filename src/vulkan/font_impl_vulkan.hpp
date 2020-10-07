@@ -3,7 +3,7 @@
 
 #include "elemd/font.hpp"
 
-#include <glad/vulkan.h>
+#include "./vulkan.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 

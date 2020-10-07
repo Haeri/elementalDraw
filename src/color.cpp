@@ -4,6 +4,12 @@
 #include <sstream>
 #include <algorithm>
 
+#ifdef _MSC_VER
+#define sscanf_cross sscanf_s
+#else
+#define sscanf_cross sscanf
+#endif
+
 namespace elemd
 {
     color::color(int r, int g, int b)
@@ -39,18 +45,18 @@ namespace elemd
 
         if (hex.size() == 4)
         {
-            sscanf(hex.c_str(), "#%01x%01x%01x", &r, &g, &b);
+            sscanf_cross(hex.c_str(), "#%01x%01x%01x", &r, &g, &b);
             r *= 0x11;
             g *= 0x11;
             b *= 0x11;
         }
         else if (hex.size() == 7)
         {
-            sscanf(hex.c_str(), "#%02x%02x%02x", &r, &g, &b);
+            sscanf_cross(hex.c_str(), "#%02x%02x%02x", &r, &g, &b);
         }
         else if (hex.size() == 9)
         {
-            sscanf(hex.c_str(), "#%02x%02x%02x%02x", &r, &g, &b, &a);
+            sscanf_cross(hex.c_str(), "#%02x%02x%02x%02x", &r, &g, &b, &a);
         }
         else 
         {
