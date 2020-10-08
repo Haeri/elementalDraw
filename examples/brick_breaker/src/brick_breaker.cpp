@@ -1,10 +1,3 @@
-#ifdef _MSC_VER
-    #define EXPORT_API __declspec(dllexport)
-#else
-    #define EXPORT_API __attribute__((visibility("default")))
-#endif
-
-
 #include <iostream>
 #include <vector>
 #include <array>
@@ -257,258 +250,245 @@ void loadLevel()
     }
 }
 
-extern "C"
+int app_run(elemd::Window* win, elemd::Context* ctx)
 {
-    EXPORT_API elemd::WindowConfig app_init()
-    {
-        levels.push_back({0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
-                          0, 1, 1, 1, 2, 2, 1, 1, 1, 0,
-                          1, 1, 1, 2, 3, 3, 2, 1, 1, 1,
-                          1, 1, 1, 1, 2, 2, 1, 1, 1, 1,
-                          1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                          1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
-                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                          0, 1, 3, 1, 3, 1, 3, 1, 0, 0});
+    Instrumentor::Get().BeginSession("Session Name");  
 
-        levels.push_back({0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
-                          0, 1, 1, 1, 2, 2, 1, 1, 1, 0,
-                          1, 1, 1, 2, 3, 3, 2, 1, 1, 1,
-                          1, 1, 1, 1, 2, 2, 1, 1, 1, 1,
-                          1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                          1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
-                          2, 3, 2, 3, 2, 3, 2, 3, 2, 3,
-                          0, 1, 0, 0, 0, 1, 0, 0, 0, 0});
+    _win = win;
+    _ctx = ctx;
+    initial_scale = _win->get_scale().get_x();
 
-        elemd::WindowConfig wc{TITLE.c_str(), WIDTH, HEIGHT};
-        //wc.transparent = true;
-        wc.resizeable = false;
-        return wc;
-    }
+    elemd::font* urbanist = elemd::font::create("./res/font/Urbanist-Regular.ttf");
+    ctx->_tmp_register_font(urbanist);
+    ctx->set_font(urbanist);
 
-    EXPORT_API void reload_notify()
-    {
-        reload = true;
-    }
+    ctx->set_clear_color(bg_color);
+    //ctx->set_clear_color(elemd::color(255, 255, 255, 255));
 
-    EXPORT_API int app_run(elemd::Window* win, elemd::Context* ctx)
-    {
-        Instrumentor::Get().BeginSession("Session Name");  
+    win->add_key_listener([&](elemd::key_event event) {
+        int start_vel = 0;
 
-        _win = win;
-        _ctx = ctx;
-        initial_scale = _win->get_scale().get_x();
-
-        elemd::font* urbanist = elemd::font::create("./res/font/Urbanist-Regular.ttf");
-        ctx->_tmp_register_font(urbanist);
-        ctx->set_font(urbanist);
-
-        ctx->set_clear_color(bg_color);
-        //ctx->set_clear_color(elemd::color(255, 255, 255, 255));
-
-        win->add_key_listener([&](elemd::key_event event) {
-            int start_vel = 0;
-
-            if (event.key == elemd::KEY_LEFT)
-            {
-                paddle_velocity.x() += -1 * paddle_speed * poll_accumulator;
-                start_vel = -1;
-            }
-            else if (event.key == elemd::KEY_RIGHT)
-            {
-                paddle_velocity.x() += 1 * paddle_speed * poll_accumulator;
-                start_vel = 1;
-            }
-
-            if (!start_game && start_vel != 0)
-            {
-                ball_velocity = elemd::vec2(start_vel, -1) * ball_speed;
-                start_game = true;
-            }
-        });
-
-        win->add_scroll_listener([&](elemd::scroll_event event) 
-        { 
-            elemd::vec2 scale = win->get_scale();
-            float deltax = std::clamp(scale.x() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
-            float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
-
-            win->set_scale(deltax, deltay);
-        });
-
-        loadLevel();
-
-        ctx->_tmp_prepare();
-
-        // Main Loop
-        while (win->is_running() && !reload)
+        if (event.key == elemd::KEY_LEFT)
         {
-            InstrumentationTimer timer("Frame");
+            paddle_velocity.x() += -1 * paddle_speed * poll_accumulator;
+            start_vel = -1;
+        }
+        else if (event.key == elemd::KEY_RIGHT)
+        {
+            paddle_velocity.x() += 1 * paddle_speed * poll_accumulator;
+            start_vel = 1;
+        }
 
-            // Timing
-            current_time = elemd::Window::now();
-            delta_time = (current_time - last_time);
-            last_time = current_time;
-            second_accumulator += delta_time;
-            render_accumulator += delta_time;
-            poll_accumulator += delta_time;
+        if (!start_game && start_vel != 0)
+        {
+            ball_velocity = elemd::vec2(start_vel, -1) * ball_speed;
+            start_game = true;
+        }
+    });
 
-            if (second_accumulator >= 1.0)
-            {
-                InstrumentationTimer timer("Second");
-                std::cout << frames << std::endl;
-                frames = 0;
-                second_accumulator = dmod(second_accumulator, 1);
-            }
+    win->add_scroll_listener([&](elemd::scroll_event event) 
+    { 
+        elemd::vec2 scale = win->get_scale();
+        float deltax = std::clamp(scale.x() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
+        float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
 
-            if (poll_accumulator >= target_poll_ms)
-            {
-                // Poll Events
-                InstrumentationTimer timer("Event Polling");
-                win->poll_events();
-                poll_accumulator = dmod(poll_accumulator, target_poll_ms);
-            }
+        win->set_scale(deltax, deltay);
+    });
+
+    loadLevel();
+
+    ctx->_tmp_prepare();
+
+    // Main Loop
+    while (win->is_running() && !reload)
+    {
+        InstrumentationTimer timer("Frame");
+
+        // Timing
+        current_time = elemd::Window::now();
+        delta_time = (current_time - last_time);
+        last_time = current_time;
+        second_accumulator += delta_time;
+        render_accumulator += delta_time;
+        poll_accumulator += delta_time;
+
+        if (second_accumulator >= 1.0)
+        {
+            InstrumentationTimer timer("Second");
+            std::cout << frames << std::endl;
+            frames = 0;
+            second_accumulator = dmod(second_accumulator, 1);
+        }
+
+        if (poll_accumulator >= target_poll_ms)
+        {
+            // Poll Events
+            InstrumentationTimer timer("Event Polling");
+            win->poll_events();
+            poll_accumulator = dmod(poll_accumulator, target_poll_ms);
+        }
             
  
-            if (render_accumulator >= target_render_ms)
+        if (render_accumulator >= target_render_ms)
+        {
+            // Bricks
+            InstrumentationTimer timer("Render");
+            for (brick& b : bricks)
             {
-                // Bricks
-                InstrumentationTimer timer("Render");
-                for (brick& b : bricks)
-                {
-                    ctx->set_fill_color(b.color);
-                    ctx->fill_rounded_rect(b.pos.x(), b.pos.y(), brick_width, brick_height, 2);
-                }
-
-                // paddle
-                paddle_velocity.x() = paddle_velocity.x() / (70.0f * render_accumulator);
-                paddle_pos = paddle_pos + paddle_velocity;
-                if (paddle_pos.get_x() > WIDTH - paddle_width)
-                {
-                    paddle_pos.x() = WIDTH - paddle_width;
-                    paddle_velocity.x() = 0;
-                }
-                else if (paddle_pos.get_x() < 0)
-                {
-                    paddle_pos.x() = 0;
-                    paddle_velocity.x() = 0;
-                }
-
-                ctx->set_fill_color(paddle_color);
-                ctx->fill_rect(paddle_pos.x(), paddle_pos.y(), paddle_width, paddle_height);
-
-                // Power Up
-
-                for (int i = power_pus.size() - 1; i >= 0; --i)
-                {
-                    power_pus[i].pos = power_pus[i].pos + elemd::vec2(0, 80) * render_accumulator;
-
-                    if (rect2rect(rect{paddle_pos, paddle_width, paddle_height},
-                                  rect{power_pus[i].pos, 20, 10}))
-                    {
-                        switch (power_pus[i].type)
-                        {
-                        case EXTTRA_LIFE:
-                            ++lifes;
-                            break;
-                        }
-                        power_pus.erase(power_pus.begin() + i);
-                    }
-                    else if (power_pus[i].pos.y() > HEIGHT)
-                    {
-                        power_pus.erase(power_pus.begin() + i);
-                    }
-                }
-
-                for (power_up& pu : power_pus)
-                {
-                    ctx->set_fill_color(pu.color);
-                    ctx->fill_rounded_rect(pu.pos.x(), pu.pos.y(), 20, 10, 1);
-                }
-
-                // Ball
-
-                ball_pos = ball_pos + ball_velocity;
-                if (ball_pos.get_x() > WIDTH - ball_radius)
-                {
-                    ball_pos.x() = WIDTH - ball_radius;
-                    ball_velocity.x() *= -1;
-                }
-                else if (ball_pos.get_x() < ball_radius)
-                {
-                    ball_pos.x() = ball_radius;
-                    ball_velocity.x() *= -1;
-                }
-                else if (ball_pos.get_y() < ball_radius)
-                {
-                    ball_pos.y() = ball_radius;
-                    ball_velocity.y() *= -1;
-                }
-                else if (ball_pos.get_y() > HEIGHT - ball_radius)
-                {
-                    --lifes;
-                    if (lifes < 0)
-                    {
-                        gameReset();
-                    }
-                    else
-                    {
-                        resetBall();
-                    }
-                }
-
-                brickToBall();
-                paddleToBall();
-
-                ctx->set_fill_color(ball_color);
-                ctx->fill_circle(ball_pos.x(), ball_pos.y(), ball_radius);
-
-                // Lifes
-                ctx->set_fill_color(ball_color);
-                for (int i = 0; i < lifes; ++i)
-                {
-                    ctx->fill_circle(WIDTH - 5 - (i * 8), HEIGHT - 5, 3);
-                }
-
-
-                // Draw Text
-                if (!start_game)
-                {
-                    ctx->set_fill_color({200, 200, 200});
-                    ctx->draw_text(WIDTH / 2 - 120, HEIGHT / 2 - 30, "Press Arrow keys\n        to start");
-                }
-
-
-                ctx->draw_frame();
-
-                ++frames;
-                render_accumulator = dmod(render_accumulator, target_render_ms);
+                ctx->set_fill_color(b.color);
+                ctx->fill_rounded_rect(b.pos.x(), b.pos.y(), brick_width, brick_height, 2);
             }
+
+            // paddle
+            paddle_velocity.x() = paddle_velocity.x() / (70.0f * render_accumulator);
+            paddle_pos = paddle_pos + paddle_velocity;
+            if (paddle_pos.get_x() > WIDTH - paddle_width)
+            {
+                paddle_pos.x() = WIDTH - paddle_width;
+                paddle_velocity.x() = 0;
+            }
+            else if (paddle_pos.get_x() < 0)
+            {
+                paddle_pos.x() = 0;
+                paddle_velocity.x() = 0;
+            }
+
+            ctx->set_fill_color(paddle_color);
+            ctx->fill_rect(paddle_pos.x(), paddle_pos.y(), paddle_width, paddle_height);
+
+            // Power Up
+
+            for (int i = power_pus.size() - 1; i >= 0; --i)
+            {
+                power_pus[i].pos = power_pus[i].pos + elemd::vec2(0, 80) * render_accumulator;
+
+                if (rect2rect(rect{paddle_pos, paddle_width, paddle_height},
+                                rect{power_pus[i].pos, 20, 10}))
+                {
+                    switch (power_pus[i].type)
+                    {
+                    case EXTTRA_LIFE:
+                        ++lifes;
+                        break;
+                    }
+                    power_pus.erase(power_pus.begin() + i);
+                }
+                else if (power_pus[i].pos.y() > HEIGHT)
+                {
+                    power_pus.erase(power_pus.begin() + i);
+                }
+            }
+
+            for (power_up& pu : power_pus)
+            {
+                ctx->set_fill_color(pu.color);
+                ctx->fill_rounded_rect(pu.pos.x(), pu.pos.y(), 20, 10, 1);
+            }
+
+            // Ball
+
+            ball_pos = ball_pos + ball_velocity;
+            if (ball_pos.get_x() > WIDTH - ball_radius)
+            {
+                ball_pos.x() = WIDTH - ball_radius;
+                ball_velocity.x() *= -1;
+            }
+            else if (ball_pos.get_x() < ball_radius)
+            {
+                ball_pos.x() = ball_radius;
+                ball_velocity.x() *= -1;
+            }
+            else if (ball_pos.get_y() < ball_radius)
+            {
+                ball_pos.y() = ball_radius;
+                ball_velocity.y() *= -1;
+            }
+            else if (ball_pos.get_y() > HEIGHT - ball_radius)
+            {
+                --lifes;
+                if (lifes < 0)
+                {
+                    gameReset();
+                }
+                else
+                {
+                    resetBall();
+                }
+            }
+
+            brickToBall();
+            paddleToBall();
+
+            ctx->set_fill_color(ball_color);
+            ctx->fill_circle(ball_pos.x(), ball_pos.y(), ball_radius);
+
+            // Lifes
+            ctx->set_fill_color(ball_color);
+            for (int i = 0; i < lifes; ++i)
+            {
+                ctx->fill_circle(WIDTH - 5 - (i * 8), HEIGHT - 5, 3);
+            }
+
+
+            // Draw Text
+            if (!start_game)
+            {
+                ctx->set_fill_color({200, 200, 200});
+                ctx->draw_text(WIDTH / 2 - 120, HEIGHT / 2 - 30, "Press Arrow keys\n        to start");
+            }
+
+
+            ctx->draw_frame();
+
+            ++frames;
+            render_accumulator = dmod(render_accumulator, target_render_ms);
+        }
             
 
-            double work_time = elemd::Window::now() - current_time;
-            double remainpoll = target_poll_ms - (poll_accumulator + work_time);
-            double remainrender = target_render_ms - (render_accumulator + work_time);
-            double sleep = std::min(remainpoll, remainrender);
+        double work_time = elemd::Window::now() - current_time;
+        double remainpoll = target_poll_ms - (poll_accumulator + work_time);
+        double remainrender = target_render_ms - (render_accumulator + work_time);
+        double sleep = std::min(remainpoll, remainrender);
 
 
-            if (sleep > 0)
-            {
-                InstrumentationTimer timer("Sleep");
-                std::this_thread::sleep_for(std::chrono::duration<double, std::ratio<1>>(sleep));
-            }
-        }
-
-
-        if (reload)
+        if (sleep > 0)
         {
-            return 1;
+            InstrumentationTimer timer("Sleep");
+            std::this_thread::sleep_for(std::chrono::duration<double, std::ratio<1>>(sleep));
         }
-
-        urbanist->destroy();
-        win->destroy();
-
-
-        Instrumentor::Get().EndSession();
-        return 0;
     }
+
+
+    if (reload)
+    {
+        return 1;
+    }
+
+    urbanist->destroy();
+    win->destroy();
+
+
+    Instrumentor::Get().EndSession();
+    return 0;
+}
+
+int main()
+{
+    levels.push_back({0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 2, 2, 1, 1, 1, 0,
+                      1, 1, 1, 2, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1,
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 1, 3, 1, 3, 1, 0, 0});
+
+    levels.push_back({0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 2, 2, 1, 1, 1, 0,
+                      1, 1, 1, 2, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1,
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
+                      2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0});
+
+    elemd::WindowConfig wc{TITLE.c_str(), WIDTH, HEIGHT};
+    // wc.transparent = true;
+    wc.resizeable = false;
+    _win = elemd::Window::create(wc);
+    _ctx = _win->create_context();
+
+    app_run(_win, _ctx);
 }

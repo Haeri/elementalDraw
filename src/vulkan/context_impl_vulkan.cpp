@@ -195,6 +195,11 @@ namespace elemd
     {
         ContextImplVulkan* impl = getImpl(this);
 
+        if (_font == nullptr) {
+            std::cerr << "Error: No font loaded!" << std::endl;
+            return;
+        }
+
         float initialX = x;
         float scale = 0.5f;
         std::map<char, character> characters = _font->get_characters();

@@ -25,6 +25,9 @@ namespace elemd
         int get_size();
         void destroy();
 
+        int fit_substring(std::string text, int width);
+        vec2 measure_dimensions(std::string text);
+
     protected:
         font() = default;
         virtual ~font() = default;
