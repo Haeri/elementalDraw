@@ -541,7 +541,7 @@ namespace elemd
 
         // --------------- Select Extents ---------------    
 
-        VkExtent2D selectedImageExtent = {_width, _height};
+        VkExtent2D selectedImageExtent = {(uint32_t)_width, (uint32_t)_height};
         selectedImageExtent.width =
             std::max(surfaceCapabilities.minImageExtent.width,
                      std::min(surfaceCapabilities.maxImageExtent.width, selectedImageExtent.width));
@@ -1010,8 +1010,8 @@ namespace elemd
             frameBufferCreateInfo.renderPass = renderPass;
             frameBufferCreateInfo.attachmentCount = 1;
             frameBufferCreateInfo.pAttachments = &(imageViews[i]);
-            frameBufferCreateInfo.width = _width;
-            frameBufferCreateInfo.height = _height;
+            frameBufferCreateInfo.width = (uint32_t)_width;
+            frameBufferCreateInfo.height = (uint32_t)_height;
             frameBufferCreateInfo.layers = 1;
 
             vku::err_check(
@@ -1451,11 +1451,6 @@ namespace elemd
 
         std::memcpy(rawData, uniforms.data(), bufferSize);
         vkUnmapMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory);
-
-
-
-
-
     }
 
 
