@@ -7,14 +7,10 @@ This is a simple brick breaker game. Move the paddle around so the ball does not
 | | |
 |--|--|
 | `<-` | move paddle left |
-| `<-` | move paddle right |
+| `->` | move paddle right |
 | `any key` | to start |
 
 
 ## Screenshots
 
-![](../doc/capture.mov "Capture")
-
-<video width="442" height="546" controls>
-  <source src="../doc/capture.mov" type="video/mp4">
-</video>
+![](./doc/capture.gif "Brick Breaker")
