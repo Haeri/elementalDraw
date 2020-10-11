@@ -344,9 +344,10 @@ namespace elemd
         
         impl->wait_for_render_fence();
         impl->update_uniforms();
-        if (rerecord)
+        if (rerecord || impl->dirty)
         {
             impl->record_command_buffers();
+            impl->dirty = false;
         }
         impl->uniforms.clear();
        
@@ -389,6 +390,7 @@ namespace elemd
     void Context::resize_context(int width, int height)
     {
         ContextImplVulkan* impl = getImpl(this);
+        impl->dirty = true;
         if (width == 0 || height == 0)
         {
             impl->headless = true;

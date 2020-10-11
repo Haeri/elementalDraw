@@ -8,7 +8,11 @@ winc = WindowConfig("Python Hello", 600)
 win = Window(winc)
 ctx = win.create_context()
 
+urbanist = font("./font/Urbanist-Regular.ttf")
+ctx.register_font(urbanist);
+
 ctx.prepare()
+ctx.set_font(urbanist)
 
 module_time = os.path.getmtime("./example.py")
 

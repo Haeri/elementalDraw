@@ -19,7 +19,7 @@ class WindowConfig(Structure):
 		("icon_file", c_char_p)
 	]
 
-	def __init__(self, title="Python Window", width=400, height=600, position_x=-1, position_y=-1, x_scale=-1, y_scale=-1, decorated=True, transparent=False, resizeable=True, visible=True, vsync=True, icon_file="./elemd_res/elemd_icon.png"):
+	def __init__(self, title="Python Window", width=400, height=600, position_x=-1, position_y=-1, x_scale=-1, y_scale=-1, decorated=True, transparent=False, resizeable=True, visible=True, vsync=True, icon_file=""):
 		super(WindowConfig, self).__init__(title.encode('utf-8'), width, height, position_x, position_y, x_scale, y_scale, decorated, transparent, resizeable, visible, vsync, icon_file.encode("utf-8"))
 
 
@@ -35,6 +35,19 @@ class color(Structure):
 	def __del__(self):
 		return lib.color_delete(self.obj)
 
+class font(Structure):
+	def __init__(self, file_path):
+		lib.font_new.argtypes = [c_char_p]
+		lib.font_new.restype = POINTER(font)
+		
+		lib.font_delete.argtypes = [POINTER(font)]
+
+		self.obj = lib.font_new(file_path.encode("utf-8"))
+
+
+	def __del__(self):
+		return lib.font_delete(self.obj)
+
 
 class Context(Structure):
 	def __init__(self, object):
@@ -49,6 +62,11 @@ class Context(Structure):
 		lib.set_fill_color.argtypes = [POINTER(Context), POINTER(color)]
 
 		lib.set_clear_color.argtypes = [POINTER(Context), POINTER(color)]
+
+		lib.register_font.argtypes = [POINTER(Context), POINTER(font)]
+    
+		lib.set_font.argtypes = [POINTER(Context), POINTER(font)]
+    
 
 		self.obj = object
 
@@ -69,6 +87,12 @@ class Context(Structure):
 	
 	def set_clear_color(self, color):
 		return lib.set_clear_color(self.obj, color.obj)
+
+	def register_font(self, font):
+		return lib.register_font(self.obj, font.obj)
+	
+	def set_font(self, font):
+		return lib.set_font(self.obj, font.obj)
 		
 
 class Window(Structure):

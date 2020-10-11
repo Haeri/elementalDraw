@@ -28,6 +28,18 @@ extern "C"
     }
 
 
+    // FONT
+    ELEMD_API elemd::font* font_new(char* file_path)
+    {
+        return elemd::font::create(file_path);
+    }
+
+    ELEMD_API void font_delete(elemd::font* font)
+    {
+        return font->destroy();
+    }
+
+
 
     // WINDOW
     ELEMD_API elemd::Window* Window_new(elemd::WindowConfig* wc)
@@ -86,5 +98,15 @@ extern "C"
     ELEMD_API void set_clear_color(elemd::Context* ctx, elemd::color* color)
     {
         ctx->set_clear_color(*color);
+    }
+
+    ELEMD_API void register_font(elemd::Context* ctx, elemd::font* font)
+    {
+        ctx->_tmp_register_font(font);
+    }
+
+    ELEMD_API void set_font(elemd::Context* ctx, elemd::font* font)
+    {
+        ctx->set_font(font);
     }
 }
