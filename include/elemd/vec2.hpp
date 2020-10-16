@@ -68,7 +68,7 @@ namespace elemd
 
     inline bool vec2::operator!=(const vec2& other) const
     {
-        return (_x != other._x && _y != other._y);
+        return (_x != other._x || _y != other._y);
     }
 
     inline vec2 vec2::operator/(const float& scalar) const

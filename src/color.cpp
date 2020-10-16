@@ -135,6 +135,31 @@ namespace elemd
                std::to_string(b()) + ", " + std::to_string(a()) + ")";
     }
 
+    inline float lerp(float a, float b, float t)
+    {
+        return (b - a) * t + a;
+    }
+
+    color color::color_lerp(color a, color b, float t)
+    {
+        float _r = lerp(a.rf(), b.rf(), t);
+        float _g = lerp(a.gf(), b.gf(), t);
+        float _b = lerp(a.bf(), b.bf(), t);
+        float _a = lerp(a.af(), b.af(), t);
+
+        return elemd::color(_r, _g, _b, _a);
+    }
+
+    bool color::operator==(const color& other) const
+    {
+        return (_r == other._r && _g == other._g && _b == other._b && _a == other._a);
+    }
+
+    bool color::operator!=(const color& other) const
+    {
+        return (_r != other._r || _g != other._g || _b != other._b || _a != other._a);
+    }
+
     std::ostream& operator<<(std::ostream& os, color c)
     {
         return os << c.rgba();

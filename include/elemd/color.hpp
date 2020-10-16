@@ -41,6 +41,11 @@ namespace elemd
         std::string rgb();
         std::string rgba();
 
+        color color_lerp(color a, color b, float t);
+
+        bool operator==(const color& other) const;
+        bool operator!=(const color& other) const;
+
         friend std::ostream& operator<<(std::ostream& os, color c);
 
     private:

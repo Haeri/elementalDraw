@@ -371,7 +371,7 @@ namespace elemd
 
         for (auto& var : winImpl->_mouse_button_callbacks)
         {
-            var({(mouse_button)button, (input_action)action, (mouse_mod)mods, x, y});
+            var({(mouse_button)button, (input_action)action, (mouse_mod)mods, x / winImpl->_x_scale, y / winImpl->_y_scale});
         }
     }
 
