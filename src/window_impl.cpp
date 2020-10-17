@@ -173,8 +173,12 @@ namespace elemd
 
     void Window::poll_events()
     {
-        WindowImpl* impl = getImpl(this);      
         glfwPollEvents();
+    }
+
+    void Window::wait_events()
+    {
+        glfwWaitEvents();
     }
 
     Context* Window::create_context()

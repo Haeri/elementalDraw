@@ -68,6 +68,7 @@ namespace elemd
         void maximize();
         void destroy();
         void poll_events();
+        void wait_events();
 
         static double now();
 
