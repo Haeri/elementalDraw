@@ -181,6 +181,16 @@ namespace elemd
         glfwWaitEvents();
     }
 
+    void Window::wait_events(float time)
+    {
+        glfwWaitEventsTimeout(time);
+    }
+
+    void Window::trigger_events()
+    {
+        glfwPostEmptyEvent();
+    }
+
     Context* Window::create_context()
     {
         WindowImpl* impl = getImpl(this);

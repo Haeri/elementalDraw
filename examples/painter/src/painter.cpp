@@ -76,7 +76,7 @@ int main(void)
     //elemd::image* img = elemd::image::create("./elemd_res/elemd_icon.png");
     //ctx->_tmp_register_image(img);
 
-
+    /*
     int im_width = 200;
     int im_height = 200;
     unsigned char ardata[] = {233, 456, 111}; 
@@ -92,7 +92,7 @@ int main(void)
             im_data.push_back(255);
         }
     }
-    
+    */
     //cust = elemd::image::create(im_width, im_height, 4, im_data.data());
     //ctx->_tmp_register_image(cust);
 

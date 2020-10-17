@@ -69,6 +69,9 @@ namespace elemd
         void destroy();
         void poll_events();
         void wait_events();
+        void wait_events(float time);
+
+        static void trigger_events();
 
         static double now();
 
