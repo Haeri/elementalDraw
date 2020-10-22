@@ -6,6 +6,8 @@
 #include <elemd/vec2.hpp>
 #include <elemd/image.hpp>
 
+#define LOADED_HEIGHT 128
+
 namespace elemd
 {
     struct ELEMD_API character
@@ -22,17 +24,18 @@ namespace elemd
         static font* create(std::string file_path);
 
         std::map<char, character>& get_characters();
-        int get_size();
+        float get_line_height();
         void destroy();
 
-        int fit_substring(std::string text, int width);
-        vec2 measure_dimensions(std::string text);
+        int fit_substring(std::string text, int width, int font_size);
+        vec2 measure_dimensions(std::string text, int font_size);
 
     protected:
+        float _line_height = 0;
+
         font() = default;
         virtual ~font() = default;
 
-        const int _size = 64;
         std::map<char, character> _characters;
     };
 

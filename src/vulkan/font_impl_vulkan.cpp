@@ -51,7 +51,9 @@ namespace elemd
         }
         
         
-        FT_Set_Pixel_Sizes(face, 0, _size);
+        FT_Set_Pixel_Sizes(face, 0, LOADED_HEIGHT);
+
+        _line_height = face->size->metrics.height >> 6;
 
         // Load first 128 characters of ASCII set
         for (int c = 0; c < 128; ++c)
@@ -106,7 +108,7 @@ namespace elemd
 //                texture = image::create(width, height, 1, buffer);
 
             }
-
+            
             texture->set_name("font_character_" + std::to_string(int(c)));
 
             // Now store character for later use
@@ -116,6 +118,7 @@ namespace elemd
                 vec2((float)(face->glyph->bitmap_left), (float)(face->glyph->bitmap_top)),
                 (int)(face->glyph->advance.x)
             };
+
             _characters[c] = character;
 
             //imageImplVulkan* img = (imageImplVulkan*)texture;

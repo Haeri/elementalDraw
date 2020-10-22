@@ -22,6 +22,11 @@ namespace elemd
         _font = font;
     }
 
+    void Context::set_font_size(int size)
+    {
+        _font_size = size;
+    }
+
     int Context::get_width()
     {
         return _width;

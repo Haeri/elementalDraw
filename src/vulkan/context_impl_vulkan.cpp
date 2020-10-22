@@ -201,7 +201,7 @@ namespace elemd
         }
 
         float initialX = x;
-        float scale = 0.5f;
+        float scale = (float)_font_size / LOADED_HEIGHT;
         std::map<char, character> characters = _font->get_characters();
 
         for (auto& token : text)
@@ -210,13 +210,13 @@ namespace elemd
 
             if (token == '\n')
             {
-                y += _font->get_size() * scale;
+                y += _font->get_line_height() * scale;
                 x = initialX;
                 continue;
             }
 
             float xpos = x + ch.bearing.x() * scale;
-            float ypos = y + (64 - ch.bearing.y()) * scale;
+            float ypos = y + (LOADED_HEIGHT - ch.bearing.y()) * scale;
 
             float width = ch.size.x() * scale;
             float height = ch.size.y() * scale;

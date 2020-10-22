@@ -128,6 +128,18 @@ namespace elemd
         glfwMaximizeWindow(impl->_glfw_window);
     }
 
+    void Window::restore()
+    {
+        WindowImpl* impl = getImpl(this);
+        glfwRestoreWindow(impl->_glfw_window);
+    }
+
+    void Window::close()
+    {
+        WindowImpl* impl = getImpl(this);
+        glfwSetWindowShouldClose(impl->_glfw_window, GLFW_TRUE);
+    }
+
     bool Window::get_vsync()
     {
         return _vsync;
@@ -152,6 +164,14 @@ namespace elemd
         int w, h;
         glfwGetWindowSize(impl->_glfw_window, &w, &h);
         return h;
+    }
+
+    elemd::vec2 Window::get_position()
+    {
+        WindowImpl* impl = getImpl(this);
+        int x, y;
+        glfwGetWindowPos(impl->_glfw_window, &x, &y);
+        return elemd::vec2(x, y);
     }
 
     bool Window::is_running()

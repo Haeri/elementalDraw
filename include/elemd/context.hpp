@@ -56,6 +56,7 @@ namespace elemd
         void set_stroke_color(color color);
         void set_line_width(float width);
         void set_font(font* font);
+        void set_font_size(int size);
 
         // TODO: To implement
         void add_layouer();
@@ -91,6 +92,7 @@ namespace elemd
         color _fill_color;
         color _stroke_color;
         float _line_width = 1;
+        int _font_size = 10;
         font* _font = nullptr;
         //font* _default_font = nullptr;
     };

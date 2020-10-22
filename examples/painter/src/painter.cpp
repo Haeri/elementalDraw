@@ -96,9 +96,7 @@ int main(void)
     //cust = elemd::image::create(im_width, im_height, 4, im_data.data());
     //ctx->_tmp_register_image(cust);
 
-
-
-    ctx->set_clear_color({255, 255, 255});
+     
     ctx->_tmp_prepare();
 
     while (win->is_running())

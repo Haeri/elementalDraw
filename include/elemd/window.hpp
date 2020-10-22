@@ -44,10 +44,11 @@ namespace elemd
 
         Context* create_context();
         Context* get_context();
+        bool is_running();
         bool get_vsync();
         int get_width();
         int get_height();
-        bool is_running();
+        elemd::vec2 get_position();
         elemd::vec2 get_scale();
 
         void set_title(const std::string& title);
@@ -66,13 +67,15 @@ namespace elemd
 
         void minimize();
         void maximize();
+        void restore();
+        void close();
+
         void destroy();
         void poll_events();
         void wait_events();
         void wait_events(float time);
 
         static void trigger_events();
-
         static double now();
 
     protected:
