@@ -27,7 +27,7 @@ namespace elemd
         float get_line_height();
         void destroy();
 
-        int fit_substring(std::string text, int width, int font_size);
+        std::string fit_substring(std::string text, int width, int font_size);
         vec2 measure_dimensions(std::string text, int font_size);
 
     protected:
@@ -37,6 +37,8 @@ namespace elemd
         virtual ~font() = default;
 
         std::map<char, character> _characters;
+
+        int fit_one_substring(std::string text, int width, int font_size);
     };
 
 } // namespace elemd
