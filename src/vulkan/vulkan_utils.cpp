@@ -182,7 +182,7 @@ namespace elemd::vku
         bufferCreateInfo.queueFamilyIndexCount = 0;
         bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-        // --------------- Create Vertex Buffer ---------------
+        // --------------- Create Buffer ---------------
 
         vku::err_check(vkCreateBuffer(VulkanSharedInfo::getInstance()->device, &bufferCreateInfo, nullptr, &buffer));
 

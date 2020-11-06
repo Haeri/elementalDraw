@@ -15,9 +15,9 @@ struct UniformData
     vec4 stroke_size_color;	
 };
 
-layout(set = 0, binding = 0, std140) uniform UBO
+layout(set = 0, binding = 0, std140) readonly buffer UBO
 {
-    UniformData payload[65536];
+    UniformData payload[];
 } ubo;
 layout(set = 0, binding = 1) uniform sampler2D textures[512];
 
@@ -88,7 +88,7 @@ void main()
     }
     else if (index <= -1)
     {
-        outColor = vec4(fill_color.rgb, alpha);
+        outColor = vec4(fill_color.rgb, min(alpha, fill_color.a));
     }
     else
     {

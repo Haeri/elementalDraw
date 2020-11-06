@@ -68,7 +68,7 @@ int main(void)
         mouse_x = event.x;
         mouse_y = event.y;
 
-        draw(ctx);
+        //draw(ctx);
     });
 
 
@@ -98,11 +98,43 @@ int main(void)
 
      
     ctx->_tmp_prepare();
+    ctx->set_clear_color({30, 30, 30});
+
+
+    elemd::color color_palette[] = {
+        elemd::color("#5ccccf"),
+        elemd::color("#77d3d0"),
+        elemd::color("#c0d6c8"),
+        elemd::color("#d6d6bc"),
+        elemd::color("#e6cdae"),
+        elemd::color("#f1c5a0"),
+        elemd::color("#f8bc92"),
+        elemd::color("#ffa781"),
+        elemd::color("#ff9f83"),
+        elemd::color("#fe6786"),
+    };
+
 
     while (win->is_running())
     {
-        //win->poll_events();
-        win->wait_events();
+        win->poll_events();
+        //win->wait_events();
+
+
+        for (int y = 0; y < 100; y++)
+        {
+            for (int x = 0; x < 100; x++)
+            {
+                ctx->set_fill_color(color_palette[rand() % 10]);
+                ctx->fill_rounded_rect(x * 6,y * 6, 5, 5, 3);
+            }
+        }
+
+        ctx->set_fill_color({200, 0, 0, 100});
+        ctx->fill_rect(0, 0, 100, 200);
+
+
+        ctx->draw_frame();
         
         //std::this_thread::sleep_for(std::chrono::duration<float, std::ratio<1>>(target_poll_ms));
     }

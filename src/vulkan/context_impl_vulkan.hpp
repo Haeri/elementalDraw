@@ -18,7 +18,7 @@
 
 #define TEXTURE_ARRAY_SIZE 512
 #define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536
-#define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE ((int)(UNIFORM_BUFFER_ARRAY_MAX_COUNT / sizeof(uniform_rect))) * sizeof(uniform_rect)
+#define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE UNIFORM_BUFFER_ARRAY_MAX_COUNT * sizeof(uniform_rect)
 
 
 namespace elemd
@@ -47,7 +47,8 @@ namespace elemd
             {vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}
         };
 
-        std::vector<uniform_rect> uniforms = {};
+        ///std::vector<uniform_rect> uniforms = {};
+        std::vector<uniform_rect> storage = {};
         int last_uniform_cnt = 0;
 
         WindowImpl* _window;
@@ -81,8 +82,11 @@ namespace elemd
         VkBuffer indexBuffer;
         VkDeviceMemory indexBufferDeviceMemory;
 
-        VkBuffer uniformBuffer;
-        VkDeviceMemory uniformBufferDeviceMemory;
+        ///VkBuffer uniformBuffer;
+        ///VkDeviceMemory uniformBufferDeviceMemory;
+
+        VkBuffer storageBuffer;
+        VkDeviceMemory storageBufferDeviceMemory;
 
         VkDescriptorSetLayout descriptorSetLayout;
         VkDescriptorPool descriptorPool;
@@ -108,7 +112,8 @@ namespace elemd
         void create_command_buffers();
         void create_vertex_buffers();
         void create_index_buffers();
-        void create_uniform_buffer();
+        ///void create_uniform_buffer();
+        void create_storage_buffer();
         void create_descriptor_pool();
         void create_descriptor_set();
         void record_command_buffers();
@@ -116,7 +121,8 @@ namespace elemd
         void create_semaphores();
         void initialize_resources();
 
-        void update_uniforms();
+        ///void update_uniforms();
+        void update_storage();
         void update_swapchain(uint32_t width, uint32_t height);
 
         void destroy() override;

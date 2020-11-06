@@ -5,8 +5,6 @@ out gl_PerVertex{
     vec4 gl_Position;
 };
 
-//layout(location = 0) in vec2 position;
-
 layout(location = 0) out vec2 uv_varying;
 layout(location = 1) out flat int instance_index;
 
@@ -19,9 +17,9 @@ struct UniformData
     vec4 stroke_size_color;
 };
 
-layout(set = 0, binding = 0, std140) uniform UBO
+layout(set = 0, binding = 0, std140) readonly buffer UBO
 {
-    UniformData payload[65536];
+    UniformData payload[];
 } ubo;
 
 vec2 _positions[4] = vec2[](
