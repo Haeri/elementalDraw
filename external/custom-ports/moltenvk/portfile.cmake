@@ -14,6 +14,6 @@ vcpkg_configure_cmake(
     PREFER_NINJA
 )
 
-vcpkg_install_make()
+vcpkg_install_make(macos)
 
 #vcpkg_fixup_cmake_targets()

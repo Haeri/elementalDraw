@@ -6,56 +6,57 @@ on:
     - master
 
 jobs:
-  build-win:
-   name: Windows Build
-   runs-on: windows-latest
-   strategy:
-     matrix: 
-       conf: [Release]
-   steps:
-    - name: Download Repository
-      uses: actions/checkout@v2
-      with:
-        submodules: 'true'
-    - name: Setup Environment
-      uses: microsoft/setup-msbuild@v1.0.2
-    - name: Install
-      run: ./tools/setup_win.bat -s
-    - name: Build
-      run: MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
-    - name: Upload
-      uses: actions/upload-artifact@v2
-      with:
-        name: elemd-win-${{ matrix.conf }}
-        path: ./build/${{ matrix.conf }}/elemd.dll
+
+  # build-win:
+  #  name: Windows Build
+  #  runs-on: windows-latest
+  #  strategy:
+  #    matrix: 
+  #      conf: [Release]
+  #  steps:
+  #   - name: Download Repository
+  #     uses: actions/checkout@v2
+  #     with:
+  #       submodules: 'true'
+  #   - name: Setup Environment
+  #     uses: microsoft/setup-msbuild@v1.0.2
+  #   - name: Install
+  #     run: ./tools/setup_win.bat -s
+  #   - name: Build
+  #     run: MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
+  #   - name: Upload
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: elemd-win-${{ matrix.conf }}
+  #       path: ./build/${{ matrix.conf }}/elemd.dll
     
-  build-linux:
-   name: Linux Build
-   runs-on: ubuntu-latest
-   strategy:
-     matrix: 
-       conf: [Release]
-   steps:
-    - name: Download Repository
-      uses: actions/checkout@v2
-      with:
-        submodules: 'true'
-    - name: Setup Environment
-      run: |
-        sudo chmod +x ./tools/*.sh
-        sudo apt update
-        sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
-    - name: Install
-      run: sudo ./tools/setup_nix.sh
-    - name: Build
-      run: |
-        cd ./build
-        sudo make config=${{ matrix.conf }}
-    - name: Upload
-      uses: actions/upload-artifact@v2
-      with:
-        name: elemd-linux-${{ matrix.conf }}
-        path: ./build/libelemd.so
+  # build-linux:
+  #  name: Linux Build
+  #  runs-on: ubuntu-latest
+  #  strategy:
+  #    matrix: 
+  #      conf: [Release]
+  #  steps:
+  #   - name: Download Repository
+  #     uses: actions/checkout@v2
+  #     with:
+  #       submodules: 'true'
+  #   - name: Setup Environment
+  #     run: |
+  #       sudo chmod +x ./tools/*.sh
+  #       sudo apt update
+  #       sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
+  #   - name: Install
+  #     run: sudo ./tools/setup_nix.sh
+  #   - name: Build
+  #     run: |
+  #       cd ./build
+  #       sudo make config=${{ matrix.conf }}
+  #   - name: Upload
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: elemd-linux-${{ matrix.conf }}
+  #       path: ./build/libelemd.so
 
   build-mac:
    name: Mac Build
@@ -72,11 +73,11 @@ jobs:
       run: |
         sudo chmod +x ./tools/*.sh
     - name: Install
-      run: ./tools/setup_nix.sh
+      run: sudo ./tools/setup_nix.sh
     - name: Build
       run: |
         cd ./build
-        make config=${{ matrix.conf }}
+        sudo make config=${{ matrix.conf }}
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
