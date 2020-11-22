@@ -3,5 +3,15 @@
   "version-string": "0.0.1",
   "homepage": "",
   "description": "Portable C++ canvas library with a Vulkan backend",
-  "dependencies": ["glfw3", "glslang", "stb", "freetype"]
+  "dependencies": 
+  [
+  	"glfw3", 
+  	"glslang", 
+  	"stb", 
+  	"freetype", 
+  	{
+  		"name": "moltenvk",
+  		"platform": "osx"
+  	}
+  ]
 }

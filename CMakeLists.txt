@@ -99,6 +99,7 @@ if (ELEMD_BUILD_EXAMPLES)
     set_target_properties(brick_breaker PROPERTIES FOLDER examples)
     set_target_properties(painter PROPERTIES FOLDER examples)
 
+  if (BUILD_SHARED_LIBS)
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         DEPENDS runtime painter brick_breaker
@@ -107,6 +108,7 @@ if (ELEMD_BUILD_EXAMPLES)
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMENT "Copy library"
     )
+  endif()
 endif()
 
 

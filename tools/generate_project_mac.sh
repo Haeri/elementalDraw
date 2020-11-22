@@ -4,17 +4,13 @@ old_path=$(pwd)
 cd $(dirname "$0")
 
 cd ..
+root_path=$(pwd)
 rm -rf build
 mkdir build
 cd build
 
 
-if [[ -z "${VCPKG_ROOT}" ]]; then
-	cmake .. -DVCPKG_TARGET_TRIPLET=x64-osx
-else
-	cmake .. -DVCPKG_TARGET_TRIPLET=x64-osx -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT"/scripts/buildsystems/vcpkg.cmake"
-fi
-
+cmake .. -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports"
 err=$?
 
 if [ $err -ne 0 ] ; then

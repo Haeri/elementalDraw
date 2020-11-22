@@ -11,7 +11,6 @@ Portable C++ canvas library with a Vulkan backend.
 ## Build Requirements
 - [CMake 3.3^](https://cmake.org/download/) 
 - [Python 3^](https://www.python.org/downloads/)
-- [Vcpkg](https://github.com/microsoft/vcpkg) (Not required. Will be downloaded if `VCPKG_ROOT` is not defined)
 
 ## Setup
 
@@ -27,7 +26,7 @@ git clone https://github.com/Haeri/ElementalDraw.git
 cd ElementalDraw
 sudo apt update
 sudo apt install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev cmake curl unzip tar
-sudo ./tools/setup_nix.sh
+./tools/setup_nix.sh
 ```
 
 ### <img height="16" src="https://image.flaticon.com/icons/svg/2/2235.svg"> Mac
