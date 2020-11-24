@@ -45,11 +45,13 @@ namespace elemd
         // TODO: To implement
         void draw_pixel(float x, float y);
         void draw_text(float x, float y, std::string text);
-        void draw_image(float x, float y, float width, float height, image* image);
+        void draw_image(float x, float y, float width, float height, image* image, bool tint = false);
         void draw_rounded_image(float x, float y, float width, float height, image* image,
-                                float border_radius);
+                                float border_radius, bool tint = false);
         void draw_rounded_image(float x, float y, float width, float height, image* image,
-                                float radius_nw, float radius_ne, float radius_se, float radius_sw);
+                                float radius_nw, float radius_ne, float radius_se, float radius_sw,
+                                bool tint = false);
+
 
         void set_clear_color(color color);
         void set_fill_color(color color);

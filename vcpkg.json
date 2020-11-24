@@ -10,7 +10,8 @@
   	"stb", 
   	"freetype", 
   	{
-  		"name": "moltenvk"
+  		"name": "moltenvk",
+  		"platform": "osx"
   	}
   ]
 }
