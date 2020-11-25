@@ -10,7 +10,7 @@ mkdir build
 cd build
 
 
-cmake .. -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports"
+cmake .. -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DVCPKG_VERBOSE=1
 err=$?
 
 if [ $err -ne 0 ] ; then
