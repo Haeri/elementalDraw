@@ -83,7 +83,7 @@ jobs:
         tail vcpkg-manifest-install-out.log
         cd ../external/vcpkg/buildtrees/moltenvk/
         ls -la
-        tail config-x64-osx-out.log
+        tail config-x64-osx-dbg-err.log
     - name: Build
       run: |
         cd ./build
