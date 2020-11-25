@@ -73,13 +73,18 @@ jobs:
       run: |
         sudo chmod +x ./tools/*.sh
     - name: Install
-      run: sudo ./tools/setup_nix.sh
+      run: |
+        sudo ./tools/setup_nix.sh
+        cd ./build
+        ls -la
+        tail vcpkg-manifest-install-out.log
+        cd ../external/vcpkg/buildtrees/moltenvk/
+        ls -la
+        tail config-x64-osx-out.log
     - name: Build
       run: |
         cd ./build
         sudo make config=${{ matrix.conf }}
-        tail ./build/vcpkg-manifest-install-out.log
-        tail ./external/vcpkg/buildtrees/moltenvk/config-x64-osx-out.log
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
