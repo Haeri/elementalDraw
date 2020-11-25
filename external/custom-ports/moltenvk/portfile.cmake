@@ -78,7 +78,7 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL release)
 
 	    message(STATUS " [2/4] Fetching dependencies (this step really takes a while) ...")
 	    vcpkg_execute_required_process(
-	        COMMAND ${BASH} fetchDependencies
+	        COMMAND ${BASH} fetchDependencies --all
 	        WORKING_DIRECTORY ${BUILD_DIR}
 	        LOGNAME fetch-dependencies-${BUILD_TRIPLET}
 	    )
@@ -168,7 +168,7 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL debug)
 
 	    message(STATUS " [2/4] Fetching dependencies (this step really takes a while) ...")
 	    vcpkg_execute_required_process(
-	        COMMAND ${BASH} fetchDependencies
+	        COMMAND ${BASH} fetchDependencies --all
 	        WORKING_DIRECTORY ${BUILD_DIR}
 	        LOGNAME fetch-dependencies-${BUILD_TRIPLET}
 	    )
