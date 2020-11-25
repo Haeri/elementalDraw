@@ -75,6 +75,9 @@ jobs:
     - name: Install
       run: |
         sudo ./tools/setup_nix.sh
+    - name: Install Debug
+      if: ${{ failure() }}
+      run: |
         cd ./build
         ls -la
         tail vcpkg-manifest-install-out.log
