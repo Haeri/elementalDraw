@@ -85,9 +85,6 @@ jobs:
         ls -la
         cd src/MoltenVK-e01856f402.clean
         ls -la
-        sudo  ./fetchDependencies --macos
-        sudo make macos
-        sudo make install
     - name: Build
       run: |
         cd ./build
