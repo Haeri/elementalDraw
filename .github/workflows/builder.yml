@@ -83,7 +83,6 @@ jobs:
         tail -n 100 vcpkg-manifest-install-out.log
         cd ../external/vcpkg/buildtrees/moltenvk/
         ls -la
-#        tail -n 100 config-x64-osx-dbg-err.log
         cd src
         ls -la
         sudo make macos
