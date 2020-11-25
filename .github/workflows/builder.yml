@@ -74,16 +74,16 @@ jobs:
         sudo chmod +x ./tools/*.sh
     - name: Install
       run: |
-        sudo ./tools/setup_nix.sh
+        sudo ./tools/generate_project_mac.sh
     - name: Install Debug
       if: ${{ failure() }}
       run: |
         cd ./build
         ls -la
-        tail vcpkg-manifest-install-out.log
+        tail -n 100 vcpkg-manifest-install-out.log
         cd ../external/vcpkg/buildtrees/moltenvk/
         ls -la
-        tail config-x64-osx-dbg-err.log
+        tail -n 100 config-x64-osx-dbg-err.log
     - name: Build
       run: |
         cd ./build
