@@ -11,7 +11,9 @@ vcpkg_extract_source_archive_ex(
     ARCHIVE ${ARCHIVE}
 )
 
-execute_process(COMMAND ./fetchDependencies --macos
-                    WORKING_DIRECTORY ${SOURCE_PATH}
+execute_process(
+    COMMAND ./fetchDependencies --macos
+    WORKING_DIRECTORY ${SOURCE_PATH}
+)
 
 vcpkg_install_make(BUILD_TARGET "macos")
