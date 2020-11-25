@@ -82,8 +82,8 @@ jobs:
         ls -la
         tail -n 100 vcpkg-manifest-install-out.log
         cd ../external/vcpkg/buildtrees/moltenvk/
-        tail -n 100 fetch-dependencies-x64-osx-rel-out.log
-        tail -n 100 fetch-dependencies-x64-osx-rel-err.log
+        tail -n 100 xcodebuild-x64-osx-rel-out.log
+        tail -n 100 xcodebuild-x64-osx-rel-err.log
         ls -la
         cd src/
         ls -la
