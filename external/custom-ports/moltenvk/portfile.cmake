@@ -11,7 +11,7 @@ vcpkg_extract_source_archive_ex(
 
 vcpkg_configure_cmake(
     SOURCE_PATH ${SOURCE_PATH}
-    PREFER_NINJA
+    #PREFER_NINJA
 )
 
 vcpkg_install_make(macos)

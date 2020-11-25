@@ -78,6 +78,8 @@ jobs:
       run: |
         cd ./build
         sudo make config=${{ matrix.conf }}
+        tail ./build/vcpkg-manifest-install-out.log
+        tail ./external/vcpkg/buildtrees/moltenvk/config-x64-osx-out.log
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
