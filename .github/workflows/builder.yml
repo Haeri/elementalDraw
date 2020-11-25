@@ -83,9 +83,9 @@ jobs:
         tail -n 100 vcpkg-manifest-install-out.log
         cd ../external/vcpkg/buildtrees/moltenvk/
         ls -la
-        tail -n 100 stdout-x64-osx.log
         cd src/MoltenVK-e01856f402.clean
         ls -la
+        sudo  ./fetchDependencies --macos
         sudo make macos
         sudo make install
     - name: Build
