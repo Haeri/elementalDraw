@@ -11,12 +11,4 @@ vcpkg_extract_source_archive_ex(
     ARCHIVE ${ARCHIVE}
 )
 
-vcpkg_configure_make(
-    SOURCE_PATH ${SOURCE_PATH}
-    SKIP_CONFIGURE
-    #PREFER_NINJA        
-)
-
 vcpkg_install_make(BUILD_TARGET "macos")
-
-#vcpkg_fixup_cmake_targets()
