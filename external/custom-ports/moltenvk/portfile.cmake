@@ -1,3 +1,5 @@
+vcpkg_fail_port_install(ON_TARGET "Windows" "Linux")
+
 vcpkg_download_distfile(ARCHIVE
 	URLS https://github.com/KhronosGroup/MoltenVK/archive/ce85a96d8041b208e6f32898912b217957019b5a.zip
 	FILENAME MoltenVK.zip
@@ -9,11 +11,14 @@ vcpkg_extract_source_archive_ex(
     ARCHIVE ${ARCHIVE}
 )
 
-vcpkg_configure_cmake(
+vcpkg_configure_make(
     SOURCE_PATH ${SOURCE_PATH}
     #PREFER_NINJA
+    OPTIONS
+        ${OPTIONS}
+        macos
 )
 
-vcpkg_install_make(macos)
+vcpkg_install_make()
 
 #vcpkg_fixup_cmake_targets()
