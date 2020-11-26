@@ -1,6 +1,7 @@
 diff --git a/configure b/configure
-index e69de29..b87cb74 100644
---- a/configure
+new file mode 100644
+index 000000000..b87cb74
+--- /dev/null
 +++ b/configure
 @@ -0,0 +1 @@
 +# This is here cause I can't skip configure step
