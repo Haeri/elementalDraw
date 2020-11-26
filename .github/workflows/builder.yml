@@ -91,6 +91,8 @@ jobs:
         ls -la
         cd ./dylib
         ls -la
+        cd ./macOS
+        ls -la
     - name: Build
       run: |
         cd ./build

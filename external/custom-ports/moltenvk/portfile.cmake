@@ -46,17 +46,17 @@ function (install_component_framework_and_lib FROM_DIR TO_DIR)
 	get_filename_component(name ${FROM_DIR} NAME_WE)
 
     #file(REMOVE_RECURSE ${TO_DIR}/${name}_ios.framework)
-    file(REMOVE_RECURSE ${TO_DIR}/${name}_macos.framework)
+    file(REMOVE_RECURSE ${TO_DIR}/${name}.xcframework)
 	#copy_file(${FROM_DIR}/iOS/framework/${name}.framework ${TO_DIR} ${name}_ios.framework)
 	copy_file(${FROM_DIR}/${name}.xcframework ${TO_DIR} ${name}.xcframework)
 
-    if(VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
+    #if(VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
 	    #copy_file(${FROM_DIR}/iOS/static/lib${name}.dylib ${TO_DIR}/lib lib${name}_ios.dylib)
 	    copy_file(${FROM_DIR}/dylib/macOS/lib${name}.dylib ${TO_DIR}/lib lib${name}.dylib)
-	else()
+	#else()
 	    #copy_file(${FROM_DIR}/iOS/static/lib${name}.a ${TO_DIR}/lib lib${name}_ios.a)
-	    copy_file(${FROM_DIR}/dylib/macOS/lib${name}.a ${TO_DIR}/lib lib${name}.a)
-	endif()
+	    #copy_file(${FROM_DIR}/dylib/macOS/lib${name}.a ${TO_DIR}/lib lib${name}.a)
+	#endif()
 endfunction()
 
 
