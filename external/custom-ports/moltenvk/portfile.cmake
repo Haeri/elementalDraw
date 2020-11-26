@@ -189,13 +189,13 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL debug)
 	    	${BUILD_DIR}/Package/Latest/MoltenVK
 	    	${CURRENT_INSTALLED_DIR}/debug)
 	    
-	    install_component_framework_and_lib(
-	    	${BUILD_DIR}/Package/Latest/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter
-	    	${CURRENT_INSTALLED_DIR}/debug)
+	    #install_component_framework_and_lib(
+	    #	${BUILD_DIR}/Package/Latest/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter
+	    #	${CURRENT_INSTALLED_DIR}/debug)
 
-	    install_component_framework_and_lib(
-	    	${BUILD_DIR}/Package/Latest/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter
-	    	${CURRENT_INSTALLED_DIR}/debug)
+	    #install_component_framework_and_lib(
+	    #	${BUILD_DIR}/Package/Latest/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter
+	    #	${CURRENT_INSTALLED_DIR}/debug)
 	endif()
 
     message(STATUS " Done.")

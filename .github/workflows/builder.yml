@@ -93,6 +93,8 @@ jobs:
         ls -la
         cd ./macOS
         ls -la
+        cd ../../../MoltenVKShaderConverter
+        ls -la
     - name: Build
       run: |
         cd ./build
