@@ -48,14 +48,14 @@ function (install_component_framework_and_lib FROM_DIR TO_DIR)
     #file(REMOVE_RECURSE ${TO_DIR}/${name}_ios.framework)
     file(REMOVE_RECURSE ${TO_DIR}/${name}_macos.framework)
 	#copy_file(${FROM_DIR}/iOS/framework/${name}.framework ${TO_DIR} ${name}_ios.framework)
-	copy_file(${FROM_DIR}/macOS/framework/${name}.framework ${TO_DIR} ${name}_macos.framework)
+	copy_file(${FROM_DIR}/${name}.xcframework ${TO_DIR} ${name}.xcframework)
 
     if(VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
 	    #copy_file(${FROM_DIR}/iOS/static/lib${name}.dylib ${TO_DIR}/lib lib${name}_ios.dylib)
-	    copy_file(${FROM_DIR}/macOS/static/lib${name}.dylib ${TO_DIR}/lib lib${name}_macos.dylib)
+	    copy_file(${FROM_DIR}/dylib/macOS/lib${name}.dylib ${TO_DIR}/lib lib${name}.dylib)
 	else()
 	    #copy_file(${FROM_DIR}/iOS/static/lib${name}.a ${TO_DIR}/lib lib${name}_ios.a)
-	    copy_file(${FROM_DIR}/macOS/static/lib${name}.a ${TO_DIR}/lib lib${name}_macos.a)
+	    copy_file(${FROM_DIR}/dylib/macOS/lib${name}.a ${TO_DIR}/lib lib${name}.a)
 	endif()
 endfunction()
 
@@ -137,13 +137,13 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL release)
 	    	${BUILD_DIR}/Package/Latest/MoltenVK
 	    	${CURRENT_INSTALLED_DIR})
 	    
-	    install_component_framework_and_lib(
-	    	${BUILD_DIR}/Package/Latest/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter
-	    	${CURRENT_INSTALLED_DIR})
+	    #install_component_framework_and_lib(
+	    #	${BUILD_DIR}/Package/Latest/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter
+	    #	${CURRENT_INSTALLED_DIR})
 
-	    install_component_framework_and_lib(
-	    	${BUILD_DIR}/Package/Latest/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter
-	    	${CURRENT_INSTALLED_DIR})
+	    #install_component_framework_and_lib(
+	    #	${BUILD_DIR}/Package/Latest/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter
+	    #	${CURRENT_INSTALLED_DIR})
 	endif()
 
     message(STATUS " Done.")

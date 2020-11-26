@@ -89,7 +89,7 @@ jobs:
         ls -la
         cd ./MoltenVK
         ls -la
-        cd ./macOS
+        cd ./dylib
         ls -la
     - name: Build
       run: |
