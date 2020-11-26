@@ -78,7 +78,7 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL release)
 
 	    message(STATUS " [2/4] Fetching dependencies (this step really takes a while) ...")
 	    vcpkg_execute_required_process(
-	        COMMAND ${BASH} fetchDependencies --all
+	        COMMAND ${BASH} fetchDependencies --macos
 	        WORKING_DIRECTORY ${BUILD_DIR}
 	        LOGNAME fetch-dependencies-${BUILD_TRIPLET}
 	    )
@@ -87,7 +87,7 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL release)
 	if (PORT_REL_DOBUILD)
 	    message(STATUS " [3/4] Building ...")
 	    vcpkg_execute_required_process(
-	        COMMAND xcodebuild -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package"
+	        COMMAND make macos
 	        WORKING_DIRECTORY ${BUILD_DIR}
 	        LOGNAME xcodebuild-${BUILD_TRIPLET}
 	    )
@@ -168,7 +168,7 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL debug)
 
 	    message(STATUS " [2/4] Fetching dependencies (this step really takes a while) ...")
 	    vcpkg_execute_required_process(
-	        COMMAND ${BASH} fetchDependencies --all
+	        COMMAND ${BASH} fetchDependencies --macos
 	        WORKING_DIRECTORY ${BUILD_DIR}
 	        LOGNAME fetch-dependencies-${BUILD_TRIPLET}
 	    )
@@ -177,7 +177,7 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL debug)
 	if (PORT_DBG_DOBUILD)
 	    message(STATUS " [3/4] Building ...")
 	    vcpkg_execute_required_process(
-	        COMMAND xcodebuild -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (Debug)"
+	        COMMAND make macos
 	        WORKING_DIRECTORY ${BUILD_DIR}
 	        LOGNAME xcodebuild-${BUILD_TRIPLET}
 	    )
