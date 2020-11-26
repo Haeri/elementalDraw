@@ -76,7 +76,7 @@ jobs:
       run: |
         sudo ./tools/generate_project_mac.sh
     - name: Debug
-      if: ${{ failure() }}
+      if: ${{ always() }}
       run: |
         cd ./build
         ls -la
@@ -103,4 +103,6 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: elemd-mac-${{ matrix.conf }}
-        path: ./build/libelemd.dylib
+        path: |
+          ./build/
+          ./external/vcpkg/packages/moltenvk_x64-osx
