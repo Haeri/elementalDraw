@@ -84,7 +84,7 @@ jobs:
         cd ../external/vcpkg/buildtrees/moltenvk/
         ls -la
         tail -n 100 build-x64-osx-dbg-err.log
-        cd src/7957019b5a-15f687534b.clean
+        cd x64-osx-dbg
         ls -la
     - name: Build
       run: |
