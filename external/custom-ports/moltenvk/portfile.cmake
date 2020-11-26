@@ -22,4 +22,26 @@ vcpkg_configure_make(
     PREFER_NINJA
 )
 
-vcpkg_build_make(BUILD_TARGET "macos")
+vcpkg_build_make(BUILD_TARGET macos)
+
+# copy copyright
+file(INSTALL ${SOURCE_PATH}/LICENSE DESTINATION ${CURRENT_INSTALLED_DIR}/share/moltenvk RENAME copyright)
+file(INSTALL ${SOURCE_PATH}/LICENSE DESTINATION ${CURRENT_PACKAGES_DIR}/share/moltenvk RENAME copyright)
+
+# copy MoltenVK include
+file(INSTALL ${SOURCE_PATH}/x64-osx-rel/Package/Latest/MoltenVK/include DESTINATION ${CURRENT_INSTALLED_DIR}/include)
+file(INSTALL ${SOURCE_PATH}/x64-osx-rel/Package/Latest/MoltenVK/include DESTINATION ${CURRENT_PACKAGES_DIR}/include)
+
+# copy MoltenVKShaderConverter include
+file(INSTALL ${SOURCE_PATH}/x64-osx-rel/Package/Latest/MoltenVKShaderConverter/include ${CURRENT_INSTALLED_DIR}/include)
+file(INSTALL ${SOURCE_PATH}/x64-osx-rel/Package/Latest/MoltenVKShaderConverter/include ${CURRENT_PACKAGES_DIR}/include)
+
+# copy tools
+file(INSTALL ${SOURCE_PATH}/x64-osx-rel/Package/Latest/MoltenVKShaderConverter/Tools/MoltenVKShaderConverter ${CURRENT_INSTALLED_DIR}/tools/moltenvk)
+file(INSTALL ${SOURCE_PATH}/x64-osx-rel/Package/Latest/MoltenVKShaderConverter/Tools/MoltenVKShaderConverter ${CURRENT_PACKAGES_DIR}/tools/moltenvk)
+
+
+# TODO copy debug static
+# TODO copy release static
+# TODO copy debug dynamic
+# TODO copy release dynamic

@@ -109,7 +109,7 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL release)
 
 	    copy_file(
 	    	${BUILD_DIR}/Package/Latest/MoltenVKShaderConverter/include
-	    	${CURRENT_INSTALLED_DIR})
+	    	${CURRENT_PACKAGES_DIR})
 
 	    copy_file(
 	    	${BUILD_DIR}/Package/Latest/MoltenVKShaderConverter/Tools/MoltenVKShaderConverter
@@ -118,18 +118,10 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL release)
 	    copy_file(
 	    	${BUILD_DIR}/LICENSE
 	    	${CURRENT_INSTALLED_DIR}/share/moltenvk
-	    	LICENSE)
+	    	copyright)
 
 	    copy_file(
-	    	${BUILD_DIR}/README.md
-	    	${CURRENT_INSTALLED_DIR}/share/moltenvk)
-
-	    copy_file(
-	    	${BUILD_DIR}/CODE_OF_CONDUCT.md
-	    	${CURRENT_INSTALLED_DIR}/share/moltenvk)
-
-	    copy_file(
-	    	${BUILD_DIR}/Package/Latest/LICENSE
+	    	${BUILD_DIR}/LICENSE
 	    	${CURRENT_PACKAGES_DIR}/share/moltenvk
 	    	copyright)
 
