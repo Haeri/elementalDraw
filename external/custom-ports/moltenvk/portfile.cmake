@@ -11,7 +11,7 @@ vcpkg_from_github(
 )
 
 vcpkg_execute_required_process(
-    COMMAND ./fetchDependencies --macos --ios
+    COMMAND ./fetchDependencies --macos
     WORKING_DIRECTORY ${SOURCE_PATH}
 )
 

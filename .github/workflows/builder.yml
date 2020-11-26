@@ -72,10 +72,10 @@ jobs:
     - name: Setup Environment
       run: |
         sudo chmod +x ./tools/*.sh
-    - name: Install
+    - name: Generate Solution
       run: |
         sudo ./tools/generate_project_mac.sh
-    - name: Install Debug
+    - name: Debug
       if: ${{ failure() }}
       run: |
         cd ./build
@@ -83,7 +83,8 @@ jobs:
         tail -n 100 vcpkg-manifest-install-out.log
         cd ../external/vcpkg/buildtrees/moltenvk/
         ls -la
-        cd src/
+        tail -n 100 build-x64-osx-dbg-err.log
+        cd src/7957019b5a-15f687534b.clean
         ls -la
     - name: Build
       run: |

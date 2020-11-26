@@ -16,22 +16,22 @@ Portable C++ canvas library with a Vulkan backend.
 
 ### <img height="14" src="https://image.flaticon.com/icons/svg/888/888882.svg"> Windows
 ```cmd
-git clone https://github.com/Haeri/ElementalDraw.git
+git clone https://github.com/Haeri/ElementalDraw.git  --recursive
 cd ElementalDraw
-./tools/setup_win.bat
+./tools/generate_project_win.bat
 ```
 ### <img height="16" src="https://image.flaticon.com/icons/svg/226/226772.svg"> Linux
 ```bash
-git clone https://github.com/Haeri/ElementalDraw.git
+git clone https://github.com/Haeri/ElementalDraw.git  --recursive
 cd ElementalDraw
 sudo apt update
 sudo apt install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev cmake curl unzip tar
-./tools/setup_nix.sh
+./tools/generate_project_linux.sh
 ```
 
 ### <img height="16" src="https://image.flaticon.com/icons/svg/2/2235.svg"> Mac
 ```bash
-git clone https://github.com/Haeri/ElementalDraw.git
+git clone https://github.com/Haeri/ElementalDraw.git  --recursive
 cd ElementalDraw
-./tools/setup_nix.sh
+./tools/generate_project_mac.sh
 ```

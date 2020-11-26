@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
 
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake
-  CACHE STRING "Vcpkg toolchain file")
-
 set(PROJECT_NAME elemd)
 project(${PROJECT_NAME} LANGUAGES CXX C)
 

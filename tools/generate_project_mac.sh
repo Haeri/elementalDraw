@@ -9,7 +9,7 @@ rm -rf build
 mkdir build
 cd build
 
-cmake .. -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DVCPKG_VERBOSE=1 -DVCPKG_DISABLE_METRICS=ON
+cmake .. -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports"  -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_DISABLE_METRICS=ON
 err=$?
 
 if [ $err -ne 0 ] ; then
