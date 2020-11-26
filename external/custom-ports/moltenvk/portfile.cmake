@@ -18,7 +18,8 @@ vcpkg_execute_required_process(
 vcpkg_configure_make(
     SOURCE_PATH ${SOURCE_PATH}
  	#SKIP_CONFIGURE this doesn't work atm
-#    PREFER_NINJA
+    COPY_SOURCE
+    #PREFER_NINJA
 )
 
 vcpkg_install_make(BUILD_TARGET "macos")
