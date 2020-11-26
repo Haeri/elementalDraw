@@ -83,23 +83,12 @@ jobs:
         tail -n 100 vcpkg-manifest-install-out.log
         cd ../external/vcpkg/buildtrees/moltenvk/
         ls -la
-        cd ./src-x64-osx-rel/7957019b5a-338ed10be8.clean/Package
-        ls -la
-        cd ./Latest
-        ls -la
-        cd ./MoltenVK
-        ls -la
-        cd ./dylib
-        ls -la
-        cd ./macOS
-        ls -la
-        cd ../../../MoltenVKShaderConverter
-        ls -la
     - name: Build
       run: |
         cd ./build
         sudo make config=${{ matrix.conf }}
     - name: Upload
+      if: ${{ always() }}
       uses: actions/upload-artifact@v2
       with:
         name: elemd-mac-${{ matrix.conf }}
