@@ -24,6 +24,8 @@ vcpkg_configure_make(
 
 vcpkg_build_make(BUILD_TARGET macos)
 
+message("VCPKG_LIBRARY_LINKAGE ${VCPKG_LIBRARY_LINKAGE}")
+message("VCPKG_BUILD_TYPE ${VCPKG_BUILD_TYPE}")
 
 
 # copy copyright

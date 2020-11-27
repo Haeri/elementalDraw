@@ -80,7 +80,7 @@ jobs:
       run: |
         cd ./build
         ls -la
-        tail -n 100 vcpkg-manifest-install-out.log
+        tail -n 1000 vcpkg-manifest-install-out.log
         cd ../external/vcpkg/buildtrees/moltenvk/
         ls -la
     - name: Build
@@ -93,4 +93,5 @@ jobs:
       with:
         name: elemd-mac-${{ matrix.conf }}
         path: |
-          ./external/vcpkg/packages/moltenvk_x64-osx
+          ./external/vcpkg/packages/
+          ./build/
