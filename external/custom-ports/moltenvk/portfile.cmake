@@ -30,6 +30,7 @@ file(INSTALL ${SOURCE_PATH}/LICENSE DESTINATION ${CURRENT_PACKAGES_DIR}/share/mo
 
 # copy MoltenVK include
 file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVK/include DESTINATION ${CURRENT_PACKAGES_DIR})
+file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/include/vulkan)
 
 # copy MoltenVKShaderConverter include
 file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVKShaderConverter/include DESTINATION ${CURRENT_PACKAGES_DIR})
@@ -41,19 +42,13 @@ file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/Molt
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
     # copy release dynamic
     file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVK/dylib/macOS/libMoltenVK.dylib DESTINATION ${CURRENT_PACKAGES_DIR}/bin)
-    file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter/dylib/macOS/libMoltenVKGLSLToSPIRVConverter.dylib DESTINATION ${CURRENT_PACKAGES_DIR}/bin)
-    file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter/dylib/macOS/libMoltenVKSPIRVToMSLConverter.dylib DESTINATION ${CURRENT_PACKAGES_DIR}/bin)
     # copy debug dynamic
     file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/Package/Latest/MoltenVK/dylib/macOS/libMoltenVK.dylib DESTINATION ${CURRENT_PACKAGES_DIR}/debug/bin)
-    file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/Package/Latest/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter/dylib/macOS/libMoltenVKGLSLToSPIRVConverter.dylib DESTINATION ${CURRENT_PACKAGES_DIR}/debug/bin)
-    file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/Package/Latest/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter/dylib/macOS/libMoltenVKSPIRVToMSLConverter.dylib DESTINATION ${CURRENT_PACKAGES_DIR}/debug/bin)
 endif()
 
 # copy release static
 file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVK/MoltenVK.xcframework/macos-x86_64/libMoltenVK.a DESTINATION ${CURRENT_PACKAGES_DIR}/lib)
-file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter/MoltenVKGLSLToSPIRVConverter.xcframework/macos-x86_64/libMoltenVKGLSLToSPIRVConverter.a DESTINATION ${CURRENT_PACKAGES_DIR}/bin)
-file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter/MoltenVKSPIRVToMSLConverter.xcframework/macos-x86_64/libMoltenVKSPIRVToMSLConverter.a DESTINATION ${CURRENT_PACKAGES_DIR}/bin)
+file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVKShaderConverter/MoltenVKShaderConverter.xcframework/macos-x86_64/libMoltenVKShaderConverter.a DESTINATION ${CURRENT_PACKAGES_DIR}/bin)
 # copy debug static
 file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/Package/Latest/MoltenVK/MoltenVK.xcframework/macos-x86_64/libMoltenVK.a DESTINATION ${CURRENT_PACKAGES_DIR}/debug/lib)
-file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/Package/Latest/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter/MoltenVKGLSLToSPIRVConverter.xcframework/macos-x86_64/libMoltenVKGLSLToSPIRVConverter.a DESTINATION ${CURRENT_PACKAGES_DIR}/debug/bin)
-file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/Package/Latest/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter/MoltenVKSPIRVToMSLConverter.xcframework/macos-x86_64/libMoltenVKSPIRVToMSLConverter.a DESTINATION ${CURRENT_PACKAGES_DIR}/debug/bin)
+file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/Package/Latest/MoltenVKShaderConverter/MoltenVKShaderConverter.xcframework/macos-x86_64/libMoltenVKShaderConverter.a DESTINATION ${CURRENT_PACKAGES_DIR}/debug/bin)

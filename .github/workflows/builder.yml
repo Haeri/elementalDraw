@@ -93,5 +93,4 @@ jobs:
       with:
         name: elemd-mac-${{ matrix.conf }}
         path: |
-          ./external/vcpkg/packages/moltenvk_x64-windows
-          ./external/vcpkg/buildtrees/moltenvk
+          ./external/vcpkg/packages/moltenvk_x64-osx
