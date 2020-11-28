@@ -31,15 +31,13 @@ jobs:
     - name: Build
       run: |
         MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
-        mkdir tmp
-        cp -R ./include ./tmp/include
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-win-${{ matrix.conf }}
         path: |
           ./build/${{ matrix.conf }}/
-          ./tmp
+          ./include
     
   build-linux:
    name: Linux Build
@@ -68,15 +66,13 @@ jobs:
       run: |
         cd ./build
         make config=${{ matrix.conf }}
-        mkdir tmp
-        cp -R ./include ./tmp/include
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-linux-${{ matrix.conf }}
         path: |
           ./build/libelemd*
-          ./tmp
+          ./include
 
   build-mac:
    name: Mac Build
@@ -102,13 +98,11 @@ jobs:
       run: |
         cd ./build
         make config=${{ matrix.conf }}
-        mkdir tmp
-        cp -R ./include ./tmp/include
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-mac-${{ matrix.conf }}
         path: |
           ./build/libelemd*
-          ./tmp
+          ./include
 
