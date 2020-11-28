@@ -36,7 +36,7 @@ jobs:
       with:
         name: elemd-win-${{ matrix.conf }}
         path: |
-          ./build/${{ matrix.conf }}/
+          ./build/${{ matrix.conf }}/*
           ./include
     
   build-linux:
