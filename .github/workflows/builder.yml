@@ -6,6 +6,7 @@ on:
     - master
 
 jobs:
+
   build-win:
    name: Windows Build
    runs-on: windows-latest
@@ -19,15 +20,26 @@ jobs:
         submodules: 'true'
     - name: Setup Environment
       uses: microsoft/setup-msbuild@v1.0.2
-    - name: Install
-      run: ./tools/setup_win.bat -s
+    - name: Generate Solution
+      run: ./tools/generate_project_win.bat -s
+    - name: Debug
+      if: ${{ failure() }}
+      run: |
+        cd ./build
+        ls -la
+        tail -n 1000 vcpkg-manifest-install.log
     - name: Build
-      run: MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
+      run: |
+        MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
+        mkdir tmp
+        cp -R ./include ./tmp/include
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-win-${{ matrix.conf }}
-        path: ./build/${{ matrix.conf }}/elemd.dll
+        path: |
+          ./build/${{ matrix.conf }}/
+          ./tmp
     
   build-linux:
    name: Linux Build
@@ -42,20 +54,29 @@ jobs:
         submodules: 'true'
     - name: Setup Environment
       run: |
-        sudo chmod +x ./tools/*.sh
         sudo apt update
         sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
-    - name: Install
-      run: sudo ./tools/setup_nix.sh
+    - name: Generate Solution
+      run: ./tools/generate_project_linux.sh
+    - name: Debug
+      if: ${{ failure() }}
+      run: |
+        cd ./build
+        ls -la
+        tail -n 1000 vcpkg-manifest-install.log
     - name: Build
       run: |
         cd ./build
-        sudo make config=${{ matrix.conf }}
+        make config=${{ matrix.conf }}
+        mkdir tmp
+        cp -R ./include ./tmp/include
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-linux-${{ matrix.conf }}
-        path: ./build/libelemd.so
+        path: |
+          ./build/libelemd*
+          ./tmp
 
   build-mac:
    name: Mac Build
@@ -68,17 +89,26 @@ jobs:
       uses: actions/checkout@v2
       with:
         submodules: 'true'
-    - name: Setup Environment
+    - name: Generate Solution
       run: |
-        sudo chmod +x ./tools/*.sh
-    - name: Install
-      run: ./tools/setup_nix.sh
+        ./tools/generate_project_mac.sh
+    - name: Debug
+      if: ${{ failure() }}
+      run: |
+        cd ./build
+        ls -la
+        tail -n 1000 vcpkg-manifest-install.log
     - name: Build
       run: |
         cd ./build
         make config=${{ matrix.conf }}
+        mkdir tmp
+        cp -R ./include ./tmp/include
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-mac-${{ matrix.conf }}
-        path: ./build/libelemd.dylib
+        path: |
+          ./build/libelemd*
+          ./tmp
+

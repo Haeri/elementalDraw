@@ -1,19 +1,57 @@
-vcpkg_download_distfile(ARCHIVE
-	URLS https://github.com/KhronosGroup/MoltenVK/archive/ce85a96d8041b208e6f32898912b217957019b5a.zip
-	FILENAME MoltenVK.zip
-    SHA512 2a6ffcf504985b47529200578f3b8b09abeaf32d56097abfe2e35981ed503e66ce2b661c663d2135d2ea5650efb889691b10d57b35e89ff19f30f8eb650aecc7
-)
+vcpkg_fail_port_install(ON_TARGET "WINDOWS" "LINUX" "UWP")
 
-vcpkg_extract_source_archive_ex(
+vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    ARCHIVE ${ARCHIVE}
+    REPO KhronosGroup/MoltenVK
+    REF ce85a96d8041b208e6f32898912b217957019b5a
+    SHA512 fa77a807a6e17fa7359b13546d46e5c5ebb4b7180df0a6fe378ff407c71c40670417ce135195db452df0d2fd1eaa51e39dda6743a1bbf19a6a68417d5e18e360
+    HEAD_REF master
+	PATCHES
+    	added_configure.patch
 )
 
-vcpkg_configure_cmake(
+# TODO: The dependencies are manually pulled by this script. This step should be ommited and dependencies integrated by vcpkg.
+vcpkg_execute_required_process(
+    COMMAND ./fetchDependencies --macos
+    WORKING_DIRECTORY ${SOURCE_PATH}
+)
+
+vcpkg_configure_make(
     SOURCE_PATH ${SOURCE_PATH}
+ 	#SKIP_CONFIGURE this doesn't work. We therefore patch in an empty configure file
+    COPY_SOURCE
     PREFER_NINJA
 )
 
-vcpkg_install_make()
+# TODO: This actually builds the release build two times. We need to actually build a debug verion
+# TODO: Currently only macos target is built. ios and tv os should be exported as features
+vcpkg_build_make(BUILD_TARGET macos)
 
-#vcpkg_fixup_cmake_targets()
+
+# copy copyright
+file(INSTALL ${SOURCE_PATH}/LICENSE DESTINATION ${CURRENT_PACKAGES_DIR}/share/moltenvk RENAME copyright)
+
+# copy MoltenVK include
+file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVK/include DESTINATION ${CURRENT_PACKAGES_DIR})
+file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/include/vulkan)
+
+# copy MoltenVKShaderConverter include
+file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVKShaderConverter/include DESTINATION ${CURRENT_PACKAGES_DIR})
+
+# copy tools
+file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVKShaderConverter/Tools/MoltenVKShaderConverter DESTINATION ${CURRENT_PACKAGES_DIR}/tools/moltenvk)
+
+
+if(VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
+    # copy release dynamic
+    file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVK/dylib/macOS/libMoltenVK.dylib DESTINATION ${CURRENT_PACKAGES_DIR}/bin)
+    # copy debug dynamic
+    file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/Package/Latest/MoltenVK/dylib/macOS/libMoltenVK.dylib DESTINATION ${CURRENT_PACKAGES_DIR}/debug/bin)
+endif()
+
+# copy release static
+file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVK/MoltenVK.xcframework/macos-x86_64/libMoltenVK.a DESTINATION ${CURRENT_PACKAGES_DIR}/lib)
+file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/Package/Latest/MoltenVKShaderConverter/MoltenVKShaderConverter.xcframework/macos-x86_64/libMoltenVKShaderConverter.a DESTINATION ${CURRENT_PACKAGES_DIR}/lib)
+# copy debug static
+file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/Package/Latest/MoltenVK/MoltenVK.xcframework/macos-x86_64/libMoltenVK.a DESTINATION ${CURRENT_PACKAGES_DIR}/debug/lib)
+file(INSTALL ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/Package/Latest/MoltenVKShaderConverter/MoltenVKShaderConverter.xcframework/macos-x86_64/libMoltenVKShaderConverter.a DESTINATION ${CURRENT_PACKAGES_DIR}/debug/lib)

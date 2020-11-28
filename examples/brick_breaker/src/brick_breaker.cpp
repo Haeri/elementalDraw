@@ -263,7 +263,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
     ctx->set_font(urbanist);
 
     ctx->set_clear_color(bg_color);
-    //ctx->set_clear_color(elemd::color(255, 255, 255, 255));
+    //ctx->set_clear_color(elemd::color(0, 0, 0, 0));
 
     win->add_key_listener([&](elemd::key_event event) {
         int start_vel = 0;
@@ -486,7 +486,8 @@ int main()
                       2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0});
 
     elemd::WindowConfig wc{TITLE.c_str(), WIDTH, HEIGHT};
-    // wc.transparent = true;
+    //wc.transparent = true;
+    //wc.decorated = false;
     wc.resizeable = false;
     _win = elemd::Window::create(wc);
     _ctx = _win->create_context();

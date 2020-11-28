@@ -246,7 +246,7 @@ namespace elemd
     }
 
 
-    void Context::draw_image(float x, float y, float width, float height, image* image)
+    void Context::draw_image(float x, float y, float width, float height, image* image, bool tint)
     {
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
@@ -267,20 +267,20 @@ namespace elemd
               vec2(xf, yf + heightf) * 2.0f - vec2(1),
               vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
              {vec2(0), vec2(0), vec2(0), vec2(0)},
-             {vec2(img->_sampler_index, 0), vec2(0)},
+             {vec2(img->_sampler_index, tint), vec2(0)},
              0,
              {0, 0, 0}});
     }
 
     void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
-                                     float border_radius)
+                                     float border_radius, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, border_radius, border_radius, border_radius,
-                           border_radius);
+                           border_radius, tint);
     }
 
-    void Context::draw_rounded_image(float x, float y, float width, float height, image* image, float radius_nw,
-                                    float radius_ne, float radius_se, float radius_sw)
+    void Context::draw_rounded_image(float x, float y, float width, float height, image* image, float radius_nw, float radius_ne, float radius_se,
+                                     float radius_sw, bool tint)
     {
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
@@ -309,7 +309,7 @@ namespace elemd
             vec2(xf, yf + heightf) * 2.0f - vec2(1),
             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
                 {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)}, 
-            {vec2(img->_sampler_index, 0), vec2(0)},
+            {vec2(img->_sampler_index, tint), vec2(0)},
              0,
              {0, 0, 0}});
     }
@@ -917,7 +917,7 @@ namespace elemd
         pipelineMultisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
         pipelineMultisampleStateCreateInfo.minSampleShading = 1.0;
         pipelineMultisampleStateCreateInfo.pSampleMask = nullptr;
-        pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = VK_TRUE;
+        pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
         pipelineMultisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
         

@@ -8,9 +8,9 @@ file(GLOB_RECURSE SOURCE_FILES
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 if(NOT APPLE AND NOT MSVC)
-  target_link_libraries(${PROJECT_NAME} PRIVATE elemd pthread ${CMAKE_DL_LIBS})
+  target_link_libraries(${PROJECT_NAME} PRIVATE elemd window_app pthread ${CMAKE_DL_LIBS})
 else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE elemd)
+    target_link_libraries(${PROJECT_NAME} PRIVATE elemd window_app)
 endif()
 
 # Make res folder available inside the cmake build

@@ -15,7 +15,7 @@ namespace elemd
 {
     class Context;
 
-    struct ELEMD_API WindowConfig
+    extern "C" struct ELEMD_API WindowConfig
     {
         const char* title;
 
