@@ -80,7 +80,7 @@ jobs:
       run: |
         cd ./build
         ls -la
-        tail -n 1000 vcpkg-manifest-install-out.log
+        tail -n 1000 vcpkg-manifest-install.log
         cd ../external/vcpkg/buildtrees/moltenvk/
         ls -la
     - name: Build
