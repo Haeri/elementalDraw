@@ -3,7 +3,7 @@ name: C++ Builder
 on: 
   push:
     branches:
-    - moltenvk-text
+    - master
 
 jobs:
 
@@ -29,12 +29,17 @@ jobs:
         ls -la
         tail -n 1000 vcpkg-manifest-install.log
     - name: Build
-      run: MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
+      run: |
+        MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
+        mkdir tmp
+        cp -R ./include ./tmp/include
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-win-${{ matrix.conf }}
-        path: ./build/${{ matrix.conf }}/
+        path: |
+          ./build/${{ matrix.conf }}/
+          ./tmp
     
   build-linux:
    name: Linux Build
@@ -63,11 +68,15 @@ jobs:
       run: |
         cd ./build
         make config=${{ matrix.conf }}
+        mkdir tmp
+        cp -R ./include ./tmp/include
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-linux-${{ matrix.conf }}
-        path: ./build/libelemd*
+        path: |
+          ./build/libelemd*
+          ./tmp
 
   build-mac:
    name: Mac Build
@@ -93,9 +102,13 @@ jobs:
       run: |
         cd ./build
         make config=${{ matrix.conf }}
+        mkdir tmp
+        cp -R ./include ./tmp/include
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-mac-${{ matrix.conf }}
         path: |
           ./build/libelemd*
+          ./tmp
+
