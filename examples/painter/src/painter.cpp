@@ -70,7 +70,7 @@ int main(void)
 #endif
 
     elemd::WindowConfig winc = elemd::WindowConfig{"Painting App", WIDTH, HEIGHT};
-    winc.transparent = true;
+    //winc.transparent = true;
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
 
@@ -118,7 +118,7 @@ int main(void)
     });
      
     ctx->_tmp_prepare();
-    ctx->set_clear_color({0, 0, 0, 0});
+    ctx->set_clear_color({255, 255, 255, 255});
 
 
     elemd::color color_palette[] = {
