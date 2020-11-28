@@ -10,6 +10,7 @@ vcpkg_from_github(
     	added_configure.patch
 )
 
+# TODO: The dependencies are manually pulled by this script. This step should be ommited and dependencies integrated by vcpkg.
 vcpkg_execute_required_process(
     COMMAND ./fetchDependencies --macos
     WORKING_DIRECTORY ${SOURCE_PATH}
@@ -17,11 +18,13 @@ vcpkg_execute_required_process(
 
 vcpkg_configure_make(
     SOURCE_PATH ${SOURCE_PATH}
- 	#SKIP_CONFIGURE this doesn't work atm
+ 	#SKIP_CONFIGURE this doesn't work. We therefore patch in an empty configure file
     COPY_SOURCE
     PREFER_NINJA
 )
 
+# TODO: This actually builds the release build two times. We need to actually build a debug verion
+# TODO: Currently only macos target is built. ios and tv os should be exported as features
 vcpkg_build_make(BUILD_TARGET macos)
 
 

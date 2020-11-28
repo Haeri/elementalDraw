@@ -4,5 +4,5 @@ index 000000000..b87cb74
 --- /dev/null
 +++ b/configure
 @@ -0,0 +1 @@
-+# This is here cause I can't skip configure step
++# This file needs to exist for vcpkg_configure_make to work
 \ No newline at end of file

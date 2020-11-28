@@ -60,7 +60,7 @@ namespace elemd
         _height = height;
         _components = components;
         _data = data;
-        _name = "noname_" + rand() % 10000;
+        _name = "noname_" + std::to_string(rand() % 10000);
 
         _managed = true;
         _loaded = true;
