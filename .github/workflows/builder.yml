@@ -13,6 +13,7 @@ jobs:
    strategy:
      matrix: 
        conf: [Release]
+       type: [static, dynamic]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
@@ -21,7 +22,7 @@ jobs:
     - name: Setup Environment
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Generate Solution
-      run: ./tools/generate_project_win.bat -s
+      run: ./tools/generate_project_win.bat -${{ matrix.type }} -s
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -52,6 +53,7 @@ jobs:
    strategy:
      matrix: 
        conf: [Release]
+       type: [static, dynamic]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
@@ -62,7 +64,7 @@ jobs:
         sudo apt update
         sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
     - name: Generate Solution
-      run: ./tools/generate_project_linux.sh
+      run: ./tools/generate_project_linux.sh -${{ matrix.type }}
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -76,13 +78,16 @@ jobs:
     - name: Package
       run: |
         mkdir bin
+        mkdir lib
         cp ./build/libelemd* ./bin/
+        cp ./build/libelemd* ./lib/
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-linux-${{ matrix.conf }}
         path: |
           ./bin
+          ./lib
           ./include
 
   build-mac:
@@ -91,14 +96,14 @@ jobs:
    strategy:
      matrix: 
        conf: [Release]
+       type: [static, dynamic]
    steps:
     - name: Download Repository
       uses: actions/checkout@v2
       with:
         submodules: 'true'
     - name: Generate Solution
-      run: |
-        ./tools/generate_project_mac.sh
+      run: ./tools/generate_project_mac.sh -${{ matrix.type }}
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -112,12 +117,14 @@ jobs:
     - name: Package
       run: |
         mkdir bin
+        mkdir lib        
         cp ./build/libelemd* ./bin/
+        cp ./build/libelemd* ./lib/
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: elemd-mac-${{ matrix.conf }}
         path: |
           ./bin
+          ./lib
           ./include
-

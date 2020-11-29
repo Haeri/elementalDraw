@@ -40,7 +40,8 @@ void draw(elemd::Context* ctx, elemd::image* brush)
     }
 
     ctx->set_fill_color(brush_color);
-    ctx->draw_image(mouse_x - brush_size / 2.0f, mouse_y - brush_size / 2.0f, brush_size,
+    ctx->draw_image((float)mouse_x - brush_size / 2.0f, (float)mouse_y - brush_size / 2.0f,
+                    brush_size,
                     brush_size, brush, true);
 
     if (mouse_click)

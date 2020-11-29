@@ -1125,7 +1125,8 @@ namespace elemd
 
                 ///vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
                 ///                 uniforms.size(), 0, 0, 0);
-                vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(), storage.size(),
+                vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
+                                 (uint32_t)storage.size(),
                                  0, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);

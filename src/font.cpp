@@ -31,7 +31,7 @@ namespace elemd
             _ret = text.substr(0, index);
 
             int start = 0;
-            int text_len = (text.size() - 1);
+            int text_len = (int)(text.size() - 1);
             while (index <= text_len)
             {
                 start = index;
@@ -56,8 +56,8 @@ namespace elemd
     {
         float x = 0;
         float y = 0;
-        int width = 0;
-        int height = 0;
+        float width = 0;
+        float height = 0;
 
         float scale = (float)font_size / LOADED_HEIGHT;
         

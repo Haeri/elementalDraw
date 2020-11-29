@@ -11,7 +11,7 @@
   	"freetype", 
   	{
   		"name": "moltenvk",
-  		"platform": "osx"
+  		"platform": "false"
   	}
   ]
 }

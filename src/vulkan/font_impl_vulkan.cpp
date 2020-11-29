@@ -53,7 +53,7 @@ namespace elemd
         
         FT_Set_Pixel_Sizes(face, 0, LOADED_HEIGHT);
 
-        _line_height = face->size->metrics.height >> 6;
+        _line_height = (float)(face->size->metrics.height >> 6);
 
         // Load first 128 characters of ASCII set
         for (int c = 0; c < 128; ++c)

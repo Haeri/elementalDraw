@@ -270,12 +270,12 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
 
         if (event.key == elemd::KEY_LEFT)
         {
-            paddle_velocity.x() += -1 * paddle_speed * poll_accumulator;
+            paddle_velocity.x() += -1 * paddle_speed * (float)poll_accumulator;
             start_vel = -1;
         }
         else if (event.key == elemd::KEY_RIGHT)
         {
-            paddle_velocity.x() += 1 * paddle_speed * poll_accumulator;
+            paddle_velocity.x() += 1 * paddle_speed * (float)poll_accumulator;
             start_vel = 1;
         }
 
@@ -340,7 +340,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
             }
 
             // paddle
-            paddle_velocity.x() = paddle_velocity.x() / (70.0f * render_accumulator);
+            paddle_velocity.x() = paddle_velocity.x() / (70.0f * (float)render_accumulator);
             paddle_pos = paddle_pos + paddle_velocity;
             if (paddle_pos.get_x() > WIDTH - paddle_width)
             {
@@ -358,9 +358,10 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
 
             // Power Up
 
-            for (int i = power_pus.size() - 1; i >= 0; --i)
+            for (int i = (int)power_pus.size() - 1; i >= 0; --i)
             {
-                power_pus[i].pos = power_pus[i].pos + elemd::vec2(0, 80) * render_accumulator;
+                power_pus[i].pos =
+                    power_pus[i].pos + elemd::vec2(0, 80) * (float)render_accumulator;
 
                 if (rect2rect(rect{paddle_pos, paddle_width, paddle_height},
                                 rect{power_pus[i].pos, 20, 10}))
@@ -426,7 +427,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
             ctx->set_fill_color(ball_color);
             for (int i = 0; i < lifes; ++i)
             {
-                ctx->fill_circle(WIDTH - 5 - (i * 8), HEIGHT - 5, 3);
+                ctx->fill_circle((float)(WIDTH - 5 - (i * 8)), (float)(HEIGHT - 5), 3);
             }
 
 
@@ -435,7 +436,8 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
             {
                 ctx->set_fill_color({200, 200, 200});
                 ctx->set_font_size(30);
-                ctx->draw_text(WIDTH / 2 - 120, HEIGHT / 2 - 30, "Press Arrow keys\n        to start");
+                ctx->draw_text((float)(WIDTH / 2 - 120), (float)(HEIGHT / 2 - 30),
+                               "Press Arrow keys\n        to start");
             }
 
 

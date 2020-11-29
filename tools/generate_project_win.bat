@@ -15,7 +15,10 @@ rmdir /S /Q "build"
 mkdir "build"
 cd build
 
-cmake .. -DVCPKG_TARGET_TRIPLET=x64-windows-static -DVCPKG_OVERLAY_PORTS="%root_path%\external\custom-ports" -DCMAKE_TOOLCHAIN_FILE=%root_path%"/external/vcpkg/scripts/buildsystems/vcpkg.cmake"
+set build_type=
+if "%1" == "-static" set build_type=-DBUILD_SHARED_LIBS=OFF
+
+cmake .. -DVCPKG_TARGET_TRIPLET=x64-windows-static -DVCPKG_OVERLAY_PORTS="%root_path%\external\custom-ports" -DCMAKE_TOOLCHAIN_FILE="%root_path%/external/vcpkg/scripts/buildsystems/vcpkg.cmake" %build_type%
 set /a "err=%err%+%errorlevel%"
 
 
@@ -24,5 +27,5 @@ set /a "err=%err%+%errorlevel%"
 ::-----------------------
 :: Restore to caller path
 cd "%old_path%"
-if not "%1" == "-s" pause
+if not "%1" == "-s" if not "%2" == "-s" pause
 exit /b %err%
