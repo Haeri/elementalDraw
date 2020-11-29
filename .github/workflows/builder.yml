@@ -33,11 +33,7 @@ jobs:
       run: |
         MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
     - name: Package
-      run: |
-        mkdir bin
-        mkdir lib
-        cp ./build/${{ matrix.conf }}/elemd.dll ./bin || cmd /c exit /b 0
-        cp ./build/${{ matrix.conf }}/elemd.lib ./lib || cmd /c exit /b 0
+      run: ./tools/package_win.bat -${{ matrix.type }} -s
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
@@ -76,11 +72,7 @@ jobs:
         cd ./build
         make config=${{ matrix.conf }}
     - name: Package
-      run: |
-        mkdir bin
-        mkdir lib
-        cp ./build/libelemd.so* ./bin/ 2>/dev/null || :
-        cp ./build/libelemd.a* ./lib/ 2>/dev/null || :
+      run: ./tools/package_linux.sh -${{ matrix.type }}
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
@@ -115,11 +107,7 @@ jobs:
         cd ./build
         make config=${{ matrix.conf }}
     - name: Package
-      run: |
-        mkdir bin
-        mkdir lib        
-        cp ./build/libelemd*.dylib ./bin/ 2>/dev/null || :
-        cp ./build/libelemd*.a ./lib/ 2>/dev/null || :
+      run: ./tools/package_mac.sh -${{ matrix.type }}
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
