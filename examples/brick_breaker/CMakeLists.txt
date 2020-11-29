@@ -1,4 +1,4 @@
-set(PROJECT_NAME brick_breaker)
+set(PROJECT_NAME brick-breaker)
 project(${PROJECT_NAME})
 
 file(GLOB_RECURSE SOURCE_FILES

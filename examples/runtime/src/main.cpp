@@ -26,7 +26,7 @@ int main(void)
 #endif
 
 
-    SharedLibrary app("../window_app/" + bin_folder +  "window_app");
+    SharedLibrary app("../window_app/" + bin_folder +  "window-app");
     //SharedLibrary app("../brick_breaker/" + bin_folder +  "brick_breaker");
     
     if (!app.load())
