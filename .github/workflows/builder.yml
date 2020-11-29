@@ -36,12 +36,12 @@ jobs:
       run: |
         mkdir bin
         mkdir lib
-        cp ./build/${{ matrix.conf }}/elemd.dll ./bin/elemd.dll
-        cp ./build/${{ matrix.conf }}/elemd.lib ./lib/elemd.lib
+        cp ./build/${{ matrix.conf }}/elemd.dll ./bin || cmd /c exit /b 0
+        cp ./build/${{ matrix.conf }}/elemd.lib ./lib || cmd /c exit /b 0
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
-        name: elemd-win-${{ matrix.conf }}
+        name: elemd_x64-windows
         path: |
           ./lib
           ./bin
@@ -79,12 +79,12 @@ jobs:
       run: |
         mkdir bin
         mkdir lib
-        cp ./build/libelemd* ./bin/
-        cp ./build/libelemd* ./lib/
+        cp ./build/libelemd.so* ./bin/ 2>/dev/null || :
+        cp ./build/libelemd.a* ./lib/ 2>/dev/null || :
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
-        name: elemd-linux-${{ matrix.conf }}
+        name: elemd_x64-linux
         path: |
           ./bin
           ./lib
@@ -118,12 +118,12 @@ jobs:
       run: |
         mkdir bin
         mkdir lib        
-        cp ./build/libelemd* ./bin/
-        cp ./build/libelemd* ./lib/
+        cp ./build/libelemd*.dylib ./bin/ 2>/dev/null || :
+        cp ./build/libelemd*.a ./lib/ 2>/dev/null || :
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
-        name: elemd-mac-${{ matrix.conf }}
+        name: elemd_x64-macos
         path: |
           ./bin
           ./lib

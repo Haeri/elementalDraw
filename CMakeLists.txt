@@ -32,6 +32,7 @@ if (BUILD_SHARED_LIBS)
     add_compile_definitions(ELEMD_BUILD_SHARED)
     add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 else()
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
 endif()
 
