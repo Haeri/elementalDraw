@@ -8,16 +8,12 @@ cd "%~dp0"
 
 
 
-
-
-if "%1" == "-static"(
-	mkdir lib
-	cp ./build/Release/elemd.lib ./lib/elemd-static.lib
-)else(
-	mkdir bin
-	mkdir lib
-	cp ./build/Release/elemd.dll ./bin/
-	cp ./build/Release/elemd.lib ./lib/
+cd ..
+if "%1" == "-static" (
+	xcopy ".\build\Release\elemd.lib" ".\lib\elemd-static.lib*"
+) else (
+	xcopy ".\build\Release\elemd.dll" ".\bin\"
+	xcopy ".\build\Release\elemd.lib" ".\lib\"
 )
 set /a "err=%err%+%errorlevel%"
 
