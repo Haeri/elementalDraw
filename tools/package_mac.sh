@@ -3,7 +3,7 @@
 old_path=$(pwd)
 cd $(dirname "$0")
 
-
+cd ..
 if [ "$1" = "-static" ]; then
 	mkdir lib
 	cp ./build/libelemd*.a ./lib/
