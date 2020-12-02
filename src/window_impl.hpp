@@ -32,6 +32,7 @@ namespace elemd
         std::vector<std::function<void(mouse_move_event)>> _mouse_move_callbacks;
         std::vector<std::function<void(mouse_button_event)>> _mouse_button_callbacks;
         std::vector<std::function<void(key_event)>> _key_callbacks;
+        std::vector<std::function<void(char_event)>> _char_callbacks;
         std::vector<std::function<void(scroll_event)>> _scroll_callbacks;
 
         GLFWwindow* getGLFWWindow();

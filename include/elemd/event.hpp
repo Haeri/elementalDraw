@@ -208,6 +208,12 @@ namespace elemd
         int scancode;
         input_action action;
         keyboard_mod mods;
+        const char* key_name;
+    };
+    
+    struct ELEMD_API char_event
+    {
+        const char* utf8;
     };
 
 } // namespace elemd

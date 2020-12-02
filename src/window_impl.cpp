@@ -27,7 +27,9 @@ namespace elemd
     void mouse_position_callback(GLFWwindow* window, double x, double y);
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
     void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    void char_callback(GLFWwindow* window, unsigned int key_code);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+    std::string UnicodeToUTF8(unsigned int codepoint);
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
@@ -97,6 +99,12 @@ namespace elemd
     {
         WindowImpl* impl = getImpl(this);
         impl->_key_callbacks.push_back(callback);
+    }
+
+    void Window::add_char_listener(std::function<void(char_event)> callback)
+    {
+        WindowImpl* impl = getImpl(this);
+        impl->_char_callbacks.push_back(callback);
     }
 
     void Window::add_scroll_listener(std::function<void(scroll_event)> callback)
@@ -220,6 +228,7 @@ namespace elemd
         glfwSetCursorPosCallback(impl->_glfw_window, mouse_position_callback);
         glfwSetMouseButtonCallback(impl->_glfw_window, mouse_button_callback);
         glfwSetKeyCallback(impl->_glfw_window, key_callback);
+        glfwSetCharCallback(impl->_glfw_window, char_callback);
         glfwSetScrollCallback(impl->_glfw_window, scroll_callback);
 
         return _context;
@@ -411,14 +420,31 @@ namespace elemd
     void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
+        const char* key_code = glfwGetKeyName(key, scancode);
+
+        std::string key_name = (key_code == NULL) ? " " : key_code;
 
         std::cout << "event: key "
                   << "key: " << key << " scancode: " << scancode << " action: " << action
-                  << " mods: " << mods << std::endl;
+                  << " mods: " << mods << " key name: " << key_name << std::endl;
 
         for (auto& var : winImpl->_key_callbacks)
         {
-            var({(keyboard_key)key, scancode, (input_action)action, (keyboard_mod)mods});
+            var({(keyboard_key)key, scancode, (input_action)action, (keyboard_mod)mods, key_code});
+        }
+    }
+
+    void char_callback(GLFWwindow* window, unsigned int key_code)
+    {
+        WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
+
+        std::string utf8 = UnicodeToUTF8(key_code);
+        std::cout << "event: char "
+                  << "char: " << utf8 << std::endl;
+
+        for (auto& var : winImpl->_char_callbacks)
+        {
+            var({utf8.c_str()});
         }
     }
 
@@ -433,6 +459,37 @@ namespace elemd
         {
             var({xoffset, yoffset});
         }
+    }
+
+
+
+
+
+    std::string UnicodeToUTF8(unsigned int codepoint)
+    {
+        std::string out;
+
+        if (codepoint <= 0x7f)
+            out.append(1, static_cast<char>(codepoint));
+        else if (codepoint <= 0x7ff)
+        {
+            out.append(1, static_cast<char>(0xc0 | ((codepoint >> 6) & 0x1f)));
+            out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+        }
+        else if (codepoint <= 0xffff)
+        {
+            out.append(1, static_cast<char>(0xe0 | ((codepoint >> 12) & 0x0f)));
+            out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
+            out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+        }
+        else
+        {
+            out.append(1, static_cast<char>(0xf0 | ((codepoint >> 18) & 0x07)));
+            out.append(1, static_cast<char>(0x80 | ((codepoint >> 12) & 0x3f)));
+            out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
+            out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
+        }
+        return out;
     }
 
 } // namespace elemd

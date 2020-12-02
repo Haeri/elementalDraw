@@ -25,6 +25,8 @@ namespace elemd
         vkDestroyDevice(device, nullptr);
         vkDestroyInstance(instance, nullptr);
 
+        gladLoaderUnloadVulkan();
+
         delete[] physicalDevices;
     }
 
