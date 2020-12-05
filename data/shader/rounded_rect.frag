@@ -6,20 +6,21 @@ layout(location = 1) in flat int instance_index;
 
 layout(location = 0) out vec4 outColor;
 
-struct UniformData
+struct StorageData
 {
     vec4 fill_color;
     vec4 vertices[2];
     vec4 border_radius[2];
     vec4 sampler_index;
     vec4 stroke_size_color;	
+    vec4 uvs;
 };
 
-layout(set = 0, binding = 0, std140) readonly buffer UBO
+layout(set = 0, binding = 0, std140) readonly buffer SBO
 {
-    UniformData payload[];
-} ubo;
-layout(set = 0, binding = 1) uniform sampler2D textures[512];
+    StorageData payload[];
+} sbo;
+layout(set = 0, binding = 1) uniform sampler2D textures[10];
 
 
 float ellipse_distance(vec2 uv, vec2 center, vec2 dims)
@@ -29,18 +30,18 @@ float ellipse_distance(vec2 uv, vec2 center, vec2 dims)
 
 void main()
 {
-    //float a = ubo.payload[instance_index].fill_color.a;
+    //float a = sbo.payload[instance_index].fill_color.a;
     
-    vec2 nw = ubo.payload[instance_index].border_radius[0].xy;
-    vec2 ne = ubo.payload[instance_index].border_radius[0].zw;
-    vec2 se = ubo.payload[instance_index].border_radius[1].xy;
-    vec2 sw = ubo.payload[instance_index].border_radius[1].zw;
+    vec2 nw = sbo.payload[instance_index].border_radius[0].xy;
+    vec2 ne = sbo.payload[instance_index].border_radius[0].zw;
+    vec2 se = sbo.payload[instance_index].border_radius[1].xy;
+    vec2 sw = sbo.payload[instance_index].border_radius[1].zw;
     
-    vec4 fill_color = ubo.payload[instance_index].fill_color.rgba; 
-    float line_width = ubo.payload[instance_index].stroke_size_color.x;
-    vec3 stroke_color = ubo.payload[instance_index].stroke_size_color.yzw;
-    int index = int(ubo.payload[instance_index].sampler_index.x);
-    int use_color = int(ubo.payload[instance_index].sampler_index.y);
+    vec4 fill_color = sbo.payload[instance_index].fill_color.rgba; 
+    float line_width = sbo.payload[instance_index].stroke_size_color.x;
+    vec3 stroke_color = sbo.payload[instance_index].stroke_size_color.yzw;
+    int index = int(sbo.payload[instance_index].sampler_index.x);
+    int use_color = int(sbo.payload[instance_index].sampler_index.y);
 
     float dist = 0.0;
 

@@ -16,7 +16,7 @@
 #include "../window_impl.hpp"
 #include "image_impl_vulkan.hpp"
 
-#define TEXTURE_ARRAY_SIZE 512
+#define TEXTURE_ARRAY_SIZE 10
 #define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536
 #define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE UNIFORM_BUFFER_ARRAY_MAX_COUNT * sizeof(uniform_rect)
 
@@ -35,6 +35,7 @@ namespace elemd
             vec2 sampler_index[2];
             float line_size;
             float stroke_color[3];
+            vec2 uvs[2];
         };
 
         imageImplVulkan* dummy;

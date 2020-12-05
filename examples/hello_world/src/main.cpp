@@ -26,6 +26,13 @@ int main(void)
     ctx->_tmp_register_font(urbanist);
 
 
+    // Event
+    std::string text = "Hello World!";
+    win->add_char_listener([&](elemd::char_event event) { 
+        text += event.utf8;
+    });
+
+
     ctx->_tmp_prepare();
     ctx->set_clear_color(dark);
 
@@ -38,7 +45,7 @@ int main(void)
         ctx->set_fill_color(white);
         ctx->set_font(urbanist);
         ctx->set_font_size(18);
-        ctx->draw_text(20, 20, "Hello World!");
+        ctx->draw_text(20, 20, text);
 
         // Circle
         ctx->set_fill_color(red);

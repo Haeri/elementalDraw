@@ -21,6 +21,11 @@ namespace elemd
         delete this;
     }
 
+    elemd::image* font::get_image()
+    {
+        return _texture_atlas;
+    }
+
     std::string font::fit_substring(std::string text, int width, int font_size)
     {
         std::string _ret = "";
@@ -64,7 +69,11 @@ namespace elemd
 
         for (auto& token : text)
         {
-            character ch = _characters[token];
+            character ch = _characters[0];
+            if (token > 0)
+            {
+                ch = _characters[token];
+            }
 
             if (token == '\n')
             {
@@ -98,6 +107,102 @@ namespace elemd
         return elemd::vec2(width, height);
     }
 
+    void font::load_from_file(std::string file_path)
+    {
+        FT_Library ft_library;
+        FT_Face face;
+        FT_Error ft_error;
+
+        ft_error = FT_Init_FreeType(&ft_library);
+        if (ft_error)
+        {
+            std::cerr << "Error: during FreeType initialization" << std::endl;
+            exit(1);
+        }
+ 
+        ft_error = FT_New_Face(ft_library, file_path.c_str(), 0, &face);
+        if (ft_error == FT_Err_Unknown_File_Format)
+        {
+            std::cerr << "Error: font not supported!" << std::endl;
+            exit(1);
+        }
+        else if (ft_error)
+        {
+            std::cerr << "Error: font not found!" << std::endl;
+            exit(1);
+        }
+        
+        FT_Set_Pixel_Sizes(face, 0, LOADED_HEIGHT);
+        _line_height = (float)(face->size->metrics.height >> 6);
+
+        // quick and dirty max texture size estimate
+
+        int max_dim = (1 + (face->size->metrics.height >> 6)) * ceilf(sqrtf(NUM_GLYPHS));
+        int tex_width = 1;
+        while (tex_width < max_dim)
+            tex_width <<= 1;
+        int tex_height = tex_width;
+        int buffer_size = tex_width * tex_height * 4;
+
+        // render glyphs to atlas
+
+        char* pixels = (char*)calloc(tex_width * tex_height, 1);
+        int pen_x = 0, pen_y = 0;
+
+        for (int i = 0; i < NUM_GLYPHS; ++i)
+        {
+            FT_Load_Char(face, i, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT);
+            FT_Bitmap* bmp = &face->glyph->bitmap;
+
+            if (pen_x + bmp->width >= tex_width)
+            {
+                pen_x = 0;
+                pen_y += ((face->size->metrics.height >> 6) + 1);
+            }
+
+            for (int row = 0; row < bmp->rows; ++row)
+            {
+                for (int col = 0; col < bmp->width; ++col)
+                {
+                    int x = pen_x + col;
+                    int y = pen_y + row;
+                    pixels[y * tex_width + x] = bmp->buffer[row * bmp->pitch + col];
+                }
+            }
+
+            // this is stuff you'd need when rendering individual glyphs out of the atlas
+
+            character character = {
+                vec2((float)(face->glyph->bitmap.width), (float)(face->glyph->bitmap.rows)),
+                vec2((float)(face->glyph->bitmap_left), (float)(face->glyph->bitmap_top)),
+                vec2((float)(pen_x), (float)(pen_y)),
+                (int)(face->glyph->advance.x)};
+
+            _characters[i] = character;
+
+            pen_x += bmp->width + 1;
+        }
+
+        FT_Done_Face(face);
+        FT_Done_FreeType(ft_library);
+
+        // write png
+
+        uint8_t* png_data = new uint8_t[buffer_size];
+        for (int i = 0; i < (tex_width * tex_height); ++i)
+        {
+            png_data[i * 4 + 0] = 0xff;
+            png_data[i * 4 + 1] = 0xff;
+            png_data[i * 4 + 2] = 0xff;
+            png_data[i * 4 + 3] = pixels[i];
+        }
+
+        _texture_atlas = image::create(tex_width, tex_height, 4, png_data);
+
+        //free(png_data);
+        free(pixels);
+    }
+
     int font::fit_one_substring(std::string text, int width, int font_size)
     {
         int character_index = 0;
@@ -109,7 +214,11 @@ namespace elemd
 
         for (auto& token : text)
         {
-            character ch = _characters[token];
+            character ch = _characters[0];
+            if (token > 0)
+            {
+                ch = _characters[token];
+            }
 
             if (token == '\n')
             {
