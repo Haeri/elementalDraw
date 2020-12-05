@@ -137,7 +137,7 @@ namespace elemd
 
         // quick and dirty max texture size estimate
 
-        int max_dim = (1 + (face->size->metrics.height >> 6)) * ceilf(sqrtf(NUM_GLYPHS));
+        int max_dim = (int)(1 + (face->size->metrics.height >> 6)) * std::ceilf(std::sqrtf(NUM_GLYPHS));
         int tex_width = 1;
         while (tex_width < max_dim)
             tex_width <<= 1;
