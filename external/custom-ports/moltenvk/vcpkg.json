@@ -7,7 +7,7 @@
   "dependencies": [
     "cereal",
     "glslang",
-    "spirv-cross"
+    "spirv-cross",
     "vulkan-headers"
   ]
 }
