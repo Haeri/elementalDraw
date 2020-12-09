@@ -46,10 +46,16 @@ namespace elemd
         void draw_pixel(float x, float y);
         void draw_text(float x, float y, std::string text);
         void draw_image(float x, float y, float width, float height, image* image, bool tint = false);
+        void draw_image(float x, float y, float width, float height, image* image, float src_x,
+                        float src_y, float src_width, float src_height, bool tint = false);
         void draw_rounded_image(float x, float y, float width, float height, image* image,
                                 float border_radius, bool tint = false);
         void draw_rounded_image(float x, float y, float width, float height, image* image,
                                 float radius_nw, float radius_ne, float radius_se, float radius_sw,
+                                bool tint = false);
+        void draw_rounded_image(float x, float y, float width, float height, image* image,
+                                float radius_nw, float radius_ne, float radius_se, float radius_sw,
+                                float src_x, float src_y, float src_width, float src_height,
                                 bool tint = false);
 
 

@@ -3,7 +3,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <vector>
-#include <cmath>
+#include <math.h>
 
 namespace elemd
 {
@@ -138,7 +138,7 @@ namespace elemd
 
         // quick and dirty max texture size estimate
 
-        int max_dim = (int)(1 + (face->size->metrics.height >> 6)) * std::ceilf(std::sqrtf(NUM_GLYPHS));
+        int max_dim = (int)(1 + (face->size->metrics.height >> 6)) * ceil(sqrt(NUM_GLYPHS));
         int tex_width = 1;
         while (tex_width < max_dim)
             tex_width <<= 1;
@@ -152,7 +152,7 @@ namespace elemd
 
         for (int i = 0; i < NUM_GLYPHS; ++i)
         {
-            FT_Load_Char(face, i, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT);
+            FT_Load_Char(face, i, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT);
             FT_Bitmap* bmp = &face->glyph->bitmap;
 
             if (pen_x + bmp->width >= tex_width)

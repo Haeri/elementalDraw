@@ -286,6 +286,13 @@ namespace elemd
              {vec2(0), vec2(1)}});
     }
 
+    void Context::draw_image(float x, float y, float width, float height, image* image, float src_x,
+                             float src_y, float src_width, float src_height, bool tint)
+    {
+        draw_rounded_image(x, y, width, height, image, 0, 0, 0, 0, src_x, src_y, src_width,
+                           src_height, tint);
+    }
+
     void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
                                      float border_radius, bool tint)
     {
@@ -295,6 +302,15 @@ namespace elemd
 
     void Context::draw_rounded_image(float x, float y, float width, float height, image* image, float radius_nw, float radius_ne, float radius_se,
                                      float radius_sw, bool tint)
+    {
+        draw_rounded_image(x, y, width, height, image, radius_nw, radius_ne, radius_se, radius_sw,
+                           0, 0, image->get_width(), image->get_height(), tint);
+    }
+
+    void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
+                                     float radius_nw, float radius_ne, float radius_se,
+                                     float radius_sw, float src_x, float src_y, float src_width,
+                                     float src_height, bool tint)
     {
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
@@ -317,18 +333,24 @@ namespace elemd
         float seyf = (radius_se / height) * (impl->_window->_y_scale);
         float swyf = (radius_sw / height) * (impl->_window->_y_scale);
 
+        float originx = src_x / img->get_width();
+        float originy = src_y / img->get_height();
+        float cropx = originx + src_width / img->get_width();
+        float cropy = originy + src_width / img->get_height();
+
         impl->storage.push_back(
             {_fill_color,
-            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
-            vec2(xf, yf + heightf) * 2.0f - vec2(1),
-            vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
-                {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)}, 
-            {vec2(img->_sampler_index, tint), vec2(0)},
+             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
+              vec2(xf, yf + heightf) * 2.0f - vec2(1),
+              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
+             {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)},
+             {vec2(img->_sampler_index, tint), vec2(0)},
              0,
              {0, 0, 0},
-             {vec2(0), vec2(1)}});
+             {vec2(originx, originy), vec2(cropx, cropy)}});
     }
 
+   
     void Context::set_clear_color(color color)
     {
         ContextImplVulkan* impl = getImpl(this);

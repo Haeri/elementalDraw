@@ -26,6 +26,22 @@ int main(void)
     ctx->_tmp_register_font(urbanist);
 
 
+    // Load image
+    elemd::image* anim = elemd::image::create("./res/anim.png");
+    ctx->_tmp_register_image(anim);
+
+    int x_frames = 4;
+    int y_frames = 8;
+    int max_frames = 25;
+
+    float anim_x = 0;    
+    float anim_y = 0;
+    float anim_w = anim->get_width() / x_frames;
+    float anim_h = anim->get_height() / y_frames;
+    int frame = 0;
+    float last_time = 0;
+    float anim_speed = 50;
+
     // Event
     std::string text = "Hello World!";
     win->add_char_listener([&](elemd::char_event event) { 
@@ -68,10 +84,24 @@ int main(void)
         ctx->draw_image(120, 110, 80, 80, img, true);
 
 
+                
+        ctx->draw_image(20, 210, 80, 80, anim, anim_x, anim_y, anim_w, anim_h);
+        if (elemd::Window::now() - last_time > anim_speed/1000.0f)
+        {
+            ++frame;
+            frame %= max_frames;
+            anim_x = (frame % x_frames) * anim_w;
+            anim_y = (frame / x_frames) * anim_h;
+
+            last_time = elemd::Window::now();
+        }
+        
+
         ctx->draw_frame();
     }
 
     // Cleanup
+    anim->destroy();
     img->destroy();
     urbanist->destroy();
     win->destroy();
