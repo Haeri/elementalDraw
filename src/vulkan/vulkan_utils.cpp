@@ -41,7 +41,7 @@ namespace elemd::vku
     {
         std::vector<char> spirvCode = read_shader(filename);
 
-        VkShaderModuleCreateInfo shaderModuleCreateInfo;
+        VkShaderModuleCreateInfo shaderModuleCreateInfo{};
         shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         shaderModuleCreateInfo.pNext = nullptr;
         shaderModuleCreateInfo.flags = 0;
@@ -52,9 +52,9 @@ namespace elemd::vku
                                             &shaderModuleCreateInfo, nullptr, shaderModule));
     }
 
-     void create_shader_module(std::vector<unsigned char> data, VkShaderModule* shaderModule)
+    void create_shader_module(std::vector<unsigned char> data, VkShaderModule* shaderModule)
     {
-        VkShaderModuleCreateInfo shaderModuleCreateInfo;
+        VkShaderModuleCreateInfo shaderModuleCreateInfo{};
         shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         shaderModuleCreateInfo.pNext = nullptr;
         shaderModuleCreateInfo.flags = 0;
@@ -111,8 +111,8 @@ namespace elemd::vku
             delete[] queueFamilyProperties;
         }
 
-        bestDeviceIndex = 0;
-        maxQueueCount = 1;
+        //bestDeviceIndex = 0;
+        //maxQueueCount = 1;
 
         return best_device_info{bestDeviceIndex, bestQueuFamily, maxQueueCount};
     }
@@ -121,7 +121,7 @@ namespace elemd::vku
     {
         // --------------- Create Command Buffer Allocate Info ---------------
 
-        VkCommandBufferAllocateInfo commandBufferAllocateInfo;
+        VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         commandBufferAllocateInfo.pNext = nullptr;
         commandBufferAllocateInfo.commandPool = commandPool;
@@ -130,7 +130,7 @@ namespace elemd::vku
 
         // --------------- Allocate Command Buffer ---------------
 
-        VkCommandBuffer commandBuffer;
+        VkCommandBuffer commandBuffer{};
         vku::err_check(vkAllocateCommandBuffers(VulkanSharedInfo::getInstance()->device,
                                                 &commandBufferAllocateInfo, &commandBuffer));
 
@@ -150,7 +150,7 @@ namespace elemd::vku
     {
         vku::err_check(vkEndCommandBuffer(commandBuffer));
 
-        VkSubmitInfo submitInfo;
+        VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.pNext = nullptr;
         submitInfo.waitSemaphoreCount = 0;
@@ -175,7 +175,7 @@ namespace elemd::vku
     {
         // --------------- Create Buffer Create Info ---------------
 
-        VkBufferCreateInfo bufferCreateInfo;
+        VkBufferCreateInfo bufferCreateInfo{};
         bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferCreateInfo.pNext = nullptr;
         bufferCreateInfo.flags = 0;
@@ -189,11 +189,11 @@ namespace elemd::vku
 
         vku::err_check(vkCreateBuffer(VulkanSharedInfo::getInstance()->device, &bufferCreateInfo, nullptr, &buffer));
 
-        VkMemoryRequirements memoryRequirements;
+        VkMemoryRequirements memoryRequirements{};
         vkGetBufferMemoryRequirements(VulkanSharedInfo::getInstance()->device, buffer,
                                       &memoryRequirements);
 
-        VkMemoryAllocateInfo memoryAllocateInfo;
+        VkMemoryAllocateInfo memoryAllocateInfo{};
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         memoryAllocateInfo.pNext = nullptr;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
@@ -213,7 +213,7 @@ namespace elemd::vku
     {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands(commandPool);
 
-        VkBufferCopy bufferCopy;
+        VkBufferCopy bufferCopy{};
         bufferCopy.srcOffset = 0;
         bufferCopy.dstOffset = 0;
         bufferCopy.size = deviceSize;
@@ -226,7 +226,7 @@ namespace elemd::vku
     uint32_t find_memory_type_index(uint32_t typeFilter,
                                     VkMemoryPropertyFlags properties)
     {
-        VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+        VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties{};
         vkGetPhysicalDeviceMemoryProperties(VulkanSharedInfo::getInstance()->bestPhysicalDevice,
                                             &physicalDeviceMemoryProperties);
         for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; ++i)
@@ -329,7 +329,7 @@ namespace elemd::vku
         {
             std::cout << "\t{\n";
 
-            VkPhysicalDeviceProperties properties;
+            VkPhysicalDeviceProperties properties{};
             vkGetPhysicalDeviceProperties(VulkanSharedInfo::getInstance()->physicalDevices[i],
                                           &properties);
 
@@ -348,7 +348,7 @@ namespace elemd::vku
                       //<< "\t\t\"sparseProperties\": \"" << properties.sparseProperties << "\",\n"
                       << "\t},\n";
 
-            VkPhysicalDeviceFeatures features;
+            VkPhysicalDeviceFeatures features{};
             vkGetPhysicalDeviceFeatures(VulkanSharedInfo::getInstance()->physicalDevices[i],
                                         &features);
 
@@ -359,7 +359,7 @@ namespace elemd::vku
                       << features.tessellationShader << "\n"
                       << "\t},\n";
 
-            VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+            VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties{};
             vkGetPhysicalDeviceMemoryProperties(VulkanSharedInfo::getInstance()->physicalDevices[i],
                                                 &physicalDeviceMemoryProperties);
 
@@ -528,7 +528,7 @@ namespace elemd::vku
                 break;
             }
 
-            __debugbreak();
+            //__debugbreak();
             return false;
         }
         else
