@@ -111,6 +111,9 @@ namespace elemd::vku
             delete[] queueFamilyProperties;
         }
 
+        bestDeviceIndex = 0;
+        maxQueueCount = 1;
+
         return best_device_info{bestDeviceIndex, bestQueuFamily, maxQueueCount};
     }
 
@@ -525,6 +528,7 @@ namespace elemd::vku
                 break;
             }
 
+            __debugbreak();
             return false;
         }
         else

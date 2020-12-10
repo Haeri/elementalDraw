@@ -61,7 +61,7 @@ namespace elemd
     {
         // --------------- Create Application Info ---------------
 
-        VkApplicationInfo applicationInfo;
+        VkApplicationInfo applicationInfo{};
         applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         applicationInfo.pNext = nullptr;
         applicationInfo.pApplicationName = "UI Application"; // TODO: Pass down from application
@@ -111,7 +111,7 @@ namespace elemd
 
         // --------------- Create Instance Create Info ---------------
 
-        VkInstanceCreateInfo instanceCreateInfo;
+        VkInstanceCreateInfo instanceCreateInfo{};
         instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         instanceCreateInfo.pNext = nullptr;
         instanceCreateInfo.flags = 0;
@@ -160,7 +160,7 @@ namespace elemd
             queuePriorities.push_back(1.0f);
         }
 
-        VkDeviceQueueCreateInfo deviceQueueCreateInfo;
+        VkDeviceQueueCreateInfo deviceQueueCreateInfo{};
         deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         deviceQueueCreateInfo.pNext = nullptr;
         deviceQueueCreateInfo.flags = 0;
@@ -183,7 +183,7 @@ namespace elemd
 
         const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-        VkDeviceCreateInfo deviceCreateInfo;
+        VkDeviceCreateInfo deviceCreateInfo{};
         deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         deviceCreateInfo.pNext = &descriptorIndexingFeatures;
         deviceCreateInfo.flags = 0;

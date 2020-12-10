@@ -1,6 +1,7 @@
 #include <elemd/color.hpp>
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
+#include <math.h> 
 
 int main(void)
 {
@@ -12,7 +13,7 @@ int main(void)
 
 
     // Configure and create window
-    elemd::WindowConfig winc = elemd::WindowConfig{"Hello World", 500, 600};
+    elemd::WindowConfig winc = elemd::WindowConfig{"Hello World", 400, 400};
     winc.icon_file = "./res/logo.png";
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
@@ -25,8 +26,7 @@ int main(void)
     elemd::font* urbanist = elemd::font::create("./res/font/Urbanist-Regular.ttf");
     ctx->_tmp_register_font(urbanist);
 
-
-    // Load image
+    // Load animation
     elemd::image* anim = elemd::image::create("./res/anim.png");
     ctx->_tmp_register_image(anim);
 
@@ -40,7 +40,9 @@ int main(void)
     float anim_h = anim->get_height() / y_frames;
     int frame = 0;
     float last_time = 0;
-    float anim_speed = 50;
+    float anim_speed = 40;
+
+    float color_phase = 0;
 
     // Event
     std::string text = "Hello World!";
@@ -80,12 +82,17 @@ int main(void)
         ctx->draw_image(20, 110, 80, 80, img);
 
         // Timted image
-        ctx->set_fill_color(elemd::color(90, 90, 90));
+        ctx->set_fill_color(elemd::color(100, 100, 230));
         ctx->draw_image(120, 110, 80, 80, img, true);
 
+        // Rounded image
+        ctx->draw_rounded_image(220, 110, 80, 80, img, 20);
 
-                
-        ctx->draw_image(20, 210, 80, 80, anim, anim_x, anim_y, anim_w, anim_h);
+
+        // Image animation
+        ctx->set_fill_color(elemd::color::color_lerp(
+            elemd::color(200, 30, 30), elemd::color(30, 200, 30), (sin(color_phase++ / 100.0f)+1)/2.0f));
+        ctx->draw_image(20, 210, 80, 80, anim, anim_x, anim_y, anim_w, anim_h, true);
         if (elemd::Window::now() - last_time > anim_speed/1000.0f)
         {
             ++frame;

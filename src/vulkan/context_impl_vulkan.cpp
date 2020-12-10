@@ -397,7 +397,7 @@ namespace elemd
 
         VkPipelineStageFlags waitStageMask[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
-        VkSubmitInfo submitInfo;
+        VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.pNext = nullptr;
         submitInfo.waitSemaphoreCount = 1;
@@ -410,7 +410,7 @@ namespace elemd
 
         vku::err_check(vkQueueSubmit(impl->queue, 1, &submitInfo, impl->renderFence));
 
-        VkPresentInfoKHR presentInfoKHR;
+        VkPresentInfoKHR presentInfoKHR{};
         presentInfoKHR.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         presentInfoKHR.pNext = nullptr;
         presentInfoKHR.waitSemaphoreCount = 1;
@@ -447,7 +447,7 @@ namespace elemd
         if (!img->_uploaded)
         {
             img->upload(impl->commandPool, impl->queue);
-            if (impl->images.size() > TEXTURE_ARRAY_SIZE)
+            if (impl->images.size() > impl->texture_array_size)
             {
                 img->_sampler_index = 0;
                 std::cerr << "Too many textures glyps loaded!" << std::endl;
@@ -469,7 +469,7 @@ namespace elemd
             fiv->upload(impl->commandPool, impl->queue);
             
             imageImplVulkan* img = (imageImplVulkan*)font->get_image();
-            if (impl->images.size() > TEXTURE_ARRAY_SIZE)
+            if (impl->images.size() > impl->texture_array_size)
             {
                 img->_sampler_index = 0;
                 std::cerr << "Too many font glyps loaded!" << std::endl;
@@ -508,6 +508,17 @@ namespace elemd
 
     /* ------------------------ PRIVATE IMPLEMENTATION ------------------------ */
 
+    void ContextImplVulkan::initialize_limits()
+    {
+        VkPhysicalDeviceProperties properties{};
+        vkGetPhysicalDeviceProperties(VulkanSharedInfo::getInstance()->bestPhysicalDevice,
+                                      &properties);
+
+        texture_array_size = (int)properties.limits.maxPerStageDescriptorSamplers;
+
+        std::cout << "maxPerStageDescriptorSamplers: " << texture_array_size << std::endl;
+    }
+
     void ContextImplVulkan::create_surface()
     {
         // --------------- Create WIndow Surface ---------------
@@ -545,7 +556,7 @@ namespace elemd
     {
         // --------------- Get Surface Capabilities ---------------
 
-        VkSurfaceCapabilitiesKHR surfaceCapabilities;
+        VkSurfaceCapabilitiesKHR surfaceCapabilities{};
         vku::err_check(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
             VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &surfaceCapabilities));
 
@@ -611,7 +622,7 @@ namespace elemd
 
         // --------------- Create Swapchain Create Info ---------------
 
-        VkSwapchainCreateInfoKHR swapchainCreateInfo;
+        VkSwapchainCreateInfoKHR swapchainCreateInfo{};
         swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         swapchainCreateInfo.pNext = nullptr;
         swapchainCreateInfo.flags = 0;
@@ -660,7 +671,7 @@ namespace elemd
         imageViews = new VkImageView[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-            VkImageViewCreateInfo imageViewCreateInfo;
+            VkImageViewCreateInfo imageViewCreateInfo{};
             imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
             imageViewCreateInfo.pNext = nullptr;
             imageViewCreateInfo.flags = 0;
@@ -691,7 +702,7 @@ namespace elemd
     {
         // --------------- Create Attachment Description ---------------
 
-        VkAttachmentDescription attachmentDescription;
+        VkAttachmentDescription attachmentDescription{};
         attachmentDescription.flags = 0;
         attachmentDescription.format = selectedImageFormat;
         attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -705,14 +716,14 @@ namespace elemd
 
         // --------------- Create Attachment Reference ---------------
 
-        VkAttachmentReference attachmentReference;
+        VkAttachmentReference attachmentReference{};
         attachmentReference.attachment = 0;
         attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         
         // --------------- Create Subpass Desciption ---------------
 
-        VkSubpassDescription subpassDescription;
+        VkSubpassDescription subpassDescription{};
         subpassDescription.flags = 0;
         subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpassDescription.inputAttachmentCount = 0;
@@ -727,7 +738,7 @@ namespace elemd
 
         // --------------- Create Subpass Dependency ---------------
 
-        VkSubpassDependency subpassDependency;
+        VkSubpassDependency subpassDependency{};
         subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
         subpassDependency.dstSubpass = 0;
         subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -740,7 +751,7 @@ namespace elemd
         
         // --------------- Create Render Pass Create Info ---------------
 
-        VkRenderPassCreateInfo renderPassCreateInfo;
+        VkRenderPassCreateInfo renderPassCreateInfo{};
         renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassCreateInfo.pNext = nullptr;
         renderPassCreateInfo.flags = 0;
@@ -767,7 +778,7 @@ namespace elemd
             ///VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         ///uniformDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
-        VkDescriptorSetLayoutBinding storageDescriptorSetLayoutBinding;
+        VkDescriptorSetLayoutBinding storageDescriptorSetLayoutBinding{};
         storageDescriptorSetLayoutBinding.binding = 0;
         storageDescriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         storageDescriptorSetLayoutBinding.descriptorCount = 1;
@@ -775,11 +786,11 @@ namespace elemd
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         storageDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
-        VkDescriptorSetLayoutBinding samplerDescriptorSetLayoutBinding;
+        VkDescriptorSetLayoutBinding samplerDescriptorSetLayoutBinding{};
         samplerDescriptorSetLayoutBinding.binding = 1;
         samplerDescriptorSetLayoutBinding.descriptorType =
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        samplerDescriptorSetLayoutBinding.descriptorCount = TEXTURE_ARRAY_SIZE;
+        samplerDescriptorSetLayoutBinding.descriptorCount = texture_array_size;
         samplerDescriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
         samplerDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
@@ -798,7 +809,7 @@ namespace elemd
             VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT
         };
 
-        VkDescriptorSetLayoutBindingFlagsCreateInfo descriptorSetLayoutBindingFlagsCreateInfo;
+        VkDescriptorSetLayoutBindingFlagsCreateInfo descriptorSetLayoutBindingFlagsCreateInfo{};
         descriptorSetLayoutBindingFlagsCreateInfo.sType =
             VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
         descriptorSetLayoutBindingFlagsCreateInfo.pNext = nullptr;
@@ -806,7 +817,7 @@ namespace elemd
         descriptorSetLayoutBindingFlagsCreateInfo.pBindingFlags = descriptorBindingFlags.data();
         
 
-        VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
+        VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo{};
         descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         descriptorSetLayoutCreateInfo.pNext = &descriptorSetLayoutBindingFlagsCreateInfo;
         descriptorSetLayoutCreateInfo.flags = 0;
@@ -832,7 +843,7 @@ namespace elemd
 
         // --------------- Create Pipeline Shader Stage Create Info ---------------
 
-        VkPipelineShaderStageCreateInfo shaderStageCreateInfoVert;
+        VkPipelineShaderStageCreateInfo shaderStageCreateInfoVert{};
         shaderStageCreateInfoVert.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStageCreateInfoVert.pNext = nullptr;
         shaderStageCreateInfoVert.flags = 0;
@@ -844,7 +855,7 @@ namespace elemd
         
         // --------------- Create Pipeline Shader Stage Create Info ---------------
 
-        VkPipelineShaderStageCreateInfo shaderStageCreateInfoFrag;
+        VkPipelineShaderStageCreateInfo shaderStageCreateInfoFrag{};
         shaderStageCreateInfoFrag.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStageCreateInfoFrag.pNext = nullptr;
         shaderStageCreateInfoFrag.flags = 0;
@@ -865,7 +876,7 @@ namespace elemd
         
         // --------------- Create Pipeline Vertex Input State Create Info ---------------
 
-        VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo;
+        VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo{};
         pipelineVertexInputStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         pipelineVertexInputStateCreateInfo.pNext = nullptr;
@@ -887,7 +898,7 @@ namespace elemd
 
         // --------------- Create Pipeline Input Assembly State Create Info ---------------
 
-        VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo;
+        VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo{};
         pipelineInputAssemblyStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         pipelineInputAssemblyStateCreateInfo.pNext = nullptr;
@@ -898,7 +909,7 @@ namespace elemd
 
         // --------------- Create Pipeline Viewport State Create Info ---------------
 
-        VkViewport viewport;
+        VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
         viewport.width = (float)_width;
@@ -906,11 +917,11 @@ namespace elemd
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
-        VkRect2D scissor;
+        VkRect2D scissor{};
         scissor.offset = {0, 0};
         scissor.extent = {(uint32_t)_width, (uint32_t)_height};
 
-        VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo;
+        VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo{};
         pipelineViewportStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         pipelineViewportStateCreateInfo.pNext = nullptr;
@@ -923,7 +934,7 @@ namespace elemd
 
         // --------------- Create Pipeline Rasterization State Create Info ---------------
 
-        VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo;
+        VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo{};
         pipelineRasterizationStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         pipelineRasterizationStateCreateInfo.pNext = nullptr;
@@ -942,7 +953,7 @@ namespace elemd
 
         // --------------- Create Pipeline Multisample State Create Info ---------------
 
-        VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo;
+        VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo{};
         pipelineMultisampleStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         pipelineMultisampleStateCreateInfo.pNext = nullptr;
@@ -957,7 +968,7 @@ namespace elemd
         
         // --------------- Create Pipeline Color Blend Attachment State ---------------
 
-        VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState;
+        VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState{};
         pipelineColorBlendAttachmentState.blendEnable = VK_TRUE;
         pipelineColorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
         pipelineColorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
@@ -972,7 +983,7 @@ namespace elemd
 
         // --------------- Create Pipeline Color Blend State Create Info ---------------
 
-        VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo;
+        VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo{};
         pipelineColorBlendStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
         pipelineColorBlendStateCreateInfo.pNext = nullptr;
@@ -992,7 +1003,7 @@ namespace elemd
             VK_DYNAMIC_STATE_SCISSOR
         };
 
-        VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo;
+        VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo{};
         pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
         pipelineDynamicStateCreateInfo.pNext = nullptr;
         pipelineDynamicStateCreateInfo.flags = 0;
@@ -1001,7 +1012,7 @@ namespace elemd
 
         // --------------- Create Pipeline Layout Create Info ---------------
 
-        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
+        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutCreateInfo.pNext = nullptr;
         pipelineLayoutCreateInfo.flags = 0;
@@ -1019,7 +1030,7 @@ namespace elemd
 
         // --------------- Create Graphics Pipeline Create Info ---------------
 
-        VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo;
+        VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
         graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         graphicsPipelineCreateInfo.pNext = nullptr;
         graphicsPipelineCreateInfo.flags = 0;
@@ -1055,7 +1066,7 @@ namespace elemd
 
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-            VkFramebufferCreateInfo frameBufferCreateInfo;
+            VkFramebufferCreateInfo frameBufferCreateInfo{};
             frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             frameBufferCreateInfo.pNext = nullptr;
             frameBufferCreateInfo.flags = 0;
@@ -1075,7 +1086,7 @@ namespace elemd
     {
         // --------------- Create Command Pool Create Info ---------------
 
-        VkCommandPoolCreateInfo commandPoolCreateInfo;
+        VkCommandPoolCreateInfo commandPoolCreateInfo{};
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         commandPoolCreateInfo.pNext = nullptr;
         commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
@@ -1091,7 +1102,7 @@ namespace elemd
     {
         // --------------- Create Command Buffer Allocate Info ---------------
 
-        VkCommandBufferAllocateInfo commandBufferAllocateInfo;
+        VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         commandBufferAllocateInfo.pNext = nullptr;
         commandBufferAllocateInfo.commandPool = commandPool;
@@ -1110,7 +1121,7 @@ namespace elemd
     {
         // --------------- Create Command Buffer Begin Info ---------------
 
-        VkCommandBufferBeginInfo commandBufferBeginInfo;
+        VkCommandBufferBeginInfo commandBufferBeginInfo{};
         commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         commandBufferBeginInfo.pNext = nullptr;
         commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
@@ -1120,7 +1131,7 @@ namespace elemd
         {
             vku::err_check(vkBeginCommandBuffer(commandBuffers[i], &commandBufferBeginInfo));
 
-            VkRenderPassBeginInfo renderPassBeginInfo;
+            VkRenderPassBeginInfo renderPassBeginInfo{};
             renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
             renderPassBeginInfo.pNext = nullptr;
             renderPassBeginInfo.renderPass = renderPass;
@@ -1135,7 +1146,7 @@ namespace elemd
 
                 vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
-                VkViewport viewport;
+                VkViewport viewport{};
                 viewport.x = 0.0f;
                 viewport.y = 0.0f;
                 viewport.width = (float)_width;
@@ -1143,7 +1154,7 @@ namespace elemd
                 viewport.minDepth = 0.0f;
                 viewport.maxDepth = 1.0f;
 
-                VkRect2D scissor;
+                VkRect2D scissor{};
                 scissor.offset = { 0, 0 };
                 scissor.extent = {(uint32_t)_width, (uint32_t)_height};
 
@@ -1178,7 +1189,7 @@ namespace elemd
     void ContextImplVulkan::create_semaphores()
     {
 
-        VkFenceCreateInfo fenceCreateInfo;
+        VkFenceCreateInfo fenceCreateInfo{};
         fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceCreateInfo.pNext = nullptr;
         fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
@@ -1189,7 +1200,7 @@ namespace elemd
 
         // --------------- Create Semaphore Create Info ---------------
 
-        VkSemaphoreCreateInfo semaphoreCreateInfo;
+        VkSemaphoreCreateInfo semaphoreCreateInfo{};
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
         semaphoreCreateInfo.pNext = nullptr;
         semaphoreCreateInfo.flags = 0;
@@ -1266,6 +1277,7 @@ namespace elemd
 
 
         VulkanSharedInfo::getInstance();
+        initialize_limits();
         create_surface();
         check_surface_support();
         create_queue();
@@ -1397,11 +1409,11 @@ namespace elemd
         uniformDescriptorPoolSize.descriptorCount = 1;
         */
 
-        VkDescriptorPoolSize storageDescriptorPoolSize;
+        VkDescriptorPoolSize storageDescriptorPoolSize{};
         storageDescriptorPoolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         storageDescriptorPoolSize.descriptorCount = 1;
 
-        VkDescriptorPoolSize samplerDescriptorPoolSize;
+        VkDescriptorPoolSize samplerDescriptorPoolSize{};
         samplerDescriptorPoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         samplerDescriptorPoolSize.descriptorCount = 1;
 
@@ -1411,7 +1423,7 @@ namespace elemd
             samplerDescriptorPoolSize
         };
 
-        VkDescriptorPoolCreateInfo descriptorPoolCreateInfo;
+        VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
         descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         descriptorPoolCreateInfo.pNext = nullptr;
         descriptorPoolCreateInfo.flags = 0;
@@ -1425,7 +1437,7 @@ namespace elemd
 
     void ContextImplVulkan::create_descriptor_set()
     {
-        VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
+        VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
         descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         descriptorSetAllocateInfo.pNext = nullptr;
         descriptorSetAllocateInfo.descriptorPool = descriptorPool;
@@ -1435,9 +1447,7 @@ namespace elemd
         vku::err_check(vkAllocateDescriptorSets(VulkanSharedInfo::getInstance()->device,
                                                 &descriptorSetAllocateInfo, &descriptorSet));
 
-        VkPhysicalDeviceProperties properties;
-        vkGetPhysicalDeviceProperties(VulkanSharedInfo::getInstance()->bestPhysicalDevice,
-                                      &properties);
+        
 
         /*
         // Uniform Buffer
@@ -1463,13 +1473,13 @@ namespace elemd
 
 
         // Storage Buffer
-        VkDescriptorBufferInfo descriptorStorageBufferInfo;
+        VkDescriptorBufferInfo descriptorStorageBufferInfo{};
         descriptorStorageBufferInfo.buffer = storageBuffer;
         descriptorStorageBufferInfo.offset = 0;
         //descriptorStorageBufferInfo.range = properties.limits.maxStorageBufferRange;
         descriptorStorageBufferInfo.range = UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE;
 
-        VkWriteDescriptorSet storageWriteDescriptorSet;
+        VkWriteDescriptorSet storageWriteDescriptorSet{};
         storageWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         storageWriteDescriptorSet.pNext = nullptr;
         storageWriteDescriptorSet.dstSet = descriptorSet;
@@ -1491,7 +1501,7 @@ namespace elemd
 
         if (images.size() <= 0)
         {
-            VkDescriptorImageInfo descriptorImageInfo;
+            VkDescriptorImageInfo descriptorImageInfo{};
             descriptorImageInfo.sampler = dummy->_sampler;
             descriptorImageInfo.imageView = dummy->_imageView;
             descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1501,7 +1511,7 @@ namespace elemd
         {        
             for (uint32_t i = 0; i < images.size(); ++i)
             {
-                VkDescriptorImageInfo descriptorImageInfo;
+                VkDescriptorImageInfo descriptorImageInfo{};
                 descriptorImageInfo.sampler = images[i]->_sampler;
                 descriptorImageInfo.imageView = images[i]->_imageView;
                 descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1525,7 +1535,7 @@ namespace elemd
             descriptorImageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         }*/
 
-        VkWriteDescriptorSet samplerWriteDescriptorSet;
+        VkWriteDescriptorSet samplerWriteDescriptorSet{};
         samplerWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         samplerWriteDescriptorSet.pNext = nullptr;
         samplerWriteDescriptorSet.dstSet = descriptorSet;

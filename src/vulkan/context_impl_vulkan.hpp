@@ -16,7 +16,6 @@
 #include "../window_impl.hpp"
 #include "image_impl_vulkan.hpp"
 
-#define TEXTURE_ARRAY_SIZE 10
 #define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536
 #define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE UNIFORM_BUFFER_ARRAY_MAX_COUNT * sizeof(uniform_rect)
 
@@ -52,6 +51,8 @@ namespace elemd
         std::vector<uniform_rect> storage = {};
         int last_uniform_cnt = 0;
 
+        int texture_array_size = -1;
+
         WindowImpl* _window;
 
         std::atomic<bool> resizing = false;
@@ -65,41 +66,42 @@ namespace elemd
         static std::vector<unsigned char> vertex_code;
         static std::vector<unsigned char> fragment_code;
 
-        VkSurfaceKHR surface;
-        VkQueue queue;
+        VkSurfaceKHR surface{};
+        VkQueue queue{};
         VkSwapchainKHR swapchain = VK_NULL_HANDLE;
         VkImageView* imageViews;
         VkShaderModule* fragShaderModule;
         VkShaderModule* vertShaderModule;
-        VkPipelineLayout pipelineLayout;
-        VkRenderPass renderPass;
-        VkPipeline pipeline;
+        VkPipelineLayout pipelineLayout{};
+        VkRenderPass renderPass{};
+        VkPipeline pipeline{};
         VkFramebuffer* frameBuffers;
-        VkCommandPool commandPool;
+        VkCommandPool commandPool{};
         VkCommandBuffer* commandBuffers;
 
         //VkBuffer vertexBuffer = VK_NULL_HANDLE;
         //VkDeviceMemory vertexBufferDeviceMemory;
-        VkBuffer indexBuffer;
-        VkDeviceMemory indexBufferDeviceMemory;
+        VkBuffer indexBuffer{};
+        VkDeviceMemory indexBufferDeviceMemory{};
 
         ///VkBuffer uniformBuffer;
         ///VkDeviceMemory uniformBufferDeviceMemory;
 
-        VkBuffer storageBuffer;
-        VkDeviceMemory storageBufferDeviceMemory;
+        VkBuffer storageBuffer{};
+        VkDeviceMemory storageBufferDeviceMemory{};
 
-        VkDescriptorSetLayout descriptorSetLayout;
-        VkDescriptorPool descriptorPool;
-        VkDescriptorSet descriptorSet;
+        VkDescriptorSetLayout descriptorSetLayout{};
+        VkDescriptorPool descriptorPool{};
+        VkDescriptorSet descriptorSet{};
 
-        VkSemaphore semaphoreImageAvailable;
-        VkSemaphore semaphoreRenderingComplete;
-        VkFence renderFence;
+        VkSemaphore semaphoreImageAvailable{};
+        VkSemaphore semaphoreRenderingComplete{};
+        VkFence renderFence{};
 
         ContextImplVulkan(Window* window);
         ~ContextImplVulkan();
 
+        void initialize_limits();
         void create_surface();
         void create_queue();
         void create_swapchain();
