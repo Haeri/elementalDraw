@@ -95,7 +95,7 @@ int main(void)
         if (playing)
         {
 
-            if (win->now() - last_time < 0.08f)
+            if (win->now() - last_time < 0.02f)
                 continue;
         
             last_time = win->now();
