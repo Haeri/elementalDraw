@@ -26,10 +26,22 @@ namespace elemd
         return new fontImplVulkan(file_path);
     }
 
+    font* font::create(unsigned char* buffer, size_t size)
+    {
+        return new fontImplVulkan(buffer, size);
+    }
+
 
     fontImplVulkan::fontImplVulkan(std::string file_path)
     {
         load_from_file(file_path);
+
+        _loaded = true;
+    }
+
+    fontImplVulkan::fontImplVulkan(unsigned char* buffer, size_t size)
+    {
+        load_from_memory(buffer, size);
 
         _loaded = true;
     }

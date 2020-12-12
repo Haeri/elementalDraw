@@ -102,7 +102,7 @@ namespace elemd
         float _line_width = 1;
         int _font_size = 10;
         font* _font = nullptr;
-        //font* _default_font = nullptr;
+        font* _default_font = nullptr;
     };
 } // namespace elemd
 

@@ -144,9 +144,10 @@ namespace elemd
 
         vku::best_device_info bdi =
             vku::select_physical_device(physicalDevices, physicalDeviceCount);
-        bestPhysicalDevice = physicalDevices[bdi.deviceIndex];
-        queueFamilyIndex = bdi.queueFamilyIndex;
-        queueCount = bdi.queueCount;
+        bestPhysicalDevice = physicalDevices[bdi.device_index];
+        queueFamilyIndex = bdi.queue_family_index;
+        queueCount = bdi.queue_count;
+        hardware_name = bdi.device_name;
     }
 
     void VulkanSharedInfo::create_logical_device()

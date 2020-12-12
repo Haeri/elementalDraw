@@ -4,6 +4,7 @@
 #include FT_FREETYPE_H
 #include <vector>
 #include <math.h>
+#include <fstream>
 
 namespace elemd
 {
@@ -108,7 +109,26 @@ namespace elemd
         return elemd::vec2(width, height);
     }
 
-    void font::load_from_file(std::string file_path)
+    void font::load_from_file(std::string file_path) 
+    {
+        std::ifstream file(file_path, std::ios::binary | std::ios::ate);
+        if (file)
+        {
+            size_t fileSize = (size_t)file.tellg();
+            unsigned char* fileBuffer = (unsigned char*)malloc(sizeof(unsigned char)*fileSize);
+            file.seekg(0);
+            file.read((char*)fileBuffer, fileSize);
+            file.close();
+        
+            load_from_memory(fileBuffer, fileSize);
+        }
+        else
+        {
+            std::cerr << "Font "<< file_path << "not found" << std::endl;
+        }
+    }
+
+    void font::load_from_memory(unsigned char* data, size_t size)
     {
         FT_Library ft_library;
         FT_Face face;
@@ -121,7 +141,7 @@ namespace elemd
             exit(1);
         }
  
-        ft_error = FT_New_Face(ft_library, file_path.c_str(), 0, &face);
+        ft_error = FT_New_Memory_Face(ft_library, data, size, 0, &face);
         if (ft_error == FT_Err_Unknown_File_Format)
         {
             std::cerr << "Error: font not supported!" << std::endl;

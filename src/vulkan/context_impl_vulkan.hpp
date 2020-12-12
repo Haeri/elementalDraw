@@ -63,8 +63,8 @@ namespace elemd
         VkClearValue clearValue = {};
         VkFormat selectedImageFormat;
 
-        static std::vector<unsigned char> vertex_code;
-        static std::vector<unsigned char> fragment_code;
+        //static std::vector<unsigned char> vertex_code;
+        //static std::vector<unsigned char> fragment_code;
 
         VkSurfaceKHR surface{};
         VkQueue queue{};

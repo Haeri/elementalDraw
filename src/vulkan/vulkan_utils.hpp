@@ -11,9 +11,10 @@ namespace elemd::vku
 {
     struct best_device_info
     {
-        int deviceIndex;
-        uint32_t queueFamilyIndex;
-        uint32_t queueCount;
+        std::string device_name;
+        int device_index;
+        uint32_t queue_family_index;
+        uint32_t queue_count;
     };
 
 

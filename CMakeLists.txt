@@ -92,12 +92,14 @@ if (ELEMD_BUILD_EXAMPLES)
     add_subdirectory(examples/brick_breaker)
     add_subdirectory(examples/painter)
     add_subdirectory(examples/hello_world)
+    add_subdirectory(examples/game_of_life)
 
     set_target_properties(runtime PROPERTIES FOLDER examples)
     set_target_properties(window-app PROPERTIES FOLDER examples)
     set_target_properties(brick-breaker PROPERTIES FOLDER examples)
     set_target_properties(painter PROPERTIES FOLDER examples)
     set_target_properties(hello-world PROPERTIES FOLDER examples)
+    set_target_properties(game-of-life PROPERTIES FOLDER examples)
 
   if (BUILD_SHARED_LIBS)
     add_custom_command(
@@ -107,6 +109,7 @@ if (ELEMD_BUILD_EXAMPLES)
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/hello_world/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/game_of_life/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMENT "Copy library"
     )
   endif()

@@ -3,6 +3,8 @@
 
 #include "./vulkan.h"
 
+#include <string>
+
 #define DEFAULT_VALIDATION_LAYER "VK_LAYER_KHRONOS_validation"
 
 namespace elemd
@@ -10,6 +12,7 @@ namespace elemd
     class VulkanSharedInfo
     {
     public:
+        std::string hardware_name = "";
         uint32_t actualSwapchainImageCount = -1;
         uint32_t queueFamilyIndex = -1;
         uint32_t queueCount = -1;

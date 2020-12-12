@@ -111,10 +111,14 @@ namespace elemd::vku
             delete[] queueFamilyProperties;
         }
 
-        //bestDeviceIndex = 0;
-        //maxQueueCount = 1;
 
-        return best_device_info{bestDeviceIndex, bestQueuFamily, maxQueueCount};
+//        bestDeviceIndex = 1;
+//        maxQueueCount = 1;
+
+        VkPhysicalDeviceProperties properties{};
+        vkGetPhysicalDeviceProperties(physicalDevices[bestDeviceIndex], &properties);
+
+        return best_device_info{properties.deviceName, bestDeviceIndex, bestQueuFamily, maxQueueCount};
     }
 
     VkCommandBuffer beginSingleTimeCommands(const VkCommandPool& commandPool)
@@ -407,7 +411,10 @@ namespace elemd::vku
 
     void print_selected_device()
     {
+
         std::cout << "\"selected_device\": {\n"
+                  << "\t\"deviceName\": " << VulkanSharedInfo::getInstance()->hardware_name
+                  << "\,\n"
                   << "\t\"queueCount\": " << VulkanSharedInfo::getInstance()->queueCount << ",\n"
                   << "\t\"queueFamilyIndex\": " << VulkanSharedInfo::getInstance()->queueFamilyIndex
                   << "\n"

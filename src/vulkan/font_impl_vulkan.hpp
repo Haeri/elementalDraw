@@ -13,6 +13,7 @@ namespace elemd
     {
     public:
         fontImplVulkan(std::string file_path);
+        fontImplVulkan(unsigned char* buffer, size_t size);
         ~fontImplVulkan();
 
         bool _loaded = false;

@@ -23,6 +23,7 @@ namespace elemd
     {
     public:
         static font* create(std::string file_path);
+        static font* create(unsigned char* buffer, size_t size);
 
         std::map<char, character>& get_characters();
         float get_line_height();
@@ -42,6 +43,7 @@ namespace elemd
         std::map<char, character> _characters;
 
         void load_from_file(std::string file_path);
+        void load_from_memory(unsigned char* data, size_t size);
         int fit_one_substring(std::string text, int width, int font_size);
     };
 

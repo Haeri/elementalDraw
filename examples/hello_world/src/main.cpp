@@ -23,8 +23,8 @@ int main(void)
     ctx->_tmp_register_image(img);
 
     // Load Font
-    elemd::font* urbanist = elemd::font::create("./res/font/Urbanist-Regular.ttf");
-    ctx->_tmp_register_font(urbanist);
+    //elemd::font* urbanist = elemd::font::create("./res/font/Urbanist-Regular.ttf");
+    //ctx->_tmp_register_font(urbanist);
 
     // Load animation
     elemd::image* anim = elemd::image::create("./res/anim.png");
@@ -61,7 +61,7 @@ int main(void)
 
         // Text
         ctx->set_fill_color(white);
-        ctx->set_font(urbanist);
+        //ctx->set_font(urbanist);
         ctx->set_font_size(18);
         ctx->draw_text(20, 20, text);
 
@@ -82,7 +82,7 @@ int main(void)
         ctx->draw_image(20, 110, 80, 80, img);
 
         // Timted image
-        ctx->set_fill_color(elemd::color(100, 100, 230));
+        ctx->set_fill_color(elemd::color(10, 10, 255));
         ctx->draw_image(120, 110, 80, 80, img, true);
 
         // Rounded image
@@ -110,7 +110,7 @@ int main(void)
     // Cleanup
     anim->destroy();
     img->destroy();
-    urbanist->destroy();
+    //urbanist->destroy();
     win->destroy();
 
     return 0;
