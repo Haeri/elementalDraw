@@ -1416,7 +1416,7 @@ namespace elemd
 
         VkDescriptorPoolSize samplerDescriptorPoolSize{};
         samplerDescriptorPoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        samplerDescriptorPoolSize.descriptorCount = 1;
+        samplerDescriptorPoolSize.descriptorCount = texture_array_size;
 
         std::vector<VkDescriptorPoolSize> descriptorPoolSizes = {
             //uniformDescriptorPoolSize,

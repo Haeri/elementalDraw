@@ -51,7 +51,6 @@ int main(void)
     elemd::WindowConfig winc =
         elemd::WindowConfig{"Game Of Life", GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE};
     //winc.transparent = true;
-    winc.icon_file = "./res/logo.png";
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
 
