@@ -20,6 +20,7 @@ namespace elemd
 
         float _x_scale = 1;
         float _y_scale = 1;
+        float _dpi_scale = 1;
         /*
         int buttonEvent;
         int cp_x;
@@ -34,6 +35,9 @@ namespace elemd
         std::vector<std::function<void(key_event)>> _key_callbacks;
         std::vector<std::function<void(char_event)>> _char_callbacks;
         std::vector<std::function<void(scroll_event)>> _scroll_callbacks;
+
+        std::unordered_map<Cursor* , GLFWcursor*> _cursors;
+        std::unordered_map<CURSOR_TYPE, GLFWcursor*> _default_cursors;
 
         GLFWwindow* getGLFWWindow();
         void create_window(const WindowConfig& config);

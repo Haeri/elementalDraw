@@ -44,12 +44,20 @@ int main(void)
 
     float color_phase = 0;
 
+    float initial_scale = win->get_dpi_scale();
     // Event
     std::string text = "Hello World!";
     win->add_char_listener([&](elemd::char_event event) { 
         text += event.utf8;
     });
 
+    win->add_scroll_listener([&](elemd::scroll_event event) {
+        elemd::vec2 scale = win->get_scale();
+        float deltax = std::clamp(scale.x() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
+        float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
+        
+        win->set_scale(deltax, deltay);
+    });
 
     ctx->_tmp_prepare();
     ctx->set_clear_color(dark);

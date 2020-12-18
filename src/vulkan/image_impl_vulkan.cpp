@@ -35,7 +35,7 @@ namespace elemd
         return new imageImplVulkan(width, height, components, data);
     }
 
-    imageImplVulkan::imageImplVulkan(std::string file_path)
+    imageImplVulkan::imageImplVulkan(std::string file_path, bool generate_mips)
     {
         stbi_uc* data =
             stbi_load(file_path.c_str(), &_width, &_height, &_components, STBI_rgb_alpha);
@@ -47,6 +47,13 @@ namespace elemd
             _components = 4;
             _name = file_path;
             
+
+            if (generate_mips)
+            {
+                _mipLevels =
+                    static_cast<uint32_t>(std::floor(std::log2(std::max(_width, _height)))) + 1;
+            }
+
             _loaded = true;
         }
         else
@@ -55,13 +62,19 @@ namespace elemd
         }
     }
 
-    imageImplVulkan::imageImplVulkan(int width, int height, int components, unsigned char* data)
+    imageImplVulkan::imageImplVulkan(int width, int height, int components, unsigned char* data,
+                                     bool generate_mips)
     {
         _width = width;
         _height = height;
         _components = components;
         _data = data;
         _name = "noname_" + std::to_string(rand() % 10000);
+
+        if (generate_mips)
+        {
+            _mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+        }
 
         _managed = true;
         _loaded = true;
@@ -101,8 +114,8 @@ namespace elemd
         //VkDeviceSize imageSize = _width * _height * 4;
         VkDeviceSize actualImageSize = _width * _height * _components;
 
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingDeviceMemory;
+        VkBuffer stagingBuffer{};
+        VkDeviceMemory stagingDeviceMemory{};
 
         vku::create_buffer(actualImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer,
                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
@@ -126,7 +139,7 @@ namespace elemd
             format = VK_FORMAT_R8G8B8A8_UNORM;
         }
 
-        VkImageCreateInfo imageCreateInfo;
+        VkImageCreateInfo imageCreateInfo{};
         imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageCreateInfo.pNext = nullptr;
         imageCreateInfo.flags = 0;
@@ -135,10 +148,10 @@ namespace elemd
         imageCreateInfo.extent.width = _width;
         imageCreateInfo.extent.height = _height;
         imageCreateInfo.extent.depth = 1;
-        imageCreateInfo.mipLevels = 1;
+        imageCreateInfo.mipLevels = _mipLevels;
         imageCreateInfo.arrayLayers = 1;
         imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
+        imageCreateInfo.tiling = _mipLevels > 1 ? VK_IMAGE_TILING_OPTIMAL : VK_IMAGE_TILING_OPTIMAL;
         imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageCreateInfo.queueFamilyIndexCount = 0;
@@ -147,10 +160,10 @@ namespace elemd
 
         vku::err_check(vkCreateImage(device, &imageCreateInfo, nullptr, &_image));
 
-        VkMemoryRequirements memoryRequirements;
+        VkMemoryRequirements memoryRequirements{};
         vkGetImageMemoryRequirements(device, _image, &memoryRequirements);
 
-        VkMemoryAllocateInfo memoryAllocateInfo;
+        VkMemoryAllocateInfo memoryAllocateInfo{};
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         memoryAllocateInfo.pNext = nullptr;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
@@ -163,14 +176,23 @@ namespace elemd
 
         changeLayout(commandPool, queue, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         writeBuffer(commandPool, queue, stagingBuffer);
-        changeLayout(commandPool, queue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        
+        if(_mipLevels > 1)
+        {
+            changeLayout(commandPool, queue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        }
 
 
         vkDestroyBuffer(device, stagingBuffer, nullptr);
         vkFreeMemory(device, stagingDeviceMemory, nullptr);
 
+        if (_mipLevels > 1)
+        {
+            generateMipmaps(commandPool, queue, format);
+        }
 
-        VkImageViewCreateInfo imageViewCreateInfo;
+
+        VkImageViewCreateInfo imageViewCreateInfo{};
         imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         imageViewCreateInfo.pNext = nullptr;
         imageViewCreateInfo.flags = 0;
@@ -183,7 +205,7 @@ namespace elemd
         imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
         imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-        imageViewCreateInfo.subresourceRange.levelCount = 1;
+        imageViewCreateInfo.subresourceRange.levelCount = _mipLevels;
         imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
         imageViewCreateInfo.subresourceRange.layerCount = 1;
 
@@ -191,7 +213,7 @@ namespace elemd
         vku::err_check(vkCreateImageView(device, &imageViewCreateInfo, nullptr, &_imageView));
         
 
-        VkSamplerCreateInfo samplerCreateInfo;
+        VkSamplerCreateInfo samplerCreateInfo{};
         samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         samplerCreateInfo.pNext = nullptr;
         samplerCreateInfo.flags = 0;
@@ -207,7 +229,7 @@ namespace elemd
         samplerCreateInfo.compareEnable = VK_FALSE;
         samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
         samplerCreateInfo.minLod = 0.0f;
-        samplerCreateInfo.maxLod = 0.0f;
+        samplerCreateInfo.maxLod = (float)_mipLevels;
         samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
         samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 
@@ -222,7 +244,7 @@ namespace elemd
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkCommandBuffer commandBuffer = vku::beginSingleTimeCommands(commandPool);
 
-        VkBufferImageCopy bufferImageCopy;
+        VkBufferImageCopy bufferImageCopy{};
         bufferImageCopy.bufferOffset = 0;
         bufferImageCopy.bufferRowLength = 0;
         bufferImageCopy.bufferImageHeight = 0;
@@ -244,10 +266,10 @@ namespace elemd
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkCommandBuffer commandBuffer = vku::beginSingleTimeCommands(commandPool);
 
-        VkPipelineStageFlags sourceStage;
-        VkPipelineStageFlags destinationStage;
+        VkPipelineStageFlags sourceStage{};
+        VkPipelineStageFlags destinationStage{};
 
-        VkImageMemoryBarrier imageMemoryBarrier;
+        VkImageMemoryBarrier imageMemoryBarrier{};
         imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         imageMemoryBarrier.pNext = nullptr;
         if (_imageLayout == VK_IMAGE_LAYOUT_PREINITIALIZED && layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
@@ -279,7 +301,7 @@ namespace elemd
         imageMemoryBarrier.image = _image; 
         imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
-        imageMemoryBarrier.subresourceRange.levelCount = 1;
+        imageMemoryBarrier.subresourceRange.levelCount = _mipLevels;
         imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
         imageMemoryBarrier.subresourceRange.layerCount = 1;
 
@@ -290,6 +312,94 @@ namespace elemd
         vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
 
         _imageLayout = layout;
+    }
+
+    void imageImplVulkan::generateMipmaps(const VkCommandPool& commandPool, const VkQueue& queue,
+                                          const VkFormat& format)
+    {
+        VkPhysicalDevice physical_device = VulkanSharedInfo::getInstance()->bestPhysicalDevice;
+
+        // Check if image format supports linear blitting
+        VkFormatProperties formatProperties{};
+        vkGetPhysicalDeviceFormatProperties(physical_device, format, &formatProperties);
+
+        if (!(formatProperties.optimalTilingFeatures &
+              VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
+        {
+            throw std::runtime_error("texture image format does not support linear blitting!");
+        }
+
+        VkCommandBuffer commandBuffer = vku::beginSingleTimeCommands(commandPool);        
+
+        VkImageMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.image = _image;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = 1;
+        barrier.subresourceRange.levelCount = 1;
+
+        int32_t mipWidth = _width;
+        int32_t mipHeight = _height;
+
+        for (uint32_t i = 1; i < _mipLevels; i++)
+        {
+            barrier.subresourceRange.baseMipLevel = i - 1;
+            barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+            vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                 VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1,
+                                 &barrier);
+
+            VkImageBlit blit{};
+            blit.srcOffsets[0] = {0, 0, 0};
+            blit.srcOffsets[1] = {mipWidth, mipHeight, 1};
+            blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            blit.srcSubresource.mipLevel = i - 1;
+            blit.srcSubresource.baseArrayLayer = 0;
+            blit.srcSubresource.layerCount = 1;
+            blit.dstOffsets[0] = {0, 0, 0};
+            blit.dstOffsets[1] = {mipWidth > 1 ? mipWidth / 2 : 1,
+                                  mipHeight > 1 ? mipHeight / 2 : 1, 1};
+            blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            blit.dstSubresource.mipLevel = i;
+            blit.dstSubresource.baseArrayLayer = 0;
+            blit.dstSubresource.layerCount = 1;
+
+            vkCmdBlitImage(commandBuffer, _image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, _image,
+                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, VK_FILTER_LINEAR);
+
+            barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+            vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr,
+                                 1, &barrier);
+
+            if (mipWidth > 1)
+                mipWidth /= 2;
+            if (mipHeight > 1)
+                mipHeight /= 2;
+        }
+
+        barrier.subresourceRange.baseMipLevel = _mipLevels - 1;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1,
+                             &barrier);
+
+        vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
     }
 
     void imageImplVulkan::writeToFile()

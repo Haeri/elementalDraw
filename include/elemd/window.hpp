@@ -37,6 +37,25 @@ namespace elemd
         const char* icon_file = nullptr;
     };
 
+    enum CURSOR_TYPE
+    {
+        ARROW_CURSOR = 0x00036001,
+        IBEAM_CURSOR = 0x00036002,
+        CROSSHAIR_CURSOR = 0x00036003,
+        HAND_CURSOR = 0x00036004,
+        HRESIZE_CURSOR = 0x00036005,
+        VRESIZE_CURSOR = 0x00036006
+    };
+
+    extern "C" struct ELEMD_API Cursor
+    {
+        int width;
+        int height;
+        int hot_x;
+        int hot_y;
+        unsigned char* data;
+    };
+
     class ELEMD_API Window
     {
     public:
@@ -50,6 +69,7 @@ namespace elemd
         int get_height();
         elemd::vec2 get_position();
         elemd::vec2 get_scale();
+        float get_dpi_scale();
 
         void set_title(const std::string& title);
         void set_position(int x, int y);
@@ -65,6 +85,9 @@ namespace elemd
         void add_char_listener(std::function<void(char_event)> callback);
         void add_scroll_listener(std::function<void(scroll_event)> callback);
         void reset_listener();
+
+        void set_cursor(CURSOR_TYPE cursor_type);
+        void set_cursor(Cursor* cursor);
 
         void minimize();
         void maximize();
@@ -85,7 +108,7 @@ namespace elemd
 
 
         Context* _context = nullptr;
-        bool _vsync = true;
+        bool _vsync = true;        
     };
 
 } // namespace elemd

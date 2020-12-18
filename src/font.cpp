@@ -158,6 +158,7 @@ namespace elemd
 
         // quick and dirty max texture size estimate
 
+        int padding = LOADED_HEIGHT/3.0f;
         int max_dim = (int)(1 + (face->size->metrics.height >> 6)) * ceil(sqrt(NUM_GLYPHS));
         int tex_width = 1;
         while (tex_width < max_dim)
@@ -168,17 +169,17 @@ namespace elemd
         // render glyphs to atlas
 
         char* pixels = (char*)calloc(tex_width * tex_height, 1);
-        int pen_x = 0, pen_y = 0;
+        int pen_x = padding, pen_y = padding;
 
         for (int i = 0; i < NUM_GLYPHS; ++i)
         {
             FT_Load_Char(face, i, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT);
             FT_Bitmap* bmp = &face->glyph->bitmap;
 
-            if (pen_x + bmp->width >= tex_width)
+            if (pen_x + bmp->width + padding >= tex_width)
             {
-                pen_x = 0;
-                pen_y += ((face->size->metrics.height >> 6) + 1);
+                pen_x = padding;
+                pen_y += ((face->size->metrics.height >> 6) + 1) + padding;
             }
 
             for (int row = 0; row < bmp->rows; ++row)
@@ -201,7 +202,7 @@ namespace elemd
 
             _characters[i] = character;
 
-            pen_x += bmp->width + 1;
+            pen_x += bmp->width + 1 + padding;
         }
 
         FT_Done_Face(face);

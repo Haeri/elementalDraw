@@ -13,8 +13,9 @@ namespace elemd
     class imageImplVulkan : public image
     {
     public:
-        imageImplVulkan(std::string file_path);
-        imageImplVulkan(int width, int height, int components, unsigned char* data);
+        imageImplVulkan(std::string file_path, bool generate_mips = true);
+        imageImplVulkan(int width, int height, int components, unsigned char* data,
+                        bool generate_mips = true);
         ~imageImplVulkan();
 
         VkImage _image;
@@ -23,6 +24,7 @@ namespace elemd
         VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
         VkSampler _sampler;
         int _sampler_index = -1;
+        uint32_t _mipLevels = 1;
 
         bool _loaded = false;
         bool _uploaded = false;
@@ -30,6 +32,8 @@ namespace elemd
         void upload(const VkCommandPool& commandPool, const VkQueue& queue);
         void writeBuffer(const VkCommandPool& commandPool, const VkQueue& queue, VkBuffer buffer);
         void changeLayout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout);
+        void generateMipmaps(const VkCommandPool& commandPool, const VkQueue& queue, const VkFormat& format);
+        
         void writeToFile();
 
         VkSampler getSampler();

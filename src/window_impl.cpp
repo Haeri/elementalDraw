@@ -123,6 +123,39 @@ namespace elemd
         impl->_scroll_callbacks.clear();
     }
 
+    void Window::set_cursor(CURSOR_TYPE cursor_type)
+    {
+        WindowImpl* impl = getImpl(this);
+
+        if (impl->_default_cursors.find(cursor_type) != impl->_default_cursors.end())
+        {
+            impl->_default_cursors[cursor_type] = glfwCreateStandardCursor(cursor_type);
+        }
+
+        glfwSetCursor(impl->_glfw_window, impl->_default_cursors[cursor_type]);
+    }
+
+    void Window::set_cursor(Cursor* cursor)
+    {
+        WindowImpl* impl = getImpl(this);
+        if (cursor == nullptr) {
+            glfwSetCursor(impl->_glfw_window, NULL);
+            return;
+        }
+
+        if (impl->_cursors.find(cursor) == impl->_cursors.end())
+        {         
+            GLFWimage image;
+            image.width = 16;
+            image.height = 16;
+            image.pixels = cursor->data;
+
+            impl->_cursors[cursor] = glfwCreateCursor(&image, cursor->hot_x, cursor->hot_y);
+        }
+
+        glfwSetCursor(impl->_glfw_window, impl->_cursors[cursor]);
+    }
+
     void Window::minimize()
     {
         WindowImpl* impl = getImpl(this);
@@ -192,6 +225,14 @@ namespace elemd
         WindowImpl* impl = getImpl(this);
         return elemd::vec2(impl->_x_scale, impl->_y_scale);
     }
+
+    float Window::get_dpi_scale()
+    {
+        WindowImpl* impl = getImpl(this);
+        //return 1;
+        return impl->_dpi_scale;
+    }
+    
 
     double Window::now()
     {
@@ -270,6 +311,15 @@ namespace elemd
 
         _context->destroy();
 
+        for (auto& cursor : _default_cursors)
+        {
+            glfwDestroyCursor(cursor.second);
+        }
+        for (auto& cursor : _cursors)
+        {
+            glfwDestroyCursor(cursor.second);
+        }
+
         if (_windowCount == 0)
         {
             VulkanSharedInfo::destroy();
@@ -308,6 +358,8 @@ namespace elemd
         {
             set_position(config.position_x, config.position_y);
         }
+        
+        glfwGetWindowContentScale(_glfw_window, &_dpi_scale, &_dpi_scale);
 
         if (config.x_scale <= 0 || config.y_scale <= 0)
         {
@@ -380,7 +432,7 @@ namespace elemd
 
         for (auto& var : winImpl->_mouse_move_callbacks)
         {
-            var({x / winImpl->_x_scale, y / winImpl->_y_scale});
+            var({x / winImpl->_dpi_scale, y / winImpl->_dpi_scale});
         }
     }
 
@@ -413,7 +465,8 @@ namespace elemd
 
         for (auto& var : winImpl->_mouse_button_callbacks)
         {
-            var({(mouse_button)button, (input_action)action, (mouse_mod)mods, x / winImpl->_x_scale, y / winImpl->_y_scale});
+            var({(mouse_button)button, (input_action)action, (mouse_mod)mods,
+                 x / winImpl->_dpi_scale, y / winImpl->_dpi_scale});
         }
     }
 

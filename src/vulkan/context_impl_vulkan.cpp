@@ -1222,7 +1222,7 @@ namespace elemd
         buffer[1] = 0;
         buffer[2] = 0;
         buffer[3] = 0;
-        dummy = new imageImplVulkan(1, 1, 4, buffer);
+        dummy = new imageImplVulkan(1, 1, 4, buffer, false);
         dummy->upload(commandPool, queue);
     }
 
