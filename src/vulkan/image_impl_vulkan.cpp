@@ -1,5 +1,6 @@
 #include "image_impl_vulkan.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <cstring>
 #define STB_IMAGE_IMPLEMENTATION

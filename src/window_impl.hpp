@@ -2,6 +2,7 @@
 #define ELEMD_WINDOW_IMPL_HPP
 
 #include <vector>
+#include <unordered_map>
 
 #include "elemd/window.hpp"
 #include <GLFW/glfw3.h>

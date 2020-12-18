@@ -2,6 +2,7 @@
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
 #include <math.h> 
+#include <algorithm>
 
 int main(void)
 {
