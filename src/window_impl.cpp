@@ -80,8 +80,8 @@ namespace elemd
     void Window::set_offset(float x, float y)
     {
         WindowImpl* impl = getImpl(this);
-        impl->_x_offset = x * impl->_dpi_scale;
-        impl->_y_offset = y * impl->_dpi_scale;
+        impl->_x_offset = x; // * impl->_dpi_scale;
+        impl->_y_offset = y; // * impl->_dpi_scale;
     }
 
     void Window::add_resize_listener(std::function<void(resize_event)> callback)

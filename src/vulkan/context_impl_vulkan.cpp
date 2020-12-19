@@ -67,9 +67,44 @@ namespace elemd
                             border_radius);
     }
 
-    void Context::stroke_rounded_rect(float x, float y, float width, float height, float tl,
-                                      float tr, float br, float bl)
+    void Context::stroke_rounded_rect(float x, float y, float width, float height, float radius_nw,
+                                      float radius_ne, float radius_se, float radius_sw)
     {
+        ContextImplVulkan* impl = getImpl(this);
+        
+        float lw = _line_width * impl->_window->_x_scale * impl->_window->_dpi_scale;
+        float lwnorm = lw / (width * impl->_window->_x_scale * impl->_window->_dpi_scale + lw);
+
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+        width *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        height *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+
+        float xf = (x / _width);
+        float yf = (y / _height);
+        float widthf = (width / _width);
+        float heightf = (height / _height);
+        float nwxf = (radius_nw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float nexf = (radius_ne / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float sexf = (radius_se / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float swxf = (radius_sw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float nwyf = (radius_nw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+        float neyf = (radius_ne / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+        float seyf = (radius_se / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+        float swyf = (radius_sw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+
+        impl->storage.push_back(
+            {_fill_color,
+             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
+              vec2(xf, yf + heightf) * 2.0f - vec2(1),
+              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
+             {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)},
+             {vec2(-1, 0), vec2(0)},
+             (lwnorm),
+             {_stroke_color.rf(), _stroke_color.gf(), _stroke_color.bf()},
+             {vec2(0), vec2(1)}});
     }
 
     // VK_PRIMITIVE_TOPOLOGY_POINT_LIST
@@ -84,6 +119,34 @@ namespace elemd
 
     void Context::stroke_circle(float x, float y, float radius)
     {
+        ContextImplVulkan* impl = getImpl(this);
+
+        float lw = _line_width * impl->_window->_x_scale * impl->_window->_dpi_scale;
+        float lwnorm = lw / (radius*2 * impl->_window->_x_scale * impl->_window->_dpi_scale + lw);
+
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+
+        float xf = ((x - radius * impl->_window->_x_scale * impl->_window->_dpi_scale) / _width);
+        float yf = ((y - radius * impl->_window->_y_scale * impl->_window->_dpi_scale) / _height);
+        float widhtf =
+            ((radius * 2 * impl->_window->_x_scale * impl->_window->_dpi_scale) / _width);
+        float heightf =
+            ((radius * 2 * impl->_window->_y_scale * impl->_window->_dpi_scale) / _height);
+        float radf = 0.5f;
+
+        impl->storage.push_back(
+            {_fill_color,
+             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
+              vec2(xf, yf + heightf) * 2.0f - vec2(1),
+              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
+             {vec2(radf), vec2(radf), vec2(radf), vec2(radf)},
+             {vec2(-1, 0), vec2(0)},
+             (lwnorm),
+             {_stroke_color.rf(), _stroke_color.gf(), _stroke_color.bf()},
+             {vec2(0), vec2(1)}});
     }
 
     void Context::stroke_ellipse(float x, float y, float width, float height)

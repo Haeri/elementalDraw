@@ -112,7 +112,7 @@ void main()
         }
     }
 
-    
+    dist = 1.0 - dist;
     float delta = fwidth(dist);
     float alpha = smoothstep(1+delta, 1, dist); 
 

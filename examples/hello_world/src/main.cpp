@@ -65,7 +65,7 @@ int main(void)
         mouse_x = event.x;
         mouse_y = event.y;
 
-        win->set_offset(-mouse_x, -mouse_y);
+        //win->set_offset(-mouse_x, -mouse_y);
     });
 
     win->add_key_listener([&](elemd::key_event event) {
@@ -99,18 +99,18 @@ int main(void)
     while (win->is_running())
     {
         win->poll_events();
-        /*
+        
         // Text
         ctx->set_fill_color(white);        
 
-        
+        /*
         int offset = 10;
         for (int i = 1; i < 35; i++)
         {
             ctx->set_font_size(i);
             ctx->draw_text(20, offset, std::to_string(i) + "px  " +text);
             offset += i;
-        }
+        }*/
                         
         
         // Text
@@ -134,15 +134,15 @@ int main(void)
 
         // Circle outline
         ctx->set_stroke_color(red);
-        ctx->stroke_circle(170, 75, 15);
+        ctx->stroke_circle(215, 75, 15);
 
         // Rectangle outline
         ctx->set_stroke_color(green);
-        //ctx->stroke_rect(220, 60, 30, 30);
+        ctx->stroke_rect(250, 60, 30, 30);
 
         // Rounded rectangle outline
         ctx->set_stroke_color(blue);
-        ctx->stroke_rect(220, 60, 120, 30);
+        ctx->stroke_rounded_rect(300, 60, 60, 30, 10);
 
         
         // Image
@@ -170,9 +170,9 @@ int main(void)
             last_time = elemd::Window::now();
         }
         
-        */
+        
 
-        ctx->draw_image(0, 0, 400, 400, img);
+        //ctx->draw_image(0, 0, 400, 400, img);
 
         ctx->draw_frame();
     }
