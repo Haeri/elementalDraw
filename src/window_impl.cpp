@@ -233,10 +233,15 @@ namespace elemd
         return elemd::vec2(impl->_x_scale, impl->_y_scale);
     }
 
+    elemd::vec2 Window::get_offset()
+    {
+        WindowImpl* impl = getImpl(this);
+        return elemd::vec2(impl->_x_offset, impl->_y_offset);
+    }
+
     float Window::get_dpi_scale()
     {
         WindowImpl* impl = getImpl(this);
-        //return 1;
         return impl->_dpi_scale;
     }
     
@@ -366,10 +371,10 @@ namespace elemd
             set_position(config.position_x, config.position_y);
         }
         
-        glfwGetWindowContentScale(_glfw_window, &_dpi_scale, &_dpi_scale);        
+        glfwGetWindowContentScale(_glfw_window, &_dpi_scale, &_dpi_scale);  
         
-        _x_scale = config.x_scale;
-        _y_scale = config.y_scale;        
+        //_x_scale = config.x_scale;
+        //_y_scale = config.y_scale;        
     }
 
     void WindowImpl::load_icon(const WindowConfig& config)

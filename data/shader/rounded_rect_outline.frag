@@ -1,58 +1,35 @@
-#version 450
-#extension GL_ARB_separate_shader_objects : enable
+// https://thebookofshaders.com/edit.php
 
-layout(location = 0) in vec2 uv_varying;
-layout(location = 1) in flat int instance_index;
+#ifdef GL_ES
+precision mediump float;
+#endif
 
-layout(location = 0) out vec4 outColor;
-
-struct StorageData
-{
-    vec4 fill_color;
-    vec4 vertices[2];
-    vec4 border_radius[2];
-    vec4 sampler_index;
-    vec4 stroke_size_color;	
-    vec4 uvs;
-};
-
-layout(set = 0, binding = 0, std140) readonly buffer SBO
-{
-    StorageData payload[];
-} sbo;
-layout(set = 0, binding = 1) uniform sampler2D textures[10];
-
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+uniform float u_time;
 
 float ellipse_distance(vec2 uv, vec2 center, vec2 dims)
 {
-    return pow((uv.x-center.x),2)/pow(dims.x,2) + pow((uv.y-center.y),2)/pow(dims.y,2);
+    return pow((uv.x-center.x),2.0)/pow(dims.x,2.0) + pow((uv.y-center.y),2.0)/pow(dims.y,2.0);
 }
 
-void main()
-{
-    //float a = sbo.payload[instance_index].fill_color.a;
+void main() {
+    vec2 res = u_resolution;
+    vec2 uv_varying = gl_FragCoord.xy/res.xy;
     
-    vec2 nw = sbo.payload[instance_index].border_radius[0].xy;
-    vec2 ne = sbo.payload[instance_index].border_radius[0].zw;
-    vec2 se = sbo.payload[instance_index].border_radius[1].xy;
-    vec2 sw = sbo.payload[instance_index].border_radius[1].zw;
+    float line_width = 80.992;
+    vec2 line_width2 = line_width / res;
     
-    vec4 fill_color = sbo.payload[instance_index].fill_color.rgba; 
-    float line_width = sbo.payload[instance_index].stroke_size_color.x;
-    vec3 stroke_color = sbo.payload[instance_index].stroke_size_color.yzw;
-    int index = int(sbo.payload[instance_index].sampler_index.x);
-    int use_color = int(sbo.payload[instance_index].sampler_index.y);
-
-    vec2 line_width2 = vec2(line_width, line_width);
-
-    nw = clamp(nw, line_width2, vec2(.5));
-    ne = clamp(ne, line_width2, vec2(.5));
-    se = clamp(se, line_width2, vec2(.5));
-    sw = clamp(sw, line_width2, vec2(.5));
-
+    vec2 nw = clamp(vec2(0.520,0.550), line_width2, vec2(.5));
+    vec2 ne = clamp(vec2(0.3), line_width2, vec2(.5));
+    vec2 se = clamp(vec2(0.110,0.050), line_width2, vec2(.5));
+    vec2 sw = clamp(vec2(0.710,0.380), line_width2, vec2(.5));
+    
+    vec3 stroke_color = vec3(0.000,0.260,0.895);
+    
     float dist = 0.0;
     float dist2 = 0.0;
-
+    
     if(uv_varying.x < nw.x && uv_varying.y < nw.y)
     { 
         dist = ellipse_distance(uv_varying, nw, nw);
@@ -104,6 +81,7 @@ void main()
             if(uv_varying.x <= line_width2.x || uv_varying.y <= line_width2.y || uv_varying.x >= 1. - line_width2.x || uv_varying.y >= 1. - line_width2.y)
             {
                 dist = 1.;
+                stroke_color = vec3(1.000,0.686,0.259);
             }
         }
         else
@@ -111,25 +89,12 @@ void main()
             dist = 1.;
         }
     }
-
     
-    float delta = fwidth(dist);
-    float alpha = smoothstep(1+delta, 1, dist); 
+    
+    //float delta = dist;
+    //float alpha = smoothstep(-0.040+delta, 1.0, dist); 
+    //dist = step(dist, 1.);
+    
 
-    if(line_width != 0){
-    	outColor = vec4(stroke_color, alpha);	
-    }
-    else if (index <= -1)
-    {
-        outColor = vec4(fill_color.rgb, min(alpha, fill_color.a));
-    }
-    else
-    {
-    	vec4 img = texture(textures[index], uv_varying.xy).rgba;
-    	if(use_color == 1){
-	        outColor = vec4((img.rgb * fill_color.rgb), min(alpha, img.a));
-    	}else{
-    		outColor = vec4((img.rgb), min(alpha, img.a));    		
-    	}
-    }
+    gl_FragColor = vec4(stroke_color.rgb, dist);
 }

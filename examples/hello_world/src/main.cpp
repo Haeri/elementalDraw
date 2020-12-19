@@ -58,14 +58,37 @@ int main(void)
         float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);       
 
         win->set_scale(deltax, deltay);
-        //win->set_offset((-mouse_x), (-mouse_y) );
+        //win->set_offset((-mouse_x), (-mouse_y));
     });
 
-     win->add_mouse_move_listener([&](elemd::mouse_move_event event) {
+    win->add_mouse_move_listener([&](elemd::mouse_move_event event) {
         mouse_x = event.x;
         mouse_y = event.y;
 
-        //win->set_offset(mouse_x, mouse_y);
+        win->set_offset(-mouse_x, -mouse_y);
+    });
+
+    win->add_key_listener([&](elemd::key_event event) {
+        
+        if (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT)
+        {
+            if (event.key == elemd::KEY_LEFT)
+            {
+                win->set_offset(win->get_offset().get_x() - 1, win->get_offset().get_y());
+            }
+            if (event.key == elemd::KEY_RIGHT)
+            {
+                win->set_offset(win->get_offset().get_x() + 1, win->get_offset().get_y());
+            }
+            if (event.key == elemd::KEY_UP)
+            {
+                win->set_offset(win->get_offset().get_x(), win->get_offset().get_y()-1);
+            }
+            if (event.key == elemd::KEY_DOWN)
+            {
+                win->set_offset(win->get_offset().get_x() , win->get_offset().get_y()+1);
+            }
+        }
     });
 
 
@@ -76,11 +99,11 @@ int main(void)
     while (win->is_running())
     {
         win->poll_events();
-
+        /*
         // Text
         ctx->set_fill_color(white);        
 
-        /*
+        
         int offset = 10;
         for (int i = 1; i < 35; i++)
         {
@@ -88,8 +111,8 @@ int main(void)
             ctx->draw_text(20, offset, std::to_string(i) + "px  " +text);
             offset += i;
         }
-        */                
-
+                        
+        
         // Text
         ctx->set_font_size(16);
         ctx->draw_text(20, 20, text);
@@ -106,17 +129,20 @@ int main(void)
         ctx->set_fill_color(blue);
         ctx->fill_rounded_rect(120, 60, 60, 30, 10);
 
+        
+        ctx->set_line_width(1);
+
         // Circle outline
         ctx->set_stroke_color(red);
         ctx->stroke_circle(170, 75, 15);
 
         // Rectangle outline
         ctx->set_stroke_color(green);
-        ctx->stroke_rect(220, 60, 30, 30);
+        //ctx->stroke_rect(220, 60, 30, 30);
 
         // Rounded rectangle outline
         ctx->set_stroke_color(blue);
-        ctx->stroke_rect(270, 60, 60, 30);
+        ctx->stroke_rect(220, 60, 120, 30);
 
         
         // Image
@@ -144,6 +170,9 @@ int main(void)
             last_time = elemd::Window::now();
         }
         
+        */
+
+        ctx->draw_image(0, 0, 400, 400, img);
 
         ctx->draw_frame();
     }

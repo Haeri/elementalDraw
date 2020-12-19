@@ -69,6 +69,7 @@ namespace elemd
         int get_height();
         elemd::vec2 get_position();
         elemd::vec2 get_scale();
+        elemd::vec2 get_offset();
         float get_dpi_scale();
 
         void set_title(const std::string& title);
