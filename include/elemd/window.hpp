@@ -25,8 +25,8 @@ namespace elemd
         int position_x = -1;
         int position_y = -1;
 
-        float x_scale = -1;
-        float y_scale = -1;
+        float x_scale = 1;
+        float y_scale = 1;
 
         bool decorated = true;
         bool transparent = false;
@@ -77,6 +77,7 @@ namespace elemd
         void set_vsync(bool vsync);
         void set_scale(float x, float y);
         void set_scale(float scalar);
+        void set_offset(float x, float y);
         
         void add_resize_listener(std::function<void(resize_event)>callback);
         void add_mouse_move_listener(std::function<void(mouse_move_event)> callback);

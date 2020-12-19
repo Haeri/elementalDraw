@@ -535,7 +535,11 @@ namespace elemd::vku
                 break;
             }
 
-            //__debugbreak();
+ #ifdef _MSC_VER
+            __debugbreak();
+#endif // MSVC
+
+
             return false;
         }
         else

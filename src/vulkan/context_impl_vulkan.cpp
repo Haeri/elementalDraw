@@ -34,12 +34,14 @@ namespace elemd
     {
         ContextImplVulkan* impl = getImpl(this);
 
-        float lw = _line_width * impl->_window->_x_scale;
-        float lwnorm = lw / (width * impl->_window->_x_scale + lw);
-        x = x * impl->_window->_x_scale - lw/2.0f;
-        y = y * impl->_window->_y_scale - lw / 2.0f;
-        width = width * impl->_window->_x_scale + lw;
-        height = height * impl->_window->_y_scale + lw;
+        float lw = _line_width * impl->_window->_x_scale * impl->_window->_dpi_scale;
+        float lwnorm = lw / (width * impl->_window->_x_scale * impl->_window->_dpi_scale + lw);
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+        x = x * impl->_window->_x_scale * impl->_window->_dpi_scale -lw / 2.0f;
+        y = y * impl->_window->_y_scale * impl->_window->_dpi_scale - lw / 2.0f;
+        width = width * impl->_window->_x_scale * impl->_window->_dpi_scale + lw;
+        height = height * impl->_window->_y_scale * impl->_window->_dpi_scale +lw;
 
         float xf = (x / _width);
         float yf = (y / _height);
@@ -97,10 +99,12 @@ namespace elemd
     {
         ContextImplVulkan* impl = getImpl(this);
         
-        x *= impl->_window->_x_scale;
-        y *= impl->_window->_y_scale;
-        width *= impl->_window->_x_scale;
-        height *= impl->_window->_y_scale;
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+        width *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        height *= impl->_window->_y_scale * impl->_window->_dpi_scale;
 
         float xf = (x / _width);
         float yf = (y / _height);
@@ -131,23 +135,25 @@ namespace elemd
     {
         ContextImplVulkan* impl = getImpl(this);
 
-        x *= impl->_window->_x_scale;
-        y *= impl->_window->_y_scale;
-        width *= impl->_window->_x_scale;
-        height *= impl->_window->_y_scale;
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+        width *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        height *= impl->_window->_y_scale * impl->_window->_dpi_scale;
 
         float xf = (x / _width);
         float yf = (y / _height);
         float widthf = (width / _width);
         float heightf = (height / _height);
-        float nwxf = (radius_nw / width) * (impl->_window->_x_scale);
-        float nexf = (radius_ne / width) * (impl->_window->_x_scale);
-        float sexf = (radius_se / width) * (impl->_window->_x_scale);
-        float swxf = (radius_sw / width) * (impl->_window->_x_scale);
-        float nwyf = (radius_nw / height) * (impl->_window->_y_scale);
-        float neyf = (radius_ne / height) * (impl->_window->_y_scale);
-        float seyf = (radius_se / height) * (impl->_window->_y_scale);
-        float swyf = (radius_sw / height) * (impl->_window->_y_scale);
+        float nwxf = (radius_nw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float nexf = (radius_ne / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float sexf = (radius_se / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float swxf = (radius_sw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float nwyf = (radius_nw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+        float neyf = (radius_ne / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+        float seyf = (radius_se / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+        float swyf = (radius_sw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
 
         impl->storage.push_back(
             {_fill_color,
@@ -165,13 +171,17 @@ namespace elemd
     {
         ContextImplVulkan* impl = getImpl(this);
 
-        x *= impl->_window->_x_scale;
-        y *= impl->_window->_y_scale;
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
 
-        float xf = ((x - radius * impl->_window->_x_scale) / _width);
-        float yf = ((y - radius * impl->_window->_y_scale) / _height);
-        float widhtf = ((radius * 2 * impl->_window->_x_scale) / _width);
-        float heightf = ((radius * 2 * impl->_window->_y_scale) / _height);
+        float xf = ((x - radius * impl->_window->_x_scale * impl->_window->_dpi_scale) / _width);
+        float yf = ((y - radius * impl->_window->_y_scale * impl->_window->_dpi_scale) / _height);
+        float widhtf =
+            ((radius * 2 * impl->_window->_x_scale * impl->_window->_dpi_scale) / _width);
+        float heightf =
+            ((radius * 2 * impl->_window->_y_scale * impl->_window->_dpi_scale) / _height);
         float radf = 0.5f;
 
         impl->storage.push_back(
@@ -205,6 +215,9 @@ namespace elemd
             return;
         }
 
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+
         float initialX = x;
         float scale = (float)_font_size / LOADED_HEIGHT;
         std::map<char, character> characters = _font->get_characters();
@@ -231,10 +244,11 @@ namespace elemd
             float width = ch.size.x() * scale;
             float height = ch.size.y() * scale;
 
-            float xf = (xpos * impl->_window->_x_scale / _width);
-            float yf = (ypos * impl->_window->_y_scale / _height);
-            float widhtf = (width * impl->_window->_x_scale / _width);
-            float heightf = (height * impl->_window->_y_scale / _height);
+            float xf = (xpos * impl->_window->_x_scale * impl->_window->_dpi_scale / _width);
+            float yf = (ypos * impl->_window->_y_scale * impl->_window->_dpi_scale / _height);
+            float widhtf = (width * impl->_window->_x_scale * impl->_window->_dpi_scale / _width);
+            float heightf =
+                (height * impl->_window->_y_scale * impl->_window->_dpi_scale / _height);
 
             float originx = ch.origin.x() / img->get_width();
             float originy = ch.origin.y() / img->get_height();
@@ -265,10 +279,19 @@ namespace elemd
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
         
-        x *= impl->_window->_x_scale;
-        y *= impl->_window->_y_scale;
-        width *= impl->_window->_x_scale;
-        height *= impl->_window->_y_scale;
+        //std::cout << impl->_window->_x_offset << " " << impl->_window->_y_offset << std::endl;
+
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+
+        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+
+        //x -= impl->_window->_x_offset;
+        //y -= impl->_window->_y_offset;
+
+        width *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        height *= impl->_window->_y_scale * impl->_window->_dpi_scale;
 
         float xf = (x / _width);
         float yf = (y / _height);
@@ -316,23 +339,25 @@ namespace elemd
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
 
-        x *= impl->_window->_x_scale;
-        y *= impl->_window->_y_scale;
-        width *= impl->_window->_x_scale;
-        height *= impl->_window->_y_scale;
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+        width *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        height *= impl->_window->_y_scale * impl->_window->_dpi_scale;
 
         float xf = (x / _width);
         float yf = (y / _height);
         float widthf = (width / _width);
         float heightf = (height / _height);
-        float nwxf = (radius_nw / width) * (impl->_window->_x_scale);
-        float nexf = (radius_ne / width) * (impl->_window->_x_scale);
-        float sexf = (radius_se / width) * (impl->_window->_x_scale);
-        float swxf = (radius_sw / width) * (impl->_window->_x_scale);
-        float nwyf = (radius_nw / height) * (impl->_window->_y_scale);
-        float neyf = (radius_ne / height) * (impl->_window->_y_scale);
-        float seyf = (radius_se / height) * (impl->_window->_y_scale);
-        float swyf = (radius_sw / height) * (impl->_window->_y_scale);
+        float nwxf = (radius_nw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float nexf = (radius_ne / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float sexf = (radius_se / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float swxf = (radius_sw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float nwyf = (radius_nw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+        float neyf = (radius_ne / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+        float seyf = (radius_se / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+        float swyf = (radius_sw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
 
         float originx = src_x / img->get_width();
         float originy = src_y / img->get_height();
@@ -517,7 +542,7 @@ namespace elemd
 
         texture_array_size = (int)properties.limits.maxPerStageDescriptorSamplers;
 
-        std::cout << "maxPerStageDescriptorSamplers: " << texture_array_size << std::endl;
+        std::cout << "maxPerStageDescriptorSamplers: " << texture_array_size << std::endl;      
     }
 
     void ContextImplVulkan::create_surface()
@@ -960,8 +985,8 @@ namespace elemd
         pipelineMultisampleStateCreateInfo.pNext = nullptr;
         pipelineMultisampleStateCreateInfo.flags = 0;
         pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-        pipelineMultisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
-        pipelineMultisampleStateCreateInfo.minSampleShading = 1.0;
+        pipelineMultisampleStateCreateInfo.sampleShadingEnable = VK_TRUE;
+        pipelineMultisampleStateCreateInfo.minSampleShading = 1.0f;
         pipelineMultisampleStateCreateInfo.pSampleMask = nullptr;
         pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
         pipelineMultisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;

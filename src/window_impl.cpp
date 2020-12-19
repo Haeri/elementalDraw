@@ -77,6 +77,13 @@ namespace elemd
         impl->_y_scale = scalar;
     }
 
+    void Window::set_offset(float x, float y)
+    {
+        WindowImpl* impl = getImpl(this);
+        impl->_x_offset = x * impl->_dpi_scale;
+        impl->_y_offset = y * impl->_dpi_scale;
+    }
+
     void Window::add_resize_listener(std::function<void(resize_event)> callback)
     {
         WindowImpl* impl = getImpl(this);
@@ -359,17 +366,10 @@ namespace elemd
             set_position(config.position_x, config.position_y);
         }
         
-        glfwGetWindowContentScale(_glfw_window, &_dpi_scale, &_dpi_scale);
-
-        if (config.x_scale <= 0 || config.y_scale <= 0)
-        {
-            glfwGetWindowContentScale(_glfw_window, &_x_scale, &_y_scale);
-        }
-        else
-        {
-            _x_scale = config.x_scale;
-            _y_scale = config.y_scale;
-        }
+        glfwGetWindowContentScale(_glfw_window, &_dpi_scale, &_dpi_scale);        
+        
+        _x_scale = config.x_scale;
+        _y_scale = config.y_scale;        
     }
 
     void WindowImpl::load_icon(const WindowConfig& config)

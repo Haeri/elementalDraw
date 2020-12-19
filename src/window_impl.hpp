@@ -21,6 +21,8 @@ namespace elemd
 
         float _x_scale = 1;
         float _y_scale = 1;
+        float _x_offset = 0;
+        float _y_offset = 0;
         float _dpi_scale = 1;
         /*
         int buttonEvent;

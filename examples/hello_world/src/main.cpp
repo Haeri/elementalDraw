@@ -23,10 +23,6 @@ int main(void)
     elemd::image* img = elemd::image::create("./res/logo.png");
     ctx->_tmp_register_image(img);
 
-    // Load Font
-    //elemd::font* urbanist = elemd::font::create("./res/font/Urbanist-Regular.ttf");
-    //ctx->_tmp_register_font(urbanist);
-
     // Load animation
     elemd::image* anim = elemd::image::create("./res/anim.png");
     ctx->_tmp_register_image(anim);
@@ -45,9 +41,13 @@ int main(void)
 
     float color_phase = 0;
 
-    float initial_scale = win->get_dpi_scale();
+    float initial_scale = 1;  
+
+    float mouse_x;
+    float mouse_y;
+
     // Event
-    std::string text = "Hello World!";
+    std::string text = "I see this as an absolute win!";
     win->add_char_listener([&](elemd::char_event event) { 
         text += event.utf8;
     });
@@ -55,10 +55,19 @@ int main(void)
     win->add_scroll_listener([&](elemd::scroll_event event) {
         elemd::vec2 scale = win->get_scale();
         float deltax = std::clamp(scale.x() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
-        float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
-        
+        float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);       
+
         win->set_scale(deltax, deltay);
+        //win->set_offset((-mouse_x), (-mouse_y) );
     });
+
+     win->add_mouse_move_listener([&](elemd::mouse_move_event event) {
+        mouse_x = event.x;
+        mouse_y = event.y;
+
+        //win->set_offset(mouse_x, mouse_y);
+    });
+
 
     ctx->_tmp_prepare();
     ctx->set_clear_color(dark);
@@ -69,11 +78,22 @@ int main(void)
         win->poll_events();
 
         // Text
-        ctx->set_fill_color(white);
-        //ctx->set_font(urbanist);
-        ctx->set_font_size(18);
-        ctx->draw_text(20, 20, text);
+        ctx->set_fill_color(white);        
 
+        /*
+        int offset = 10;
+        for (int i = 1; i < 35; i++)
+        {
+            ctx->set_font_size(i);
+            ctx->draw_text(20, offset, std::to_string(i) + "px  " +text);
+            offset += i;
+        }
+        */                
+
+        // Text
+        ctx->set_font_size(16);
+        ctx->draw_text(20, 20, text);
+        
         // Circle
         ctx->set_fill_color(red);
         ctx->fill_circle(35, 75, 15);
@@ -86,10 +106,22 @@ int main(void)
         ctx->set_fill_color(blue);
         ctx->fill_rounded_rect(120, 60, 60, 30, 10);
 
+        // Circle outline
+        ctx->set_stroke_color(red);
+        ctx->stroke_circle(170, 75, 15);
 
+        // Rectangle outline
+        ctx->set_stroke_color(green);
+        ctx->stroke_rect(220, 60, 30, 30);
+
+        // Rounded rectangle outline
+        ctx->set_stroke_color(blue);
+        ctx->stroke_rect(270, 60, 60, 30);
+
+        
         // Image
         ctx->draw_image(20, 110, 80, 80, img);
-
+        
         // Timted image
         ctx->set_fill_color(elemd::color(10, 10, 255));
         ctx->draw_image(120, 110, 80, 80, img, true);
@@ -119,7 +151,6 @@ int main(void)
     // Cleanup
     anim->destroy();
     img->destroy();
-    //urbanist->destroy();
     win->destroy();
 
     return 0;

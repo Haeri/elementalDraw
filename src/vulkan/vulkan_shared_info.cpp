@@ -180,7 +180,7 @@ namespace elemd
         
 
         VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
-
+        physicalDeviceFeatures.sampleRateShading = VK_TRUE;
 
         const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
