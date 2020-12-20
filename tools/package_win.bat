@@ -15,6 +15,10 @@ if "%1" == "-static" (
 	xcopy ".\build\Release\elemd.dll" ".\bin\"
 	xcopy ".\build\Release\elemd.lib" ".\lib\"
 )
+
+xcopy ".\build\examples\hello_world\Release\*" ".\samples\hello_world\"
+xcopy ".\build\examples\hello_world\res\*" ".\samples\hello_world\res\"
+
 set /a "err=%err%+%errorlevel%"
 
 

@@ -42,6 +42,7 @@ jobs:
           ./lib
           ./bin
           ./include
+          ./samples
     
   build-linux:
    name: Linux Build
@@ -81,6 +82,7 @@ jobs:
           ./bin
           ./lib
           ./include
+          ./samples
 
   build-mac:
    name: Mac Build
@@ -116,3 +118,4 @@ jobs:
           ./bin
           ./lib
           ./include
+          ./samples

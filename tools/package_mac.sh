@@ -11,6 +11,10 @@ else
 	mkdir bin
 	cp ./build/libelemd*.dylib ./bin/
 fi
+
+mkdir samples/hello_world
+cp ./build/examples/hello_world/* ./samples/hello_world/
+
 err=$?
 
 
