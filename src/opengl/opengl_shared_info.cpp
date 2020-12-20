@@ -44,9 +44,11 @@ namespace elemd
 
         if (!gladLoadGL(glfwGetProcAddress))
         {
-            std::cerr << "Failed to initialize OpenGL context" << std::endl;
+            std::cerr << "Could not load the OpenGL context" << std::endl;
             glfwTerminate();
             exit(EXIT_FAILURE);
         }
+
+        std::cout << "BACKEND: OpenGL " << glGetString(GL_VERSION) << std::endl;
     }
 } // namespace elemd

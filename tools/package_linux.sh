@@ -12,7 +12,7 @@ else
 	cp ./build/libelemd.so* ./bin/
 fi
 
-mkdir samples/hello_world
+mkdir -p samples/hello_world
 cp ./build/examples/hello_world/* ./samples/hello_world/
 
 err=$?

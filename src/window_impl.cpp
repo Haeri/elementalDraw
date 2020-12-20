@@ -377,7 +377,9 @@ namespace elemd
             glfwCreateWindow(config.width, config.height, config.title, NULL, NULL);
         if (!_glfw_window)
         {
-            std::cerr << "Failed to create a window!" << std::endl;
+            const char* errorText = NULL;
+            glfwGetError(&errorText);
+            std::cerr << errorText << std::endl;
             glfwTerminate();
             exit(EXIT_FAILURE);
         }

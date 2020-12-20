@@ -209,8 +209,16 @@ namespace elemd
 
         if (gladLoaderLoadVulkan(instance, bestPhysicalDevice, device) <= 0)
         {
-            vku::err("Could not load the Vulkan device!");
+            vku::err("Could not load the Vulkan context!");
             exit(EXIT_FAILURE);
         }
+
+        VkPhysicalDeviceProperties properties{};
+        vkGetPhysicalDeviceProperties(bestPhysicalDevice, &properties);
+
+        std::cout << "BACKEND: Vulkan " << VK_VERSION_MAJOR(properties.apiVersion) << "."
+                  << VK_VERSION_MINOR(properties.apiVersion) << "."
+                  << VK_VERSION_PATCH(properties.apiVersion) << " - " << properties.deviceName
+                  << " Build " << properties.driverVersion << std::endl;
     }
 } // namespace elemd
