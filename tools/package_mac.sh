@@ -13,7 +13,7 @@ else
 fi
 
 mkdir -p samples/hello_world
-cp ./build/examples/hello_world/* ./samples/hello_world/
+cp -R ./build/examples/hello_world/ ./samples/
 
 err=$?
 
