@@ -5,11 +5,12 @@
 #include <unordered_map>
 
 #include "elemd/window.hpp"
-#include <GLFW/glfw3.h>
+
+class GLFWwindow;
+class GLFWcursor;
 
 namespace elemd
 {
-
     class WindowImpl : public Window
     {
     public:

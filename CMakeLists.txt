@@ -10,6 +10,8 @@ endif()
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
+set(ELEMD_RENDERING_BACKEND "vulkan" CACHE STRING "Choose Backend (vulkan, opengl)")
+string(TOUPPER ${ELEMD_RENDERING_BACKEND} ELEMD_RENDERING_BACKEND_UPPER)
 
 # Settings
 set(CMAKE_CXX_STANDARD 17)
@@ -20,13 +22,21 @@ set(CMAKE_VISIBILITY_INLINE_HIDDEN YES)
 # Enable folder view in solution explorer
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-file(GLOB_RECURSE SOURCE_FILES
+message("ELEMD_RENDERING_BACKEND is: " ${ELEMD_RENDERING_BACKEND_UPPER})
+add_compile_definitions("ELEMD_RENDERING_BACKEND_${ELEMD_RENDERING_BACKEND_UPPER}")
+
+file(GLOB SOURCE_FILES
     include/${PROJECT_NAME}/*.hpp
     src/*.hpp
     src/*.h
     src/*.cpp
     src/*.c
+    src/${ELEMD_RENDERING_BACKEND}/*.hpp
+    src/${ELEMD_RENDERING_BACKEND}/*.h
+    src/${ELEMD_RENDERING_BACKEND}/*.cpp
+    src/${ELEMD_RENDERING_BACKEND}/*.c
  )
+
 
 if (BUILD_SHARED_LIBS)
     add_compile_definitions(ELEMD_BUILD_SHARED)

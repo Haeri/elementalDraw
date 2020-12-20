@@ -4,7 +4,14 @@
 #include "stb_image.h"
 
 #include "elemd/context.hpp"
+
+#if defined(ELEMD_RENDERING_BACKEND_VULKAN)
 #include "vulkan/vulkan_shared_info.hpp"
+#elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
+#include "opengl/opengl_shared_info.hpp"
+#endif
+
+#include <GLFW/glfw3.h>
 
 namespace elemd
 {
@@ -305,7 +312,16 @@ namespace elemd
             }
         }
 
+        glfwDefaultWindowHints();
+#if defined(ELEMD_RENDERING_BACKEND_VULKAN)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+#ifdef __APPLE__
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+#endif
         glfwWindowHint(GLFW_DECORATED, config.decorated);
         glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, config.transparent);
         glfwWindowHint(GLFW_RESIZABLE, config.resizeable);
@@ -334,7 +350,11 @@ namespace elemd
 
         if (_windowCount == 0)
         {
+#if defined(ELEMD_RENDERING_BACKEND_VULKAN)
             VulkanSharedInfo::destroy();
+#elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
+            OpenglSharedInfo::destroy();
+#endif
             glfwTerminate();
         }
     }
@@ -371,6 +391,7 @@ namespace elemd
             set_position(config.position_x, config.position_y);
         }
         
+        glfwMakeContextCurrent(_glfw_window);
         glfwGetWindowContentScale(_glfw_window, &_dpi_scale, &_dpi_scale);  
         
         //_x_scale = config.x_scale;
