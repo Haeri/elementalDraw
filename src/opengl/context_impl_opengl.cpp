@@ -470,19 +470,25 @@ namespace elemd
             rerecord = true;
         }
         
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(impl->shaderProgram);
         ///impl->update_uniforms();
         impl->update_storage();
         if (rerecord || impl->dirty)
         {
-         
+        
             impl->dirty = false;
         }
-        
-        glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(impl->shaderProgram);
-        //glBindVertexArray(VAO); 
-        glDrawElementsInstanced(GL_TRIANGLE_STRIP, impl->rect_indices.size(), GL_UNSIGNED_INT, 0,
+
+        for (int i = 0; i < impl->images.size(); ++i)
+        {
+            impl->images[i]->bind(i);
+        }               
+
+        glBindVertexArray(impl->vertex_array_object); 
+        glDrawElementsInstanced(GL_TRIANGLES, impl->rect_indices.size(), GL_UNSIGNED_INT, 0,
                                 impl->storage.size());
 
         glfwSwapBuffers(impl->_window->getGLFWWindow());
@@ -556,10 +562,18 @@ namespace elemd
 
         ContextImplOpengl* impl = getImpl(this);
         
-        impl->create_vertex_buffers();
-        impl->create_index_buffers();
-        ///impl->create_uniform_buffer();
+        impl->configure_surface();
+        impl->create_vertex_array();
         impl->create_storage_buffer();
+
+
+        glUseProgram(impl->shaderProgram);
+        for (int i = 0; i < impl->images.size(); ++i)
+        {
+            std::string sloc = "textures[" + std::to_string(i) + "]";
+            GLint loc = glGetUniformLocation(impl->shaderProgram, sloc.c_str());
+            glUniform1i(loc, i);
+        }       
     }
 
     void ContextImplOpengl::destroy()
@@ -573,20 +587,20 @@ namespace elemd
 
     
 
-    void ContextImplOpengl::create_surface()
+    void ContextImplOpengl::configure_surface()
     {
-        // --------------- Create WIndow Surface ---------------
-
-
         glViewport(0, 0, _width, _height);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-
-    void ContextImplOpengl::create_framebuffer()
+    void ContextImplOpengl::create_storage_buffer()
     {
-        // --------------- Create Framebuffers ---------------
-
-        
+        glGenBuffers(1, &storageBuffer);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, storageBuffer);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE, storage.data(),
+                     GL_DYNAMIC_COPY);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
 
@@ -620,115 +634,247 @@ namespace elemd
 
     ContextImplOpengl::~ContextImplOpengl()
     {
-        //delete vertShaderModule;
-        //delete fragShaderModule;
-
-        //delete dummy;
+        glDeleteVertexArrays(1, &vertex_array_object);
+        glDeleteBuffers(1, &vertex_buffer);
+        glDeleteBuffers(1, &index_buffer);
+        glDeleteProgram(shaderProgram);
     }
 
 
-    void ContextImplOpengl::create_vertex_buffers()
+    void ContextImplOpengl::create_vertex_array()
     {
-        /*
-        vku::create_and_upload_buffer(rect_vertices, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                                      vertexBuffer, vertexBufferDeviceMemory, commandPool, queue);
-        */
-    }
+        glGenVertexArrays(1, &vertex_array_object);
+        glGenBuffers(1, &vertex_buffer);
+        glGenBuffers(1, &index_buffer);
+        // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then
+        // configure vertex attributes(s).
+        glBindVertexArray(vertex_array_object);
 
-     void ContextImplOpengl::create_index_buffers()
-    {
-    
-    }
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(point_vertices) * point_vertices.size(),
+                     point_vertices.data(),
+                     GL_STATIC_DRAW);
 
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rect_indices) * rect_indices.size(),
+                     rect_indices.data(), GL_STATIC_DRAW);
 
-     /*
-    void ContextImplOpengl::create_uniform_buffer()
-    {
-        VkDeviceSize bufferSize = UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE;
-        vku::create_buffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer,
-                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                           uniformBufferDeviceMemory);
-    }
-    */
-    void ContextImplOpengl::create_storage_buffer()
-    {
-     
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex
+        // attribute's bound vertex buffer object so afterwards we can safely unbind
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object
+        // IS stored in the VAO; keep the EBO bound.
+        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO,
+        // but this rarely happens. Modifying other VAOs requires a call to glBindVertexArray
+        // anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+        glBindVertexArray(0); 
     }
 
     void ContextImplOpengl::create_shader_programm()
     {
-        const char* fragmentShaderSource =
-            "#version 450\n#extension GL_ARB_separate_shader_objects : enablelayout(location = 0) in "
-            "vec2 uv_varying;layout(location = 1) in flat int instance_index;layout(location = 0) "
-            "out vec4 outColor;struct StorageData{    vec4 fill_color;    vec4 vertices[2];    "
-            "vec4 border_radius[2];    vec4 sampler_index;    vec4 stroke_size_color;	    vec4 "
-            "uvs;};layout(set = 0, binding = 0, std140) readonly buffer SBO{    StorageData "
-            "payload[];} sbo;layout(set = 0, binding = 1) uniform sampler2D textures[10];float "
-            "ellipse_distance(vec2 uv, vec2 center, vec2 dims){    return "
-            "pow((uv.x-center.x),2)/pow(dims.x,2) + pow((uv.y-center.y),2)/pow(dims.y,2);}void "
-            "main(){    //float a = sbo.payload[instance_index].fill_color.a;        vec2 nw = "
-            "sbo.payload[instance_index].border_radius[0].xy;    vec2 ne = "
-            "sbo.payload[instance_index].border_radius[0].zw;    vec2 se = "
-            "sbo.payload[instance_index].border_radius[1].xy;    vec2 sw = "
-            "sbo.payload[instance_index].border_radius[1].zw;        vec4 fill_color = "
-            "sbo.payload[instance_index].fill_color.rgba;     float line_width = "
-            "sbo.payload[instance_index].stroke_size_color.x;    vec3 stroke_color = "
-            "sbo.payload[instance_index].stroke_size_color.yzw;    int index = "
-            "int(sbo.payload[instance_index].sampler_index.x);    int use_color = "
-            "int(sbo.payload[instance_index].sampler_index.y);    vec2 line_width2 = "
-            "vec2(line_width, line_width);    nw = clamp(nw, line_width2, vec2(.5));    ne = "
-            "clamp(ne, line_width2, vec2(.5));    se = clamp(se, line_width2, vec2(.5));    sw = "
-            "clamp(sw, line_width2, vec2(.5));    float dist = 0.0;    float dist2 = 0.0;    "
-            "if(uv_varying.x < nw.x && uv_varying.y < nw.y)    {         dist = "
-            "ellipse_distance(uv_varying, nw, nw);        dist = step(dist, 1.);        "
-            "if(line_width != 0.)        {                        dist2 = "
-            "1.-ellipse_distance(uv_varying, nw, nw-line_width2);            dist2 = step(dist2, "
-            "0.);            dist = min(dist, dist2);        }    }        else if (1.0 -  "
-            "uv_varying.x < ne.x && uv_varying.y < ne.y)    {        dist = "
-            "ellipse_distance(uv_varying, vec2(1.0-ne.x, ne.y), ne);        dist = step(dist, 1.); "
-            "       if(line_width != 0.)        {             dist2 = "
-            "1.-ellipse_distance(uv_varying, vec2(1.0-ne.x, ne.y), ne-line_width2);            "
-            "dist2 = step(dist2, 0.);            dist = min(dist, dist2);        }    }    else if "
-            "(uv_varying.x < sw.x && 1.0 - uv_varying.y < sw.y)    {        dist = "
-            "ellipse_distance(uv_varying, vec2(sw.x, 1.0-sw.y), sw);        dist = step(dist, 1.); "
-            "       if(line_width != 0.)        {             dist2 = "
-            "1.-ellipse_distance(uv_varying, vec2(sw.x, 1.0-sw.y), sw-line_width2);            "
-            "dist2 = step(dist2, 0.);            dist = min(dist, dist2);        }    }    else if "
-            "(1.0 -  uv_varying.x < se.x && 1.0 - uv_varying.y < se.y)    {        dist = "
-            "ellipse_distance(uv_varying, vec2(1.0-se.x, 1.0-se.y), se);        dist = step(dist, "
-            "1.);        if(line_width != 0.)        {             dist2 = "
-            "1.-ellipse_distance(uv_varying, vec2(1.0-se.x, 1.0-se.y), se-line_width2);            "
-            "dist2 = step(dist2, 0.);            dist = min(dist, dist2);        }    }    else    "
-            "{        if(line_width != 0.)        {                        if(uv_varying.x <= "
-            "line_width2.x || uv_varying.y <= line_width2.y || uv_varying.x >= 1. - line_width2.x "
-            "|| uv_varying.y >= 1. - line_width2.y)            {                dist = 1.;         "
-            "   }        }        else        {            dist = 1.;        }    }    dist = 1.0 "
-            "- dist;    float delta = fwidth(dist);    float alpha = smoothstep(1+delta, 1, dist); "
-            "    if(line_width != 0){    	outColor = vec4(stroke_color, alpha);	    }    else "
-            "if (index <= -1)    {        outColor = vec4(fill_color.rgb, min(alpha, "
-            "fill_color.a));    }    else    {    	vec4 img = texture(textures[index], "
-            "uv_varying.xy).rgba;    	if(use_color == 1){	        outColor = vec4((img.rgb * "
-            "fill_color.rgb), min(alpha, img.a));    	}else{    		outColor = vec4((img.rgb), "
-            "min(alpha, img.a));    		    	}    }}";
+        const char* fragmentShaderSource = 
+            "#version 440 core\n"
+            "\n"
+            "layout(location = 0) in vec2 uv_varying;\n"
+            "layout(location = 1) in flat int instance_index;\n"
+            "\n"
+            "layout(location = 0) out vec4 outColor;\n"
+            "\n"
+            "struct StorageData\n"
+            "{\n"
+            "    vec4 fill_color;\n"
+            "    vec4 vertices[2];\n"
+            "    vec4 border_radius[2];\n"
+            "    vec4 sampler_index;\n"
+            "    vec4 stroke_size_color;	\n"
+            "    vec4 uvs;\n"
+            "};\n"
+            "\n"
+            "layout(set = 0, binding = 0, std140) readonly buffer SBO\n"
+            "{\n"
+            "    StorageData payload[];\n"
+            "} sbo;\n"
+            "layout(set = 0, binding = 1) uniform sampler2D textures[20];\n"
+            "\n"
+            "\n"
+            "float ellipse_distance(vec2 uv, vec2 center, vec2 dims)\n"
+            "{\n"
+            "    return pow((uv.x-center.x),2)/pow(dims.x,2) + "
+            "pow((uv.y-center.y),2)/pow(dims.y,2);\n"
+            "}\n"
+            "\n"
+            "void main()\n"
+            "{\n"
+            "    //float a = sbo.payload[instance_index].fill_color.a;\n"
+            "    \n"
+            "    vec2 nw = sbo.payload[instance_index].border_radius[0].xy;\n"
+            "    vec2 ne = sbo.payload[instance_index].border_radius[0].zw;\n"
+            "    vec2 se = sbo.payload[instance_index].border_radius[1].xy;\n"
+            "    vec2 sw = sbo.payload[instance_index].border_radius[1].zw;\n"
+            "    \n"
+            "    vec4 fill_color = sbo.payload[instance_index].fill_color.rgba; \n"
+            "    float line_width = sbo.payload[instance_index].stroke_size_color.x;\n"
+            "    vec3 stroke_color = sbo.payload[instance_index].stroke_size_color.yzw;\n"
+            "    int index = int(sbo.payload[instance_index].sampler_index.x);\n"
+            "    int use_color = int(sbo.payload[instance_index].sampler_index.y);\n"
+            "\n"
+            "    vec2 line_width2 = vec2(line_width, line_width);\n"
+            "\n"
+            "    nw = clamp(nw, line_width2, vec2(.5));\n"
+            "    ne = clamp(ne, line_width2, vec2(.5));\n"
+            "    se = clamp(se, line_width2, vec2(.5));\n"
+            "    sw = clamp(sw, line_width2, vec2(.5));\n"
+            "\n"
+            "    float dist = 0.0;\n"
+            "    float dist2 = 0.0;\n"
+            "\n"
+            "    if(uv_varying.x < nw.x && uv_varying.y < nw.y)\n"
+            "    { \n"
+            "        dist = ellipse_distance(uv_varying, nw, nw);\n"
+            "        dist = step(dist, 1.);\n"
+            "        if(line_width != 0.)\n"
+            "        {            \n"
+            "            dist2 = 1.-ellipse_distance(uv_varying, nw, nw-line_width2);\n"
+            "            dist2 = step(dist2, 0.);\n"
+            "            dist = min(dist, dist2);\n"
+            "        }\n"
+            "    }    \n"
+            "    else if (1.0 -  uv_varying.x < ne.x && uv_varying.y < ne.y)\n"
+            "    {\n"
+            "        dist = ellipse_distance(uv_varying, vec2(1.0-ne.x, ne.y), ne);\n"
+            "        dist = step(dist, 1.);\n"
+            "        if(line_width != 0.)\n"
+            "        { \n"
+            "            dist2 = 1.-ellipse_distance(uv_varying, vec2(1.0-ne.x, ne.y), "
+            "ne-line_width2);\n"
+            "            dist2 = step(dist2, 0.);\n"
+            "            dist = min(dist, dist2);\n"
+            "        }\n"
+            "    }\n"
+            "    else if (uv_varying.x < sw.x && 1.0 - uv_varying.y < sw.y)\n"
+            "    {\n"
+            "        dist = ellipse_distance(uv_varying, vec2(sw.x, 1.0-sw.y), sw);\n"
+            "        dist = step(dist, 1.);\n"
+            "        if(line_width != 0.)\n"
+            "        { \n"
+            "            dist2 = 1.-ellipse_distance(uv_varying, vec2(sw.x, 1.0-sw.y), "
+            "sw-line_width2);\n"
+            "            dist2 = step(dist2, 0.);\n"
+            "            dist = min(dist, dist2);\n"
+            "        }\n"
+            "    }\n"
+            "    else if (1.0 -  uv_varying.x < se.x && 1.0 - uv_varying.y < se.y)\n"
+            "    {\n"
+            "        dist = ellipse_distance(uv_varying, vec2(1.0-se.x, 1.0-se.y), se);\n"
+            "        dist = step(dist, 1.);\n"
+            "        if(line_width != 0.)\n"
+            "        { \n"
+            "            dist2 = 1.-ellipse_distance(uv_varying, vec2(1.0-se.x, 1.0-se.y), "
+            "se-line_width2);\n"
+            "            dist2 = step(dist2, 0.);\n"
+            "            dist = min(dist, dist2);\n"
+            "        }\n"
+            "    }\n"
+            "    else\n"
+            "    {\n"
+            "        if(line_width != 0.)\n"
+            "        {            \n"
+            "            if(uv_varying.x <= line_width2.x || uv_varying.y <= line_width2.y || "
+            "uv_varying.x >= 1. - line_width2.x || uv_varying.y >= 1. - line_width2.y)\n"
+            "            {\n"
+            "                dist = 1.;\n"
+            "            }\n"
+            "        }\n"
+            "        else\n"
+            "        {\n"
+            "            dist = 1.;\n"
+            "        }\n"
+            "    }\n"
+            "\n"
+            "    dist = 1.0 - dist;\n"
+            "    float delta = fwidth(dist);\n"
+            "    float alpha = smoothstep(1+delta, 1, dist); \n"
+            "\n"
+            "    if(line_width != 0){\n"
+            "    	outColor = vec4(stroke_color, alpha);	\n"
+            "    }\n"
+            "    else if (index <= -1)\n"
+            "    {\n"
+            "        outColor = vec4(fill_color.rgb, min(alpha, fill_color.a));\n"
+            "    }\n"
+            "    else\n"
+            "    {\n"
+            "    	vec4 img = texture(textures[index], uv_varying.xy).rgba;\n"
+            "    	if(use_color == 1){\n"
+            "	        outColor = vec4((img.rgb * fill_color.rgb), min(alpha, img.a));\n"
+            "    	}else{\n"
+            "    		outColor = vec4((img.rgb), min(alpha, img.a));    		\n"
+            "    	}\n"
+            "    }\n"
+            "}";
+
         const char* vertexShaderSource =
-            "#version 450\n#extension GL_ARB_separate_shader_objects : enableout gl_PerVertex{    "
-            "vec4 gl_Position;};layout(location = 0) out vec2 uv_varying;layout(location = 1) out "
-            "flat int instance_index;struct StorageData{    vec4 fill_color;    vec4 vertices[2];  "
-            "  vec4 border_radius[2];    vec4 sampler_index;     vec4 stroke_size_color;    vec4 "
-            "uvs;};layout(set = 0, binding = 0, std140) readonly buffer SBO{    StorageData "
-            "payload[];} sbo;vec2 _positions[4] = vec2[](    vec2(0, 0),    vec2(1, 0),    vec2(0, "
-            "1),    vec2(1, 1));void main(){    vec2 verts[4] = {        "
-            "sbo.payload[gl_InstanceIndex].vertices[0].xy,        "
-            "sbo.payload[gl_InstanceIndex].vertices[0].zw,        "
-            "sbo.payload[gl_InstanceIndex].vertices[1].xy,        "
-            "sbo.payload[gl_InstanceIndex].vertices[1].zw    };    vec2 _uvs[4] = vec2[](        "
-            "vec2(sbo.payload[gl_InstanceIndex].uvs.x, sbo.payload[gl_InstanceIndex].uvs.y),       "
-            " vec2(sbo.payload[gl_InstanceIndex].uvs.z, sbo.payload[gl_InstanceIndex].uvs.y),      "
-            "  vec2(sbo.payload[gl_InstanceIndex].uvs.x, sbo.payload[gl_InstanceIndex].uvs.w),     "
-            "   vec2(sbo.payload[gl_InstanceIndex].uvs.z, sbo.payload[gl_InstanceIndex].uvs.w)    "
-            ");    instance_index = gl_InstanceIndex;    gl_Position = "
-            "vec4(verts[gl_VertexIndex].xy, 0.0, 1.0);    uv_varying = _uvs[gl_VertexIndex];}";
+            "#version 440 core\n"
+            "\n"
+            "out gl_PerVertex{\n"
+            "    vec4 gl_Position;\n"
+            "};\n"
+            "\n"
+            "layout(location = 0) out vec2 uv_varying;\n"
+            "layout(location = 1) out flat int instance_index;\n"
+            "\n"
+            "struct StorageData\n"
+            "{\n"
+            "    vec4 fill_color;\n"
+            "    vec4 vertices[2];\n"
+            "    vec4 border_radius[2];\n"
+            "    vec4 sampler_index; \n"
+            "    vec4 stroke_size_color;\n"
+            "    vec4 uvs;\n"
+            "};\n"
+            "\n"
+            "layout(set = 0, binding = 0, std140) readonly buffer SBO\n"
+            "{\n"
+            "    StorageData payload[];\n"
+            "} sbo;\n"
+            "\n"
+            "vec2 _positions[4] = vec2[](\n"
+            "    vec2(0, 0),\n"
+            "    vec2(1, 0),\n"
+            "    vec2(0, 1),\n"
+            "    vec2(1, 1)\n"
+            ");\n"
+            "\n"
+            "void main()\n"
+            "{\n"
+            "    vec2 verts[4] = {\n"
+            "        sbo.payload[gl_InstanceID].vertices[0].xy,\n"
+            "        sbo.payload[gl_InstanceID].vertices[0].zw,\n"
+            "        sbo.payload[gl_InstanceID].vertices[1].xy,\n"
+            "        sbo.payload[gl_InstanceID].vertices[1].zw\n"
+            "    };\n"
+            "\n"
+            "    vec2 _uvs[4] = vec2[](\n"
+            "        vec2(sbo.payload[gl_InstanceID].uvs.x, "
+            "sbo.payload[gl_InstanceID].uvs.y),\n"
+            "        vec2(sbo.payload[gl_InstanceID].uvs.z, "
+            "sbo.payload[gl_InstanceID].uvs.y),\n"
+            "        vec2(sbo.payload[gl_InstanceID].uvs.x, "
+            "sbo.payload[gl_InstanceID].uvs.w),\n"
+            "        vec2(sbo.payload[gl_InstanceID].uvs.z, "
+            "sbo.payload[gl_InstanceID].uvs.w)\n"
+            "    );\n"
+            "\n"
+            "    instance_index = gl_InstanceID;\n"
+            "    gl_Position = vec4(verts[gl_VertexID].xy*vec2(1.0, -1.0), 0.0, 1.0);\n"
+            "    uv_varying = _uvs[gl_VertexID];\n"
+            "}";
 
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -758,6 +904,7 @@ namespace elemd
         glAttachShader(shaderProgram, vertexShader);
         glAttachShader(shaderProgram, fragmentShader);
         glLinkProgram(shaderProgram);
+
         // check for linking errors
         glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
         if (!success)
@@ -765,6 +912,17 @@ namespace elemd
             glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
             std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
         }
+
+        glValidateProgram(shaderProgram);
+
+        // check for validation errors
+        glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &success);
+        if (!success)
+        {
+            glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+            std::cout << "ERROR::SHADER::PROGRAM::GL_VALIDATE_STATUS\n" << infoLog << std::endl;
+        }
+        
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
 
@@ -787,6 +945,14 @@ namespace elemd
 
     void ContextImplOpengl::update_storage()
     {
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, storageBuffer);
+        GLvoid* p = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
+        std::memcpy(p, storage.data(), storage.size() * sizeof(uniform_rect));
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, storageBuffer);
+
+        
     }
 
 

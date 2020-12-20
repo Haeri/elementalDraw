@@ -26,7 +26,7 @@ namespace elemd
         bool _uploaded = false;
 
         void upload();
-        void generateMipmaps();
+        void bind(GLuint texture_unit);
         
         void writeToFile();
     };

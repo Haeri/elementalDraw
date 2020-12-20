@@ -7,10 +7,16 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     set(ELEMD_STANDALONE TRUE)
 endif()
 
+if(APPLE)
+    set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
+else()
+    set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
+endif()
+
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
-set(ELEMD_RENDERING_BACKEND "vulkan" CACHE STRING "Choose Backend (vulkan, opengl)")
+set(ELEMD_RENDERING_BACKEND ${ELEMD_DEFAULT_RENDERING_BACKEND} CACHE STRING "Choose Backend (vulkan, opengl)")
 string(TOUPPER ${ELEMD_RENDERING_BACKEND} ELEMD_RENDERING_BACKEND_UPPER)
 
 # Settings

@@ -90,6 +90,7 @@ namespace elemd
 
         if (_uploaded)
         {               
+            glDeleteTextures(1, &_image);
             _uploaded = false;
         }
     }
@@ -99,20 +100,35 @@ namespace elemd
         if (!_loaded)
             return;
 
+        glGenTextures(1, &_image);
+        glBindTexture(GL_TEXTURE_2D, _image);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _width, _height, 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, _data);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
         if (_mipLevels > 1)
         {
-            generateMipmaps();
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+        else
+        {
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         }
 
+        
         _uploaded = true;
     }
 
-
-
-    void imageImplOpengl::generateMipmaps()
+    void imageImplOpengl::bind(GLuint texture_unit)
     {
-        
+        glActiveTexture(GL_TEXTURE0 + texture_unit);
+        glBindTexture(GL_TEXTURE_2D, _image);
     }
 
     void imageImplOpengl::writeToFile()

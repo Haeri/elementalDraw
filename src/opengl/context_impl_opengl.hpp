@@ -13,7 +13,7 @@
 #include "../window_impl.hpp"
 #include "image_impl_opengl.hpp"
 
-#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536
+#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536/2
 #define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE UNIFORM_BUFFER_ARRAY_MAX_COUNT * sizeof(uniform_rect)
 
 
@@ -53,7 +53,7 @@ namespace elemd
         std::vector<uniform_rect> storage = {};
         int last_uniform_cnt = 0;
 
-        int texture_array_size = -1;
+        int texture_array_size = 32;
 
         WindowImpl* _window;
 
@@ -63,28 +63,20 @@ namespace elemd
         bool dirty = true;
         
 
-//        VkShaderModule* fragShaderModule;
-//        VkShaderModule* vertShaderModule;
         int shaderProgram = -1;
-        //        VkFramebuffer* frameBuffers;
 
-        //VkBuffer vertexBuffer = VK_NULL_HANDLE;
-//        VkBuffer indexBuffer{};
+        GLuint vertex_array_object;
+        GLuint vertex_buffer;
+        GLuint index_buffer;
 
-        ///VkBuffer uniformBuffer;
-        ///VkDeviceMemory uniformBufferDeviceMemory;
-
-//        VkBuffer storageBuffer{};
+        GLuint storageBuffer;
 
         ContextImplOpengl(Window* window);
         ~ContextImplOpengl();
 
-        void create_surface();
-        void create_framebuffer();
-        void create_vertex_buffers();
-        void create_index_buffers();
-        ///void create_uniform_buffer();
+        void configure_surface();
         void create_storage_buffer();
+        void create_vertex_array();
         void create_shader_programm();
         void initialize_resources();
         void update_swapchain(uint32_t width, uint32_t height);
