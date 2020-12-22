@@ -11,8 +11,11 @@ cd "%~dp0"
 
 cd ..
 set root_path=%cd%
-rmdir /S /Q "build"
-mkdir "build"
+
+if not exist "build/" (
+	echo INFO: First time setup will take longer as the dependencies need to be downloaded and compiled.
+	mkdir "build"
+)
 cd build
 
 set build_type=

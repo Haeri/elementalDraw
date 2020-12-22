@@ -5,8 +5,11 @@ cd $(dirname "$0")
 
 cd ..
 root_path=$(pwd)
-rm -rf build
-mkdir build
+
+if [ ! -d "build/" ]; then
+	echo "INFO: First time setup will take longer as the dependencies need to be downloaded and compiled."
+	mkdir "build"
+fi
 cd build
 
 build_type=""

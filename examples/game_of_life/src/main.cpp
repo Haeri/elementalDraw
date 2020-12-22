@@ -5,8 +5,8 @@
 #include <thread>
 
 
-const int GRID_WIDTH = 400;
-const int GRID_HEIGHT = 400;
+const int GRID_WIDTH = 700;
+const int GRID_HEIGHT = 450;
 const int CELL_SIZE = 2;
 
 int grid1[GRID_WIDTH * GRID_HEIGHT] = {0};

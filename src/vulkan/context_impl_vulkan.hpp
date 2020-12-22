@@ -16,7 +16,7 @@
 #include "../window_impl.hpp"
 #include "image_impl_vulkan.hpp"
 
-#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536
+#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536*2
 #define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE UNIFORM_BUFFER_ARRAY_MAX_COUNT * sizeof(uniform_rect)
 
 
