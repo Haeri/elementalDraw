@@ -508,7 +508,7 @@ namespace elemd
         else
         {
             impl->headless = false;
-            impl->update_swapchain((uint32_t)width, (uint32_t)height);
+            impl->update_viewport((uint32_t)width, (uint32_t)height);
         }
     }
 
@@ -615,9 +615,18 @@ namespace elemd
         dummy->upload();
     }
 
-    void ContextImplOpengl::update_swapchain(uint32_t width, uint32_t height)
+    void ContextImplOpengl::update_viewport(uint32_t width, uint32_t height)
     {
+        if (resizing)
+            return;
+        resizing = true;
 
+        this->_width = width;
+        this->_height = height;
+
+        glViewport(0, 0, width, height);
+
+        resizing = false;
     }
 
 
@@ -692,7 +701,7 @@ namespace elemd
             "    vec4 vertices[2];\n"
             "    vec4 border_radius[2];\n"
             "    vec4 sampler_index;\n"
-            "    vec4 stroke_size_color;	\n"
+            "    vec4 stroke_size_color;\n"
             "    vec4 uvs;\n"
             "};\n"
             "\n"
@@ -705,8 +714,8 @@ namespace elemd
             "\n"
             "float ellipse_distance(vec2 uv, vec2 center, vec2 dims)\n"
             "{\n"
-            "    return pow((uv.x-center.x),2)/pow(dims.x,2) + "
-            "pow((uv.y-center.y),2)/pow(dims.y,2);\n"
+            "    return 1. - (pow((uv.x-center.x),2)/pow(dims.x,2) + "
+            "pow((uv.y-center.y),2)/pow(dims.y,2));\n"
             "}\n"
             "\n"
             "void main()\n"
@@ -726,10 +735,10 @@ namespace elemd
             "\n"
             "    vec2 line_width2 = vec2(line_width, line_width);\n"
             "\n"
-            "    nw = clamp(nw, line_width2, vec2(.5));\n"
-            "    ne = clamp(ne, line_width2, vec2(.5));\n"
-            "    se = clamp(se, line_width2, vec2(.5));\n"
-            "    sw = clamp(sw, line_width2, vec2(.5));\n"
+            "    //nw = clamp(nw, line_width2, vec2(.5));\n"
+            "    //ne = clamp(ne, line_width2, vec2(.5));\n"
+            "    //se = clamp(se, line_width2, vec2(.5));\n"
+            "    //sw = clamp(sw, line_width2, vec2(.5));\n"
             "\n"
             "    float dist = 0.0;\n"
             "    float dist2 = 0.0;\n"
@@ -737,47 +746,55 @@ namespace elemd
             "    if(uv_varying.x < nw.x && uv_varying.y < nw.y)\n"
             "    { \n"
             "        dist = ellipse_distance(uv_varying, nw, nw);\n"
-            "        dist = step(dist, 1.);\n"
+            "        float bias = fwidth(dist);\n"
+            "        dist = smoothstep(0., 0. + bias, dist);\n"
             "        if(line_width != 0.)\n"
             "        {            \n"
-            "            dist2 = 1.-ellipse_distance(uv_varying, nw, nw-line_width2);\n"
-            "            dist2 = step(dist2, 0.);\n"
+            "            dist2 = ellipse_distance(uv_varying, nw, nw-line_width2);\n"
+            "            bias = fwidth(dist2);\n"
+            "            dist2 = smoothstep(0.+bias, 0., dist2);\n"
             "            dist = min(dist, dist2);\n"
             "        }\n"
             "    }    \n"
             "    else if (1.0 -  uv_varying.x < ne.x && uv_varying.y < ne.y)\n"
             "    {\n"
             "        dist = ellipse_distance(uv_varying, vec2(1.0-ne.x, ne.y), ne);\n"
-            "        dist = step(dist, 1.);\n"
+            "        float bias = fwidth(dist);\n"
+            "        dist = smoothstep(0., 0. + bias, dist);\n"
             "        if(line_width != 0.)\n"
             "        { \n"
-            "            dist2 = 1.-ellipse_distance(uv_varying, vec2(1.0-ne.x, ne.y), "
+            "            dist2 = ellipse_distance(uv_varying, vec2(1.0-ne.x, ne.y), "
             "ne-line_width2);\n"
-            "            dist2 = step(dist2, 0.);\n"
+            "            bias = fwidth(dist2);\n"
+            "            dist2 = smoothstep(0.+bias, 0., dist2);\n"
             "            dist = min(dist, dist2);\n"
             "        }\n"
             "    }\n"
             "    else if (uv_varying.x < sw.x && 1.0 - uv_varying.y < sw.y)\n"
             "    {\n"
             "        dist = ellipse_distance(uv_varying, vec2(sw.x, 1.0-sw.y), sw);\n"
-            "        dist = step(dist, 1.);\n"
+            "        float bias = fwidth(dist);\n"
+            "        dist = smoothstep(0., 0. + bias, dist);\n"
             "        if(line_width != 0.)\n"
             "        { \n"
-            "            dist2 = 1.-ellipse_distance(uv_varying, vec2(sw.x, 1.0-sw.y), "
+            "            dist2 = ellipse_distance(uv_varying, vec2(sw.x, 1.0-sw.y), "
             "sw-line_width2);\n"
-            "            dist2 = step(dist2, 0.);\n"
+            "            bias = fwidth(dist2);\n"
+            "            dist2 = smoothstep(0.+bias, 0., dist2);\n"
             "            dist = min(dist, dist2);\n"
             "        }\n"
             "    }\n"
             "    else if (1.0 -  uv_varying.x < se.x && 1.0 - uv_varying.y < se.y)\n"
             "    {\n"
             "        dist = ellipse_distance(uv_varying, vec2(1.0-se.x, 1.0-se.y), se);\n"
-            "        dist = step(dist, 1.);\n"
+            "        float bias = fwidth(dist);\n"
+            "        dist = smoothstep(0., 0. + bias, dist);\n"
             "        if(line_width != 0.)\n"
             "        { \n"
-            "            dist2 = 1.-ellipse_distance(uv_varying, vec2(1.0-se.x, 1.0-se.y), "
+            "            dist2 = ellipse_distance(uv_varying, vec2(1.0-se.x, 1.0-se.y), "
             "se-line_width2);\n"
-            "            dist2 = step(dist2, 0.);\n"
+            "            bias = fwidth(dist2);\n"
+            "            dist2 = smoothstep(0.+bias, 0., dist2);\n"
             "            dist = min(dist, dist2);\n"
             "        }\n"
             "    }\n"
@@ -797,9 +814,7 @@ namespace elemd
             "        }\n"
             "    }\n"
             "\n"
-            "    dist = 1.0 - dist;\n"
-            "    float delta = fwidth(dist);\n"
-            "    float alpha = smoothstep(1+delta, 1, dist); \n"
+            "    float alpha =  dist;\n"
             "\n"
             "    if(line_width != 0){\n"
             "    	outColor = vec4(stroke_color, alpha);	\n"

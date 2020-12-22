@@ -25,14 +25,30 @@ namespace elemd
 
         struct uniform_rect
         {
-            color fill_color;
-            vec2 vertices[4];
-            vec2 border_radius[4];
-            vec2 sampler_index[2];
+            color fill_color;      // 32
+            vec2 vertices[4];      // 64
+            vec2 border_radius[4]; // 64
+            vec2 sampler_index[2]; // 32
             float line_size;
-            float stroke_color[3];
-            vec2 uvs[2];
-        };
+            float stroke_color[3]; // 32
+            vec2 uvs[2];           // 32
+        };                         // 256
+
+        struct uniform_rect2
+        {
+            
+            color color;            // 32
+            vec2 vertices[4];       // 64
+            float border_radius[4]; // 32            
+            float sampler_index;
+            float use_tint;
+            vec2 resolution; // 32 
+            vec2 uvs[2];     // 32
+            float line_width; // 8
+        };                    // 224
+
+        // color.r  color.g color.b  color.a
+
 
         struct point_vertex
         {
@@ -79,7 +95,7 @@ namespace elemd
         void create_vertex_array();
         void create_shader_programm();
         void initialize_resources();
-        void update_swapchain(uint32_t width, uint32_t height);
+        void update_viewport(uint32_t width, uint32_t height);
 
         ///void update_uniforms();
         void update_storage();
