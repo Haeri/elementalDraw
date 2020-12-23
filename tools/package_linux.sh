@@ -14,13 +14,10 @@ if [ "$1" = "-static" ]; then
 	mkdir -p samples/hello_world
 	cp -R ./build/examples/hello_world/res ./samples/hello_world
 	cp ./build/examples/hello_world/hello-world ./samples/hello_world
-	#cp ./build/examples/hello_world/libelemd.so ./samples/hello_world
 
 	# Game Of Life
 	mkdir -p samples/game_of_life
-	cp -R ./build/examples/game_of_life/res ./samples/game_of_life
 	cp ./build/examples/game_of_life/game-of-life ./samples/game_of_life
-	#cp ./build/examples/game_of_life/libelemd.so ./samples/game_of_life
 else
 	mkdir bin
 	cp ./build/libelemd.so* ./bin/
