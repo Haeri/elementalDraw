@@ -6,7 +6,8 @@ out gl_PerVertex{
 };
 
 layout(location = 0) out vec2 uv_varying;
-layout(location = 1) out flat int instance_index;
+layout(location = 1) out vec2 uv_tex_varying;
+layout(location = 2) out flat int instance_index;
 
 struct StorageData
 {
@@ -48,5 +49,6 @@ void main()
 
     instance_index = gl_InstanceIndex;
     gl_Position = vec4(verts[gl_VertexIndex].xy, 0.0, 1.0);
-    uv_varying = _uvs[gl_VertexIndex];
+    uv_varying = _positions[gl_VertexIndex];
+    uv_tex_varying = _uvs[gl_VertexIndex];
 }

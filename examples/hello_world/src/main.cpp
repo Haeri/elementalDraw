@@ -27,6 +27,14 @@ int main(void)
     elemd::image* anim = elemd::image::create("./res/anim.png");
     ctx->_tmp_register_image(anim);
 
+    // Load fonts
+    elemd::font* monserat_light = elemd::font::create("./res/font/Montserrat-Light.ttf");
+    ctx->_tmp_register_font(monserat_light);
+    
+    elemd::font* monserat_black = elemd::font::create("./res/font/Montserrat-Black.ttf");
+    ctx->_tmp_register_font(monserat_black);
+    
+
     int x_frames = 4;
     int y_frames = 8;
     int max_frames = 25;
@@ -45,6 +53,8 @@ int main(void)
 
     float mouse_x;
     float mouse_y;
+
+    int width = 400;
 
     // Event
     std::string text = "I see this as an absolute win!";
@@ -91,6 +101,7 @@ int main(void)
         }
     });
 
+    win->add_resize_listener([&](elemd::resize_event event) { width = event.width; });
 
     ctx->_tmp_prepare();
     ctx->set_clear_color(dark);
@@ -114,52 +125,58 @@ int main(void)
                         
         
         // Text
-        ctx->set_font_size(16);
-        ctx->draw_text(20, 20, text);
+        ctx->set_font(monserat_black);
+        ctx->set_font_size(18);
+        ctx->draw_text(20, 20, "Well to be honest");        
+        
+        ctx->set_font(monserat_light);        
+        ctx->set_font_size(12);
+        std::string formated = monserat_light->fit_substring(text, width - 2 * 20, 12);
+        ctx->draw_text(20, 45, formated);
         
         // Circle
         ctx->set_fill_color(red);
-        ctx->fill_circle(35, 75, 15);
+        ctx->fill_circle(35, 95, 15);
 
         // Rectangle
         ctx->set_fill_color(green);
-        ctx->fill_rect(70, 60, 30, 30);
+        ctx->fill_rect(70, 80, 30, 30);
 
         // Rounded rectangle
         ctx->set_fill_color(blue);
-        ctx->fill_rounded_rect(120, 60, 60, 30, 10);
+        ctx->fill_rounded_rect(120, 80, 60, 30, 10);
 
         
         ctx->set_line_width(1);
 
         // Circle outline
         ctx->set_stroke_color(red);
-        ctx->stroke_circle(215, 75, 15);
+        ctx->stroke_circle(215, 95, 15);
 
         // Rectangle outline
         ctx->set_stroke_color(green);
-        ctx->stroke_rect(250, 60, 30, 30);
+        ctx->stroke_rect(250, 80, 30, 30);
 
         // Rounded rectangle outline
         ctx->set_stroke_color(blue);
-        ctx->stroke_rounded_rect(300, 60, 60, 30, 10);
+        ctx->stroke_rounded_rect(300, 80, 60, 30, 10);
 
         
         // Image
-        ctx->draw_image(20, 110, 80, 80, img);
+        ctx->draw_image(20, 130, 80, 80, img);
         
         // Timted image
         ctx->set_fill_color(elemd::color(10, 10, 255));
-        ctx->draw_image(120, 110, 80, 80, img, true);
+        ctx->draw_image(120, 130, 80, 80, img, true);
 
         // Rounded image
-        ctx->draw_rounded_image(220, 110, 80, 80, img, 20);
+        ctx->draw_rounded_image(220, 130, 80, 80, img, 10, 10, 10, 10, 400, 400, 1600, 1600);
 
 
         // Image animation
         ctx->set_fill_color(elemd::color::color_lerp(
             elemd::color(200, 30, 30), elemd::color(30, 200, 30), (sin(color_phase++ / 100.0f)+1)/2.0f));
-        ctx->draw_image(20, 210, 80, 80, anim, anim_x, anim_y, anim_w, anim_h, true);
+        ctx->draw_image(20, 230, 80, 80, anim, anim_x, anim_y, anim_w, anim_h, true);
         if (elemd::Window::now() - last_time > anim_speed/1000.0f)
         {
             ++frame;
@@ -170,14 +187,13 @@ int main(void)
             last_time = elemd::Window::now();
         }
         
-        
-
-        //ctx->draw_image(0, 0, 400, 400, img);
 
         ctx->draw_frame();
     }
 
     // Cleanup
+    monserat_black->destroy();
+    monserat_light->destroy();
     anim->destroy();
     img->destroy();
     win->destroy();

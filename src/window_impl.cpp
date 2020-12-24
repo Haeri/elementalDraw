@@ -441,7 +441,7 @@ namespace elemd
 
         for (auto& var : winImpl->_resize_callbacks)
         {
-            var({width, height});
+            var({(int)(width / winImpl->_dpi_scale), (int)(height / winImpl->_dpi_scale)});
         }
     }
     

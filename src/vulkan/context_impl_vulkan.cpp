@@ -329,10 +329,7 @@ namespace elemd
                  {0, 0, 0},
                  {vec2(originx, originy), vec2(cropx, cropy)}});
 
-            // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-            // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th
-            // pixels by 64 to get amount of pixels))
-            x += (ch.advance >> 6) * scale;
+            x += ch.advance * scale;
         }
     }
 
@@ -575,7 +572,10 @@ namespace elemd
     {
         _default_font = font::create(default_font.data(), default_font.size());
         _tmp_register_font(_default_font);
-        set_font(_default_font);
+        if (_font == nullptr)
+        {
+            set_font(_default_font);
+        }
 
         ContextImplVulkan* impl = getImpl(this);
         

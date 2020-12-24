@@ -2,7 +2,8 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(location = 0) in vec2 uv_varying;
-layout(location = 1) in flat int instance_index;
+layout(location = 1) in vec2 uv_tex_varying;
+layout(location = 2) in flat int instance_index;
 
 layout(location = 0) out vec4 outColor;
 
@@ -134,7 +135,7 @@ void main()
     }
     else
     {
-    	vec4 img = texture(textures[index], uv_varying.xy).rgba;
+    	vec4 img = texture(textures[index], uv_tex_varying.xy).rgba;
     	if(use_color == 1){
 	        outColor = vec4((img.rgb * fill_color.rgb), min(alpha, img.a));
     	}else{

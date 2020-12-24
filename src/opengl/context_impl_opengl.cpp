@@ -558,7 +558,10 @@ namespace elemd
     {
         _default_font = font::create(default_font.data(), default_font.size());
         _tmp_register_font(_default_font);
-        set_font(_default_font);
+        if (_font == nullptr)
+        {
+            set_font(_default_font);
+        }
 
         ContextImplOpengl* impl = getImpl(this);
         
@@ -691,7 +694,8 @@ namespace elemd
             "#version 440 core\n"
             "\n"
             "layout(location = 0) in vec2 uv_varying;\n"
-            "layout(location = 1) in flat int instance_index;\n"
+            "layout(location = 1) in vec2 uv_tex_varying;\n"
+            "layout(location = 2) in flat int instance_index;\n"
             "\n"
             "layout(location = 0) out vec4 outColor;\n"
             "\n"
@@ -825,7 +829,7 @@ namespace elemd
             "    }\n"
             "    else\n"
             "    {\n"
-            "    	vec4 img = texture(textures[index], uv_varying.xy).rgba;\n"
+            "    	vec4 img = texture(textures[index], uv_tex_varying.xy).rgba;\n"
             "    	if(use_color == 1){\n"
             "	        outColor = vec4((img.rgb * fill_color.rgb), min(alpha, img.a));\n"
             "    	}else{\n"
@@ -842,7 +846,8 @@ namespace elemd
             "};\n"
             "\n"
             "layout(location = 0) out vec2 uv_varying;\n"
-            "layout(location = 1) out flat int instance_index;\n"
+            "layout(location = 1) out vec2 uv_tex_varying;\n"
+            "layout(location = 2) out flat int instance_index;\n"
             "\n"
             "struct StorageData\n"
             "{\n"
@@ -888,7 +893,8 @@ namespace elemd
             "\n"
             "    instance_index = gl_InstanceID;\n"
             "    gl_Position = vec4(verts[gl_VertexID].xy*vec2(1.0, -1.0), 0.0, 1.0);\n"
-            "    uv_varying = _uvs[gl_VertexID];\n"
+            "    uv_varying = _positions[gl_VertexID];\n"
+            "    uv_tex_varying = _uvs[gl_VertexID];\n"
             "}";
 
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);

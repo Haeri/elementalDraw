@@ -96,7 +96,7 @@ namespace elemd
             float text_width = ch.size.x() * scale;
             float text_height = ch.size.y() * scale;
 
-            x += (ch.advance >> 6) * scale;
+            x += ch.advance * scale;
         }
         if (x > width)
         {
@@ -197,8 +197,7 @@ namespace elemd
             character character = {
                 vec2((float)(face->glyph->bitmap.width), (float)(face->glyph->bitmap.rows)),
                 vec2((float)(face->glyph->bitmap_left), (float)(face->glyph->bitmap_top)),
-                vec2((float)(pen_x), (float)(pen_y)),
-                (int)(face->glyph->advance.x)};
+                vec2((float)(pen_x), (float)(pen_y)), (int)(face->glyph->advance.x >> 6)};
 
             _characters[i] = character;
 
@@ -247,7 +246,7 @@ namespace elemd
                 y += _line_height * scale;
                 x = 0;
 
-                return character_index;
+                return character_index+1;
             }
             
             float xpos = x + ch.bearing.x() * scale;
@@ -256,7 +255,7 @@ namespace elemd
             float text_width = ch.size.x() * scale;
             float text_height = ch.size.y() * scale;
 
-            x += (ch.advance >> 6) * scale;
+            x += ch.advance * scale;
 
             if (token == ' ')
             {
