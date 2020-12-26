@@ -330,10 +330,7 @@ namespace elemd
                  {0, 0, 0},
                  {vec2(originx, originy), vec2(cropx, cropy)}});
 
-            // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-            // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th
-            // pixels by 64 to get amount of pixels))
-            x += (ch.advance >> 6) * scale;
+            x += ch.advance * scale;
         }
     }
 
@@ -594,7 +591,7 @@ namespace elemd
     {
         glViewport(0, 0, _width, _height);
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
     }
 
     void ContextImplOpengl::create_storage_buffer()

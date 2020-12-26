@@ -48,7 +48,15 @@ namespace elemd
                 {
                     line = line.substr(1, line.size() - 1);
                 }
-                _ret += "\n" + line;
+                if (_ret[_ret.size() - 1] == '\n')
+                {
+                    _ret += line;
+                }
+                else
+                {
+                    _ret += "\n" + line;
+                }
+                
             }
         }
         else
