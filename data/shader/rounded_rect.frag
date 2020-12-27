@@ -9,12 +9,13 @@ layout(location = 0) out vec4 outColor;
 
 struct StorageData
 {
-    vec4 fill_color;
-    vec4 vertices[2];
-    vec4 border_radius[2];
-    vec4 sampler_index;
-    vec4 stroke_size_color;	
-    vec4 uvs;
+    vec4 color;										// 32   4
+    vec4 vertices[2];								// 64   4, 4
+    vec4 border_radius;								// 32   4
+    vec4 sampler_index1__use_tint1__resolution2; 	// 32   1:1:2
+    vec4 uvs;										// 32   4
+    vec4 line_width;    							// 32   4
+	vec4 shadow_size;      							// 32   1:0:0:0
 };
 
 layout(set = 0, binding = 0, std140) readonly buffer SBO
@@ -24,120 +25,59 @@ layout(set = 0, binding = 0, std140) readonly buffer SBO
 layout(set = 0, binding = 1) uniform sampler2D textures[10];
 
 
-float ellipse_distance(vec2 uv, vec2 center, vec2 dims)
+float sdRoundedBox(vec2 p, vec2 b, vec4 r )
 {
-    return 1.0 - (pow((uv.x-center.x),2)/pow(dims.x,2) + pow((uv.y-center.y),2)/pow(dims.y,2));
+    r.xy = (p.x>0.0)?r.xy : r.zw;
+    r.x  = (p.y>0.0)?r.x  : r.y;
+    vec2 q = abs(p)-b+r.x;
+    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
 }
 
 void main()
-{
-    //float a = sbo.payload[instance_index].fill_color.a;
-    
-    vec2 nw = sbo.payload[instance_index].border_radius[0].xy;
-    vec2 ne = sbo.payload[instance_index].border_radius[0].zw;
-    vec2 se = sbo.payload[instance_index].border_radius[1].xy;
-    vec2 sw = sbo.payload[instance_index].border_radius[1].zw;
-    
-    vec4 fill_color = sbo.payload[instance_index].fill_color.rgba; 
-    float line_width = sbo.payload[instance_index].stroke_size_color.x;
-    vec3 stroke_color = sbo.payload[instance_index].stroke_size_color.yzw;
-    int index = int(sbo.payload[instance_index].sampler_index.x);
-    int use_color = int(sbo.payload[instance_index].sampler_index.y);
+{   
+	vec4 border_radius = sbo.payload[instance_index].border_radius * 2.;     
+    vec4 color = sbo.payload[instance_index].color; 
+    float line_width = sbo.payload[instance_index].line_width.x * 2.;
+    int index = int(sbo.payload[instance_index].sampler_index1__use_tint1__resolution2.x);
+    int use_tint = int(sbo.payload[instance_index].sampler_index1__use_tint1__resolution2.y);
+    vec2 resolution = sbo.payload[instance_index].sampler_index1__use_tint1__resolution2.zw;
+    float shadow_size = sbo.payload[instance_index].shadow_size.x * 2.;
 
-    vec2 line_width2 = vec2(line_width, line_width);
+	float dominant_axis = (resolution.x/resolution.y > 0.) ? resolution.x : resolution.y;
+	vec4 border_radius_norm = border_radius/dominant_axis; 
+	vec2 resolution_norm = resolution / dominant_axis;
+	float line_width_norm = line_width / dominant_axis;
+	float shadow_size_norm = shadow_size / dominant_axis;
 
-    //nw = clamp(nw, line_width2, vec2(.5));
-    //ne = clamp(ne, line_width2, vec2(.5));
-    //se = clamp(se, line_width2, vec2(.5));
-    //sw = clamp(sw, line_width2, vec2(.5));
+ 	float dist = 1.-sdRoundedBox((uv_varying-0.5)*2.*resolution_norm, resolution_norm, border_radius_norm);
+    float bias = fwidth(dist);
+    float shape = smoothstep(1., 1.+bias, dist);
 
-    float dist = 0.0;
-    float dist2 = 0.0;
+	if(shadow_size > 0.)
+    {
+        shape = smoothstep(1., 1. + shadow_size_norm, dist);
+    }
+    else if(line_width > 0.)
+    {
+        float inner = 1.-smoothstep(1.+line_width_norm, 1.+line_width_norm+bias, dist);
+        shape = min(inner, shape);
+    }
 
-    if(uv_varying.x < nw.x && uv_varying.y < nw.y)
-	{ 
-	  dist = ellipse_distance(uv_varying, nw, nw);
-	  float bias = fwidth(dist);
-	  dist = smoothstep(0., 0. + bias, dist);
-	  if(line_width != 0.)
-	  {            
-	      dist2 = ellipse_distance(uv_varying, nw, nw-line_width2);
-	      bias = fwidth(dist2);
-	      dist2 = smoothstep(0.+bias, 0., dist2);
-	      dist = min(dist, dist2);
-	  }
-	}    
-	else if (1.0 -  uv_varying.x < ne.x && uv_varying.y < ne.y)
-	{
-	  dist = ellipse_distance(uv_varying, vec2(1.0-ne.x, ne.y), ne);
-	  float bias = fwidth(dist);
-	  dist = smoothstep(0., 0. + bias, dist);
-	  if(line_width != 0.)
-	  { 
-	      dist2 = ellipse_distance(uv_varying, vec2(1.0-ne.x, ne.y), ne-line_width2);
-	      bias = fwidth(dist2);
-	      dist2 = smoothstep(0.+bias, 0., dist2);
-	      dist = min(dist, dist2);
-	  }
-	}
-	else if (uv_varying.x < sw.x && 1.0 - uv_varying.y < sw.y)
-	{
-	  dist = ellipse_distance(uv_varying, vec2(sw.x, 1.0-sw.y), sw);
-	  float bias = fwidth(dist);
-	  dist = smoothstep(0., 0. + bias, dist);
-	  if(line_width != 0.)
-	  { 
-	      dist2 = ellipse_distance(uv_varying, vec2(sw.x, 1.0-sw.y), 
-	sw-line_width2);
-	      bias = fwidth(dist2);
-	      dist2 = smoothstep(0.+bias, 0., dist2);
-	      dist = min(dist, dist2);
-	  }
-	}
-	else if (1.0 -  uv_varying.x < se.x && 1.0 - uv_varying.y < se.y)
-	{
-	  dist = ellipse_distance(uv_varying, vec2(1.0-se.x, 1.0-se.y), se);
-	  float bias = fwidth(dist);
-	  dist = smoothstep(0., 0. + bias, dist);
-	  if(line_width != 0.)
-	  { 
-	      dist2 = ellipse_distance(uv_varying, vec2(1.0-se.x, 1.0-se.y), 
-	se-line_width2);
-	      bias = fwidth(dist2);
-	      dist2 = smoothstep(0.+bias, 0., dist2);
-	      dist = min(dist, dist2);
-	  }
-	}
-	else
-	{
-	  if(line_width != 0.)
-	  {            
-	      if(uv_varying.x <= line_width2.x || uv_varying.y <= line_width2.y || uv_varying.x >= 1. - line_width2.x || uv_varying.y >= 1. - line_width2.y)
-	      {
-	          dist = 1.;
-	      }
-	  }
-	  else
-	  {
-	      dist = 1.;
-	  }
-	}
-
-	float alpha =  dist;
+	float alpha = shape;
 
     if(line_width != 0)
     {
-    	outColor = vec4(stroke_color, alpha);	
+    	outColor = vec4(color.rgb, alpha);	
     }
     else if (index <= -1)
     {
-        outColor = vec4(fill_color.rgb, min(alpha, fill_color.a));
+        outColor = vec4(color.rgb, min(alpha, color.a));
     }
     else
     {
     	vec4 img = texture(textures[index], uv_tex_varying.xy).rgba;
-    	if(use_color == 1){
-	        outColor = vec4((img.rgb * fill_color.rgb), min(alpha, img.a));
+    	if(use_tint == 1){
+	        outColor = vec4((img.rgb * color.rgb), min(alpha, img.a));
     	}else{
     		outColor = vec4((img.rgb), min(alpha, img.a));    		
     	}

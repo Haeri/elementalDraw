@@ -13,7 +13,7 @@
 #include "../window_impl.hpp"
 #include "image_impl_opengl.hpp"
 
-#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536/2
+#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536*2
 #define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE UNIFORM_BUFFER_ARRAY_MAX_COUNT * sizeof(uniform_rect)
 
 
@@ -25,29 +25,16 @@ namespace elemd
 
         struct uniform_rect
         {
-            color fill_color;      // 32
-            vec2 vertices[4];      // 64
-            vec2 border_radius[4]; // 64
-            vec2 sampler_index[2]; // 32
-            float line_size;
-            float stroke_color[3]; // 32
-            vec2 uvs[2];           // 32
-        };                         // 256
-
-        struct uniform_rect2
-        {
-            
-            color color;            // 32
-            vec2 vertices[4];       // 64
-            float border_radius[4]; // 32            
-            float sampler_index;
-            float use_tint;
-            vec2 resolution; // 32 
-            vec2 uvs[2];     // 32
-            float line_width; // 8
-        };                    // 224
-
-        // color.r  color.g color.b  color.a
+            color color;            // 32   1
+            vec2 vertices[4];       // 64   2
+            float border_radius[4]; // 32   1        
+            float sampler_index;    //  
+            float use_tint;         // 
+            vec2 resolution;        // 32   1 TODO: Should be moved to uniform
+            vec2 uvs[2];            // 32   1
+            float line_width[4];    // 32   1
+            float shadow_size[4];   // 8    1
+        };                          // 256
 
 
         struct point_vertex

@@ -58,6 +58,13 @@ namespace elemd
                                 float src_x, float src_y, float src_width, float src_height,
                                 bool tint = false);
 
+        void draw_circle_shadow(float x, float y, float radius, float shadow_size);
+        void draw_rect_shadow(float x, float y, float width, float height, float shadow_size);
+        void draw_rounded_rect_shadow(float x, float y, float width, float height,
+                                      float border_radius, float shadow_size);
+        void draw_rounded_rect_shadow(float x, float y, float width, float height, float radius_nw,
+                                      float radius_ne, float radius_se, float radius_sw,
+                                      float shadow_size);
 
         void set_clear_color(color color);
         void set_fill_color(color color);

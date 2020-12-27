@@ -35,29 +35,31 @@ namespace elemd
         ContextImplVulkan* impl = getImpl(this);
 
         float lw = _line_width * impl->_window->_x_scale * impl->_window->_dpi_scale;
-        float lwnorm = lw / (width * impl->_window->_x_scale * impl->_window->_dpi_scale + lw);
         x += impl->_window->_x_offset;
         y += impl->_window->_y_offset;
-        x = x * impl->_window->_x_scale * impl->_window->_dpi_scale -lw / 2.0f;
-        y = y * impl->_window->_y_scale * impl->_window->_dpi_scale - lw / 2.0f;
-        width = width * impl->_window->_x_scale * impl->_window->_dpi_scale + lw;
-        height = height * impl->_window->_y_scale * impl->_window->_dpi_scale +lw;
+        x = x * impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y = y * impl->_window->_y_scale * impl->_window->_dpi_scale;
+        width = width * impl->_window->_x_scale * impl->_window->_dpi_scale;
+        height = height * impl->_window->_y_scale * impl->_window->_dpi_scale;
 
         float xf = (x / _width);
         float yf = (y / _height);
-        float widhtf = (width / _width);
+        float widthf = (width / _width);
         float heightf = (height / _height);
 
-        impl->storage.push_back(
-            {_fill_color,
-             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
-              vec2(xf, yf + heightf) * 2.0f - vec2(1),
-              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(0), vec2(0), vec2(0), vec2(0)},
-             {vec2(-1, 0), vec2(0)},
-             (lwnorm),
-             {_stroke_color.rf(), _stroke_color.gf(), _stroke_color.bf()},
-             {vec2(0), vec2(1)}});
+        impl->storage.push_back({
+            _stroke_color,                                                          // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {0, 0, 0, 0},                                                           // border_radius
+            -1,                                                                     // sampler_index
+            0,                                                                      // use_tint
+            vec2(width, height),                                                    // resolution
+            {vec2(0), vec2(1)},                                                     // uvs
+            {lw, lw, lw, lw},                                                       // line_width
+            {0, 0, 0, 0},                                                           // shadow_size
+        });
     }
 
     void Context::stroke_rounded_rect(float x, float y, float width, float height,
@@ -71,9 +73,8 @@ namespace elemd
                                       float radius_ne, float radius_se, float radius_sw)
     {
         ContextImplVulkan* impl = getImpl(this);
-        
+
         float lw = _line_width * impl->_window->_x_scale * impl->_window->_dpi_scale;
-        float lwnorm = lw / (width * impl->_window->_x_scale * impl->_window->_dpi_scale + lw);
 
         x += impl->_window->_x_offset;
         y += impl->_window->_y_offset;
@@ -86,25 +87,25 @@ namespace elemd
         float yf = (y / _height);
         float widthf = (width / _width);
         float heightf = (height / _height);
-        float nwxf = (radius_nw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float nexf = (radius_ne / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float sexf = (radius_se / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float swxf = (radius_sw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float nwyf = (radius_nw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
-        float neyf = (radius_ne / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
-        float seyf = (radius_se / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
-        float swyf = (radius_sw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
 
-        impl->storage.push_back(
-            {_fill_color,
-             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
-              vec2(xf, yf + heightf) * 2.0f - vec2(1),
-              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)},
-             {vec2(-1, 0), vec2(0)},
-             (lwnorm),
-             {_stroke_color.rf(), _stroke_color.gf(), _stroke_color.bf()},
-             {vec2(0), vec2(1)}});
+        float nwf = radius_nw * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float nef = radius_ne * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float sef = radius_se * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float swf = radius_sw * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+
+        impl->storage.push_back({
+            _stroke_color,                                                          // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {nwf, nef, sef, swf},                                                   // border_radius
+            -1,                                                                     // sampler_index
+            0,                                                                      // use_tint
+            vec2(width, height),                                                    // resolution
+            {vec2(0), vec2(1)},                                                     // uvs
+            {lw, lw, lw, lw},                                                       // line_width
+            {0, 0, 0, 0},                                                           // shadow_size
+        });
     }
 
     // VK_PRIMITIVE_TOPOLOGY_POINT_LIST
@@ -122,7 +123,6 @@ namespace elemd
         ContextImplVulkan* impl = getImpl(this);
 
         float lw = _line_width * impl->_window->_x_scale * impl->_window->_dpi_scale;
-        float lwnorm = lw / (radius*2 * impl->_window->_x_scale * impl->_window->_dpi_scale + lw);
 
         x += impl->_window->_x_offset;
         y += impl->_window->_y_offset;
@@ -131,22 +131,27 @@ namespace elemd
 
         float xf = ((x - radius * impl->_window->_x_scale * impl->_window->_dpi_scale) / _width);
         float yf = ((y - radius * impl->_window->_y_scale * impl->_window->_dpi_scale) / _height);
-        float widhtf =
+        float widthf =
             ((radius * 2 * impl->_window->_x_scale * impl->_window->_dpi_scale) / _width);
         float heightf =
             ((radius * 2 * impl->_window->_y_scale * impl->_window->_dpi_scale) / _height);
-        float radf = 0.5f;
+        float width = (radius * 2 * impl->_window->_x_scale * impl->_window->_dpi_scale);
 
-        impl->storage.push_back(
-            {_fill_color,
-             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
-              vec2(xf, yf + heightf) * 2.0f - vec2(1),
-              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(radf), vec2(radf), vec2(radf), vec2(radf)},
-             {vec2(-1, 0), vec2(0)},
-             (lwnorm),
-             {_stroke_color.rf(), _stroke_color.gf(), _stroke_color.bf()},
-             {vec2(0), vec2(1)}});
+        float radf = width / 2.0f;
+
+        impl->storage.push_back({
+            _stroke_color,                                                          // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {radf, radf, radf, radf},                                               // border_radius
+            -1,                                                                     // sampler_index
+            0,                                                                      // use_tint
+            vec2(width, width),                                                     // resolution
+            {vec2(0), vec2(1)},                                                     // uvs
+            {lw, lw, lw, lw},                                                       // line_width
+            {0, 0, 0, 0},                                                           // shadow_size
+        });
     }
 
     void Context::stroke_ellipse(float x, float y, float width, float height)
@@ -171,19 +176,22 @@ namespace elemd
 
         float xf = (x / _width);
         float yf = (y / _height);
-        float widhtf = (width / _width);
+        float widthf = (width / _width);
         float heightf = (height / _height);
-        
-        impl->storage.push_back(
-            {_fill_color,
-             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
-              vec2(xf, yf + heightf) * 2.0f - vec2(1),
-              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(0), vec2(0), vec2(0), vec2(0)},
-             {vec2(-1, 0), vec2(0)},
-             0,
-             {0, 0, 0},
-             {vec2(0), vec2(1)}});
+
+        impl->storage.push_back({
+            _fill_color,                                                            // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {0, 0, 0, 0},                                                           // border_radius
+            -1,                                                                     // sampler_index
+            0,                                                                      // use_tint
+            vec2(width, height),                                                    // resolution
+            {vec2(0), vec2(1)},                                                     // uvs
+            {0, 0, 0, 0},                                                           // line_width
+            {0, 0, 0, 0},                                                           // shadow_size
+        });
     }
 
     void Context::fill_rounded_rect(float x, float y, float width, float height,
@@ -209,25 +217,25 @@ namespace elemd
         float yf = (y / _height);
         float widthf = (width / _width);
         float heightf = (height / _height);
-        float nwxf = (radius_nw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float nexf = (radius_ne / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float sexf = (radius_se / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float swxf = (radius_sw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float nwyf = (radius_nw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
-        float neyf = (radius_ne / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
-        float seyf = (radius_se / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
-        float swyf = (radius_sw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
 
-        impl->storage.push_back(
-            {_fill_color,
-             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
-              vec2(xf, yf + heightf) * 2.0f - vec2(1),
-              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)},
-             {vec2(-1, 0), vec2(0)},
-             0,
-             {0, 0, 0},
-             {vec2(0), vec2(1)}});
+        float nwf = radius_nw * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float nef = radius_ne * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float sef = radius_se * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float swf = radius_sw * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+
+        impl->storage.push_back({
+            _fill_color,                                                            // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {nwf, nef, sef, swf},                                                   // border_radius
+            -1,                                                                     // sampler_index
+            0,                                                                      // use_tint
+            vec2(width, height),                                                    // resolution
+            {vec2(0), vec2(1)},                                                     // uvs
+            {0, 0, 0, 0},                                                           // line_width
+            {0, 0, 0, 0},                                                           // shadow_size
+        });
     }
 
     void Context::fill_circle(float x, float y, float radius)
@@ -241,24 +249,27 @@ namespace elemd
 
         float xf = ((x - radius * impl->_window->_x_scale * impl->_window->_dpi_scale) / _width);
         float yf = ((y - radius * impl->_window->_y_scale * impl->_window->_dpi_scale) / _height);
-        float widhtf =
+        float widthf =
             ((radius * 2 * impl->_window->_x_scale * impl->_window->_dpi_scale) / _width);
         float heightf =
             ((radius * 2 * impl->_window->_y_scale * impl->_window->_dpi_scale) / _height);
-        float radf = 0.5f;
 
-        impl->storage.push_back(
-            {_fill_color,
-            {vec2(xf, yf) * 2.0f - vec2(1), 
-              vec2(xf + widhtf, yf) * 2.0f - vec2(1),
-              vec2(xf, yf + heightf) * 2.0f - vec2(1),
-              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(radf), vec2(radf), vec2(radf), vec2(radf)},
-             {vec2(-1, 0), vec2(0)},
-             0,
-             {0, 0, 0},
-             {vec2(0), vec2(1)}});
-   
+        float width = (radius * 2 * impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float radf = width / 2.0f;
+
+        impl->storage.push_back({
+            _fill_color,                                                            // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {radf, radf, radf, radf},                                               // border_radius
+            -1,                                                                     // sampler_index
+            0,                                                                      // use_tint
+            vec2(width, width),                                                     // resolution
+            {vec2(0), vec2(1)},                                                     // uvs
+            {0, 0, 0, 0},                                                           // line_width
+            {0, 0, 0, 0},                                                           // shadow_size
+        });
     }
 
     void Context::fill_ellipse(float x, float y, float width, float height)
@@ -309,7 +320,7 @@ namespace elemd
 
             float xf = (xpos * impl->_window->_x_scale * impl->_window->_dpi_scale / _width);
             float yf = (ypos * impl->_window->_y_scale * impl->_window->_dpi_scale / _height);
-            float widhtf = (width * impl->_window->_x_scale * impl->_window->_dpi_scale / _width);
+            float widthf = (width * impl->_window->_x_scale * impl->_window->_dpi_scale / _width);
             float heightf =
                 (height * impl->_window->_y_scale * impl->_window->_dpi_scale / _height);
 
@@ -318,16 +329,19 @@ namespace elemd
             float cropx = originx + ch.size.x() / img->get_width();
             float cropy = originy + ch.size.y() / img->get_height();
 
-            impl->storage.push_back(
-                {_fill_color,
-                 {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
-                  vec2(xf, yf + heightf) * 2.0f - vec2(1),
-                  vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
-                 {vec2(0), vec2(0), vec2(0), vec2(0)},
-                 {vec2(img->_sampler_index, 1), vec2(0)},
-                 0,
-                 {0, 0, 0},
-                 {vec2(originx, originy), vec2(cropx, cropy)}});
+            impl->storage.push_back({
+                _fill_color,                                                            // color
+                {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+                 vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+                 vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+                {0, 0, 0, 0},                                 // border_radius
+                (float)img->_sampler_index,                   // sampler_index
+                1,                                            // use_tint
+                vec2(width, height),                          // resolution
+                {vec2(originx, originy), vec2(cropx, cropy)}, // uvs
+                {0, 0, 0, 0},                                 // line_width
+                {0, 0, 0, 0},                                 // shadow_size
+            });
 
             x += ch.advance * scale;
         }
@@ -339,35 +353,33 @@ namespace elemd
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
         
-        //std::cout << impl->_window->_x_offset << " " << impl->_window->_y_offset << std::endl;
-
         x += impl->_window->_x_offset;
         y += impl->_window->_y_offset;
 
         x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
         y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
 
-        //x -= impl->_window->_x_offset;
-        //y -= impl->_window->_y_offset;
-
         width *= impl->_window->_x_scale * impl->_window->_dpi_scale;
         height *= impl->_window->_y_scale * impl->_window->_dpi_scale;
 
         float xf = (x / _width);
         float yf = (y / _height);
-        float widhtf = (width / _width);
+        float widthf = (width / _width);
         float heightf = (height / _height);
 
-        impl->storage.push_back(
-            {_fill_color,
-             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widhtf, yf) * 2.0f - vec2(1),
-              vec2(xf, yf + heightf) * 2.0f - vec2(1),
-              vec2(xf + widhtf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(0), vec2(0), vec2(0), vec2(0)},
-             {vec2(img->_sampler_index, tint), vec2(0)},
-             0,
-             {0, 0, 0},
-             {vec2(0), vec2(1)}});
+        impl->storage.push_back({
+            _fill_color,                                                            // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {0, 0, 0, 0},                                                           // border_radius
+            (float)img->_sampler_index,                                             // sampler_index
+            (float)tint,                                                            // use_tint
+            vec2(width, height),                                                    // resolution
+            {vec2(0), vec2(1)},                                                     // uvs
+            {0, 0, 0, 0},                                                           // line_width
+            {0, 0, 0, 0},                                                           // shadow_size
+        });
     }
 
     void Context::draw_image(float x, float y, float width, float height, image* image, float src_x,
@@ -410,30 +422,143 @@ namespace elemd
         float yf = (y / _height);
         float widthf = (width / _width);
         float heightf = (height / _height);
-        float nwxf = (radius_nw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float nexf = (radius_ne / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float sexf = (radius_se / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float swxf = (radius_sw / width) * (impl->_window->_x_scale * impl->_window->_dpi_scale);
-        float nwyf = (radius_nw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
-        float neyf = (radius_ne / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
-        float seyf = (radius_se / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
-        float swyf = (radius_sw / height) * (impl->_window->_y_scale * impl->_window->_dpi_scale);
+
+        float nwf = radius_nw * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float nef = radius_ne * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float sef = radius_se * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float swf = radius_sw * (impl->_window->_x_scale * impl->_window->_dpi_scale);
 
         float originx = src_x / img->get_width();
         float originy = src_y / img->get_height();
         float cropx = originx + src_width / img->get_width();
         float cropy = originy + src_width / img->get_height();
 
-        impl->storage.push_back(
-            {_fill_color,
-             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1),
-              vec2(xf, yf + heightf) * 2.0f - vec2(1),
-              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},
-             {vec2(nwxf, nwyf), vec2(nexf, neyf), vec2(sexf, seyf), vec2(swxf, swyf)},
-             {vec2(img->_sampler_index, tint), vec2(0)},
-             0,
-             {0, 0, 0},
-             {vec2(originx, originy), vec2(cropx, cropy)}});
+        impl->storage.push_back({
+            _fill_color,                                                            // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {nwf, nef, sef, swf},                                                   // border_radius
+            (float)img->_sampler_index,                                             // sampler_index
+            (float)tint,                                                            // use_tint
+            vec2(width, height),                                                    // resolution
+            {vec2(originx, originy), vec2(cropx, cropy)},                           // uvs
+            {0, 0, 0, 0},                                                           // line_width
+            {0, 0, 0, 0},                                                           // shadow_size
+        });
+    }
+
+    void Context::draw_rect_shadow(float x, float y, float width, float height, float shadow_size)
+    {
+        ContextImplVulkan* impl = getImpl(this);
+
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+        width *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        height *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+        shadow_size *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+
+        float xf = (x / _width);
+        float yf = (y / _height);
+        float widthf = (width / _width);
+        float heightf = (height / _height);
+
+        impl->storage.push_back({
+            _fill_color,                                                            // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {0, 0, 0, 0},                                                           // border_radius
+            -1,                                                                     // sampler_index
+            0,                                                                      // use_tint
+            vec2(width, height),                                                    // resolution
+            {vec2(0), vec2(1)},                                                     // uvs
+            {0, 0, 0, 0},                                                           // line_width
+            {shadow_size, 0, 0, 0},                                                 // shadow_size
+        });
+    }
+
+    void Context::draw_rounded_rect_shadow(float x, float y, float width, float height,
+                                           float border_radius, float shadow_size)
+    {
+        draw_rounded_rect_shadow(x, y, width, height, border_radius, border_radius, border_radius,
+                                 border_radius, shadow_size);
+    }
+
+    void Context::draw_rounded_rect_shadow(float x, float y, float width, float height,
+                                           float radius_nw, float radius_ne, float radius_se,
+                                           float radius_sw, float shadow_size)
+    {
+        ContextImplVulkan* impl = getImpl(this);
+
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+        width *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        height *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+        shadow_size *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+
+        float xf = (x / _width);
+        float yf = (y / _height);
+        float widthf = (width / _width);
+        float heightf = (height / _height);
+
+        float nwf = radius_nw * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float nef = radius_ne * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float sef = radius_se * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float swf = radius_sw * (impl->_window->_x_scale * impl->_window->_dpi_scale);
+
+        impl->storage.push_back({
+            _fill_color,                                                            // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {nwf, nef, sef, swf},                                                   // border_radius
+            -1,                                                                     // sampler_index
+            0,                                                                      // use_tint
+            vec2(width, height),                                                    // resolution
+            {vec2(0), vec2(1)},                                                     // uvs
+            {0, 0, 0, 0},                                                           // line_width
+            {shadow_size, 0, 0, 0},                                                 // shadow_size
+        });
+    }
+
+    void Context::draw_circle_shadow(float x, float y, float radius, float shadow_size)
+    {
+        ContextImplVulkan* impl = getImpl(this);
+
+        x += impl->_window->_x_offset;
+        y += impl->_window->_y_offset;
+        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
+        shadow_size *= impl->_window->_x_scale * impl->_window->_dpi_scale;
+
+        float xf = ((x - radius * impl->_window->_x_scale * impl->_window->_dpi_scale) / _width);
+        float yf = ((y - radius * impl->_window->_y_scale * impl->_window->_dpi_scale) / _height);
+        float widthf =
+            ((radius * 2 * impl->_window->_x_scale * impl->_window->_dpi_scale) / _width);
+        float heightf =
+            ((radius * 2 * impl->_window->_y_scale * impl->_window->_dpi_scale) / _height);
+
+        float width = (radius * 2 * impl->_window->_x_scale * impl->_window->_dpi_scale);
+        float radf = width / 2.0f;
+
+        impl->storage.push_back({
+            _fill_color,                                                            // color
+            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
+             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
+             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
+            {radf, radf, radf, radf},                                               // border_radius
+            -1,                                                                     // sampler_index
+            0,                                                                      // use_tint
+            vec2(width, width),                                                     // resolution
+            {vec2(0), vec2(1)},                                                     // uvs
+            {0, 0, 0, 0},                                                           // line_width
+            {shadow_size, 0, 0, 0},                                                 // shadow_size
+        });
     }
 
    
@@ -1664,8 +1789,9 @@ namespace elemd
     */
 
     void ContextImplVulkan::update_storage()
-    {
-        VkDeviceSize bufferSize = sizeof(uniform_rect) * storage.size();
+    {            
+        VkDeviceSize bufferSize =
+                std::min(storage.size() * sizeof(uniform_rect), UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE);
 
         void* rawData;
         vkMapMemory(VulkanSharedInfo::getInstance()->device, storageBufferDeviceMemory, 0,

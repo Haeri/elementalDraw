@@ -28,14 +28,16 @@ namespace elemd
 
         struct uniform_rect
         {
-            color fill_color;
-            vec2 vertices[4];
-            vec2 border_radius[4];
-            vec2 sampler_index[2];
-            float line_size;
-            float stroke_color[3];
-            vec2 uvs[2];
-        };
+            color color;            // 32   1
+            vec2 vertices[4];       // 64   2
+            float border_radius[4]; // 32   1
+            float sampler_index;    //
+            float use_tint;         //
+            vec2 resolution;        // 32   1 TODO: Should be moved to uniform
+            vec2 uvs[2];            // 32   1
+            float line_width[4];    // 32   1
+            float shadow_size[4];   // 8    1
+        };                          // 256
 
         imageImplVulkan* dummy;
         std::vector<imageImplVulkan*> images;

@@ -14,7 +14,7 @@ int main(void)
 
 
     // Configure and create window
-    elemd::WindowConfig winc = elemd::WindowConfig{"Hello World", 400, 400};
+    elemd::WindowConfig winc = elemd::WindowConfig{"Hello World", 440, 550};
     winc.icon_file = "./res/logo.png";
     winc.transparent = true;
     elemd::Window* win = elemd::Window::create(winc);
@@ -55,7 +55,7 @@ int main(void)
     float mouse_x;
     float mouse_y;
 
-    int width = 400;
+    int width = 440;
 
     // Event
     std::string text = "I see this as an absolute win!";
@@ -134,6 +134,9 @@ int main(void)
         ctx->set_font_size(12);
         std::string formated = monserat_light->fit_substring(text, width - 2 * 20, 12);
         ctx->draw_text(20, 45, formated);
+
+        ctx->set_font_size(12);
+        ctx->draw_text(210, 20, "123456789 +\"*ç%&/()=?,.-;:_<>\\|¦@#°§¬|¢`\nABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz ÖÄÜöäü ");     
         
         // Circle
         ctx->set_fill_color(red);
@@ -145,22 +148,22 @@ int main(void)
 
         // Rounded rectangle
         ctx->set_fill_color(blue);
-        ctx->fill_rounded_rect(120, 80, 60, 30, 10);
+        ctx->fill_rounded_rect(120, 80, 80, 30, 10);
 
         
         ctx->set_line_width(1);
 
         // Circle outline
         ctx->set_stroke_color(red);
-        ctx->stroke_circle(215, 95, 15);
+        ctx->stroke_circle(235, 95, 15);
 
         // Rectangle outline
         ctx->set_stroke_color(green);
-        ctx->stroke_rect(250, 80, 30, 30);
+        ctx->stroke_rect(270, 80, 30, 30);
 
         // Rounded rectangle outline
         ctx->set_stroke_color(blue);
-        ctx->stroke_rounded_rect(300, 80, 60, 30, 10);
+        ctx->stroke_rounded_rect(320, 80, 80, 30, 10);
 
         
         // Image
@@ -177,7 +180,7 @@ int main(void)
         // Image animation
         ctx->set_fill_color(elemd::color::color_lerp(
             elemd::color(200, 30, 30), elemd::color(30, 200, 30), (sin(color_phase++ / 100.0f)+1)/2.0f));
-        ctx->draw_image(20, 230, 80, 80, anim, anim_x, anim_y, anim_w, anim_h, true);
+        ctx->draw_image(320, 130, 80, 80, anim, anim_x, anim_y, anim_w, anim_h, true);
         if (elemd::Window::now() - last_time > anim_speed/1000.0f)
         {
             ++frame;
@@ -188,6 +191,46 @@ int main(void)
             last_time = elemd::Window::now();
         }
         
+
+
+        for (size_t i = 0; i < 10; i++)
+        {
+            ctx->set_line_width(i+1);
+            
+            // Stroke Circle
+            ctx->set_stroke_color(red);
+            ctx->stroke_circle(35 + i * (30 + 10), 245, 15);
+            
+            // Stroke Rectangle
+            ctx->set_stroke_color(green);
+            ctx->stroke_rect(20 + i * (30 + 10), 280, 30, 30);
+
+            // Stroke Rounded rectangle
+            ctx->set_stroke_color(blue);
+            ctx->stroke_rounded_rect(20 + i * (30 + 10), 330, 30, 30, 10);
+        }
+
+
+        for (size_t i = 0; i < 10; i++)
+        {
+            // Circle shadow
+            ctx->set_fill_color(red);
+            ctx->draw_circle_shadow(35 + i * (30 + 10), 395, 15, i *3);
+            
+
+            // Rectangle shadow
+            ctx->set_fill_color(green);
+            ctx->draw_rect_shadow(20 + i * (30 + 10), 430, 30, 30, i * 3);
+
+            // Rounded rectangle shadow
+            ctx->set_fill_color(blue);
+            ctx->draw_rounded_rect_shadow(20 + i * (30 + 10), 480, 30, 30, 10, i * 3);
+        }
+
+
+
+
+
 
         ctx->draw_frame();
     }

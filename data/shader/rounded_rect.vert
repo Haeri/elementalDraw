@@ -11,12 +11,13 @@ layout(location = 2) out flat int instance_index;
 
 struct StorageData
 {
-    vec4 fill_color;
-    vec4 vertices[2];
-    vec4 border_radius[2];
-    vec4 sampler_index; 
-    vec4 stroke_size_color;
-    vec4 uvs;
+    vec4 color;										// 32   4
+    vec4 vertices[2];								// 64   4, 4
+    vec4 border_radius;								// 32   4
+    vec4 sampler_index1__use_tint1__resolution2; 	// 32   1:1:2
+    vec4 uvs;										// 32   4
+    vec4 line_width;    							// 32   4
+	vec4 shadow_size;      							// 32   1:0:0:0
 };
 
 layout(set = 0, binding = 0, std140) readonly buffer SBO
