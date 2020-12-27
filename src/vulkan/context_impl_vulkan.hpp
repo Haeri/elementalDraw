@@ -28,12 +28,12 @@ namespace elemd
 
         struct uniform_rect
         {
-            color color;            // 32   1
+            class color color;      // 32   1
             vec2 vertices[4];       // 64   2
             float border_radius[4]; // 32   1
             float sampler_index;    //
             float use_tint;         //
-            vec2 resolution;        // 32   1 TODO: Should be moved to uniform
+            vec2 resolution;        // 32   1
             vec2 uvs[2];            // 32   1
             float line_width[4];    // 32   1
             float shadow_size[4];   // 8    1
@@ -45,7 +45,7 @@ namespace elemd
         //std::vector<vertex> rect_vertices = {{vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
         std::vector<uint32_t> rect_indices = {0, 1, 2, 1, 3, 2};
         
-        std::vector<point_vertex> point_vertices = {
+        std::vector<point_vertex> rect_vertices = {
             {vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}
         };
 
@@ -65,9 +65,6 @@ namespace elemd
         VkClearValue clearValue = {};
         VkFormat selectedImageFormat;
 
-        //static std::vector<unsigned char> vertex_code;
-        //static std::vector<unsigned char> fragment_code;
-
         VkSurfaceKHR surface{};
         VkQueue queue{};
         VkSwapchainKHR swapchain = VK_NULL_HANDLE;
@@ -83,6 +80,7 @@ namespace elemd
 
         //VkBuffer vertexBuffer = VK_NULL_HANDLE;
         //VkDeviceMemory vertexBufferDeviceMemory;
+
         VkBuffer indexBuffer{};
         VkDeviceMemory indexBufferDeviceMemory{};
 

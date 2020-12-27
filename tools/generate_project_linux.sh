@@ -8,8 +8,11 @@ root_path=$(pwd)
 
 if [ ! -d "build/" ]; then
 	echo "INFO: First time setup will take longer as the dependencies need to be downloaded and compiled."
-	mkdir "build"
+else
+	rm -rf build
 fi
+
+mkdir "build"
 cd build
 
 build_type=""

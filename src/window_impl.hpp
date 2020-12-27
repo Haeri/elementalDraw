@@ -6,8 +6,8 @@
 
 #include "elemd/window.hpp"
 
-class GLFWwindow;
-class GLFWcursor;
+struct GLFWwindow;
+struct GLFWcursor;
 
 namespace elemd
 {
@@ -25,13 +25,6 @@ namespace elemd
         float _x_offset = 0;
         float _y_offset = 0;
         float _dpi_scale = 1;
-        /*
-        int buttonEvent;
-        int cp_x;
-        int cp_y;
-        int offset_cpx;
-        int offset_cpy;
-        */
 
         std::vector<std::function<void(resize_event)>> _resize_callbacks;
         std::vector<std::function<void(mouse_move_event)>> _mouse_move_callbacks;

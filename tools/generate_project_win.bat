@@ -14,8 +14,11 @@ set root_path=%cd%
 
 if not exist "build/" (
 	echo INFO: First time setup will take longer as the dependencies need to be downloaded and compiled.
-	mkdir "build"
+) else (
+	rmdir /S /Q "build"
 )
+
+mkdir "build"
 cd build
 
 set build_type=

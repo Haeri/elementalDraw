@@ -401,7 +401,7 @@ namespace elemd
                                      float radius_sw, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, radius_nw, radius_ne, radius_se, radius_sw,
-                           0, 0, image->get_width(), image->get_height(), tint);
+                           0, 0, (float)image->get_width(), (float)image->get_height(), tint);
     }
 
     void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
@@ -610,8 +610,8 @@ namespace elemd
         }               
 
         glBindVertexArray(impl->vertex_array_object); 
-        glDrawElementsInstanced(GL_TRIANGLES, impl->rect_indices.size(), GL_UNSIGNED_INT, 0,
-                                impl->storage.size());
+        glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)impl->rect_indices.size(), GL_UNSIGNED_INT,
+                                0, (GLsizei)impl->storage.size());
 
         glfwSwapBuffers(impl->_window->getGLFWWindow());
 
@@ -786,8 +786,8 @@ namespace elemd
         glBindVertexArray(vertex_array_object);
 
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(point_vertices) * point_vertices.size(),
-                     point_vertices.data(),
+        glBufferData(GL_ARRAY_BUFFER, sizeof(rect_vertices) * rect_vertices.size(),
+                     rect_vertices.data(),
                      GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
@@ -813,6 +813,13 @@ namespace elemd
 
     void ContextImplOpengl::create_shader_programm()
     {
+        // Adjust
+        // `#version 450`       ->  `#version 44 core`
+        // `#extension GL_..`   ->  ``
+        // `layout(set = 0,`    ->  `layout(`
+        // `gl_InstanceIndex`   ->  `gl_InstanceID`
+        // `gl_VertexIndex`     ->  `gl_VertexID`
+
         const char* fragmentShaderSource = 
             "#version 440 core\n"
             "\n"
@@ -827,17 +834,17 @@ namespace elemd
             "    vec4 color;										// 32   4\n"
             "    vec4 vertices[2];								// 64   4, 4\n"
             "    vec4 border_radius;								// 32   4\n"
-            "    vec4 sampler_index1__use_tint1__resolution2; 	// 32   1:1:2\n"
+            "    vec4 sampler_index1_use_tint1_resolution2; 	// 32   1:1:2\n"
             "    vec4 uvs;										// 32   4\n"
             "    vec4 line_width;    							// 32   4\n"
             "	vec4 shadow_size;      							// 32   1:0:0:0\n"
             "};\n"
             "\n"
-            "layout(set = 0, binding = 0, std140) readonly buffer SBO\n"
+            "layout(binding = 0, std140) readonly buffer SBO\n"
             "{\n"
             "    StorageData payload[];\n"
             "} sbo;\n"
-            "layout(set = 0, binding = 1) uniform sampler2D textures[10];\n"
+            "layout(binding = 1) uniform sampler2D textures[10];\n"
             "\n"
             "\n"
             "float sdRoundedBox(vec2 p, vec2 b, vec4 r )\n"
@@ -854,11 +861,11 @@ namespace elemd
             "    vec4 color = sbo.payload[instance_index].color; \n"
             "    float line_width = sbo.payload[instance_index].line_width.x * 2.;\n"
             "    int index = "
-            "int(sbo.payload[instance_index].sampler_index1__use_tint1__resolution2.x);\n"
+            "int(sbo.payload[instance_index].sampler_index1_use_tint1_resolution2.x);\n"
             "    int use_tint = "
-            "int(sbo.payload[instance_index].sampler_index1__use_tint1__resolution2.y);\n"
+            "int(sbo.payload[instance_index].sampler_index1_use_tint1_resolution2.y);\n"
             "    vec2 resolution = "
-            "sbo.payload[instance_index].sampler_index1__use_tint1__resolution2.zw;\n"
+            "sbo.payload[instance_index].sampler_index1_use_tint1_resolution2.zw;\n"
             "    float shadow_size = sbo.payload[instance_index].shadow_size.x * 2.;\n"
             "\n"
             "    float dominant_axis = (resolution.x/resolution.y > 0.) ? resolution.x : resolution.y;\n"
@@ -918,13 +925,13 @@ namespace elemd
             "    vec4 color;										// 32   4\n"
             "    vec4 vertices[2];								// 64   4, 4\n"
             "    vec4 border_radius;								// 32   4\n"
-            "    vec4 sampler_index1__use_tint1__resolution2; 	// 32   1:1:2\n"
+            "    vec4 sampler_index1_use_tint1_resolution2; 	// 32   1:1:2\n"
             "    vec4 uvs;										// 32   4\n"
             "    vec4 line_width;    							// 32   4\n"
             "	vec4 shadow_size;      							// 32   1:0:0:0\n"
             "};\n"
             "\n"
-            "layout(set = 0, binding = 0, std140) readonly buffer SBO\n"
+            "layout(binding = 0, std140) readonly buffer SBO\n"
             "{\n"
             "    StorageData payload[];\n"
             "} sbo;\n"
@@ -1028,7 +1035,8 @@ namespace elemd
     void ContextImplOpengl::update_storage()
     {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, storageBuffer);
-        int size = std::min(storage.size() * sizeof(uniform_rect), UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE);
+        GLsizei size = (GLsizei)std::min(storage.size() * sizeof(uniform_rect),
+                                         UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE);
         glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, size, storage.data());
     }
 

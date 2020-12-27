@@ -400,7 +400,7 @@ namespace elemd
                                      float radius_sw, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, radius_nw, radius_ne, radius_se, radius_sw,
-                           0, 0, image->get_width(), image->get_height(), tint);
+                           0, 0, (float)image->get_width(), (float)image->get_height(), tint);
     }
 
     void Context::draw_rounded_image(float x, float y, float width, float height, image* image,

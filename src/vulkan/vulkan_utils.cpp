@@ -414,7 +414,7 @@ namespace elemd::vku
 
         std::cout << "\"selected_device\": {\n"
                   << "\t\"deviceName\": " << VulkanSharedInfo::getInstance()->hardware_name
-                  << "\,\n"
+                  << ",\n"
                   << "\t\"queueCount\": " << VulkanSharedInfo::getInstance()->queueCount << ",\n"
                   << "\t\"queueFamilyIndex\": " << VulkanSharedInfo::getInstance()->queueFamilyIndex
                   << "\n"

@@ -149,7 +149,7 @@ namespace elemd
             exit(1);
         }
  
-        ft_error = FT_New_Memory_Face(ft_library, data, size, 0, &face);
+        ft_error = FT_New_Memory_Face(ft_library, data, (FT_Long)size, 0, &face);
         if (ft_error == FT_Err_Unknown_File_Format)
         {
             std::cerr << "Error: font not supported!" << std::endl;
@@ -166,18 +166,19 @@ namespace elemd
 
         // quick and dirty max texture size estimate
 
-        int padding = LOADED_HEIGHT/3.0f;
-        int max_dim = (int)(1 + (face->size->metrics.height >> 6)) * ceil(sqrt(NUM_GLYPHS));
-        int tex_width = 1;
+        unsigned int padding = (int)(LOADED_HEIGHT/3.0f);
+        unsigned int max_dim =
+            (int)((1 + (face->size->metrics.height >> 6)) * ceil(sqrt(NUM_GLYPHS)));
+        unsigned int tex_width = 1;
         while (tex_width < max_dim)
             tex_width <<= 1;
-        int tex_height = tex_width;
-        int buffer_size = tex_width * tex_height * 4;
+        unsigned int tex_height = tex_width;
+        unsigned int buffer_size = tex_width * tex_height * 4;
 
         // render glyphs to atlas
 
         char* pixels = (char*)calloc(tex_width * tex_height, 1);
-        int pen_x = padding, pen_y = padding;
+        unsigned int pen_x = padding, pen_y = padding;
 
         for (int i = 0; i < NUM_GLYPHS; ++i)
         {
@@ -190,9 +191,9 @@ namespace elemd
                 pen_y += ((face->size->metrics.height >> 6) + 1) + padding;
             }
 
-            for (int row = 0; row < bmp->rows; ++row)
+            for (unsigned int row = 0; row < bmp->rows; ++row)
             {
-                for (int col = 0; col < bmp->width; ++col)
+                for (unsigned int col = 0; col < bmp->width; ++col)
                 {
                     int x = pen_x + col;
                     int y = pen_y + row;
@@ -218,7 +219,7 @@ namespace elemd
         // write png
 
         uint8_t* png_data = new uint8_t[buffer_size];
-        for (int i = 0; i < (tex_width * tex_height); ++i)
+        for (unsigned int i = 0; i < (tex_width * tex_height); ++i)
         {
             png_data[i * 4 + 0] = 0xff;
             png_data[i * 4 + 1] = 0xff;
