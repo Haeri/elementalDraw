@@ -120,6 +120,7 @@ jobs:
           ./include
           ./samples
     - name: Run KEKW
+      if: matrix.type == 'dynamic'
       run: |
         cd ./samples/hello_world/
         chmod +x hello-world
