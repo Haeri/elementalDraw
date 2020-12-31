@@ -36,7 +36,6 @@ namespace elemd
     void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
     void char_callback(GLFWwindow* window, unsigned int key_code);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-    std::string UnicodeToUTF8(unsigned int codepoint);
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
@@ -373,8 +372,17 @@ namespace elemd
             exit(EXIT_FAILURE);
         }
 
+        std::string full_title = config.title;
+#ifndef NDEBUG
+#if defined(ELEMD_RENDERING_BACKEND_VULKAN)
+        full_title += " - [Vulkan]";
+#elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
+        full_title += " - [OpenGL]";
+#endif
+#endif
+
         _glfw_window =
-            glfwCreateWindow(config.width, config.height, config.title, NULL, NULL);
+            glfwCreateWindow(config.width, config.height, full_title.c_str(), NULL, NULL);
         if (!_glfw_window)
         {
             const char* errorText = NULL;
@@ -520,13 +528,13 @@ namespace elemd
     {
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
 
-        std::string utf8 = UnicodeToUTF8(key_code);
+        std::string utf8 = font::UnicodeToUTF8(key_code);
         std::cout << "event: char "
-                  << "char: " << utf8 << std::endl;
+                  << "char: " << key_code << std::endl;
 
         for (auto& var : winImpl->_char_callbacks)
         {
-            var({utf8.c_str()});
+            var({key_code, utf8.c_str()});
         }
     }
 
@@ -541,37 +549,6 @@ namespace elemd
         {
             var({xoffset, yoffset});
         }
-    }
-
-
-
-
-
-    std::string UnicodeToUTF8(unsigned int codepoint)
-    {
-        std::string out;
-
-        if (codepoint <= 0x7f)
-            out.append(1, static_cast<char>(codepoint));
-        else if (codepoint <= 0x7ff)
-        {
-            out.append(1, static_cast<char>(0xc0 | ((codepoint >> 6) & 0x1f)));
-            out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
-        }
-        else if (codepoint <= 0xffff)
-        {
-            out.append(1, static_cast<char>(0xe0 | ((codepoint >> 12) & 0x0f)));
-            out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
-            out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
-        }
-        else
-        {
-            out.append(1, static_cast<char>(0xf0 | ((codepoint >> 18) & 0x07)));
-            out.append(1, static_cast<char>(0x80 | ((codepoint >> 12) & 0x3f)));
-            out.append(1, static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
-            out.append(1, static_cast<char>(0x80 | (codepoint & 0x3f)));
-        }
-        return out;
     }
 
 } // namespace elemd

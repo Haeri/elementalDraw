@@ -8,7 +8,7 @@
 
 namespace elemd
 {
-    std::map<char, character>& font::get_characters()
+    std::map<unsigned int, character>& font::get_characters()
     {
         return _characters;
     }
@@ -117,6 +117,33 @@ namespace elemd
         return elemd::vec2(width, height);
     }
 
+    std::string font::UnicodeToUTF8(unsigned int unicode)
+    {
+        std::string out;
+
+        if (unicode <= 0x7f)
+            out.append(1, static_cast<char>(unicode));
+        else if (unicode <= 0x7ff)
+        {
+            out.append(1, static_cast<char>(0xc0 | ((unicode >> 6) & 0x1f)));
+            out.append(1, static_cast<char>(0x80 | (unicode & 0x3f)));
+        }
+        else if (unicode <= 0xffff)
+        {
+            out.append(1, static_cast<char>(0xe0 | ((unicode >> 12) & 0x0f)));
+            out.append(1, static_cast<char>(0x80 | ((unicode >> 6) & 0x3f)));
+            out.append(1, static_cast<char>(0x80 | (unicode & 0x3f)));
+        }
+        else
+        {
+            out.append(1, static_cast<char>(0xf0 | ((unicode >> 18) & 0x07)));
+            out.append(1, static_cast<char>(0x80 | ((unicode >> 12) & 0x3f)));
+            out.append(1, static_cast<char>(0x80 | ((unicode >> 6) & 0x3f)));
+            out.append(1, static_cast<char>(0x80 | (unicode & 0x3f)));
+        }
+        return out;
+    }
+
     void font::load_from_file(std::string file_path) 
     {
         std::ifstream file(file_path, std::ios::binary | std::ios::ate);
@@ -132,7 +159,7 @@ namespace elemd
         }
         else
         {
-            std::cerr << "Font "<< file_path << "not found" << std::endl;
+            std::cerr << "WARNING: Font "<< file_path << " not found!" << std::endl;
         }
     }
 
@@ -162,27 +189,35 @@ namespace elemd
         }
         
         FT_Set_Pixel_Sizes(face, 0, LOADED_HEIGHT);
-        _line_height = (float)(face->size->metrics.height >> 6);
+        _line_height = (float)(1 + (face->size->metrics.height >> 6));
 
         // quick and dirty max texture size estimate
 
         unsigned int padding = (int)(LOADED_HEIGHT/3.0f);
         unsigned int max_dim =
-            (int)((1 + (face->size->metrics.height >> 6)) * ceil(sqrt(NUM_GLYPHS)));
+            (int)((1 + (face->size->metrics.height >> 6)) * ceil(sqrt(face->num_glyphs)));
+
         unsigned int tex_width = 1;
         while (tex_width < max_dim)
             tex_width <<= 1;
         unsigned int tex_height = tex_width;
         unsigned int buffer_size = tex_width * tex_height * 4;
 
+
         // render glyphs to atlas
 
         char* pixels = (char*)calloc(tex_width * tex_height, 1);
         unsigned int pen_x = padding, pen_y = padding;
 
-        for (int i = 0; i < NUM_GLYPHS; ++i)
+
+        FT_ULong charcode;
+        FT_UInt gindex;
+
+        charcode = FT_Get_First_Char(face, &gindex);
+        int i = 0;
+        while (gindex != 0)
         {
-            FT_Load_Char(face, i, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT);
+            FT_Load_Char(face, charcode, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT);
             FT_Bitmap* bmp = &face->glyph->bitmap;
 
             if (pen_x + bmp->width + padding >= tex_width)
@@ -208,9 +243,16 @@ namespace elemd
                 vec2((float)(face->glyph->bitmap_left), (float)(face->glyph->bitmap_top)),
                 vec2((float)(pen_x), (float)(pen_y)), (int)(face->glyph->advance.x >> 6)};
 
-            _characters[i] = character;
+            _characters[charcode] = character;
 
-            pen_x += bmp->width + 1 + padding;
+            if (bmp->width != 0 && bmp->rows != 0)
+            {
+                pen_x += bmp->width + 1 + padding;
+            }
+
+            // Next
+            charcode = FT_Get_Next_Char(face, charcode, &gindex);
+            ++i;
         }
 
         FT_Done_Face(face);

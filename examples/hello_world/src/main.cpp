@@ -1,4 +1,4 @@
-#include <elemd/color.hpp>
+ï»¿#include <elemd/color.hpp>
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
 #include <math.h> 
@@ -6,6 +6,8 @@
 
 int main(void)
 {
+    int width = 840;
+
     elemd::color red = elemd::color("#e74c3c");
     elemd::color green = elemd::color("#2ecc71");
     elemd::color blue = elemd::color("#3498db");
@@ -14,7 +16,7 @@ int main(void)
 
 
     // Configure and create window
-    elemd::WindowConfig winc = elemd::WindowConfig{"Hello World", 440, 550};
+    elemd::WindowConfig winc = elemd::WindowConfig{"Hello World", width, 550};
     winc.icon_file = "./res/logo.png";
     winc.transparent = true;
     elemd::Window* win = elemd::Window::create(winc);
@@ -35,6 +37,32 @@ int main(void)
     elemd::font* monserat_black = elemd::font::create("./res/font/Montserrat-Black.ttf");
     ctx->_tmp_register_font(monserat_black);
     
+    
+    elemd::font* icon_font = elemd::font::create("./res/font/feather.ttf");
+    ctx->_tmp_register_font(icon_font);
+
+
+    std::u32string icons = U"";
+    int icon_i = 0;
+    for (const auto& c : icon_font->get_characters())
+    {
+        ++icon_i;
+        if (icon_i > 20)
+        {
+            icons += c.first;
+            icons += U"\n";
+            icons += U" ";
+            icon_i = 0;
+        }
+        else
+        {
+            icons += c.first;
+            icons += U" ";
+        }
+    }
+
+
+    
 
     int x_frames = 4;
     int y_frames = 8;
@@ -54,8 +82,6 @@ int main(void)
 
     float mouse_x;
     float mouse_y;
-
-    int width = 440;
 
     // Event
     std::string text = "I see this as an absolute win!";
@@ -133,11 +159,22 @@ int main(void)
         ctx->set_font(monserat_light);        
         ctx->set_font_size(12);
         std::string formated = monserat_light->fit_substring(text, width - 2 * 20, 12);
-        ctx->draw_text(20, 45, formated);
+        ctx->draw_text(20, 45, formated);        
 
-        ctx->set_font_size(12);
-        ctx->draw_text(210, 20, "123456789 +\"*ç%&/()=?,.-;:_<>\\|¦@#°§¬|¢`\nABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz ÖÄÜöäü ");     
-        
+        ctx->set_font(icon_font);
+        ctx->set_font_size(18);
+        ctx->draw_text(440, 80, icons);
+
+        ctx->set_font(nullptr);        
+        ctx->set_font_size(14);
+        ctx->draw_text(440, 360,
+                       U"Numbers:  123456789\n"
+                       U"Symbols:    +\"*Ã§%&/()=?,.-;:_<>\\|Â¦@#Â°Â§Â¬|Â¢`\n"
+                       U"Capital:       ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
+                       U"Small:         abcdefghijklmnopqrstuvwxyz\n"
+                       U"Umlaut:      Ã–Ã„ÃœÃ¶Ã¤Ã¼");
+
+
         // Circle
         ctx->set_fill_color(red);
         ctx->fill_circle(35, 95, 15);
@@ -215,16 +252,16 @@ int main(void)
         {
             // Circle shadow
             ctx->set_fill_color(red);
-            ctx->draw_circle_shadow(35 + i * (30 + 10), 395, 15, i *3);
+            ctx->draw_circle_shadow(35 + i * (30 + 10), 395, 15, i *6);
             
 
             // Rectangle shadow
             ctx->set_fill_color(green);
-            ctx->draw_rect_shadow(20 + i * (30 + 10), 430, 30, 30, i * 3);
+            ctx->draw_rect_shadow(20 + i * (30 + 10), 430, 30, 30, i * 6);
 
             // Rounded rectangle shadow
             ctx->set_fill_color(blue);
-            ctx->draw_rounded_rect_shadow(20 + i * (30 + 10), 480, 30, 30, 10, i * 3);
+            ctx->draw_rounded_rect_shadow(20 + i * (30 + 10), 480, 30, 30, 10, i * 6);
         }
 
 
@@ -236,6 +273,7 @@ int main(void)
     }
 
     // Cleanup
+    icon_font->destroy();
     monserat_black->destroy();
     monserat_light->destroy();
     anim->destroy();

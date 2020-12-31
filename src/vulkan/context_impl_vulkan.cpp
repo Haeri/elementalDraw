@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cstring>
+#include <codecvt> // for std::codecvt_utf8
+#include <locale>  // for std::wstring_convert
 #include <GLFW/glfw3.h>
 
 #include "vulkan_shared_info.hpp"
@@ -279,8 +281,16 @@ namespace elemd
     void Context::fill_polygon(float x, float y)
     {
     }
-
+    
     void Context::draw_text(float x, float y, std::string text)
+    {
+        std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv_utf8_utf32;
+
+        std::u32string unicode_codepoints = conv_utf8_utf32.from_bytes(text);
+        draw_text(x, y, unicode_codepoints);
+    }
+
+    void Context::draw_text(float x, float y, std::u32string text)
     {
         ContextImplVulkan* impl = getImpl(this);
 
@@ -294,10 +304,10 @@ namespace elemd
 
         float initialX = x;
         float scale = (float)_font_size / LOADED_HEIGHT;
-        std::map<char, character> characters = _font->get_characters();
+        std::map<unsigned int, character> characters = _font->get_characters();
         imageImplVulkan* img = (imageImplVulkan*)_font->get_image();
 
-        for (auto& token : text)
+        for (char32_t& token : text)
         {
             character ch = characters[0];
             if (token > 0)

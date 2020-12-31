@@ -85,7 +85,7 @@ extern "C"
         ctx->fill_rect(x, y, width, height);
     }
 
-    ELEMD_API void draw_text(elemd::Context* ctx, float x, float y, char* text)
+    ELEMD_API void draw_text(elemd::Context* ctx, float x, float y, const char* text)
     {
         ctx->draw_text(x, y, text);
     }

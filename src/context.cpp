@@ -19,7 +19,14 @@ namespace elemd
 
     void Context::set_font(font* font)
     {
-        _font = font;
+        if (font == nullptr)
+        {
+            _font = _default_font;
+        }
+        else
+        {
+            _font = font;
+        }
     }
 
     void Context::set_font_size(int size)

@@ -335,6 +335,13 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
             InstrumentationTimer timer("Render");
             for (brick& b : bricks)
             {
+                ctx->set_fill_color(elemd::color(0, 0, 0, 120));
+                float ss = 5;
+                ctx->draw_rounded_rect_shadow(b.pos.x() - ss +4, b.pos.y() - ss+4, brick_width + ss * 2,
+                                              brick_height + ss * 2, 2, ss * ss);
+            }
+            for (brick& b : bricks)
+            {
                 ctx->set_fill_color(b.color);
                 ctx->fill_rounded_rect(b.pos.x(), b.pos.y(), brick_width, brick_height, 2);
             }

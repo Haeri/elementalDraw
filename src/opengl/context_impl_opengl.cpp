@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cstring>
+#include <codecvt> // for std::codecvt_utf8
+#include <locale>  // for std::wstring_convert
 #include <GLFW/glfw3.h>
 
 #include "../window_impl.hpp"
@@ -283,6 +285,14 @@ namespace elemd
 
     void Context::draw_text(float x, float y, std::string text)
     {
+        std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv_utf8_utf32;
+
+        std::u32string unicode_codepoints = conv_utf8_utf32.from_bytes(text);
+        draw_text(x, y, unicode_codepoints);
+    }
+
+    void Context::draw_text(float x, float y, std::u32string text)
+    {
         ContextImplOpengl* impl = getImpl(this);
 
         if (_font == nullptr) {
@@ -295,10 +305,10 @@ namespace elemd
 
         float initialX = x;
         float scale = (float)_font_size / LOADED_HEIGHT;
-        std::map<char, character> characters = _font->get_characters();
+        std::map<unsigned int, character> characters = _font->get_characters();
         imageImplOpengl* img = (imageImplOpengl*)_font->get_image();
 
-        for (auto& token : text)
+        for (char32_t &token : text)
         {
             character ch = characters[0];
             if (token > 0)
@@ -874,7 +884,7 @@ namespace elemd
             "    float line_width_norm = line_width / dominant_axis;\n"
             "    float shadow_size_norm = shadow_size / dominant_axis;\n"
             "\n"
-            " 	 float dist = 1.-sdRoundedBox((uv_varying-0.5)*2.*resolution_norm, resolution_norm, border_radius_norm);\n"
+            " 	 float dist = 1.-(sdRoundedBox((uv_varying-0.5)*2.*(resolution_norm+shadow_size_norm), resolution_norm, border_radius_norm)-shadow_size_norm);\n"
             "    float bias = fwidth(dist);\n"
             "    float shape = smoothstep(1., 1.+bias, dist);\n"
             "\n"

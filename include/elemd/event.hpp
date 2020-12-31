@@ -213,6 +213,7 @@ namespace elemd
     
     struct ELEMD_API char_event
     {
+        unsigned int unnicode;
         const char* utf8;
     };
 

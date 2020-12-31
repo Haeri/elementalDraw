@@ -49,7 +49,7 @@ void main()
 	float line_width_norm = line_width / dominant_axis;
 	float shadow_size_norm = shadow_size / dominant_axis;
 
- 	float dist = 1.-sdRoundedBox((uv_varying-0.5)*2.*resolution_norm, resolution_norm, border_radius_norm);
+ 	float dist = 1.-(sdRoundedBox((uv_varying-0.5)*2.*(resolution_norm+shadow_size_norm), resolution_norm, border_radius_norm)-shadow_size_norm);
     float bias = fwidth(dist);
     float shape = smoothstep(1., 1.+bias, dist);
 

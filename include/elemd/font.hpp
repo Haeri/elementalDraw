@@ -7,7 +7,7 @@
 #include <elemd/image.hpp>
 
 #define LOADED_HEIGHT 128
-#define NUM_GLYPHS 128
+//#define NUM_GLYPHS 128
 
 namespace elemd
 {
@@ -25,13 +25,16 @@ namespace elemd
         static font* create(std::string file_path);
         static font* create(unsigned char* buffer, size_t size);
 
-        std::map<char, character>& get_characters();
+        std::map<unsigned int, character>& get_characters();
         float get_line_height();
         void destroy();
         elemd::image* get_image();
 
         std::string fit_substring(std::string text, int width, int font_size);
         vec2 measure_dimensions(std::string text, int font_size);
+
+        static std::string UnicodeToUTF8(unsigned int unicode);
+        
 
     protected:
         float _line_height = 0;
@@ -40,7 +43,7 @@ namespace elemd
         virtual ~font() = default;
 
         image* _texture_atlas;
-        std::map<char, character> _characters;
+        std::map<unsigned int, character> _characters;
 
         void load_from_file(std::string file_path);
         void load_from_memory(unsigned char* data, size_t size);
