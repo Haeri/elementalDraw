@@ -168,11 +168,11 @@ int main(void)
         ctx->set_font(nullptr);        
         ctx->set_font_size(14);
         ctx->draw_text(440, 360,
-                       U"Numbers:  123456789\n"
+                       U"Numbers:  0123456789\n"
                        U"Symbols:    +\"*ç%&/()=?,.-;:_<>\\|¦@#°§¬|¢`\n"
                        U"Capital:       ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
                        U"Small:         abcdefghijklmnopqrstuvwxyz\n"
-                       U"Umlaut:      ÖÄÜöäü");
+                       U"Umlaut:      ÖÄÜöäüéèàêâ");
 
 
         // Circle
