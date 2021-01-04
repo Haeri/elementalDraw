@@ -1,7 +1,15 @@
 #include "elemd/font.hpp"
 
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
+//#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
+#include <msdfgen/msdfgen.h>
+#include <msdfgen/msdfgen-ext.h>
+
 #include <vector>
 #include <math.h>
 #include <fstream>
@@ -167,6 +175,7 @@ namespace elemd
 
     void font::load_from_memory(unsigned char* data, size_t size)
     {
+
         FT_Library ft_library;
         FT_Face face;
         FT_Error ft_error;
@@ -177,7 +186,7 @@ namespace elemd
             std::cerr << "Error: during FreeType initialization" << std::endl;
             exit(1);
         }
- 
+
         ft_error = FT_New_Memory_Face(ft_library, data, (FT_Long)size, 0, &face);
         if (ft_error == FT_Err_Unknown_File_Format)
         {
@@ -189,15 +198,18 @@ namespace elemd
             std::cerr << "Error: font not found!" << std::endl;
             exit(1);
         }
-        
-        FT_Set_Pixel_Sizes(face, 0, LOADED_HEIGHT);
-        _line_height = (float)(1 + (face->size->metrics.height >> 6));
+
+        // FT_Set_Pixel_Sizes(face, 32, 32);
+        //_line_height = (float)(1 + (face->size->metrics.height >> 6));
 
         // quick and dirty max texture size estimate
 
-        unsigned int padding = (int)(LOADED_HEIGHT/3.0f);
+        unsigned int padding = 0;
+        //(int)(LOADED_HEIGHT / 3.0f);
         unsigned int max_dim =
             (int)((1 + (face->size->metrics.height >> 6)) * ceil(sqrt(face->num_glyphs)));
+
+        max_dim = 1024;
 
         unsigned int tex_width = 1;
         while (tex_width < max_dim)
@@ -205,76 +217,132 @@ namespace elemd
         unsigned int tex_height = tex_width;
         unsigned int buffer_size = tex_width * tex_height * 4;
 
-
         // render glyphs to atlas
 
-        char* pixels = (char*)calloc(tex_width * tex_height, 1);
-        unsigned int pen_x = padding, pen_y = padding;
+        // char* pixels = (char*)calloc(tex_width * tex_height, 1);
 
+        uint8_t* pixels = new uint8_t[buffer_size]{0};
+        unsigned int pen_x = padding, pen_y = padding;
 
         FT_ULong charcode;
         FT_UInt gindex;
+
+        msdfgen::FontHandle* font_handle = msdfgen::adoptFreetypeFont(face);
+        msdfgen::FontMetrics font_metrics;
+        msdfgen::getFontMetrics(font_metrics, font_handle);
+        _line_height = font_metrics.lineHeight;
+
+        int max_height = 0;
+
+        msdfgen::Shape shape;
+        msdfgen::Shape::Bounds bounds{};
 
         charcode = FT_Get_First_Char(face, &gindex);
         int i = 0;
         while (gindex != 0)
         {
-            FT_Load_Char(face, charcode, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT);
-            FT_Bitmap* bmp = &face->glyph->bitmap;
+            if (i > 128)
+                break;
 
-            if (pen_x + bmp->width + padding >= tex_width)
-            {
-                pen_x = padding;
-                pen_y += ((face->size->metrics.height >> 6) + 1) + padding;
-            }
+            int w = 0;
+            int h = 0;
+            double advance = 0;
+            float border_width = 4;
 
-            for (unsigned int row = 0; row < bmp->rows; ++row)
+
+
+            msdfgen::loadGlyph(shape, font_handle, charcode, &advance);
+
+            if (shape.validate() && shape.contours.size() > 0)
             {
-                for (unsigned int col = 0; col < bmp->width; ++col)
+
+                shape.normalize();
+                shape.inverseYAxis = true;
+
+                bounds = shape.getBounds(border_width);
+
+                w = ceil(bounds.r - bounds.l);
+                h = ceil(bounds.t - bounds.b);
+
+                if (max_height < h)
+                    max_height = h;
+
+                //std::cout << w << " " << h << std::endl;
+
+                msdfgen::edgeColoringSimple(shape, 3.0);
+                msdfgen::Bitmap<float, 3> msdf(w, h);
+                msdfgen::generateMSDF(msdf, shape, border_width, 1.0,
+                                      msdfgen::Vector2(-bounds.l, -bounds.b));
+
+                // msdfgen::savePng(msdf, (name + "_msdf_" + std::to_string(i) + ".png").c_str());
+
+                if (pen_x + msdf.width() + padding >= tex_width)
                 {
-                    int x = pen_x + col;
-                    int y = pen_y + row;
-                    pixels[y * tex_width + x] = bmp->buffer[row * bmp->pitch + col];
+                    pen_x = padding;
+                    pen_y += max_height + padding;
                 }
+
+                //std::cout << pen_x << " " << pen_y << std::endl;
+
+                for (unsigned int row = 0; row < msdf.height(); ++row)
+                {
+                    for (unsigned int col = 0; col < msdf.width(); ++col)
+                    {
+                        int x = pen_x + col;
+                        int y = pen_y + row;
+
+                        pixels[(x + tex_width * y) * 4 + 0] =
+                            msdfgen::pixelFloatToByte(msdf(col, row)[0]);
+                        pixels[(x + tex_width * y) * 4 + 1] =
+                            msdfgen::pixelFloatToByte(msdf(col, row)[1]);
+                        pixels[(x + tex_width * y) * 4 + 2] =
+                            msdfgen::pixelFloatToByte(msdf(col, row)[2]);
+                        pixels[(x + tex_width * y) * 4 + 3] = 255;
+                            //msdfgen::pixelFloatToByte(msdf(col, row)[3]);
+
+                    }
+                }
+
+
+
+
             }
 
             // this is stuff you'd need when rendering individual glyphs out of the atlas
 
             character character = {
-                vec2((float)(face->glyph->bitmap.width), (float)(face->glyph->bitmap.rows)),
-                vec2((float)(face->glyph->bitmap_left), (float)(face->glyph->bitmap_top)),
-                vec2((float)(pen_x), (float)(pen_y)), (int)(face->glyph->advance.x >> 6)};
+                vec2((float)(w), (float)(h)),
+                                   vec2((float)(bounds.l), (float)(bounds.t)),
+                vec2((float)(pen_x), (float)(pen_y)), ((int)advance)
+            };
 
+            std::cout << font::UnicodeToUTF8(charcode) << "\tsize:" << character.size << "\tbearing:" << character.bearing
+                      << "\torigin:" << character.origin << "\tadvance:" << character.advance
+                      << std::endl;
+            
             _characters[charcode] = character;
 
-            if (bmp->width != 0 && bmp->rows != 0)
-            {
-                pen_x += bmp->width + 1 + padding;
-            }
+            pen_x += w;
 
             // Next
             charcode = FT_Get_Next_Char(face, charcode, &gindex);
             ++i;
         }
 
+        msdfgen::destroyFont(font_handle);
         FT_Done_Face(face);
         FT_Done_FreeType(ft_library);
 
-        // write png
 
-        uint8_t* png_data = new uint8_t[buffer_size];
-        for (unsigned int i = 0; i < (tex_width * tex_height); ++i)
-        {
-            png_data[i * 4 + 0] = 0xff;
-            png_data[i * 4 + 1] = 0xff;
-            png_data[i * 4 + 2] = 0xff;
-            png_data[i * 4 + 3] = pixels[i];
-        }
+        _texture_atlas = image::create(tex_width, tex_height, 4, pixels);
 
-        _texture_atlas = image::create(tex_width, tex_height, 4, png_data);
+        stbi_write_png(
+            (_name + "_msdf.png").c_str(), _texture_atlas->get_width(), _texture_atlas->get_height(),
+            _texture_atlas->get_channels(), _texture_atlas->get_data(),
+            _texture_atlas->get_width() * _texture_atlas->get_channels() * sizeof(unsigned char));
 
-        //free(png_data);
-        free(pixels);
+        // free(png_data);
+        // free(pixels);
     }
 
     int font::fit_one_substring(std::string text, int width, int font_size)

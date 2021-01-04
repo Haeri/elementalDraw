@@ -8,7 +8,8 @@
   	"glfw3", 
   	"glslang", 
   	"stb", 
-  	"freetype", 
+  	"freetype",
+    "msdfgen",
   	{
   		"name": "moltenvk",
   		"platform": "false"

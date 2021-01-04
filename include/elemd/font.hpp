@@ -6,7 +6,7 @@
 #include <elemd/vec2.hpp>
 #include <elemd/image.hpp>
 
-#define LOADED_HEIGHT 128
+#define LOADED_HEIGHT 32
 //#define NUM_GLYPHS 128
 
 namespace elemd
@@ -39,6 +39,7 @@ namespace elemd
     protected:
         std::string _name;
 
+        bool _msdf = false;
         float _line_height = 0;
         
         image* _texture_atlas;

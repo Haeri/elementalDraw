@@ -13,6 +13,8 @@ else()
     set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
 endif()
 
+#set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
+
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
@@ -106,6 +108,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 find_package(freetype CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
 
+# msdfgen
+find_package(msdfgen CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE msdfgen::msdfgen msdfgen::msdfgen-ext)
 
 
 
