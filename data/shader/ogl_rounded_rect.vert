@@ -51,4 +51,4 @@ void main()
 	gl_Position = vec4(verts[gl_VertexID].xy*vec2(1.0, -1.0), 0.0, 1.0);
 	uv_varying = default_uvs[gl_VertexID];
 	uv_tex_varying = uvs[gl_VertexID];
-};
+}
