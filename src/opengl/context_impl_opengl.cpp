@@ -58,10 +58,11 @@ namespace elemd
             {0, 0, 0, 0},                                                           // border_radius
             -1,                                                                     // sampler_index
             0,                                                                      // use_tint
-            vec2(width, height),                                                  // resolution
+            vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {lw, lw, lw, lw},                                                       // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -104,10 +105,11 @@ namespace elemd
             {nwf, nef, sef, swf},                                                   // border_radius
             -1,                                                                     // sampler_index
             0,                                                                      // use_tint
-            vec2(width, height),                                                   // resolution
+            vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {lw, lw, lw, lw},                                                       // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -153,7 +155,8 @@ namespace elemd
             vec2(width, width),                                                     // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {lw, lw, lw, lw},                                                       // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -193,7 +196,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -236,8 +240,9 @@ namespace elemd
             0,                                                                      // use_tint
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
-            {0, 0, 0, 0},                                                       // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            {0, 0, 0, 0},                                                           // line_width
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -271,7 +276,8 @@ namespace elemd
             vec2(width, width),                                                     // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -351,7 +357,8 @@ namespace elemd
                 vec2(width, height),                          // resolution
                 {vec2(originx, originy), vec2(cropx, cropy)}, // uvs
                 {0, 0, 0, 0},                                 // line_width
-                {0, 0, 0, 0},                                 // shadow_size
+                0,                                            // shadow_size
+                {1, 0, 0},                                    // is_msdf
             });
 
             x += ch.advance * scale;
@@ -389,7 +396,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -455,7 +463,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(originx, originy), vec2(cropx, cropy)},                           // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -487,7 +496,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {shadow_size, 0, 0, 0},                                                 // shadow_size
+            shadow_size,                                                            // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -533,7 +543,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {shadow_size, 0, 0, 0},                                                 // shadow_size
+            shadow_size,                                                            // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -568,7 +579,8 @@ namespace elemd
             vec2(width, width),                                                     // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {shadow_size, 0, 0, 0},                                                 // shadow_size
+            shadow_size,                                                            // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -605,8 +617,8 @@ namespace elemd
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(impl->shaderProgram);
-        ///impl->update_uniforms();
-        impl->update_storage();
+        //impl->update_storage_buffer();
+        impl->update_uniform_buffer();
         if (rerecord || impl->dirty)
         {
         
@@ -688,18 +700,20 @@ namespace elemd
 
     void Context::_tmp_prepare()
     {
+        
         _default_font = font::create(default_font.data(), default_font.size());
         _tmp_register_font(_default_font);
         if (_font == nullptr)
         {
             set_font(_default_font);
         }
-
+        
         ContextImplOpengl* impl = getImpl(this);
         
         impl->configure_surface();
         impl->create_vertex_array();
-        impl->create_storage_buffer();
+        //impl->create_storage_buffer();
+        impl->create_uniform_buffer();
 
 
         glUseProgram(impl->shaderProgram);
@@ -729,6 +743,17 @@ namespace elemd
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
     }
 
+    void ContextImplOpengl::create_uniform_buffer()
+    {
+        glGenBuffers(1, &storageBuffer);
+        glBindBuffer(GL_UNIFORM_BUFFER, storageBuffer);
+        glBufferData(GL_UNIFORM_BUFFER, UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE, storage.data(),
+                     GL_DYNAMIC_COPY);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, storageBuffer);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    /*
     void ContextImplOpengl::create_storage_buffer()
     {
         glGenBuffers(1, &storageBuffer);
@@ -738,7 +763,7 @@ namespace elemd
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, storageBuffer);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
-
+    */
 
     void ContextImplOpengl::initialize_resources()
     {
@@ -823,160 +848,9 @@ namespace elemd
 
     void ContextImplOpengl::create_shader_programm()
     {
-        // Adjust
-        // `#version 450`       ->  `#version 44 core`
-        // `#extension GL_..`   ->  ``
-        // `layout(set = 0,`    ->  `layout(`
-        // `gl_InstanceIndex`   ->  `gl_InstanceID`
-        // `gl_VertexIndex`     ->  `gl_VertexID`
-
-        const char* fragmentShaderSource = 
-            "#version 440 core\n"
-            "\n"
-            "layout(location = 0) in vec2 uv_varying;\n"
-            "layout(location = 1) in vec2 uv_tex_varying;\n"
-            "layout(location = 2) in flat int instance_index;\n"
-            "\n"
-            "layout(location = 0) out vec4 outColor;\n"
-            "\n"
-            "struct StorageData\n"
-            "{\n"
-            "    vec4 color;										// 32   4\n"
-            "    vec4 vertices[2];								// 64   4, 4\n"
-            "    vec4 border_radius;								// 32   4\n"
-            "    vec4 sampler_index1_use_tint1_resolution2; 	// 32   1:1:2\n"
-            "    vec4 uvs;										// 32   4\n"
-            "    vec4 line_width;    							// 32   4\n"
-            "	vec4 shadow_size;      							// 32   1:0:0:0\n"
-            "};\n"
-            "\n"
-            "layout(binding = 0, std140) readonly buffer SBO\n"
-            "{\n"
-            "    StorageData payload[];\n"
-            "} sbo;\n"
-            "layout(binding = 1) uniform sampler2D textures[10];\n"
-            "\n"
-            "\n"
-            "float sdRoundedBox(vec2 p, vec2 b, vec4 r )\n"
-            "{\n"
-            "    r.xy = (p.x>0.0)?r.xy : r.zw;\n"
-            "    r.x  = (p.y>0.0)?r.x  : r.y;\n"
-            "    vec2 q = abs(p)-b+r.x;\n"
-            "    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;\n"
-            "}\n"
-            "\n"
-            "void main()\n"
-            "{   \n"
-            "	vec4 border_radius = sbo.payload[instance_index].border_radius * 2.;\n"
-            "    vec4 color = sbo.payload[instance_index].color; \n"
-            "    float line_width = sbo.payload[instance_index].line_width.x * 2.;\n"
-            "    int index = "
-            "int(sbo.payload[instance_index].sampler_index1_use_tint1_resolution2.x);\n"
-            "    int use_tint = "
-            "int(sbo.payload[instance_index].sampler_index1_use_tint1_resolution2.y);\n"
-            "    vec2 resolution = "
-            "sbo.payload[instance_index].sampler_index1_use_tint1_resolution2.zw;\n"
-            "    float shadow_size = sbo.payload[instance_index].shadow_size.x * 2.;\n"
-            "\n"
-            "    float dominant_axis = (resolution.x/resolution.y > 0.) ? resolution.x : resolution.y;\n"
-            "    vec4 border_radius_norm = border_radius/dominant_axis;\n"
-            "    vec2 resolution_norm = resolution / dominant_axis;\n"
-            "    float line_width_norm = line_width / dominant_axis;\n"
-            "    float shadow_size_norm = shadow_size / dominant_axis;\n"
-            "\n"
-            " 	 float dist = 1.-(sdRoundedBox((uv_varying-0.5)*2.*(resolution_norm+shadow_size_norm), resolution_norm, border_radius_norm)-shadow_size_norm);\n"
-            "    float bias = fwidth(dist);\n"
-            "    float shape = smoothstep(1., 1.+bias, dist);\n"
-            "\n"
-            "	if(shadow_size > 0.)\n"
-            "    {\n"
-            "        shape = smoothstep(1., 1. + shadow_size_norm, dist);\n"
-            "    }\n"
-            "    else if(line_width > 0.)\n"
-            "    {\n"
-            "        float inner = 1.-smoothstep(1.+line_width_norm, 1.+line_width_norm+bias, dist);\n"
-            "        shape = min(inner, shape);\n"
-            "    }\n"
-            "\n"
-            "	float alpha = shape;\n"
-            "\n"
-            "    if(line_width != 0)\n"
-            "    {\n"
-            "    	outColor = vec4(color.rgb, alpha);	\n"
-            "    }\n"
-            "    else if (index <= -1)\n"
-            "    {\n"
-            "        outColor = vec4(color.rgb, min(alpha, color.a));\n"
-            "    }\n"
-            "    else\n"
-            "    {\n"
-            "    	vec4 img = texture(textures[index], uv_tex_varying.xy).rgba;\n"
-            "    	if(use_tint == 1){\n"
-            "	        outColor = vec4((img.rgb * color.rgb), min(alpha, img.a));\n"
-            "    	}else{\n"
-            "    		outColor = vec4((img.rgb), min(alpha, img.a));    		\n"
-            "    	}\n"
-            "    }\n"
-            "}\n";
-
-        const char* vertexShaderSource =
-            "#version 440 core\n"
-            "\n"
-            "out gl_PerVertex{\n"
-            "    vec4 gl_Position;\n"
-            "};\n"
-            "\n"
-            "layout(location = 0) out vec2 uv_varying;\n"
-            "layout(location = 1) out vec2 uv_tex_varying;\n"
-            "layout(location = 2) out flat int instance_index;\n"
-            "\n"
-            "struct StorageData\n"
-            "{\n"
-            "    vec4 color;										// 32   4\n"
-            "    vec4 vertices[2];								// 64   4, 4\n"
-            "    vec4 border_radius;								// 32   4\n"
-            "    vec4 sampler_index1_use_tint1_resolution2; 	// 32   1:1:2\n"
-            "    vec4 uvs;										// 32   4\n"
-            "    vec4 line_width;    							// 32   4\n"
-            "	vec4 shadow_size;      							// 32   1:0:0:0\n"
-            "};\n"
-            "\n"
-            "layout(binding = 0, std140) readonly buffer SBO\n"
-            "{\n"
-            "    StorageData payload[];\n"
-            "} sbo;\n"
-            "\n"
-            "vec2 _positions[4] = vec2[](\n"
-            "    vec2(0, 0),\n"
-            "    vec2(1, 0),\n"
-            "    vec2(0, 1),\n"
-            "    vec2(1, 1)\n"
-            ");\n"
-            "\n"
-            "void main()\n"
-            "{\n"
-            "    vec2 verts[4] = {\n"
-            "        sbo.payload[gl_InstanceID].vertices[0].xy,\n"
-            "        sbo.payload[gl_InstanceID].vertices[0].zw,\n"
-            "        sbo.payload[gl_InstanceID].vertices[1].xy,\n"
-            "        sbo.payload[gl_InstanceID].vertices[1].zw\n"
-            "    };\n"
-            "\n"
-            "    vec2 _uvs[4] = vec2[](\n"
-            "        vec2(sbo.payload[gl_InstanceID].uvs.x, sbo.payload[gl_InstanceID].uvs.y),\n"
-            "        vec2(sbo.payload[gl_InstanceID].uvs.z, sbo.payload[gl_InstanceID].uvs.y),\n"
-            "        vec2(sbo.payload[gl_InstanceID].uvs.x, sbo.payload[gl_InstanceID].uvs.w),\n"
-            "        vec2(sbo.payload[gl_InstanceID].uvs.z, sbo.payload[gl_InstanceID].uvs.w)\n"
-            "    );\n"
-            "\n"
-            "    instance_index = gl_InstanceID;\n"
-            "    gl_Position = vec4(verts[gl_VertexID].xy*vec2(1.0, -1.0), 0.0, 1.0);\n"
-            "    uv_varying = _positions[gl_VertexID];\n"
-            "    uv_tex_varying = _uvs[gl_VertexID];\n"
-            "}\n";
 
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+        glShaderSource(vertexShader, 1, &ogl_vertex_code, NULL);
         glCompileShader(vertexShader);
         // check for shader compile errors
         int success;
@@ -989,7 +863,7 @@ namespace elemd
         }
         // fragment shader
         int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+        glShaderSource(fragmentShader, 1, &ogl_fragment_code, NULL);
         glCompileShader(fragmentShader);
         // check for shader compile errors
         glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
@@ -1042,13 +916,22 @@ namespace elemd
     }
     */
 
-    void ContextImplOpengl::update_storage()
+    void ContextImplOpengl::update_uniform_buffer()
+    {
+        glBindBuffer(GL_UNIFORM_BUFFER, storageBuffer);
+        GLsizei size = (GLsizei)std::min(storage.size() * sizeof(uniform_rect),
+                                         (size_t)UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, size, storage.data());
+    }
+
+    /*
+    void ContextImplOpengl::update_storage_buffer()
     {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, storageBuffer);
         GLsizei size = (GLsizei)std::min(storage.size() * sizeof(uniform_rect),
                                          UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE);
         glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, size, storage.data());
     }
-
+    */
 
 } // namespace elemd 

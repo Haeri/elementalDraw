@@ -36,7 +36,8 @@ namespace elemd
             vec2 resolution;        // 32   1
             vec2 uvs[2];            // 32   1
             float line_width[4];    // 32   1
-            float shadow_size[4];   // 8    1
+            float shadow_size;      //
+            float is_msdf[3];       // 16   1
         };                          // 256
 
         imageImplVulkan* dummy;

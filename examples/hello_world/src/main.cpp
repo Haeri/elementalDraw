@@ -78,7 +78,8 @@ int main(void)
 
     float color_phase = 0;
 
-    float initial_scale = 1;  
+    float min_scale = 0.01;
+    float max_scale = 100;
 
     float mouse_x;
     float mouse_y;
@@ -91,8 +92,8 @@ int main(void)
 
     win->add_scroll_listener([&](elemd::scroll_event event) {
         elemd::vec2 scale = win->get_scale();
-        float deltax = std::clamp(scale.x() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
-        float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);       
+        float deltax = std::clamp(scale.x() + (float)event.yoffset / 6.0f, min_scale, max_scale);
+        float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, min_scale, max_scale);       
 
         win->set_scale(deltax, deltay);
         //win->set_offset((-mouse_x), (-mouse_y));

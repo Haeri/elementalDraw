@@ -37,13 +37,16 @@ namespace elemd
         
 
     protected:
+        std::string _name;
+
         float _line_height = 0;
+        
+        image* _texture_atlas;
+        std::map<unsigned int, character> _characters;
 
         font() = default;
         virtual ~font() = default;
 
-        image* _texture_atlas;
-        std::map<unsigned int, character> _characters;
 
         void load_from_file(std::string file_path);
         void load_from_memory(unsigned char* data, size_t size);

@@ -7,23 +7,27 @@ layout(location = 2) in flat int instance_index;
 
 layout(location = 0) out vec4 outColor;
 
-struct StorageData
+struct RoundedRectData
 {
     vec4 color;										// 32   4
     vec4 vertices[2];								// 64   4, 4
     vec4 border_radius;								// 32   4
-    vec4 sampler_index1__use_tint1__resolution2; 	// 32   1:1:2
+    vec4 sampler_index1_use_tint1_resolution2; 		// 32   1:1:2
     vec4 uvs;										// 32   4
     vec4 line_width;    							// 32   4
-	vec4 shadow_size;      							// 32   1:0:0:0
+	vec4 shadow_size1_is_msdf1;						// 32   1:0:0:0
 };
 
 layout(set = 0, binding = 0, std140) readonly buffer SBO
 {
-    StorageData payload[];
+    RoundedRectData payload[];
 } sbo;
 layout(set = 0, binding = 1) uniform sampler2D textures[10];
 
+float median(float r, float g, float b)
+{
+    return max(min(r, g), min(max(r, g), b));
+}
 
 float sdRoundedBox(vec2 p, vec2 b, vec4 r )
 {
@@ -38,10 +42,11 @@ void main()
 	vec4 border_radius = sbo.payload[instance_index].border_radius * 2.;     
     vec4 color = sbo.payload[instance_index].color; 
     float line_width = sbo.payload[instance_index].line_width.x * 2.;
-    int index = int(sbo.payload[instance_index].sampler_index1__use_tint1__resolution2.x);
-    int use_tint = int(sbo.payload[instance_index].sampler_index1__use_tint1__resolution2.y);
-    vec2 resolution = sbo.payload[instance_index].sampler_index1__use_tint1__resolution2.zw;
-    float shadow_size = sbo.payload[instance_index].shadow_size.x * 2.;
+    int index = int(sbo.payload[instance_index].sampler_index1_use_tint1_resolution2.x);
+    int use_tint = int(sbo.payload[instance_index].sampler_index1_use_tint1_resolution2.y);
+    vec2 resolution = sbo.payload[instance_index].sampler_index1_use_tint1_resolution2.zw;
+    float shadow_size = sbo.payload[instance_index].shadow_size1_is_msdf1.x * 2.;
+    int is_msdf = int(sbo.payload[instance_index].shadow_size1_is_msdf1.y);
 
 	float dominant_axis = (resolution.x/resolution.y > 0.) ? resolution.x : resolution.y;
 	vec4 border_radius_norm = border_radius/dominant_axis; 
@@ -65,6 +70,7 @@ void main()
 
 	float alpha = shape;
 
+
     if(line_width != 0)
     {
     	outColor = vec4(color.rgb, alpha);	
@@ -76,10 +82,23 @@ void main()
     else
     {
     	vec4 img = texture(textures[index], uv_tex_varying.xy).rgba;
-    	if(use_tint == 1){
-	        outColor = vec4((img.rgb * color.rgb), min(alpha, img.a));
-    	}else{
-    		outColor = vec4((img.rgb), min(alpha, img.a));    		
-    	}
-    }
+
+    	if(is_msdf > 0)
+		{
+		 	vec2 msdfUnit = 4./vec2(textureSize(textures[index], 0));
+		    vec3 sampl = texture(textures[index], uv_tex_varying.xy).rgb;
+		    float sigDist = median(sampl.r, sampl.g, sampl.b) - 0.5;
+		    sigDist *= dot(msdfUnit, 0.5/fwidth(uv_tex_varying.xy));
+		    float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
+		    outColor = vec4(color.rgb, min(opacity, img.a));
+		}
+		else
+		{
+	    	if(use_tint == 1){
+		        outColor = vec4((img.rgb * color.rgb), min(alpha, img.a));
+	    	}else{
+	    		outColor = vec4((img.rgb), min(alpha, img.a));
+	    	}
+	    }
+	}
 }

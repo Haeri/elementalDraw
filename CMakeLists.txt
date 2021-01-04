@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.16)
 
 set(PROJECT_NAME elemd)
 project(${PROJECT_NAME} LANGUAGES CXX C)
@@ -16,6 +16,7 @@ endif()
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
+option(DYNAMIC_RUNTIME_LIBRARY "Set runtime library to dynamic" ${BUILD_SHARED_LIBS})
 set(ELEMD_RENDERING_BACKEND ${ELEMD_DEFAULT_RENDERING_BACKEND} CACHE STRING "Choose Backend (vulkan, opengl)")
 string(TOUPPER ${ELEMD_RENDERING_BACKEND} ELEMD_RENDERING_BACKEND_UPPER)
 
@@ -28,7 +29,6 @@ set(CMAKE_VISIBILITY_INLINE_HIDDEN YES)
 # Enable folder view in solution explorer
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-message("ELEMD_RENDERING_BACKEND is: " ${ELEMD_RENDERING_BACKEND_UPPER})
 add_compile_definitions("ELEMD_RENDERING_BACKEND_${ELEMD_RENDERING_BACKEND_UPPER}")
 
 file(GLOB SOURCE_FILES
@@ -43,6 +43,10 @@ file(GLOB SOURCE_FILES
     src/${ELEMD_RENDERING_BACKEND}/*.c
  )
 
+# Microsoft Runtime Library shenanigens
+if(NOT DYNAMIC_RUNTIME_LIBRARY) 
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
 
 if (BUILD_SHARED_LIBS)
     add_compile_definitions(ELEMD_BUILD_SHARED)
@@ -51,6 +55,7 @@ else()
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
 endif()
+
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
     SOVERSION 0
@@ -84,6 +89,10 @@ endif()
 #)
 
 
+message("ELEMD_RENDERING_BACKEND: " ${ELEMD_RENDERING_BACKEND_UPPER})
+message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
+message("DYNAMIC_RUNTIME_LIBRARY: ${DYNAMIC_RUNTIME_LIBRARY}")
+message("CMAKE_MSVC_RUNTIME_LIBRARY: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
 
 
 

@@ -154,6 +154,8 @@ namespace elemd
             file.seekg(0);
             file.read((char*)fileBuffer, fileSize);
             file.close();
+
+            _name = file_path;
         
             load_from_memory(fileBuffer, fileSize);
         }

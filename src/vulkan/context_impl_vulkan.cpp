@@ -1,15 +1,15 @@
 #include "context_impl_vulkan.hpp"
 
-#include <algorithm>
-#include <cstring>
-#include <codecvt> // for std::codecvt_utf8
-#include <locale>  // for std::wstring_convert
 #include <GLFW/glfw3.h>
+#include <algorithm>
+#include <codecvt> // for std::codecvt_utf8
+#include <cstring>
+#include <locale> // for std::wstring_convert
 
-#include "vulkan_shared_info.hpp"
+#include "../resources.h"
 #include "../window_impl.hpp"
 #include "font_impl_vulkan.hpp"
-#include "../resources.h"
+#include "vulkan_shared_info.hpp"
 
 namespace elemd
 {
@@ -60,7 +60,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {lw, lw, lw, lw},                                                       // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -106,7 +107,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {lw, lw, lw, lw},                                                       // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -152,7 +154,8 @@ namespace elemd
             vec2(width, width),                                                     // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {lw, lw, lw, lw},                                                       // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -168,7 +171,7 @@ namespace elemd
     void Context::fill_rect(float x, float y, float width, float height)
     {
         ContextImplVulkan* impl = getImpl(this);
-        
+
         x += impl->_window->_x_offset;
         y += impl->_window->_y_offset;
         x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
@@ -192,7 +195,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -236,7 +240,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -270,7 +275,8 @@ namespace elemd
             vec2(width, width),                                                     // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -281,7 +287,7 @@ namespace elemd
     void Context::fill_polygon(float x, float y)
     {
     }
-    
+
     void Context::draw_text(float x, float y, std::string text)
     {
         std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv_utf8_utf32;
@@ -294,7 +300,8 @@ namespace elemd
     {
         ContextImplVulkan* impl = getImpl(this);
 
-        if (_font == nullptr) {
+        if (_font == nullptr)
+        {
             std::cerr << "Error: No font loaded!" << std::endl;
             return;
         }
@@ -320,7 +327,7 @@ namespace elemd
                 y += _font->get_line_height() * scale;
                 x = initialX;
                 continue;
-            }         
+            }
 
             float xpos = x + ch.bearing.x() * scale;
             float ypos = y + (LOADED_HEIGHT - ch.bearing.y()) * scale;
@@ -350,19 +357,19 @@ namespace elemd
                 vec2(width, height),                          // resolution
                 {vec2(originx, originy), vec2(cropx, cropy)}, // uvs
                 {0, 0, 0, 0},                                 // line_width
-                {0, 0, 0, 0},                                 // shadow_size
+                0,                                            // shadow_size
+                {1, 0, 0},                                    // is_msdf
             });
 
             x += ch.advance * scale;
         }
     }
 
-
     void Context::draw_image(float x, float y, float width, float height, image* image, bool tint)
     {
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
-        
+
         x += impl->_window->_x_offset;
         y += impl->_window->_y_offset;
 
@@ -388,7 +395,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -406,7 +414,8 @@ namespace elemd
                            border_radius, tint);
     }
 
-    void Context::draw_rounded_image(float x, float y, float width, float height, image* image, float radius_nw, float radius_ne, float radius_se,
+    void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
+                                     float radius_nw, float radius_ne, float radius_se,
                                      float radius_sw, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, radius_nw, radius_ne, radius_se, radius_sw,
@@ -454,7 +463,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(originx, originy), vec2(cropx, cropy)},                           // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {0, 0, 0, 0},                                                           // shadow_size
+            0,                                                                      // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -486,7 +496,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {shadow_size, 0, 0, 0},                                                 // shadow_size
+            shadow_size,                                                            // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -532,7 +543,8 @@ namespace elemd
             vec2(width, height),                                                    // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {shadow_size, 0, 0, 0},                                                 // shadow_size
+            shadow_size,                                                            // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
@@ -567,11 +579,11 @@ namespace elemd
             vec2(width, width),                                                     // resolution
             {vec2(0), vec2(1)},                                                     // uvs
             {0, 0, 0, 0},                                                           // line_width
-            {shadow_size, 0, 0, 0},                                                 // shadow_size
+            shadow_size,                                                            // shadow_size
+            {0, 0, 0},                                                              // is_msdf
         });
     }
 
-   
     void Context::set_clear_color(color color)
     {
         ContextImplVulkan* impl = getImpl(this);
@@ -590,7 +602,8 @@ namespace elemd
     void Context::draw_frame()
     {
         ContextImplVulkan* impl = getImpl(this);
-        if (impl->rendering || impl->headless || impl->storage.empty()) return;
+        if (impl->rendering || impl->headless || impl->storage.empty())
+            return;
         impl->rendering = true;
 
         bool rerecord = false;
@@ -599,9 +612,9 @@ namespace elemd
             impl->last_uniform_cnt = (int)impl->storage.size();
             rerecord = true;
         }
-        
+
         impl->wait_for_render_fence();
-        ///impl->update_uniforms();
+        /// impl->update_uniforms();
         impl->update_storage();
         if (rerecord || impl->dirty)
         {
@@ -609,12 +622,12 @@ namespace elemd
             impl->dirty = false;
         }
         impl->storage.clear();
-       
 
         uint32_t imageIndex;
         vku::err_check(vkAcquireNextImageKHR(VulkanSharedInfo::getInstance()->device,
                                              impl->swapchain, std::numeric_limits<uint64_t>::max(),
-                              impl->semaphoreImageAvailable, VK_NULL_HANDLE, &imageIndex));
+                                             impl->semaphoreImageAvailable, VK_NULL_HANDLE,
+                                             &imageIndex));
 
         VkPipelineStageFlags waitStageMask[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
@@ -642,7 +655,7 @@ namespace elemd
         presentInfoKHR.pResults = nullptr;
 
         vku::err_check(vkQueuePresentKHR(impl->queue, &presentInfoKHR));
-        
+
         impl->rendering = false;
     }
 
@@ -688,7 +701,7 @@ namespace elemd
         if (!fiv->_uploaded)
         {
             fiv->upload(impl->commandPool, impl->queue);
-            
+
             imageImplVulkan* img = (imageImplVulkan*)font->get_image();
             if (impl->images.size() > impl->texture_array_size)
             {
@@ -713,10 +726,10 @@ namespace elemd
         }
 
         ContextImplVulkan* impl = getImpl(this);
-        
+
         impl->create_vertex_buffers();
         impl->create_index_buffers();
-        ///impl->create_uniform_buffer();
+        /// impl->create_uniform_buffer();
         impl->create_storage_buffer();
         impl->create_descriptor_pool();
         impl->create_descriptor_set();
@@ -740,15 +753,15 @@ namespace elemd
 
         texture_array_size = (int)properties.limits.maxPerStageDescriptorSamplers;
 
-        std::cout << "maxPerStageDescriptorSamplers: " << texture_array_size << std::endl;      
+        std::cout << "maxPerStageDescriptorSamplers: " << texture_array_size << std::endl;
     }
 
     void ContextImplVulkan::create_surface()
     {
         // --------------- Create WIndow Surface ---------------
 
-        vku::err_check(
-            glfwCreateWindowSurface(VulkanSharedInfo::getInstance()->instance, _window->getGLFWWindow(), nullptr, &surface));
+        vku::err_check(glfwCreateWindowSurface(VulkanSharedInfo::getInstance()->instance,
+                                               _window->getGLFWWindow(), nullptr, &surface));
     }
 
     void ContextImplVulkan::create_queue()
@@ -756,10 +769,9 @@ namespace elemd
         // --------------- Get Device Queue ---------------
 
         vkGetDeviceQueue(VulkanSharedInfo::getInstance()->device,
-                         VulkanSharedInfo::getInstance()->queueFamilyIndex, 0,
-                         &queue);
+                         VulkanSharedInfo::getInstance()->queueFamilyIndex, 0, &queue);
     }
-    
+
     void ContextImplVulkan::check_surface_support()
     {
         // --------------- Check Surface Support ---------------
@@ -767,8 +779,7 @@ namespace elemd
         VkBool32 surfaceSupport = false;
         vku::err_check(vkGetPhysicalDeviceSurfaceSupportKHR(
             VulkanSharedInfo::getInstance()->bestPhysicalDevice,
-            VulkanSharedInfo::getInstance()->queueFamilyIndex, surface,
-                                                            &surfaceSupport));
+            VulkanSharedInfo::getInstance()->queueFamilyIndex, surface, &surfaceSupport));
         if (!surfaceSupport)
         {
             std::cerr << "Error: Swapchain not supported on your Device!" << std::endl;
@@ -784,23 +795,22 @@ namespace elemd
         vku::err_check(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
             VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &surfaceCapabilities));
 
-
         // --------------- Get Surface Formats ---------------
 
         uint32_t surfaceFormatCount = 0;
-        vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(VulkanSharedInfo::getInstance()->bestPhysicalDevice,
-                                                            surface, &surfaceFormatCount, nullptr));
+        vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(
+            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &surfaceFormatCount,
+            nullptr));
         VkSurfaceFormatKHR* surfaceFormats = new VkSurfaceFormatKHR[surfaceFormatCount];
         vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(
-            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &surfaceFormatCount, surfaceFormats));
-
+            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &surfaceFormatCount,
+            surfaceFormats));
 
         // --------------- Select Image Count ---------------
 
         uint32_t selectedImageCount = surfaceCapabilities.minImageCount + 1;
         if (selectedImageCount > surfaceCapabilities.maxImageCount)
             selectedImageCount = surfaceCapabilities.maxImageCount;
-
 
         // --------------- Select Image Format and Colorspace ---------------
 
@@ -816,33 +826,31 @@ namespace elemd
             }
         }
 
-
-        // --------------- Select Extents ---------------    
+        // --------------- Select Extents ---------------
 
         VkExtent2D selectedImageExtent = {(uint32_t)_width, (uint32_t)_height};
         selectedImageExtent.width =
             std::max(surfaceCapabilities.minImageExtent.width,
                      std::min(surfaceCapabilities.maxImageExtent.width, selectedImageExtent.width));
-        selectedImageExtent.height =
-            std::max(surfaceCapabilities.minImageExtent.height,
-                     std::min(surfaceCapabilities.maxImageExtent.height, selectedImageExtent.height));
-
+        selectedImageExtent.height = std::max(
+            surfaceCapabilities.minImageExtent.height,
+            std::min(surfaceCapabilities.maxImageExtent.height, selectedImageExtent.height));
 
         // --------------- Get Present Modes ---------------
 
         uint32_t presentModeCount = 0;
         vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(
-            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &presentModeCount, nullptr));
+            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &presentModeCount,
+            nullptr));
         VkPresentModeKHR* presentModes = new VkPresentModeKHR[presentModeCount];
         vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(
-            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &presentModeCount, presentModes));
-
+            VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &presentModeCount,
+            presentModes));
 
         // --------------- Select Present Mode ---------------
-            
+
         VkPresentModeKHR selectedPresentMode =
             vku::select_present_mode(presentModes, presentModeCount, _window->get_vsync());
-
 
         // --------------- Create Swapchain Create Info ---------------
 
@@ -866,12 +874,10 @@ namespace elemd
         swapchainCreateInfo.clipped = VK_TRUE;
         swapchainCreateInfo.oldSwapchain = swapchain;
 
-
         // --------------- Create Swapchain ---------------
 
         vku::err_check(vkCreateSwapchainKHR(VulkanSharedInfo::getInstance()->device,
                                             &swapchainCreateInfo, nullptr, &swapchain));
-
 
         // --------------- Cleanup ---------------
 
@@ -883,13 +889,15 @@ namespace elemd
     {
         // --------------- Get Swapchain Image ---------------
 
-        vku::err_check(vkGetSwapchainImagesKHR(VulkanSharedInfo::getInstance()->device, swapchain,
-                                               &VulkanSharedInfo::getInstance()->actualSwapchainImageCount, nullptr));
-        VkImage* swapchainImages = new VkImage[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
-        vku::err_check(vkGetSwapchainImagesKHR(VulkanSharedInfo::getInstance()->device, swapchain, &VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
-                                               swapchainImages));
+        vku::err_check(vkGetSwapchainImagesKHR(
+            VulkanSharedInfo::getInstance()->device, swapchain,
+            &VulkanSharedInfo::getInstance()->actualSwapchainImageCount, nullptr));
+        VkImage* swapchainImages =
+            new VkImage[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
+        vku::err_check(vkGetSwapchainImagesKHR(
+            VulkanSharedInfo::getInstance()->device, swapchain,
+            &VulkanSharedInfo::getInstance()->actualSwapchainImageCount, swapchainImages));
 
-        
         // --------------- Create Image Views ---------------
 
         imageViews = new VkImageView[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
@@ -912,11 +920,10 @@ namespace elemd
             imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
             imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-            vku::err_check(
-                vkCreateImageView(VulkanSharedInfo::getInstance()->device, &imageViewCreateInfo, nullptr, &imageViews[i]));
+            vku::err_check(vkCreateImageView(VulkanSharedInfo::getInstance()->device,
+                                             &imageViewCreateInfo, nullptr, &imageViews[i]));
         }
 
-        
         // --------------- Cleanup ---------------
 
         delete[] swapchainImages;
@@ -937,14 +944,12 @@ namespace elemd
         attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-
         // --------------- Create Attachment Reference ---------------
 
         VkAttachmentReference attachmentReference{};
         attachmentReference.attachment = 0;
         attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-        
         // --------------- Create Subpass Desciption ---------------
 
         VkSubpassDescription subpassDescription{};
@@ -959,7 +964,6 @@ namespace elemd
         subpassDescription.preserveAttachmentCount = 0;
         subpassDescription.pPreserveAttachments = nullptr;
 
-
         // --------------- Create Subpass Dependency ---------------
 
         VkSubpassDependency subpassDependency{};
@@ -972,7 +976,6 @@ namespace elemd
             VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         subpassDependency.dependencyFlags = 0;
 
-        
         // --------------- Create Render Pass Create Info ---------------
 
         VkRenderPassCreateInfo renderPassCreateInfo{};
@@ -986,21 +989,21 @@ namespace elemd
         renderPassCreateInfo.dependencyCount = 1;
         renderPassCreateInfo.pDependencies = &subpassDependency;
 
-
         // --------------- Create Render Pass ---------------
 
-        vku::err_check(vkCreateRenderPass(VulkanSharedInfo::getInstance()->device, &renderPassCreateInfo, nullptr, &renderPass));
+        vku::err_check(vkCreateRenderPass(VulkanSharedInfo::getInstance()->device,
+                                          &renderPassCreateInfo, nullptr, &renderPass));
     }
 
     void ContextImplVulkan::create_descriptor_set_layout()
     {
-        ///VkDescriptorSetLayoutBinding uniformDescriptorSetLayoutBinding;
-        ///uniformDescriptorSetLayoutBinding.binding = 0;
-        ///uniformDescriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        ///uniformDescriptorSetLayoutBinding.descriptorCount = 1;
-        ///uniformDescriptorSetLayoutBinding.stageFlags =
-            ///VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-        ///uniformDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
+        /// VkDescriptorSetLayoutBinding uniformDescriptorSetLayoutBinding;
+        /// uniformDescriptorSetLayoutBinding.binding = 0;
+        /// uniformDescriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        /// uniformDescriptorSetLayoutBinding.descriptorCount = 1;
+        /// uniformDescriptorSetLayoutBinding.stageFlags =
+        /// VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        /// uniformDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
         VkDescriptorSetLayoutBinding storageDescriptorSetLayoutBinding{};
         storageDescriptorSetLayoutBinding.binding = 0;
@@ -1019,27 +1022,24 @@ namespace elemd
         samplerDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
         std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings = {
-            ///uniformDescriptorSetLayoutBinding, 
-            storageDescriptorSetLayoutBinding,
-            samplerDescriptorSetLayoutBinding
-        };
+            /// uniformDescriptorSetLayoutBinding,
+            storageDescriptorSetLayoutBinding, samplerDescriptorSetLayoutBinding};
 
         /* Since we are preallocating a big array of samplers and only supplying actually less,
-        * we have to tell Vulkan, that those slots are partially bound or else it will complain.
-        * This only applies to the samplerDescriptor and not uniformDescriptor, hence it being 0 as in default.
-        */
+         * we have to tell Vulkan, that those slots are partially bound or else it will complain.
+         * This only applies to the samplerDescriptor and not uniformDescriptor, hence it being 0 as
+         * in default.
+         */
         std::vector<VkDescriptorBindingFlags> descriptorBindingFlags = {
-            0,
-            VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT
-        };
+            0, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT};
 
         VkDescriptorSetLayoutBindingFlagsCreateInfo descriptorSetLayoutBindingFlagsCreateInfo{};
         descriptorSetLayoutBindingFlagsCreateInfo.sType =
             VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
         descriptorSetLayoutBindingFlagsCreateInfo.pNext = nullptr;
-        descriptorSetLayoutBindingFlagsCreateInfo.bindingCount = (uint32_t)descriptorBindingFlags.size();
+        descriptorSetLayoutBindingFlagsCreateInfo.bindingCount =
+            (uint32_t)descriptorBindingFlags.size();
         descriptorSetLayoutBindingFlagsCreateInfo.pBindingFlags = descriptorBindingFlags.data();
-        
 
         VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo{};
         descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -1059,11 +1059,12 @@ namespace elemd
 
         fragShaderModule = new VkShaderModule();
         vertShaderModule = new VkShaderModule();
-//        vku::create_shader_module("./elemd_res/shader/rounded_rect.frag.spv", fragShaderModule);
-//        vku::create_shader_module("./elemd_res/shader/rounded_rect.vert.spv", vertShaderModule);
-        vku::create_shader_module(fragment_code, fragShaderModule);
-        vku::create_shader_module(vertex_code, vertShaderModule);
-
+        //        vku::create_shader_module("./elemd_res/shader/rounded_rect.frag.spv",
+        //        fragShaderModule);
+        //        vku::create_shader_module("./elemd_res/shader/rounded_rect.vert.spv",
+        //        vertShaderModule);
+        vku::create_shader_module(vk_fragment_code, fragShaderModule);
+        vku::create_shader_module(vk_vertex_code, vertShaderModule);
 
         // --------------- Create Pipeline Shader Stage Create Info ---------------
 
@@ -1076,7 +1077,6 @@ namespace elemd
         shaderStageCreateInfoVert.pName = "main";
         shaderStageCreateInfoVert.pSpecializationInfo = nullptr;
 
-        
         // --------------- Create Pipeline Shader Stage Create Info ---------------
 
         VkPipelineShaderStageCreateInfo shaderStageCreateInfoFrag{};
@@ -1091,13 +1091,12 @@ namespace elemd
         VkPipelineShaderStageCreateInfo shaderStages[] = {shaderStageCreateInfoVert,
                                                           shaderStageCreateInfoFrag};
 
-
         /*
-        VkVertexInputBindingDescription vertexInputBindingDescription = vertex::getBindingDescription();
-        std::array<VkVertexInputAttributeDescription, 1> vertexInputAttributeDescription =
-            vertex::gerAttributeDescriptions();
+        VkVertexInputBindingDescription vertexInputBindingDescription =
+        vertex::getBindingDescription(); std::array<VkVertexInputAttributeDescription, 1>
+        vertexInputAttributeDescription = vertex::gerAttributeDescriptions();
             */
-        
+
         // --------------- Create Pipeline Vertex Input State Create Info ---------------
 
         VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo{};
@@ -1115,10 +1114,9 @@ namespace elemd
             vertexInputAttributeDescription.data();
         */
         pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
-        pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr; 
+        pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr;
         pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
         pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
-
 
         // --------------- Create Pipeline Input Assembly State Create Info ---------------
 
@@ -1129,7 +1127,6 @@ namespace elemd
         pipelineInputAssemblyStateCreateInfo.flags = 0;
         pipelineInputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
-
 
         // --------------- Create Pipeline Viewport State Create Info ---------------
 
@@ -1155,7 +1152,6 @@ namespace elemd
         pipelineViewportStateCreateInfo.scissorCount = 1;
         pipelineViewportStateCreateInfo.pScissors = &scissor;
 
-
         // --------------- Create Pipeline Rasterization State Create Info ---------------
 
         VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo{};
@@ -1174,7 +1170,6 @@ namespace elemd
         pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
         pipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
 
-
         // --------------- Create Pipeline Multisample State Create Info ---------------
 
         VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo{};
@@ -1189,7 +1184,6 @@ namespace elemd
         pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
         pipelineMultisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
-        
         // --------------- Create Pipeline Color Blend Attachment State ---------------
 
         VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState{};
@@ -1203,7 +1197,6 @@ namespace elemd
         pipelineColorBlendAttachmentState.colorWriteMask =
             VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
             VK_COLOR_COMPONENT_A_BIT;
-
 
         // --------------- Create Pipeline Color Blend State Create Info ---------------
 
@@ -1221,11 +1214,7 @@ namespace elemd
         pipelineColorBlendStateCreateInfo.blendConstants[2] = 0.0f;
         pipelineColorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
-
-        VkDynamicState dynamicStates[] = {
-            VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR
-        };
+        VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
 
         VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo{};
         pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -1245,12 +1234,10 @@ namespace elemd
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
         pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
-
         // --------------- Create Pipeline Layout ---------------
 
-        vku::err_check(
-            vkCreatePipelineLayout(VulkanSharedInfo::getInstance()->device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
-
+        vku::err_check(vkCreatePipelineLayout(VulkanSharedInfo::getInstance()->device,
+                                              &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
 
         // --------------- Create Graphics Pipeline Create Info ---------------
 
@@ -1275,18 +1262,19 @@ namespace elemd
         graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
         graphicsPipelineCreateInfo.basePipelineIndex = -1;
 
-
         // --------------- Create Graphics Pipeline ---------------
 
-        vku::err_check(vkCreateGraphicsPipelines(VulkanSharedInfo::getInstance()->device, VK_NULL_HANDLE, 1,
-                                                 &graphicsPipelineCreateInfo, nullptr, &pipeline));
+        vku::err_check(vkCreateGraphicsPipelines(VulkanSharedInfo::getInstance()->device,
+                                                 VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo,
+                                                 nullptr, &pipeline));
     }
 
     void ContextImplVulkan::create_framebuffer()
     {
         // --------------- Create Framebuffers ---------------
 
-        frameBuffers = new VkFramebuffer[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
+        frameBuffers =
+            new VkFramebuffer[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
 
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
@@ -1301,8 +1289,9 @@ namespace elemd
             frameBufferCreateInfo.height = (uint32_t)_height;
             frameBufferCreateInfo.layers = 1;
 
-            vku::err_check(
-                vkCreateFramebuffer(VulkanSharedInfo::getInstance()->device, &frameBufferCreateInfo, nullptr, &(frameBuffers[i])));
+            vku::err_check(vkCreateFramebuffer(VulkanSharedInfo::getInstance()->device,
+                                               &frameBufferCreateInfo, nullptr,
+                                               &(frameBuffers[i])));
         }
     }
 
@@ -1316,10 +1305,10 @@ namespace elemd
         commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         commandPoolCreateInfo.queueFamilyIndex = VulkanSharedInfo::getInstance()->queueFamilyIndex;
 
-
         // --------------- Create Command Pool ---------------
 
-        vku::err_check(vkCreateCommandPool(VulkanSharedInfo::getInstance()->device, &commandPoolCreateInfo, nullptr, &commandPool));
+        vku::err_check(vkCreateCommandPool(VulkanSharedInfo::getInstance()->device,
+                                           &commandPoolCreateInfo, nullptr, &commandPool));
     }
 
     void ContextImplVulkan::create_command_buffers()
@@ -1331,14 +1320,15 @@ namespace elemd
         commandBufferAllocateInfo.pNext = nullptr;
         commandBufferAllocateInfo.commandPool = commandPool;
         commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        commandBufferAllocateInfo.commandBufferCount = VulkanSharedInfo::getInstance()->actualSwapchainImageCount;
-
+        commandBufferAllocateInfo.commandBufferCount =
+            VulkanSharedInfo::getInstance()->actualSwapchainImageCount;
 
         // --------------- Allocate Command Buffers ---------------
 
-        commandBuffers = new VkCommandBuffer[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
-        vku::err_check(
-            vkAllocateCommandBuffers(VulkanSharedInfo::getInstance()->device, &commandBufferAllocateInfo, commandBuffers));
+        commandBuffers =
+            new VkCommandBuffer[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
+        vku::err_check(vkAllocateCommandBuffers(VulkanSharedInfo::getInstance()->device,
+                                                &commandBufferAllocateInfo, commandBuffers));
     }
 
     void ContextImplVulkan::record_command_buffers()
@@ -1368,35 +1358,34 @@ namespace elemd
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo,
                                  VK_SUBPASS_CONTENTS_INLINE);
 
-                vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
-                VkViewport viewport{};
-                viewport.x = 0.0f;
-                viewport.y = 0.0f;
-                viewport.width = (float)_width;
-                viewport.height = (float)_height;
-                viewport.minDepth = 0.0f;
-                viewport.maxDepth = 1.0f;
+            VkViewport viewport{};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = (float)_width;
+            viewport.height = (float)_height;
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
 
-                VkRect2D scissor{};
-                scissor.offset = { 0, 0 };
-                scissor.extent = {(uint32_t)_width, (uint32_t)_height};
+            VkRect2D scissor{};
+            scissor.offset = {0, 0};
+            scissor.extent = {(uint32_t)_width, (uint32_t)_height};
 
-                vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
-                vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
+            vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
+            vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
 
-                VkDeviceSize offsets[] = { 0 };
-                //vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
-                vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-            
-                vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+            VkDeviceSize offsets[] = {0};
+            // vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
+            vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-                ///vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
-                ///                 uniforms.size(), 0, 0, 0);
-                vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
-                                 (uint32_t)storage.size(),
-                                 0, 0, 0);
+            vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+
+            /// vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
+            ///                 uniforms.size(), 0, 0, 0);
+            vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
+                             (uint32_t)storage.size(), 0, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             vku::err_check(vkEndCommandBuffer(commandBuffers[i]));
@@ -1421,7 +1410,6 @@ namespace elemd
         vku::err_check(vkCreateFence(VulkanSharedInfo::getInstance()->device, &fenceCreateInfo,
                                      nullptr, &renderFence));
 
-
         // --------------- Create Semaphore Create Info ---------------
 
         VkSemaphoreCreateInfo semaphoreCreateInfo{};
@@ -1429,13 +1417,13 @@ namespace elemd
         semaphoreCreateInfo.pNext = nullptr;
         semaphoreCreateInfo.flags = 0;
 
-
         // --------------- Create Semaphores ---------------
 
-        vku::err_check(
-            vkCreateSemaphore(VulkanSharedInfo::getInstance()->device, &semaphoreCreateInfo, nullptr, &semaphoreImageAvailable));
-        vku::err_check(
-            vkCreateSemaphore(VulkanSharedInfo::getInstance()->device, &semaphoreCreateInfo, nullptr, &semaphoreRenderingComplete));
+        vku::err_check(vkCreateSemaphore(VulkanSharedInfo::getInstance()->device,
+                                         &semaphoreCreateInfo, nullptr, &semaphoreImageAvailable));
+        vku::err_check(vkCreateSemaphore(VulkanSharedInfo::getInstance()->device,
+                                         &semaphoreCreateInfo, nullptr,
+                                         &semaphoreRenderingComplete));
     }
 
     void ContextImplVulkan::initialize_resources()
@@ -1451,17 +1439,20 @@ namespace elemd
 
     void ContextImplVulkan::update_swapchain(uint32_t width, uint32_t height)
     {
-        if (resizing) return;
+        if (resizing)
+            return;
         resizing = true;
 
         this->_width = width;
         //*_window->_x_scale;
         this->_height = height;
-        //*_window->_y_scale;        
+        //*_window->_y_scale;
 
         vkDeviceWaitIdle(VulkanSharedInfo::getInstance()->device);
 
-        vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool, VulkanSharedInfo::getInstance()->actualSwapchainImageCount, commandBuffers);
+        vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool,
+                             VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
+                             commandBuffers);
         vkDestroyCommandPool(VulkanSharedInfo::getInstance()->device, commandPool, nullptr);
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
@@ -1472,7 +1463,7 @@ namespace elemd
         {
             vkDestroyImageView(VulkanSharedInfo::getInstance()->device, imageViews[i], nullptr);
         }
-        
+
         delete[] commandBuffers;
         delete[] frameBuffers;
         delete[] imageViews;
@@ -1497,8 +1488,7 @@ namespace elemd
         _window = (WindowImpl*)window;
 
         _width = (uint32_t)window->get_width();
-        _height = (uint32_t)window->get_height();        
-
+        _height = (uint32_t)window->get_height();
 
         VulkanSharedInfo::getInstance();
         initialize_limits();
@@ -1513,7 +1503,7 @@ namespace elemd
         create_descriptor_set_layout();
 
         create_pipeline();
-        
+
         create_framebuffer();
         create_command_pool();
         create_command_buffers();
@@ -1524,10 +1514,10 @@ namespace elemd
 #ifndef NDEBUG
         std::cout << "{\n";
         vku::print_layers();
-        //vku::print_extensions();
+        // vku::print_extensions();
         vku::print_physical_devices();
         vku::print_selected_device();
-        std::cout << "}\n";      
+        std::cout << "}\n";
 #endif
     }
 
@@ -1538,21 +1528,25 @@ namespace elemd
         vkDestroyDescriptorSetLayout(VulkanSharedInfo::getInstance()->device, descriptorSetLayout,
                                      nullptr);
         vkDestroyDescriptorPool(VulkanSharedInfo::getInstance()->device, descriptorPool, nullptr);
-        ///vkFreeMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory, nullptr);
-        ///vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, uniformBuffer, nullptr);
+        /// vkFreeMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory,
+        /// nullptr); vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, uniformBuffer,
+        /// nullptr);
 
         vkFreeMemory(VulkanSharedInfo::getInstance()->device, storageBufferDeviceMemory, nullptr);
         vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, storageBuffer, nullptr);
 
         vkDestroyFence(VulkanSharedInfo::getInstance()->device, renderFence, nullptr);
-        vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreImageAvailable, nullptr);
-        vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreRenderingComplete, nullptr);
+        vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreImageAvailable,
+                           nullptr);
+        vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreRenderingComplete,
+                           nullptr);
 
         vkFreeMemory(VulkanSharedInfo::getInstance()->device, indexBufferDeviceMemory, nullptr);
         vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, indexBuffer, nullptr);
 
-//        vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory, nullptr);
-//        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer, nullptr);  
+        //        vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory,
+        //        nullptr); vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer,
+        //        nullptr);
 
         vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool,
                              VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
@@ -1560,27 +1554,26 @@ namespace elemd
         vkDestroyCommandPool(VulkanSharedInfo::getInstance()->device, commandPool, nullptr);
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-          vkDestroyFramebuffer(VulkanSharedInfo::getInstance()->device, frameBuffers[i], nullptr);
+            vkDestroyFramebuffer(VulkanSharedInfo::getInstance()->device, frameBuffers[i], nullptr);
         }
 
         vkDestroyPipeline(VulkanSharedInfo::getInstance()->device, pipeline, nullptr);
-        
+
         vkDestroyRenderPass(VulkanSharedInfo::getInstance()->device, renderPass, nullptr);
-        
+
         vkDestroyPipelineLayout(VulkanSharedInfo::getInstance()->device, pipelineLayout, nullptr);
 
         vkDestroyShaderModule(VulkanSharedInfo::getInstance()->device, *vertShaderModule, nullptr);
         vkDestroyShaderModule(VulkanSharedInfo::getInstance()->device, *fragShaderModule, nullptr);
-        
+
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
             vkDestroyImageView(VulkanSharedInfo::getInstance()->device, imageViews[i], nullptr);
         }
-        
+
         vkDestroySwapchainKHR(VulkanSharedInfo::getInstance()->device, swapchain, nullptr);
         vkDestroySurfaceKHR(VulkanSharedInfo::getInstance()->instance, surface, nullptr);
 
-        
         delete[] commandBuffers;
         delete[] frameBuffers;
         delete vertShaderModule;
@@ -1590,7 +1583,6 @@ namespace elemd
         delete dummy;
     }
 
-
     void ContextImplVulkan::create_vertex_buffers()
     {
         /*
@@ -1599,23 +1591,22 @@ namespace elemd
         */
     }
 
-     void ContextImplVulkan::create_index_buffers()
+    void ContextImplVulkan::create_index_buffers()
     {
         vku::create_and_upload_buffer(rect_indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indexBuffer,
                                       indexBufferDeviceMemory, commandPool, queue);
     }
 
-
-     /*
-    void ContextImplVulkan::create_uniform_buffer()
-    {
-        VkDeviceSize bufferSize = UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE;
-        vku::create_buffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer,
-                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                           uniformBufferDeviceMemory);
-    }
-    */
+    /*
+   void ContextImplVulkan::create_uniform_buffer()
+   {
+       VkDeviceSize bufferSize = UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE;
+       vku::create_buffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer,
+                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                              VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                          uniformBufferDeviceMemory);
+   }
+   */
     void ContextImplVulkan::create_storage_buffer()
     {
         VkDeviceSize bufferSize = UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE;
@@ -1641,11 +1632,9 @@ namespace elemd
         samplerDescriptorPoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         samplerDescriptorPoolSize.descriptorCount = texture_array_size;
 
-        std::vector<VkDescriptorPoolSize> descriptorPoolSizes = {
-            //uniformDescriptorPoolSize,
-            storageDescriptorPoolSize,
-            samplerDescriptorPoolSize
-        };
+        std::vector<VkDescriptorPoolSize> descriptorPoolSizes = {// uniformDescriptorPoolSize,
+                                                                 storageDescriptorPoolSize,
+                                                                 samplerDescriptorPoolSize};
 
         VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
         descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -1671,8 +1660,6 @@ namespace elemd
         vku::err_check(vkAllocateDescriptorSets(VulkanSharedInfo::getInstance()->device,
                                                 &descriptorSetAllocateInfo, &descriptorSet));
 
-        
-
         /*
         // Uniform Buffer
         VkDescriptorBufferInfo descriptorBufferInfo;
@@ -1693,14 +1680,11 @@ namespace elemd
         uniformWriteDescriptorSet.pTexelBufferView = nullptr;
         */
 
-
-
-
         // Storage Buffer
         VkDescriptorBufferInfo descriptorStorageBufferInfo{};
         descriptorStorageBufferInfo.buffer = storageBuffer;
         descriptorStorageBufferInfo.offset = 0;
-        //descriptorStorageBufferInfo.range = properties.limits.maxStorageBufferRange;
+        // descriptorStorageBufferInfo.range = properties.limits.maxStorageBufferRange;
         descriptorStorageBufferInfo.range = UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE;
 
         VkWriteDescriptorSet storageWriteDescriptorSet{};
@@ -1715,11 +1699,6 @@ namespace elemd
         storageWriteDescriptorSet.pBufferInfo = &descriptorStorageBufferInfo;
         storageWriteDescriptorSet.pTexelBufferView = nullptr;
 
-
-
-
-
-        
         std::vector<VkDescriptorImageInfo> descriptorImageInfos;
         //[images.size()];
 
@@ -1732,7 +1711,7 @@ namespace elemd
             descriptorImageInfos.push_back(descriptorImageInfo);
         }
         else
-        {        
+        {
             for (uint32_t i = 0; i < images.size(); ++i)
             {
                 VkDescriptorImageInfo descriptorImageInfo{};
@@ -1771,16 +1750,13 @@ namespace elemd
         samplerWriteDescriptorSet.pBufferInfo = nullptr;
         samplerWriteDescriptorSet.pTexelBufferView = nullptr;
 
-
-        std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
-            ///uniformWriteDescriptorSet, 
-            storageWriteDescriptorSet,
-            samplerWriteDescriptorSet
-        };
+        std::vector<VkWriteDescriptorSet> writeDescriptorSets = {/// uniformWriteDescriptorSet,
+                                                                 storageWriteDescriptorSet,
+                                                                 samplerWriteDescriptorSet};
 
         vkUpdateDescriptorSets(VulkanSharedInfo::getInstance()->device,
-                               (uint32_t)writeDescriptorSets.size(),
-                               writeDescriptorSets.data(), 0, nullptr);
+                               (uint32_t)writeDescriptorSets.size(), writeDescriptorSets.data(), 0,
+                               nullptr);
     }
 
     /*
@@ -1799,9 +1775,9 @@ namespace elemd
     */
 
     void ContextImplVulkan::update_storage()
-    {            
+    {
         VkDeviceSize bufferSize =
-                std::min(storage.size() * sizeof(uniform_rect), UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE);
+            std::min(storage.size() * sizeof(uniform_rect), UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE);
 
         void* rawData;
         vkMapMemory(VulkanSharedInfo::getInstance()->device, storageBufferDeviceMemory, 0,
@@ -1811,5 +1787,4 @@ namespace elemd
         vkUnmapMemory(VulkanSharedInfo::getInstance()->device, storageBufferDeviceMemory);
     }
 
-
-} // namespace elemd 
+} // namespace elemd
