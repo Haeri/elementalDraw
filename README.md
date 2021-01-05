@@ -36,28 +36,29 @@ cd ElementalDraw
 ./scripts/generate_project_mac.sh
 ```
 
+## Dependencies
+Dependencies will be automatically managed through vcpkg if this repo is cloned with the `--recursive` flag.
+- [glfw3](https://www.glfw.org/)
+- [glslang](https://github.com/KhronosGroup/glslang)
+- [stb](https://github.com/nothings/stb)
+- [freetype](https://www.freetype.org/)
+
+
 ## Simple API
+Simple API across all platforms.
 
 ![preview](./docs/preview.png)
 
 ```cpp
 int main(void)
 {  
-    // configure and create window
-    elemd::WindowConfig winc = elemd::WindowConfig{"Hello World", 310, 240};
-    elemd::Window* win = elemd::Window::create(winc);
+    // create window and context
+    elemd::Window* win = elemd::Window::create({"Hello World", 310, 240});
     elemd::Context* ctx = win->create_context();
 
     // load image
     elemd::image* logo = elemd::image::create("./res/logo.png");
-    ctx->_tmp_register_image(logo);
 
-    // load font
-    elemd::font* monserat = elemd::font::create("./res/font/Montserrat-Light.ttf");
-    ctx->_tmp_register_font(monserat);
-
-
-    ctx->_tmp_prepare();
     ctx->set_clear_color(elemd::color("#e5e9f0"));
 
     // main loop
@@ -66,7 +67,6 @@ int main(void)
         win->poll_events();
 
         // Text
-        ctx->set_font(monserat);
         ctx->set_fill_color(elemd::color("#2e3441"));
         ctx->set_font_size(30);
         ctx->draw_text(55, 60, "elemental UI");        
@@ -85,12 +85,7 @@ int main(void)
 
         ctx->draw_frame();
     }
-
-    // Cleanup
-    monserat->destroy();
-    bg->destroy();
-    win->destroy();
-
+    
     return 0;
 }
 ```
