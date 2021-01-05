@@ -16,6 +16,10 @@ if "%1" == "-static" (
 	xcopy ".\build\examples\hello_world\res" ".\samples\hello_world\res" /I/E
 	xcopy ".\build\examples\hello_world\Release\hello-world.exe" ".\samples\hello_world\"
 
+	:: Overview
+	xcopy ".\build\examples\overview\res" ".\samples\overview\res" /I/E
+	xcopy ".\build\examples\overview\Release\overview.exe" ".\samples\overview\"
+
 	:: Game Of Life
 	xcopy ".\build\examples\game_of_life\Release\game-of-life.exe" ".\samples\game_of_life\"
 

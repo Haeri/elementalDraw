@@ -7078,7 +7078,7 @@ namespace elemd
         "       gl_Position = vec4(verts[gl_VertexID].xy*vec2(1.0, -1.0), 0.0, 1.0);\n"
         "       uv_varying = default_uvs[gl_VertexID];\n"
         "       uv_tex_varying = uvs[gl_VertexID];\n"
-        "};\n";
+        "}\n";
     
 } // namespace elemd
 
