@@ -1,4 +1,4 @@
-set(PROJECT_NAME runtime)
+set(PROJECT_NAME window-app-runtime)
 project(${PROJECT_NAME})
 
 file(GLOB_RECURSE SOURCE_FILES

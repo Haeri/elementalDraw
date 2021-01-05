@@ -56,7 +56,6 @@ else()
     add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
 endif()
 
-
 set_target_properties(${PROJECT_NAME} PROPERTIES 
     SOVERSION 0
     VERSION 0.1.0
@@ -66,28 +65,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 	$<INSTALL_INTERFACE:include>
 )
-
-if(APPLE)
-    set(CONVERTER_POSTFIX "mac.sh")
-    set(SHARED_LIB_NAME "lib${PROJECT_NAME}.dylib")
-elseif(WIN32) 
-    set(CONVERTER_POSTFIX "win.bat")
-    set(SHARED_LIB_NAME "${PROJECT_NAME}.dll")
-else()
-    set(CONVERTER_POSTFIX "linux.sh")
-    set(SHARED_LIB_NAME "lib${PROJECT_NAME}.so")
-endif()
-
-
-#find_program(GLSLANGVALIDATOR_EXECUTABLE NAMES glslangValidator PATHS ${CMAKE_SOURCE_DIR}/external/vcpkg/installed/tools/)
-
-#add_custom_command(
-#    TARGET ${PROJECT_NAME}
-#    PRE_BUILD
-#    COMMAND ${GLSLANGVALIDATOR_EXECUTABLE} -V ${CMAKE_SOURCE_DIR}/data/shader/rounded_rect.frag -o ${CMAKE_SOURCE_DIR}/data/shader/rounded_rect.frag.spv
-#    COMMAND ${GLSLANGVALIDATOR_EXECUTABLE} -V ${CMAKE_SOURCE_DIR}/data/shader/rounded_rect.vert -o ${CMAKE_SOURCE_DIR}/data/shader/rounded_rect.vert.spv
-#)
-
 
 message("ELEMD_RENDERING_BACKEND: " ${ELEMD_RENDERING_BACKEND_UPPER})
 message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
@@ -111,36 +88,52 @@ target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
 
 # ---------------- EXAMPLES ---------------------#
 
-if (ELEMD_BUILD_EXAMPLES)
-    add_subdirectory(examples/runtime)
-    add_subdirectory(examples/window_app)
-    add_subdirectory(examples/brick_breaker)
-    add_subdirectory(examples/painter)
-    add_subdirectory(examples/hello_world)
-    add_subdirectory(examples/game_of_life)
+if(APPLE)
+    set(CONVERTER_POSTFIX "mac.sh")
+    set(SHARED_LIB_NAME "lib${PROJECT_NAME}.dylib")
+elseif(WIN32) 
+    set(CONVERTER_POSTFIX "win.bat")
+    set(SHARED_LIB_NAME "${PROJECT_NAME}.dll")
+else()
+    set(CONVERTER_POSTFIX "linux.sh")
+    set(SHARED_LIB_NAME "lib${PROJECT_NAME}.so")
+endif()
 
-    set_target_properties(runtime PROPERTIES FOLDER examples)
-    set_target_properties(window-app PROPERTIES FOLDER examples)
+if (ELEMD_BUILD_EXAMPLES)
+    add_subdirectory(examples/brick_breaker)
+    add_subdirectory(examples/game_of_life)
+    add_subdirectory(examples/hello_world)
+    add_subdirectory(examples/overview)
+    add_subdirectory(examples/painter)
+    add_subdirectory(examples/window_app)
+    add_subdirectory(examples/window_app_runtime)
+
     set_target_properties(brick-breaker PROPERTIES FOLDER examples)
-    set_target_properties(painter PROPERTIES FOLDER examples)
-    set_target_properties(hello-world PROPERTIES FOLDER examples)
     set_target_properties(game-of-life PROPERTIES FOLDER examples)
+    set_target_properties(hello-world PROPERTIES FOLDER examples)
+    set_target_properties(overview PROPERTIES FOLDER examples)
+    set_target_properties(painter PROPERTIES FOLDER examples)
+    set_target_properties(window-app PROPERTIES FOLDER examples)
+    set_target_properties(window-app-runtime PROPERTIES FOLDER examples)
 
   if (BUILD_SHARED_LIBS)
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
-        DEPENDS runtime painter brick_breaker
+        DEPENDS window-app-runtime painter brick-breaker hello-world overview game-of-life
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/brick_breaker/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/hello_world/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/game_of_life/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/hello_world/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/overview/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/window_app_runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMENT "Copy library"
     )
   endif()
 endif()
 
 
+
+# ---------------- EXPORT ---------------------#
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
