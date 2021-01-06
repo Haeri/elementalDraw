@@ -1,5 +1,6 @@
 #include "context_impl_vulkan.hpp"
 
+#include <msdfgen/msdfgen-ext.h>
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <codecvt> // for std::codecvt_utf8
@@ -310,10 +311,11 @@ namespace elemd
         y += impl->_window->_y_offset;
 
         float initialX = x;
-        float scale = (float)_font_size / LOADED_HEIGHT;
+        float scale = (float)_font_size / _font->get_em_size();
         std::map<unsigned int, character> characters = _font->get_characters();
         imageImplVulkan* img = (imageImplVulkan*)_font->get_image();
 
+        int index = 1;
         for (char32_t& token : text)
         {
             character ch = characters[0];
@@ -330,7 +332,7 @@ namespace elemd
             }
 
             float xpos = x + ch.bearing.x() * scale;
-            float ypos = y + (LOADED_HEIGHT - ch.bearing.y()) * scale;
+            float ypos = y + (_font->get_em_size() - ch.bearing.y()) * scale;
 
             float width = ch.size.x() * scale;
             float height = ch.size.y() * scale;
@@ -361,7 +363,13 @@ namespace elemd
                 {1, 0, 0},                                    // is_msdf
             });
 
-            x += ch.advance * scale;
+            if (index < text.length())
+            {
+                double kern = 0;         
+                msdfgen::getKerning(kern, _font->_font_handle, (uint8_t)token, (uint8_t)text[index]);
+                x += (ch.advance + kern) * scale;
+                ++index;
+            }
         }
     }
 

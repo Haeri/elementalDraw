@@ -26,6 +26,11 @@ namespace elemd
         return _line_height;
     }
 
+    float font::get_em_size()
+    {
+        return _em_size;
+    }
+
     void font::destroy()
     {
         delete this;
@@ -82,7 +87,7 @@ namespace elemd
         float width = 0;
         float height = 0;
 
-        float scale = (float)font_size / LOADED_HEIGHT;
+        float scale = (float)font_size / _em_size;
         
 
         for (auto& token : text)
@@ -107,7 +112,7 @@ namespace elemd
             }
 
             float xpos = x + ch.bearing.x() * scale;
-            float ypos = y + (LOADED_HEIGHT - ch.bearing.y()) * scale;
+            float ypos = y + (_em_size - ch.bearing.y()) * scale;
 
             float text_width = ch.size.x() * scale;
             float text_height = ch.size.y() * scale;
@@ -150,6 +155,12 @@ namespace elemd
             out.append(1, static_cast<char>(0x80 | (unicode & 0x3f)));
         }
         return out;
+    }
+
+    font::~font()
+    {
+        msdfgen::destroyFont(_font_handle);
+        //FT_Done_Face(face);
     }
 
     void font::load_from_file(std::string file_path) 
@@ -199,38 +210,33 @@ namespace elemd
             exit(1);
         }
 
-        // FT_Set_Pixel_Sizes(face, 32, 32);
-        //_line_height = (float)(1 + (face->size->metrics.height >> 6));
 
-        // quick and dirty max texture size estimate
+        _font_handle = msdfgen::adoptFreetypeFont(face);
+        msdfgen::FontMetrics font_metrics;
+        msdfgen::getFontMetrics(font_metrics, _font_handle);
+        
+        _line_height = font_metrics.lineHeight;
+        _em_size = font_metrics.emSize;
+        
 
-        unsigned int padding = 0;
-        //(int)(LOADED_HEIGHT / 3.0f);
-        unsigned int max_dim =
-            (int)((1 + (face->size->metrics.height >> 6)) * ceil(sqrt(face->num_glyphs)));
-
-        max_dim = 1024;
-
+        unsigned int max_dim = (int)(1 + _em_size) * ceil(sqrt(face->num_glyphs));
         unsigned int tex_width = 1;
         while (tex_width < max_dim)
             tex_width <<= 1;
         unsigned int tex_height = tex_width;
         unsigned int buffer_size = tex_width * tex_height * 4;
 
-        // render glyphs to atlas
-
-        // char* pixels = (char*)calloc(tex_width * tex_height, 1);
+        
 
         uint8_t* pixels = new uint8_t[buffer_size]{0};
-        unsigned int pen_x = padding, pen_y = padding;
+        unsigned int pen_x = 0;
+        unsigned int pen_y = 0;
 
         FT_ULong charcode;
         FT_UInt gindex;
 
-        msdfgen::FontHandle* font_handle = msdfgen::adoptFreetypeFont(face);
-        msdfgen::FontMetrics font_metrics;
-        msdfgen::getFontMetrics(font_metrics, font_handle);
-        _line_height = font_metrics.lineHeight;
+
+        float border_width = 4;
 
         int max_height = 0;
 
@@ -241,17 +247,16 @@ namespace elemd
         int i = 0;
         while (gindex != 0)
         {
-            if (i > 128)
-                break;
+            //if (i > 128)
+            //    break;
 
-            int w = 0;
-            int h = 0;
+            float glyph_width = 0;
+            float glyph_height = 0;
             double advance = 0;
-            float border_width = 4;
 
 
 
-            msdfgen::loadGlyph(shape, font_handle, charcode, &advance);
+            msdfgen::loadGlyph(shape, _font_handle, charcode, &advance);
 
             if (shape.validate() && shape.contours.size() > 0)
             {
@@ -261,25 +266,25 @@ namespace elemd
 
                 bounds = shape.getBounds(border_width);
 
-                w = ceil(bounds.r - bounds.l);
-                h = ceil(bounds.t - bounds.b);
+                glyph_width = ceil(bounds.r - bounds.l);
+                glyph_height = ceil(bounds.t - bounds.b);
 
-                if (max_height < h)
-                    max_height = h;
+                if (max_height < glyph_height)
+                    max_height = glyph_height;
 
-                //std::cout << w << " " << h << std::endl;
 
                 msdfgen::edgeColoringSimple(shape, 3.0);
-                msdfgen::Bitmap<float, 3> msdf(w, h);
+                msdfgen::Bitmap<float, 3> msdf(glyph_width, glyph_height);
                 msdfgen::generateMSDF(msdf, shape, border_width, 1.0,
                                       msdfgen::Vector2(-bounds.l, -bounds.b));
 
                 // msdfgen::savePng(msdf, (name + "_msdf_" + std::to_string(i) + ".png").c_str());
 
-                if (pen_x + msdf.width() + padding >= tex_width)
+                if (pen_x + msdf.width() >= tex_width)
                 {
-                    pen_x = padding;
-                    pen_y += max_height + padding;
+                    pen_x = 0;
+                    pen_y += max_height;
+                    max_height = 0;
                 }
 
                 //std::cout << pen_x << " " << pen_y << std::endl;
@@ -311,9 +316,10 @@ namespace elemd
             // this is stuff you'd need when rendering individual glyphs out of the atlas
 
             character character = {
-                vec2((float)(w), (float)(h)),
-                                   vec2((float)(bounds.l), (float)(bounds.t)),
-                vec2((float)(pen_x), (float)(pen_y)), ((int)advance)
+                vec2(glyph_width, glyph_height),
+                vec2((float)(bounds.l), (float)(bounds.t)),
+                vec2((float)(pen_x), (float)(pen_y)), 
+                (float)advance
             };
 
             std::cout << font::UnicodeToUTF8(charcode) << "\tsize:" << character.size << "\tbearing:" << character.bearing
@@ -322,16 +328,15 @@ namespace elemd
             
             _characters[charcode] = character;
 
-            pen_x += w;
+            pen_x += glyph_width;
 
             // Next
             charcode = FT_Get_Next_Char(face, charcode, &gindex);
             ++i;
         }
 
-        msdfgen::destroyFont(font_handle);
-        FT_Done_Face(face);
-        FT_Done_FreeType(ft_library);
+
+//        FT_Done_FreeType(ft_library);
 
 
         _texture_atlas = image::create(tex_width, tex_height, 4, pixels);
@@ -352,7 +357,7 @@ namespace elemd
         float x = 0;
         float y = 0;
 
-        float scale = (float)font_size / LOADED_HEIGHT;
+        float scale = (float)font_size / _em_size;
 
         for (auto& token : text)
         {
@@ -371,7 +376,7 @@ namespace elemd
             }
             
             float xpos = x + ch.bearing.x() * scale;
-            float ypos = y + (LOADED_HEIGHT - ch.bearing.y()) * scale;
+            float ypos = y + (_em_size - ch.bearing.y()) * scale;
 
             float text_width = ch.size.x() * scale;
             float text_height = ch.size.y() * scale;

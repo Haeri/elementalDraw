@@ -90,6 +90,10 @@ find_package(msdfgen CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE msdfgen::msdfgen msdfgen::msdfgen-ext)
 
 
+# converter
+add_subdirectory(converter)
+
+
 
 # ---------------- EXAMPLES ---------------------#
 

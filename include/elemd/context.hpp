@@ -44,6 +44,7 @@ namespace elemd
 
         // TODO: To implement
         void draw_pixel(float x, float y);
+        void draw_char(float x, float y, float width, float height, unsigned int character);
         void draw_text(float x, float y, std::string text);
         void draw_text(float x, float y, std::u32string text);
         void draw_image(float x, float y, float width, float height, image* image, bool tint = false);
