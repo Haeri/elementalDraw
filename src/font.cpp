@@ -210,13 +210,14 @@ namespace elemd
             exit(1);
         }
 
+        float scalar = 2.0f;
 
         _font_handle = msdfgen::adoptFreetypeFont(face);
         msdfgen::FontMetrics font_metrics;
         msdfgen::getFontMetrics(font_metrics, _font_handle);
         
-        _line_height = font_metrics.lineHeight;
-        _em_size = font_metrics.emSize;
+        _line_height = font_metrics.lineHeight * scalar; 
+        _em_size = font_metrics.emSize * scalar;
         
 
         unsigned int max_dim = (int)(1 + _em_size) * ceil(sqrt(face->num_glyphs));
@@ -254,20 +255,19 @@ namespace elemd
             float glyph_height = 0;
             double advance = 0;
 
-
-
             msdfgen::loadGlyph(shape, _font_handle, charcode, &advance);
 
             if (shape.validate() && shape.contours.size() > 0)
             {
 
                 shape.normalize();
+                shape.orientContours();
                 shape.inverseYAxis = true;
 
                 bounds = shape.getBounds(border_width);
 
-                glyph_width = ceil(bounds.r - bounds.l);
-                glyph_height = ceil(bounds.t - bounds.b);
+                glyph_width = ceil(bounds.r - bounds.l) * scalar;               
+                glyph_height = ceil(bounds.t - bounds.b) * scalar;
 
                 if (max_height < glyph_height)
                     max_height = glyph_height;
@@ -275,7 +275,7 @@ namespace elemd
 
                 msdfgen::edgeColoringSimple(shape, 3.0);
                 msdfgen::Bitmap<float, 3> msdf(glyph_width, glyph_height);
-                msdfgen::generateMSDF(msdf, shape, border_width, 1.0,
+                msdfgen::generateMSDF(msdf, shape, border_width, scalar,
                                       msdfgen::Vector2(-bounds.l, -bounds.b));
 
                 // msdfgen::savePng(msdf, (name + "_msdf_" + std::to_string(i) + ".png").c_str());
@@ -319,11 +319,11 @@ namespace elemd
                 vec2(glyph_width, glyph_height),
                 vec2((float)(bounds.l), (float)(bounds.t)),
                 vec2((float)(pen_x), (float)(pen_y)), 
-                (float)advance
+                (float)(advance * scalar)
             };
 
-            std::cout << font::UnicodeToUTF8(charcode) << "\tsize:" << character.size << "\tbearing:" << character.bearing
-                      << "\torigin:" << character.origin << "\tadvance:" << character.advance
+            std::cout << font::UnicodeToUTF8(charcode) << "\tsize:" << character.size << "\tbearing:" << character.bearing << "\ttorigin:" << character.origin
+                      << "\tadvance:" << character.advance
                       << std::endl;
             
             _characters[charcode] = character;
