@@ -358,7 +358,7 @@ namespace elemd
                 {vec2(originx, originy), vec2(cropx, cropy)}, // uvs
                 {0, 0, 0, 0},                                 // line_width
                 0,                                            // shadow_size
-                {1, 0, 0},                                    // is_msdf
+                {0, 0, 0},                                    // is_msdf
             });
 
             x += ch.advance * scale;

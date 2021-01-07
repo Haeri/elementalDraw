@@ -177,7 +177,7 @@ namespace elemd
             std::cerr << "Error: during FreeType initialization" << std::endl;
             exit(1);
         }
- 
+
         ft_error = FT_New_Memory_Face(ft_library, data, (FT_Long)size, 0, &face);
         if (ft_error == FT_Err_Unknown_File_Format)
         {
@@ -189,13 +189,13 @@ namespace elemd
             std::cerr << "Error: font not found!" << std::endl;
             exit(1);
         }
-        
+
         FT_Set_Pixel_Sizes(face, 0, LOADED_HEIGHT);
-        _line_height = (float)(1 + (face->size->metrics.height >> 6));
+        _line_height = (float)(face->size->metrics.height >> 6);
 
         // quick and dirty max texture size estimate
 
-        unsigned int padding = (int)(LOADED_HEIGHT/3.0f);
+        unsigned int padding = 4;
         unsigned int max_dim =
             (int)((1 + (face->size->metrics.height >> 6)) * ceil(sqrt(face->num_glyphs)));
 
@@ -205,21 +205,22 @@ namespace elemd
         unsigned int tex_height = tex_width;
         unsigned int buffer_size = tex_width * tex_height * 4;
 
-
-        // render glyphs to atlas
-
-        char* pixels = (char*)calloc(tex_width * tex_height, 1);
+        unsigned char* pixels = (unsigned char*)calloc(buffer_size, sizeof(unsigned char));
         unsigned int pen_x = padding, pen_y = padding;
-
 
         FT_ULong charcode;
         FT_UInt gindex;
 
         charcode = FT_Get_First_Char(face, &gindex);
-        int i = 0;
+
+        FT_Int32 flags = FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT;
+        if (FT_HAS_COLOR(face))
+            flags |= FT_LOAD_COLOR;
+
         while (gindex != 0)
         {
-            FT_Load_Char(face, charcode, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT);
+
+            FT_Load_Char(face, charcode, flags);
             FT_Bitmap* bmp = &face->glyph->bitmap;
 
             if (pen_x + bmp->width + padding >= tex_width)
@@ -228,20 +229,46 @@ namespace elemd
                 pen_y += ((face->size->metrics.height >> 6) + 1) + padding;
             }
 
-            for (unsigned int row = 0; row < bmp->rows; ++row)
+            if (bmp->pixel_mode == FT_PIXEL_MODE_BGRA)
             {
-                for (unsigned int col = 0; col < bmp->width; ++col)
+                for (unsigned int row = 0; row < bmp->rows; ++row)
                 {
-                    int x = pen_x + col;
                     int y = pen_y + row;
-                    pixels[y * tex_width + x] = bmp->buffer[row * bmp->pitch + col];
+                    for (unsigned int col = 0; col < bmp->width; ++col)
+                    {
+                        int x = pen_x + col;
+
+                        pixels[(y * tex_width + x) * 4 + 0] =
+                            bmp->buffer[row * bmp->pitch + col * 4 + 2];
+                        pixels[(y * tex_width + x) * 4 + 1] =
+                            bmp->buffer[row * bmp->pitch + col * 4 + 1];
+                        pixels[(y * tex_width + x) * 4 + 2] =
+                            bmp->buffer[row * bmp->pitch + col * 4 + 0];
+                        pixels[(y * tex_width + x) * 4 + 3] =
+                            bmp->buffer[row * bmp->pitch + col * 4 + 3];
+                    }
+                }
+            }
+            else
+            {
+                for (unsigned int row = 0; row < bmp->rows; ++row)
+                {
+                    int y = pen_y + row;
+                    for (unsigned int col = 0; col < bmp->width; ++col)
+                    {
+                        int x = pen_x + col;
+
+                        unsigned char p = bmp->buffer[row * bmp->pitch + col];
+                        pixels[(y * tex_width + x) * 4 + 0] = p;
+                        pixels[(y * tex_width + x) * 4 + 1] = p;
+                        pixels[(y * tex_width + x) * 4 + 2] = p;
+                        pixels[(y * tex_width + x) * 4 + 3] = p;
+                    }
                 }
             }
 
-            // this is stuff you'd need when rendering individual glyphs out of the atlas
-
             character character = {
-                vec2((float)(face->glyph->bitmap.width), (float)(face->glyph->bitmap.rows)),
+                vec2((float)(face->glyph->bitmap.width), (float)(bmp->rows)),
                 vec2((float)(face->glyph->bitmap_left), (float)(face->glyph->bitmap_top)),
                 vec2((float)(pen_x), (float)(pen_y)), (int)(face->glyph->advance.x >> 6)};
 
@@ -254,27 +281,12 @@ namespace elemd
 
             // Next
             charcode = FT_Get_Next_Char(face, charcode, &gindex);
-            ++i;
         }
 
         FT_Done_Face(face);
         FT_Done_FreeType(ft_library);
 
-        // write png
-
-        uint8_t* png_data = new uint8_t[buffer_size];
-        for (unsigned int i = 0; i < (tex_width * tex_height); ++i)
-        {
-            png_data[i * 4 + 0] = 0xff;
-            png_data[i * 4 + 1] = 0xff;
-            png_data[i * 4 + 2] = 0xff;
-            png_data[i * 4 + 3] = pixels[i];
-        }
-
-        _texture_atlas = image::create(tex_width, tex_height, 4, png_data);
-
-        //free(png_data);
-        free(pixels);
+        _texture_atlas = image::create(tex_width, tex_height, 4, pixels);
     }
 
     int font::fit_one_substring(std::string text, int width, int font_size)
