@@ -66,7 +66,7 @@ int main(void)
     {
         win->poll_events();
 
-        // Text
+        // text
         ctx->set_fill_color(elemd::color("#2e3441"));
         ctx->set_font_size(30);
         ctx->draw_text(55, 60, "elemental UI");        

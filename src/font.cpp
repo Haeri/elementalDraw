@@ -200,8 +200,9 @@ namespace elemd
             (int)((1 + (face->size->metrics.height >> 6)) * ceil(sqrt(face->num_glyphs)));
 
         unsigned int tex_width = 1;
-        while (tex_width < max_dim)
+        while (tex_width < max_dim && tex_width < 8192)
             tex_width <<= 1;
+
         unsigned int tex_height = tex_width;
         unsigned int buffer_size = tex_width * tex_height * 4;
 

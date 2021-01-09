@@ -368,37 +368,7 @@ namespace elemd
 
     void Context::draw_image(float x, float y, float width, float height, image* image, bool tint)
     {
-        ContextImplOpengl* impl = getImpl(this);
-        imageImplOpengl* img = (imageImplOpengl*)image;
-        
-        x += impl->_window->_x_offset;
-        y += impl->_window->_y_offset;
-
-        x *= impl->_window->_x_scale * impl->_window->_dpi_scale;
-        y *= impl->_window->_y_scale * impl->_window->_dpi_scale;
-
-        width *= impl->_window->_x_scale * impl->_window->_dpi_scale;
-        height *= impl->_window->_y_scale * impl->_window->_dpi_scale;
-
-        float xf = (x / _width);
-        float yf = (y / _height);
-        float widthf = (width / _width);
-        float heightf = (height / _height);
-
-        impl->storage.push_back({
-            _fill_color,                                                            // color
-            {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
-             vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
-             vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
-            {0, 0, 0, 0},                                                           // border_radius
-            (float)img->_sampler_index,                                             // sampler_index
-            (float)tint,                                                            // use_tint
-            vec2(width, height),                                                    // resolution
-            {vec2(0), vec2(1)},                                                     // uvs
-            {0, 0, 0, 0},                                                           // line_width
-            0,                                                                      // shadow_size
-            {0, 0, 0},                                                              // is_msdf
-        });
+        draw_rounded_image(x, y, width, height, image, 0, 0, 0, 0, tint);
     }
 
     void Context::draw_image(float x, float y, float width, float height, image* image, float src_x,
@@ -450,7 +420,7 @@ namespace elemd
         float originx = src_x / img->get_width();
         float originy = src_y / img->get_height();
         float cropx = originx + src_width / img->get_width();
-        float cropy = originy + src_width / img->get_height();
+        float cropy = originy + src_height / img->get_height();
 
         impl->storage.push_back({
             _fill_color,                                                            // color
