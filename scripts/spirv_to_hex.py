@@ -6,8 +6,8 @@ import re
 
 frag_file = '../data/shader/rounded_rect.frag';
 vert_file = '../data/shader/rounded_rect.vert';
-ogl_frag_file = '../data/shader/ogl_rounded_rect.frag';
-ogl_vert_file = '../data/shader/ogl_rounded_rect.vert';
+ogl_frag_file = '../data/shader/gl/rounded_rect.frag';
+ogl_vert_file = '../data/shader/gl/rounded_rect.vert';
 frag_file_bin = frag_file + '.spv';
 vert_file_bin = vert_file + '.spv';
 

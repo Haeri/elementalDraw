@@ -101,7 +101,7 @@ namespace elemd
             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
              vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
-            {nwf, nef, sef, swf},                                                   // border_radius
+            {nef, sef, nwf, swf},                                                   // border_radius
             -1,                                                                     // sampler_index
             0,                                                                      // use_tint
             vec2(width, height),                                                    // resolution
@@ -234,7 +234,7 @@ namespace elemd
             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
              vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
-            {nwf, nef, sef, swf},                                                   // border_radius
+            {nef, sef, nwf, swf},                                                   // border_radius
             -1,                                                                     // sampler_index
             0,                                                                      // use_tint
             vec2(width, height),                                                    // resolution
@@ -427,7 +427,7 @@ namespace elemd
             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
              vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
-            {nwf, nef, sef, swf},                                                   // border_radius
+            {nef, sef, nwf, swf},                                                   // border_radius
             (float)img->_sampler_index,                                             // sampler_index
             (float)tint,                                                            // use_tint
             vec2(width, height),                                                    // resolution
@@ -507,7 +507,7 @@ namespace elemd
             {vec2(xf, yf) * 2.0f - vec2(1), vec2(xf + widthf, yf) * 2.0f - vec2(1), //
              vec2(xf, yf + heightf) * 2.0f - vec2(1),                               //
              vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
-            {nwf, nef, sef, swf},                                                   // border_radius
+            {nef, sef, nwf, swf},                                                   // border_radius
             -1,                                                                     // sampler_index
             0,                                                                      // use_tint
             vec2(width, height),                                                    // resolution

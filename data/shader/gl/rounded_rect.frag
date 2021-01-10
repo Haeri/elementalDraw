@@ -44,7 +44,7 @@ void main()
 	int index = int(ubo.payload[instance_index].sampler_index1_use_tint1_resolution2.x);
 	int use_tint = int(ubo.payload[instance_index].sampler_index1_use_tint1_resolution2.y);
 	vec2 resolution = ubo.payload[instance_index].sampler_index1_use_tint1_resolution2.zw;
-	float shadow_size = ubo.payload[instance_index].shadow_size1_is_msdf1.x * 2.;
+	float shadow_size = pow(ubo.payload[instance_index].shadow_size1_is_msdf1.x, 2.);
 	int is_msdf = int(ubo.payload[instance_index].shadow_size1_is_msdf1.y);
 
 	float dominant_axis = (resolution.x/resolution.y > 0.) ? resolution.x : resolution.y;
@@ -54,7 +54,7 @@ void main()
 	float shadow_size_norm = shadow_size / dominant_axis;
 
 	float dist = 1.-(sdRoundedBox((uv_varying-0.5)*2.*(resolution_norm+shadow_size_norm), resolution_norm, border_radius_norm)-shadow_size_norm);
-	float bias = fwidth(dist);
+	float bias = min(fwidth(dist), line_width);
 	float shape = smoothstep(1., 1.+bias, dist);
 
 	if(shadow_size > 0.)
@@ -70,7 +70,7 @@ void main()
 	float alpha = shape;
 
 
-	if(line_width != 0)
+	if(line_width > 0.)
 	{
 		outColor = vec4(color.rgb, alpha);
 	}
