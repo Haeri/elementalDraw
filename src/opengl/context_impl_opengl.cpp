@@ -160,9 +160,6 @@ namespace elemd
         });
     }
 
-    void Context::stroke_ellipse(float x, float y, float width, float height)
-    {
-    }
 
     // VK_PRIMITIVE_TOPOLOGY_LINE_STRIP
     void Context::stroke_polygon(float x, float y)
@@ -281,10 +278,7 @@ namespace elemd
         });
     }
 
-    void Context::fill_ellipse(float x, float y, float width, float height)
-    {
-    }
-
+    
     void Context::fill_polygon(float x, float y)
     {
     }
@@ -358,7 +352,7 @@ namespace elemd
                 {vec2(originx, originy), vec2(cropx, cropy)}, // uvs
                 {0, 0, 0, 0},                                 // line_width
                 0,                                            // shadow_size
-                {1, 0, 0},                                    // is_msdf
+                {0, 0, 0},                                    // is_msdf
             });
 
             x += ch.advance * scale;
@@ -563,6 +557,39 @@ namespace elemd
 
     }
 
+    void Context::set_rect_mask(float x, float y, float width, float height)
+    {
+        ContextImplOpengl* impl = getImpl(this);
+
+        impl->storage_instance_offset = (int)impl->storage.size() - 1;
+        impl->scissor_primitives.push_back(
+            {x * impl->_window->_x_scale * impl->_window->_dpi_scale,
+             impl->_window->get_height() - y * impl->_window->_y_scale * impl->_window->_dpi_scale -
+                 height * impl->_window->_y_scale * impl->_window->_dpi_scale,
+             width * impl->_window->_x_scale * impl->_window->_dpi_scale,
+             height * impl->_window->_y_scale * impl->_window->_dpi_scale
+            });
+        impl->draw_call_indices.push_back({impl->storage_instance_offset,
+                                           (int)impl->scissor_primitives.size() - 1,
+                                             ContextImplOpengl::SCISSOR});
+
+
+        impl->draw_call_indices.push_back(
+            {impl->storage_instance_offset, -1, ContextImplOpengl::COLOR});
+    }
+
+    void Context::remove_rect_mask()
+    {
+        ContextImplOpengl* impl = getImpl(this);
+        impl->storage_instance_offset = (int)impl->storage.size() - 1;
+        impl->draw_call_indices.push_back({impl->storage_instance_offset,
+                                           (int)impl->scissor_primitives.size() - 1,
+                                           ContextImplOpengl::SCISSOR_CLEAR});
+
+        impl->draw_call_indices.push_back(
+            {impl->storage_instance_offset, -1, ContextImplOpengl::COLOR});
+    }
+
     void Context::clear()
     {
     }
@@ -574,7 +601,8 @@ namespace elemd
     void Context::draw_frame()
     {
         ContextImplOpengl* impl = getImpl(this);
-        if (impl->rendering || impl->headless || impl->storage.empty()) return;
+        if (impl->rendering || impl->headless || impl->storage.empty())
+            return;
         impl->rendering = true;
 
         bool rerecord = false;
@@ -583,31 +611,68 @@ namespace elemd
             impl->last_uniform_cnt = (int)impl->storage.size();
             rerecord = true;
         }
-        
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(impl->shaderProgram);
-        //impl->update_storage_buffer();
+        // impl->update_storage_buffer();
         impl->update_uniform_buffer();
         if (rerecord || impl->dirty)
         {
-        
+
             impl->dirty = false;
         }
-
 
         for (int i = 0; i < impl->images.size(); ++i)
         {
             impl->images[i]->bind(i);
-        }               
+        }
 
-        glBindVertexArray(impl->vertex_array_object); 
-        glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)impl->rect_indices.size(), GL_UNSIGNED_INT,
-                                0, (GLsizei)impl->storage.size());
+        // std::cout << "------------- DRAW CALL START ------------- \n";
+        for (int i = 0; i < impl->draw_call_indices.size(); ++i)
+        {
+            if (impl->draw_call_indices[i].type == ContextImplOpengl::draw_call_type::COLOR)
+            {
+                // std::cout << i + 1 << " CALL TYPE: COLOR\n";
+                int batch_length =
+                    ((int)(impl->storage.size())) - impl->draw_call_indices[i].instance_index;
+                if (impl->draw_call_indices.size() > i + 1)
+                {
+                    batch_length = impl->draw_call_indices[i + 1].instance_index -
+                                   impl->draw_call_indices[i].instance_index;
+                }
+                // std::cout << "\tSTART: " << impl->draw_call_indices[i].instance_index                  << " batch_length: " << batch_length << "\n";
+
+                glBindVertexArray(impl->vertex_array_object);                                
+                glUniform1i(impl->instance_offset_location, impl->draw_call_indices[i].instance_index);
+                glDrawElementsInstancedBaseInstance(
+                    GL_TRIANGLES, (GLsizei)impl->rect_indices.size(), GL_UNSIGNED_INT, 0,
+                    (GLsizei)batch_length, impl->draw_call_indices[i].instance_index);
+            }
+            else if (impl->draw_call_indices[i].type == ContextImplOpengl::draw_call_type::SCISSOR)
+            {
+                // std::cout << i + 1 << " CALL TYPE: SCISSOR\n";
+                ContextImplOpengl::scissor_primitive sp =
+                    impl->scissor_primitives[impl->draw_call_indices[i].scissor_index];
+                glEnable(GL_SCISSOR_TEST);
+                glScissor(sp.x, sp.y, sp.width, sp.height);
+            }
+            else if (impl->draw_call_indices[i].type ==
+                     ContextImplOpengl::draw_call_type::SCISSOR_CLEAR)
+            {
+                // //std::cout << i + 1 << " CALL TYPE: SCISSOR_CLEAR\n";
+                glDisable(GL_SCISSOR_TEST);
+            }
+        }
+        //std::cout << "------------- DRAW CALL END ------------- \n";
 
         glfwSwapBuffers(impl->_window->getGLFWWindow());
 
         impl->storage.clear();
+        impl->draw_call_indices.clear();
+        impl->draw_call_indices.push_back({0, -1, ContextImplOpengl::draw_call_type::COLOR});
+        impl->scissor_primitives.clear();
+        impl->storage_instance_offset = 0;
         impl->rendering = false;
     }
 
@@ -710,6 +775,7 @@ namespace elemd
     {
         glViewport(0, 0, _width, _height);
         glEnable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
     }
 
@@ -786,8 +852,7 @@ namespace elemd
         glGenVertexArrays(1, &vertex_array_object);
         glGenBuffers(1, &vertex_buffer);
         glGenBuffers(1, &index_buffer);
-        // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then
-        // configure vertex attributes(s).
+ 
         glBindVertexArray(vertex_array_object);
 
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -802,17 +867,8 @@ namespace elemd
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), (void*)0);
         glEnableVertexAttribArray(0);
 
-        // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex
-        // attribute's bound vertex buffer object so afterwards we can safely unbind
+
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object
-        // IS stored in the VAO; keep the EBO bound.
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-        // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO,
-        // but this rarely happens. Modifying other VAOs requires a call to glBindVertexArray
-        // anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
         glBindVertexArray(0); 
     }
 
@@ -865,6 +921,8 @@ namespace elemd
             glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
             std::cout << "ERROR::SHADER::PROGRAM::GL_VALIDATE_STATUS\n" << infoLog << std::endl;
         }
+
+        instance_offset_location = glGetUniformLocation(shaderProgram, "instance_offset");
         
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);

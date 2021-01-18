@@ -2,7 +2,7 @@
 #define ELEMD_OPENGL_SHARED_INFO_HPP
 
 #define GLAD_GL_IMPLEMENTATION
-#include "./gl.h"
+#include "glad/glad.h"
 
 #include <string>
 

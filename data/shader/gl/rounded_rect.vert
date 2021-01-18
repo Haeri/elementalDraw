@@ -23,6 +23,7 @@ layout(std140) uniform UBO
 {
 	RoundedRectData payload[1]; // this is a meme
 } ubo;
+uniform int instance_offset;
 
 const vec2 default_uvs[4] = vec2[4](
 	vec2(0, 0),
@@ -33,21 +34,22 @@ const vec2 default_uvs[4] = vec2[4](
 
 void main()
 {
+	instance_index = gl_InstanceID + instance_offset;
+
 	vec2 verts[4] = vec2[4](
-		ubo.payload[gl_InstanceID].vertices[0].xy,
-		ubo.payload[gl_InstanceID].vertices[0].zw,
-		ubo.payload[gl_InstanceID].vertices[1].xy,
-		ubo.payload[gl_InstanceID].vertices[1].zw
+		ubo.payload[instance_index].vertices[0].xy,
+		ubo.payload[instance_index].vertices[0].zw,
+		ubo.payload[instance_index].vertices[1].xy,
+		ubo.payload[instance_index].vertices[1].zw
 	);
 
 	vec2 uvs[4] = vec2[4](
-		vec2(ubo.payload[gl_InstanceID].uvs.x, ubo.payload[gl_InstanceID].uvs.y),
-		vec2(ubo.payload[gl_InstanceID].uvs.z, ubo.payload[gl_InstanceID].uvs.y),
-		vec2(ubo.payload[gl_InstanceID].uvs.x, ubo.payload[gl_InstanceID].uvs.w),
-		vec2(ubo.payload[gl_InstanceID].uvs.z, ubo.payload[gl_InstanceID].uvs.w)
+		vec2(ubo.payload[instance_index].uvs.x, ubo.payload[instance_index].uvs.y),
+		vec2(ubo.payload[instance_index].uvs.z, ubo.payload[instance_index].uvs.y),
+		vec2(ubo.payload[instance_index].uvs.x, ubo.payload[instance_index].uvs.w),
+		vec2(ubo.payload[instance_index].uvs.z, ubo.payload[instance_index].uvs.w)
 	);
 
-	instance_index = gl_InstanceID;
 	gl_Position = vec4(verts[gl_VertexID].xy*vec2(1.0, -1.0), 0.0, 1.0);
 	uv_varying = default_uvs[gl_VertexID];
 	uv_tex_varying = uvs[gl_VertexID];

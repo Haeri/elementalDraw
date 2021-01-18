@@ -42,7 +42,7 @@ namespace elemd
     {
         // --------------- Load Vulkan ---------------
 
-        if (!gladLoadGL(glfwGetProcAddress))
+        if (!gladLoadGL())
         {
             std::cerr << "Could not load the OpenGL context" << std::endl;
             glfwTerminate();

@@ -21,15 +21,10 @@ namespace elemd
         // TODO: To implement
         void stroke_line(float x, float y);
         void stroke_rect(float x, float y, float width, float height);
-        // TODO: To implement
         void stroke_rounded_rect(float x, float y, float width, float height, float border_radius);
-        // TODO: To implement
         void stroke_rounded_rect(float x, float y, float width, float height, float radius_nw,
                                  float radius_ne, float radius_se, float radius_sw);
-        // TODO: To implement
-        void stroke_circle(float x, float y, float radius);
-        // TODO: To implement
-        void stroke_ellipse(float x, float y, float width, float height);
+        void stroke_circle(float x, float y, float radius);                
         // TODO: To implement
         void stroke_polygon(float x, float y);
 
@@ -38,7 +33,6 @@ namespace elemd
         void fill_rounded_rect(float x, float y, float width, float height, float radius_nw, float radius_ne,
                                float radius_se, float radius_sw);
         void fill_circle(float x, float y, float radius);
-        void fill_ellipse(float x, float y, float width, float height);
         // TODO: To implement
         void fill_polygon(float x, float y);
 
@@ -78,8 +72,12 @@ namespace elemd
         void add_layouer();
         // TODO: To implement
         void change_layer();
+
         // TODO: To implement
         void add_mask();
+
+        void set_rect_mask(float x, float y, float width, float height);
+        void remove_rect_mask();
 
         // TODO: To implement
         void clear();

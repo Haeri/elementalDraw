@@ -43,6 +43,27 @@ namespace elemd
             vec2 position;
         };
 
+        enum draw_call_type
+        {
+            COLOR,
+            SCISSOR,
+            SCISSOR_CLEAR,
+            TEXTURE_INCREMENT
+        };
+        struct draw_call_chain
+        {
+            int instance_index;
+            int scissor_index;
+            draw_call_type type;
+        };
+        struct scissor_primitive
+        {
+            float x;
+            float y;
+            float width;
+            float height;
+        };
+
         imageImplOpengl* dummy;
         std::vector<imageImplOpengl*> images;
 
@@ -52,6 +73,10 @@ namespace elemd
         std::vector<point_vertex> rect_vertices = {
             {vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}
         };
+
+        std::vector<scissor_primitive> scissor_primitives = {};
+        std::vector<draw_call_chain> draw_call_indices = {{0,-1, COLOR}};
+        int storage_instance_offset = 0;
 
         ///std::vector<uniform_rect> uniforms = {};
         std::vector<uniform_rect> storage = {};
@@ -68,6 +93,7 @@ namespace elemd
         
 
         int shaderProgram = -1;
+        int instance_offset_location = -1;
 
         GLuint vertex_array_object;
         GLuint vertex_buffer;
