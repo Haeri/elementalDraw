@@ -13,15 +13,15 @@
 #include "../window_impl.hpp"
 #include "image_impl_opengl.hpp"
 
-#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536*2
-#define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE UNIFORM_BUFFER_ARRAY_MAX_COUNT * sizeof(uniform_rect)
-
+//#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536*2
+//#define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE UNIFORM_BUFFER_ARRAY_MAX_COUNT * sizeof(uniform_rect)
 
 namespace elemd
 {
     class ContextImplOpengl : public Context
     {
-    public:            
+    public:        
+        int MAX_UNIFORM_RECT_PER_BLOCK_COUNT = -1;            
 
         struct uniform_rect
         {
@@ -45,6 +45,7 @@ namespace elemd
 
         enum draw_call_type
         {
+            UNSET,
             COLOR,
             SCISSOR,
             SCISSOR_CLEAR,
@@ -64,6 +65,7 @@ namespace elemd
             float height;
         };
 
+       
         imageImplOpengl* dummy;
         std::vector<imageImplOpengl*> images;
 
@@ -75,8 +77,9 @@ namespace elemd
         };
 
         std::vector<scissor_primitive> scissor_primitives = {};
-        std::vector<draw_call_chain> draw_call_indices = {{0,-1, COLOR}};
-        int storage_instance_offset = 0;
+        std::vector<draw_call_chain> draw_call_indices = {};
+        int current_color_call_cnt = 0;
+        draw_call_type current_type = UNSET;
 
         ///std::vector<uniform_rect> uniforms = {};
         std::vector<uniform_rect> storage = {};
@@ -115,6 +118,7 @@ namespace elemd
         void update_uniform_buffer();
         //void update_storage_buffer();
 
+        void queue_color_call();
         void destroy() override;
     };
 

@@ -12,6 +12,8 @@ namespace elemd
     class OpenglSharedInfo
     {
     public:
+        static int MAX_UNIFORM_BLOCK_SIZE;
+
         static OpenglSharedInfo* getInstance();
         static void destroy();
 

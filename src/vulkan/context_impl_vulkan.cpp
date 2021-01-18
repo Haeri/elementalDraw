@@ -115,11 +115,13 @@ namespace elemd
     // VK_PRIMITIVE_TOPOLOGY_POINT_LIST
     void Context::draw_pixel(float x, float y)
     {
+        std::cout << "WARNING: Context::draw_pixel is not implemented!\n";
     }
 
     // VK_PRIMITIVE_TOPOLOGY_LINE_LIST, line_vertex
     void Context::stroke_line(float x, float y)
     {
+        std::cout << "WARNING: Context::stroke_line is not implemented!\n";
     }
 
     void Context::stroke_circle(float x, float y, float radius)
@@ -159,13 +161,10 @@ namespace elemd
         });
     }
 
-    void Context::stroke_ellipse(float x, float y, float width, float height)
-    {
-    }
-
     // VK_PRIMITIVE_TOPOLOGY_LINE_STRIP
     void Context::stroke_polygon(float x, float y)
     {
+        std::cout << "WARNING: Context::stroke_polygon is not implemented!\n";
     }
 
     void Context::fill_rect(float x, float y, float width, float height)
@@ -280,12 +279,9 @@ namespace elemd
         });
     }
 
-    void Context::fill_ellipse(float x, float y, float width, float height)
-    {
-    }
-
     void Context::fill_polygon(float x, float y)
     {
+        std::cout << "WARNING: Context::fill_polygon is not implemented!\n";
     }
 
     void Context::draw_text(float x, float y, std::string text)
@@ -561,12 +557,23 @@ namespace elemd
         impl->clearValue.color = {color.rf(), color.gf(), color.bf(), color.af()};
     }
 
+    void Context::set_rect_mask(float x, float y, float width, float height)
+    {
+    }
+
+    void Context::remove_rect_mask()
+    {
+    }
+
+
     void Context::clear()
     {
+        std::cout << "WARNING: Context::clear is not implemented!\n";
     }
 
     void Context::clear_rect(float x, float y, float width, float height)
     {
+        std::cout << "WARNING: Context::clear_rect is not implemented!\n";
     }
 
     void Context::draw_frame()

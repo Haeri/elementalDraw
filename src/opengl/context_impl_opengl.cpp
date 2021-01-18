@@ -64,6 +64,7 @@ namespace elemd
             0,                                                                      // shadow_size
             {0, 0, 0},                                                              // is_msdf
         });
+        impl->queue_color_call();
     }
 
     void Context::stroke_rounded_rect(float x, float y, float width, float height,
@@ -111,16 +112,19 @@ namespace elemd
             0,                                                                      // shadow_size
             {0, 0, 0},                                                              // is_msdf
         });
+        impl->queue_color_call();
     }
 
     // VK_PRIMITIVE_TOPOLOGY_POINT_LIST
     void Context::draw_pixel(float x, float y)
     {
+        std::cout << "WARNING: Context::draw_pixel is not implemented!\n";
     }
 
     // VK_PRIMITIVE_TOPOLOGY_LINE_LIST, line_vertex
     void Context::stroke_line(float x, float y)
     {
+        std::cout << "WARNING: Context::stroke_line is not implemented!\n";
     }
 
     void Context::stroke_circle(float x, float y, float radius)
@@ -158,12 +162,14 @@ namespace elemd
             0,                                                                      // shadow_size
             {0, 0, 0},                                                              // is_msdf
         });
+        impl->queue_color_call();
     }
 
 
     // VK_PRIMITIVE_TOPOLOGY_LINE_STRIP
     void Context::stroke_polygon(float x, float y)
     {
+        std::cout << "WARNING: Context::stroke_polygon is not implemented!\n";
     }
 
     void Context::fill_rect(float x, float y, float width, float height)
@@ -196,6 +202,7 @@ namespace elemd
             0,                                                                      // shadow_size
             {0, 0, 0},                                                              // is_msdf
         });
+        impl->queue_color_call();
     }
 
     void Context::fill_rounded_rect(float x, float y, float width, float height,
@@ -241,6 +248,7 @@ namespace elemd
             0,                                                                      // shadow_size
             {0, 0, 0},                                                              // is_msdf
         });
+        impl->queue_color_call();
     }
 
     void Context::fill_circle(float x, float y, float radius)
@@ -276,11 +284,13 @@ namespace elemd
             0,                                                                      // shadow_size
             {0, 0, 0},                                                              // is_msdf
         });
+        impl->queue_color_call();
     }
 
     
     void Context::fill_polygon(float x, float y)
     {
+        std::cout << "WARNING: Context::fill_polygon is not implemented!\n";
     }
 
     void Context::draw_text(float x, float y, std::string text)
@@ -354,6 +364,7 @@ namespace elemd
                 0,                                            // shadow_size
                 {0, 0, 0},                                    // is_msdf
             });
+            impl->queue_color_call();
 
             x += ch.advance * scale;
         }
@@ -430,6 +441,7 @@ namespace elemd
             0,                                                                      // shadow_size
             {0, 0, 0},                                                              // is_msdf
         });
+        impl->queue_color_call();
     }
 
     void Context::draw_rect_shadow(float x, float y, float width, float height, float shadow_size)
@@ -463,6 +475,7 @@ namespace elemd
             shadow_size,                                                            // shadow_size
             {0, 0, 0},                                                              // is_msdf
         });
+        impl->queue_color_call();
     }
 
     void Context::draw_rounded_rect_shadow(float x, float y, float width, float height,
@@ -510,6 +523,7 @@ namespace elemd
             shadow_size,                                                            // shadow_size
             {0, 0, 0},                                                              // is_msdf
         });
+        impl->queue_color_call();
     }
 
     void Context::draw_circle_shadow(float x, float y, float radius, float shadow_size)
@@ -546,6 +560,7 @@ namespace elemd
             shadow_size,                                                            // shadow_size
             {0, 0, 0},                                                              // is_msdf
         });
+        impl->queue_color_call();
     }
 
    
@@ -561,7 +576,7 @@ namespace elemd
     {
         ContextImplOpengl* impl = getImpl(this);
 
-        impl->storage_instance_offset = (int)impl->storage.size() - 1;
+        impl->current_type = ContextImplOpengl::SCISSOR;
         impl->scissor_primitives.push_back(
             {x * impl->_window->_x_scale * impl->_window->_dpi_scale,
              impl->_window->get_height() - y * impl->_window->_y_scale * impl->_window->_dpi_scale -
@@ -569,33 +584,30 @@ namespace elemd
              width * impl->_window->_x_scale * impl->_window->_dpi_scale,
              height * impl->_window->_y_scale * impl->_window->_dpi_scale
             });
-        impl->draw_call_indices.push_back({impl->storage_instance_offset,
+        impl->draw_call_indices.push_back({(int)impl->storage.size(),
                                            (int)impl->scissor_primitives.size() - 1,
                                              ContextImplOpengl::SCISSOR});
 
-
-        impl->draw_call_indices.push_back(
-            {impl->storage_instance_offset, -1, ContextImplOpengl::COLOR});
     }
 
     void Context::remove_rect_mask()
     {
         ContextImplOpengl* impl = getImpl(this);
-        impl->storage_instance_offset = (int)impl->storage.size() - 1;
-        impl->draw_call_indices.push_back({impl->storage_instance_offset,
+
+        impl->current_type = ContextImplOpengl::SCISSOR_CLEAR;
+        impl->draw_call_indices.push_back({(int)impl->storage.size(),
                                            (int)impl->scissor_primitives.size() - 1,
                                            ContextImplOpengl::SCISSOR_CLEAR});
-
-        impl->draw_call_indices.push_back(
-            {impl->storage_instance_offset, -1, ContextImplOpengl::COLOR});
     }
 
     void Context::clear()
     {
+        std::cout << "WARNING: Context::clear is not implemented!\n";
     }
 
     void Context::clear_rect(float x, float y, float width, float height)
     {
+        std::cout << "WARNING: Context::clear_rect is not implemented!\n";
     }
 
     void Context::draw_frame()
@@ -616,7 +628,7 @@ namespace elemd
 
         glUseProgram(impl->shaderProgram);
         // impl->update_storage_buffer();
-        impl->update_uniform_buffer();
+        //
         if (rerecord || impl->dirty)
         {
 
@@ -628,30 +640,36 @@ namespace elemd
             impl->images[i]->bind(i);
         }
 
-        // std::cout << "------------- DRAW CALL START ------------- \n";
+        //std::cout << "------------- DRAW CALL START ------------- \n";
         for (int i = 0; i < impl->draw_call_indices.size(); ++i)
         {
             if (impl->draw_call_indices[i].type == ContextImplOpengl::draw_call_type::COLOR)
             {
-                // std::cout << i + 1 << " CALL TYPE: COLOR\n";
-                int batch_length =
-                    ((int)(impl->storage.size())) - impl->draw_call_indices[i].instance_index;
+                //std::cout << i + 1 << " CALL TYPE: COLOR\n";
+                int batch_length = impl->storage.size() - impl->draw_call_indices[i].instance_index;
                 if (impl->draw_call_indices.size() > i + 1)
                 {
                     batch_length = impl->draw_call_indices[i + 1].instance_index -
                                    impl->draw_call_indices[i].instance_index;
                 }
-                // std::cout << "\tSTART: " << impl->draw_call_indices[i].instance_index                  << " batch_length: " << batch_length << "\n";
+                //std::cout << "\tSTART: " << impl->draw_call_indices[i].instance_index << " batch_length: " << batch_length << "\n";
 
-                glBindVertexArray(impl->vertex_array_object);                                
-                glUniform1i(impl->instance_offset_location, impl->draw_call_indices[i].instance_index);
+                //impl->update_uniform_buffer();
+
+                glBindBuffer(GL_UNIFORM_BUFFER, impl->storageBuffer);
+                GLsizei size = (GLsizei)(batch_length * sizeof(ContextImplOpengl::uniform_rect));
+                                                 
+                glBufferSubData(GL_UNIFORM_BUFFER, 0, size,
+                                &(impl->storage[impl->draw_call_indices[i].instance_index]));
+
+                glBindVertexArray(impl->vertex_array_object);
                 glDrawElementsInstancedBaseInstance(
                     GL_TRIANGLES, (GLsizei)impl->rect_indices.size(), GL_UNSIGNED_INT, 0,
                     (GLsizei)batch_length, impl->draw_call_indices[i].instance_index);
             }
             else if (impl->draw_call_indices[i].type == ContextImplOpengl::draw_call_type::SCISSOR)
             {
-                // std::cout << i + 1 << " CALL TYPE: SCISSOR\n";
+                //std::cout << i + 1 << " CALL TYPE: SCISSOR\n";
                 ContextImplOpengl::scissor_primitive sp =
                     impl->scissor_primitives[impl->draw_call_indices[i].scissor_index];
                 glEnable(GL_SCISSOR_TEST);
@@ -660,19 +678,20 @@ namespace elemd
             else if (impl->draw_call_indices[i].type ==
                      ContextImplOpengl::draw_call_type::SCISSOR_CLEAR)
             {
-                // //std::cout << i + 1 << " CALL TYPE: SCISSOR_CLEAR\n";
+                //std::cout << i + 1 << " CALL TYPE: SCISSOR_CLEAR\n";
                 glDisable(GL_SCISSOR_TEST);
             }
         }
-        //std::cout << "------------- DRAW CALL END ------------- \n";
+        
+        //std::cout << " TOTAL COLOR UNITS: " << impl->storage.size() << "\n";
 
         glfwSwapBuffers(impl->_window->getGLFWWindow());
 
         impl->storage.clear();
         impl->draw_call_indices.clear();
-        impl->draw_call_indices.push_back({0, -1, ContextImplOpengl::draw_call_type::COLOR});
         impl->scissor_primitives.clear();
-        impl->storage_instance_offset = 0;
+        impl->current_color_call_cnt = 0;
+        impl->current_type = ContextImplOpengl::UNSET;
         impl->rendering = false;
     }
 
@@ -760,6 +779,21 @@ namespace elemd
         }       
     }
 
+    void ContextImplOpengl::queue_color_call()
+    {
+        // Start new color sequence
+        if (current_type != COLOR || current_color_call_cnt >= MAX_UNIFORM_RECT_PER_BLOCK_COUNT)
+        {
+            draw_call_indices.push_back({(int)storage.size() - 1, -1, ContextImplOpengl::COLOR});
+            current_color_call_cnt = 1;
+            current_type = COLOR;
+        }
+        else
+        {
+            current_color_call_cnt++;
+        } 
+    }
+
     void ContextImplOpengl::destroy()
     {
         _default_font->destroy();
@@ -783,7 +817,7 @@ namespace elemd
     {
         glGenBuffers(1, &storageBuffer);
         glBindBuffer(GL_UNIFORM_BUFFER, storageBuffer);
-        glBufferData(GL_UNIFORM_BUFFER, UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE, storage.data(),
+        glBufferData(GL_UNIFORM_BUFFER, OpenglSharedInfo::MAX_UNIFORM_BLOCK_SIZE, storage.data(),
                      GL_DYNAMIC_COPY);
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, storageBuffer);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -829,12 +863,14 @@ namespace elemd
 
     ContextImplOpengl::ContextImplOpengl(Window* window)
     {
+
         _window = (WindowImpl*)window;
 
         _width = (uint32_t)window->get_width();
         _height = (uint32_t)window->get_height();        
 
         OpenglSharedInfo::getInstance();
+        MAX_UNIFORM_RECT_PER_BLOCK_COUNT = OpenglSharedInfo::MAX_UNIFORM_BLOCK_SIZE / sizeof(uniform_rect);
         create_shader_programm();
     }
 
@@ -921,12 +957,9 @@ namespace elemd
             glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
             std::cout << "ERROR::SHADER::PROGRAM::GL_VALIDATE_STATUS\n" << infoLog << std::endl;
         }
-
-        instance_offset_location = glGetUniformLocation(shaderProgram, "instance_offset");
         
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
-
     }
 
     /*
@@ -948,7 +981,10 @@ namespace elemd
     {
         glBindBuffer(GL_UNIFORM_BUFFER, storageBuffer);
         GLsizei size = (GLsizei)std::min(storage.size() * sizeof(uniform_rect),
-                                         (size_t)UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE);
+                                         (size_t)OpenglSharedInfo::MAX_UNIFORM_BLOCK_SIZE);
+                                         
+        //GLsizei size = (GLsizei)(storage.size() * sizeof(uniform_rect));
+
         glBufferSubData(GL_UNIFORM_BUFFER, 0, size, storage.data());
     }
 

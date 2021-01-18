@@ -34,21 +34,22 @@ const vec2 default_uvs[4] = vec2[](
 
 void main()
 {
+    instance_index = gl_InstanceIndex;
+    
     vec2 verts[4] = vec2[](
-        sbo.payload[gl_InstanceIndex].vertices[0].xy,
-        sbo.payload[gl_InstanceIndex].vertices[0].zw,
-        sbo.payload[gl_InstanceIndex].vertices[1].xy,
-        sbo.payload[gl_InstanceIndex].vertices[1].zw
+        sbo.payload[instance_index].vertices[0].xy,
+        sbo.payload[instance_index].vertices[0].zw,
+        sbo.payload[instance_index].vertices[1].xy,
+        sbo.payload[instance_index].vertices[1].zw
     );
 
     vec2 uvs[4] = vec2[](
-        vec2(sbo.payload[gl_InstanceIndex].uvs.x, sbo.payload[gl_InstanceIndex].uvs.y),
-        vec2(sbo.payload[gl_InstanceIndex].uvs.z, sbo.payload[gl_InstanceIndex].uvs.y),
-        vec2(sbo.payload[gl_InstanceIndex].uvs.x, sbo.payload[gl_InstanceIndex].uvs.w),
-        vec2(sbo.payload[gl_InstanceIndex].uvs.z, sbo.payload[gl_InstanceIndex].uvs.w)
+        vec2(sbo.payload[instance_index].uvs.x, sbo.payload[instance_index].uvs.y),
+        vec2(sbo.payload[instance_index].uvs.z, sbo.payload[instance_index].uvs.y),
+        vec2(sbo.payload[instance_index].uvs.x, sbo.payload[instance_index].uvs.w),
+        vec2(sbo.payload[instance_index].uvs.z, sbo.payload[instance_index].uvs.w)
     );
 
-    instance_index = gl_InstanceIndex;
     gl_Position = vec4(verts[gl_VertexIndex].xy, 0.0, 1.0);
     uv_varying = default_uvs[gl_VertexIndex];
     uv_tex_varying = uvs[gl_VertexIndex];

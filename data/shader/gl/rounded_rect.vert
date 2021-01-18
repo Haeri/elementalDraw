@@ -23,7 +23,6 @@ layout(std140) uniform UBO
 {
 	RoundedRectData payload[1]; // this is a meme
 } ubo;
-uniform int instance_offset;
 
 const vec2 default_uvs[4] = vec2[4](
 	vec2(0, 0),
@@ -34,7 +33,7 @@ const vec2 default_uvs[4] = vec2[4](
 
 void main()
 {
-	instance_index = gl_InstanceID + instance_offset;
+	instance_index = gl_InstanceID;
 
 	vec2 verts[4] = vec2[4](
 		ubo.payload[instance_index].vertices[0].xy,

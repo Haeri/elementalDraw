@@ -8,6 +8,7 @@
 
 namespace elemd
 {
+    int OpenglSharedInfo::MAX_UNIFORM_BLOCK_SIZE = -1;
     OpenglSharedInfo* OpenglSharedInfo::_instance = nullptr;
 
     OpenglSharedInfo::OpenglSharedInfo()
@@ -50,5 +51,9 @@ namespace elemd
         }
 
         std::cout << "BACKEND: OpenGL " << glGetString(GL_VERSION) << std::endl;
+
+        glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &MAX_UNIFORM_BLOCK_SIZE);
+        std::cout << "GL_MAX_UNIFORM_BLOCK_SIZE is " << MAX_UNIFORM_BLOCK_SIZE << " bytes\n";
+
     }
 } // namespace elemd
