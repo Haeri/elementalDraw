@@ -559,10 +559,21 @@ namespace elemd
 
     void Context::set_rect_mask(float x, float y, float width, float height)
     {
+        ContextImplVulkan* impl = getImpl(this);
+        int32_t s_x = x * impl->_window->_x_scale * impl->_window->_dpi_scale;
+        int32_t s_y = y * impl->_window->_y_scale * impl->_window->_dpi_scale;
+        uint32_t s_width = width * impl->_window->_x_scale * impl->_window->_dpi_scale;
+        uint32_t s_height = height * impl->_window->_y_scale * impl->_window->_dpi_scale;
+
+        impl->draw_sequence_chain.push_back(
+            {(int)impl->storage.size(), {{s_x, s_y}, {s_width, s_height}}});
     }
 
     void Context::remove_rect_mask()
     {
+        ContextImplVulkan* impl = getImpl(this);
+        impl->draw_sequence_chain.push_back(
+            {(int)impl->storage.size(), {{0, 0}, {(uint32_t)_width, (uint32_t)_height}}});
     }
 
 
@@ -593,12 +604,15 @@ namespace elemd
         impl->wait_for_render_fence();
         /// impl->update_uniforms();
         impl->update_storage();
-        if (rerecord || impl->dirty)
+        //if (rerecord || impl->dirty)
         {
             impl->record_command_buffers();
             impl->dirty = false;
         }
         impl->storage.clear();
+        impl->draw_sequence_chain.clear();
+        impl->draw_sequence_chain.push_back({0, {{0, 0}, {(uint32_t)_width, (uint32_t)_height}}});
+
 
         uint32_t imageIndex;
         vku::err_check(vkAcquireNextImageKHR(VulkanSharedInfo::getInstance()->device,
@@ -1335,34 +1349,41 @@ namespace elemd
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo,
                                  VK_SUBPASS_CONTENTS_INLINE);
 
-            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);            
 
-            VkViewport viewport{};
-            viewport.x = 0.0f;
-            viewport.y = 0.0f;
-            viewport.width = (float)_width;
-            viewport.height = (float)_height;
-            viewport.minDepth = 0.0f;
-            viewport.maxDepth = 1.0f;
+            for (int s = 0; s < draw_sequence_chain.size(); ++s)
+            {
+                VkViewport viewport{};
+                viewport.x = 0.0f;
+                viewport.y = 0.0f;
+                viewport.width = (float)_width;
+                viewport.height = (float)_height;
+                viewport.minDepth = 0.0f;
+                viewport.maxDepth = 1.0f;
 
-            VkRect2D scissor{};
-            scissor.offset = {0, 0};
-            scissor.extent = {(uint32_t)_width, (uint32_t)_height};
+                uint32_t sequence_length = storage.size() - draw_sequence_chain[s].start_index;
+                if (draw_sequence_chain.size() > s + 1)
+                {
+                    sequence_length =
+                        draw_sequence_chain[s + 1].start_index - draw_sequence_chain[s].start_index;
+                }
 
-            vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
-            vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
 
-            VkDeviceSize offsets[] = {0};
-            // vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
-            vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+                vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
+                vkCmdSetScissor(commandBuffers[i], 0, 1, &draw_sequence_chain[s].scissor);
 
-            vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+                VkDeviceSize offsets[] = {0};
+                // vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexBuffer, offsets);
+                vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-            /// vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
-            ///                 uniforms.size(), 0, 0, 0);
-            vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
-                             (uint32_t)storage.size(), 0, 0, 0);
+                vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+
+                /// vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
+                ///                 uniforms.size(), 0, 0, 0);
+                vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(), sequence_length,
+                                 0, 0, draw_sequence_chain[s].start_index);
+            }
 
             vkCmdEndRenderPass(commandBuffers[i]);
             vku::err_check(vkEndCommandBuffer(commandBuffers[i]));
@@ -1496,6 +1517,8 @@ namespace elemd
         vku::print_selected_device();
         std::cout << "}\n";
 #endif
+
+        remove_rect_mask();
     }
 
     ContextImplVulkan::~ContextImplVulkan()

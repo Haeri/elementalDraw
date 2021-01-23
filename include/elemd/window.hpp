@@ -32,7 +32,7 @@ namespace elemd
         bool transparent = false;
         bool resizeable = true;
         bool visible = true;
-        bool vsync = true;
+        bool vsync = false;
 
         const char* icon_file = nullptr;
     };

@@ -393,8 +393,6 @@ namespace elemd
         }
         ++_windowCount;
 
-        _vsync = config.vsync;
-
         load_icon(config);
 
         if (config.position_x != -1 && config.position_y != -1)
@@ -405,6 +403,12 @@ namespace elemd
         glfwMakeContextCurrent(_glfw_window);
         glfwGetWindowContentScale(_glfw_window, &_dpi_scale, &_dpi_scale);  
         
+        _vsync = config.vsync;
+        if (!_vsync)
+        {
+            glfwSwapInterval(0);
+        }
+
         //_x_scale = config.x_scale;
         //_y_scale = config.y_scale;        
     }

@@ -18,7 +18,7 @@ if [ "$1" = "-static" ]; then
 	# Overview
 	mkdir -p samples/overview
 	cp -R ./build/examples/overview/res ./samples/overview
-	cp ./build/examples/overview/hello-world ./samples/overview
+	cp ./build/examples/overview/overview ./samples/overview
 
 	# Game Of Life
 	mkdir -p samples/game_of_life

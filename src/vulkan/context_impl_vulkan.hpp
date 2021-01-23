@@ -39,6 +39,12 @@ namespace elemd
             float shadow_size;      //
             float is_msdf[3];       // 16   1
         };                          // 256
+        
+        struct draw_sequence
+        {
+            int start_index;
+            VkRect2D scissor;
+        };
 
         imageImplVulkan* dummy;
         std::vector<imageImplVulkan*> images;
@@ -49,6 +55,8 @@ namespace elemd
         std::vector<point_vertex> rect_vertices = {
             {vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}
         };
+
+        std::vector<draw_sequence> draw_sequence_chain = {};
 
         ///std::vector<uniform_rect> uniforms = {};
         std::vector<uniform_rect> storage = {};
