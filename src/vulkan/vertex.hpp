@@ -3,7 +3,7 @@
 
 #include <array>
 
-#include "./vulkan.h"
+#include "glad/vulkan.h"
 #include "elemd/vec2.hpp"
 #include "elemd/color.hpp"
 

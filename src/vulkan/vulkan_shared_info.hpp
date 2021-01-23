@@ -1,7 +1,7 @@
 #ifndef ELEMD_VULKAN_SHARED_INFO_HPP
 #define ELEMD_VULKAN_SHARED_INFO_HPP
 
-#include "./vulkan.h"
+#include "glad/vulkan.h"
 
 #include <string>
 

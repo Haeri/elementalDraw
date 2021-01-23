@@ -6,7 +6,7 @@
 #include <map>
 #include <string>
 
-#include "./vulkan.h"
+#include "glad/vulkan.h"
 
 namespace elemd
 {
