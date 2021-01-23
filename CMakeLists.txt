@@ -33,14 +33,11 @@ add_compile_definitions("ELEMD_RENDERING_BACKEND_${ELEMD_RENDERING_BACKEND_UPPER
 
 file(GLOB SOURCE_FILES
     include/${PROJECT_NAME}/*.hpp
-    src/*.hpp
-    src/*.h
-    src/*.cpp
-    src/*.c
-    src/${ELEMD_RENDERING_BACKEND}/*.hpp
-    src/${ELEMD_RENDERING_BACKEND}/*.h
-    src/${ELEMD_RENDERING_BACKEND}/*.cpp
-    src/${ELEMD_RENDERING_BACKEND}/*.c
+    src/*    
+ )
+ file(GLOB_RECURSE SOURCE_FILES
+    ${SOURCE_FILES}
+    src/${ELEMD_RENDERING_BACKEND}/*
  )
 
 # Microsoft Runtime Library shenanigens

@@ -43,17 +43,20 @@ namespace elemd
     {
         // --------------- Load Vulkan ---------------
 
-        if (!gladLoadGL())
+        int version = gladLoadGL(glfwGetProcAddress);
+        if (version == 0)
         {
             std::cerr << "Could not load the OpenGL context" << std::endl;
             glfwTerminate();
             exit(EXIT_FAILURE);
         }
 
-        std::cout << "BACKEND: OpenGL " << glGetString(GL_VERSION) << std::endl;
+        const GLubyte* vendor = glGetString(GL_VENDOR);     // Returns the vendor
+        const GLubyte* renderer = glGetString(GL_RENDERER); // Returns a hint to the model
 
+        std::cout << "BACKEND: OpenGL " << GLAD_VERSION_MAJOR(version) << "."
+                  << GLAD_VERSION_MINOR(version) <<  " - " << vendor << " " << renderer << std::endl;
         glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &MAX_UNIFORM_BLOCK_SIZE);
-        std::cout << "GL_MAX_UNIFORM_BLOCK_SIZE is " << MAX_UNIFORM_BLOCK_SIZE << " bytes\n";
 
     }
 } // namespace elemd

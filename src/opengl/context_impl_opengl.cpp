@@ -663,9 +663,9 @@ namespace elemd
                                 &(impl->storage[impl->draw_call_indices[i].instance_index]));
 
                 glBindVertexArray(impl->vertex_array_object);
-                glDrawElementsInstancedBaseInstance(
+                glDrawElementsInstanced(
                     GL_TRIANGLES, (GLsizei)impl->rect_indices.size(), GL_UNSIGNED_INT, 0,
-                    (GLsizei)batch_length, impl->draw_call_indices[i].instance_index);
+                    (GLsizei)batch_length);
             }
             else if (impl->draw_call_indices[i].type == ContextImplOpengl::draw_call_type::SCISSOR)
             {
