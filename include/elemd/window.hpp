@@ -11,6 +11,12 @@
 
 //#define ELEMD_ICON "./elemd_res/elemd_icon.png"
 
+#if defined(ELEMD_RENDERING_BACKEND_VULKAN)
+#define ELEMD_BACKEND "Vulkan"
+#elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
+#define ELEMD_BACKEND "OpenGL"
+#endif
+
 namespace elemd
 {
     class Context;
@@ -33,6 +39,7 @@ namespace elemd
         bool resizeable = true;
         bool visible = true;
         bool vsync = false;
+        bool native_pixel_size = false;
 
         const char* icon_file = nullptr;
     };

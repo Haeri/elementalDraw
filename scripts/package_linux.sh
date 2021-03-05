@@ -23,6 +23,10 @@ if [ "$1" = "-static" ]; then
 	# Game Of Life
 	mkdir -p samples/game_of_life
 	cp ./build/examples/game_of_life/game-of-life ./samples/game_of_life
+
+	# Benchmark
+	mkdir -p samples/benchmark
+	cp ./build/examples/benchmark/benchmark ./samples/benchmark
 else
 	mkdir bin
 	cp ./build/libelemd.so* ./bin/

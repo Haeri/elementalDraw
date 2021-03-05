@@ -23,6 +23,9 @@ if "%1" == "-static" (
 	:: Game Of Life
 	xcopy ".\build\examples\game_of_life\Release\game-of-life.exe" ".\samples\game_of_life\"
 
+	:: Benchmark
+	xcopy ".\build\examples\benchmark\Release\benchmark.exe" ".\samples\benchmark\"
+
 ) else (
 	xcopy ".\build\Release\elemd.dll" ".\bin\"
 	xcopy ".\build\Release\elemd.lib" ".\lib\"

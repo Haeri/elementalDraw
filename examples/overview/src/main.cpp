@@ -16,7 +16,7 @@ int main(void)
 
 
     // Configure and create window
-    elemd::WindowConfig winc = elemd::WindowConfig{"Hello World", width, 550};
+    elemd::WindowConfig winc = elemd::WindowConfig{"Overview", width, 550};
     winc.icon_file = "./res/logo.png";
     winc.transparent = true;
     elemd::Window* win = elemd::Window::create(winc);

@@ -326,7 +326,7 @@ namespace elemd
         glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, config.transparent);
         glfwWindowHint(GLFW_RESIZABLE, config.resizeable);
         glfwWindowHint(GLFW_VISIBLE, config.visible);
-        glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+        glfwWindowHint(GLFW_SCALE_TO_MONITOR, !config.native_pixel_size);
 
 
         create_window(config);
@@ -402,6 +402,11 @@ namespace elemd
         
         glfwMakeContextCurrent(_glfw_window);
         glfwGetWindowContentScale(_glfw_window, &_dpi_scale, &_dpi_scale);  
+
+        if (config.native_pixel_size)
+        {
+            _dpi_scale = 1;
+        }
         
         _vsync = config.vsync;
         if (!_vsync)
@@ -448,8 +453,10 @@ namespace elemd
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
         winImpl->get_context()->resize_context(width, height);
 
+#ifdef DEBUG
         std::cout << "event: resize "
                   << "width: " << width << " height: " << height << std::endl;
+#endif
 
         for (auto& var : winImpl->_resize_callbacks)
         {
@@ -468,9 +475,9 @@ namespace elemd
             winImpl->offset_cpy = y - winImpl->cp_y;
         }
         */
-
+#ifdef DEBUG
         std::cout << "event: mouse_position " << "x: " << x << " y: " << y << std::endl;
-
+#endif
         for (auto& var : winImpl->_mouse_move_callbacks)
         {
             var({x / winImpl->_dpi_scale, y / winImpl->_dpi_scale});
@@ -497,10 +504,11 @@ namespace elemd
             winImpl->cp_y = 0;
         }
         */
+#ifdef DEBUG
         std::cout << "event: mouse_button "
                   << "button: " << button << " action: " << action << " mods: " << mods
                   << std::endl;
-
+#endif
         double x, y;
         glfwGetCursorPos(window, &x, &y);
 
@@ -518,9 +526,11 @@ namespace elemd
 
         std::string key_name = (key_code == NULL) ? " " : key_code;
 
+#ifdef DEBUG
         std::cout << "event: key "
                   << "key: " << key << " scancode: " << scancode << " action: " << action
                   << " mods: " << mods << " key name: " << key_name << std::endl;
+#endif
 
         for (auto& var : winImpl->_key_callbacks)
         {
@@ -533,8 +543,11 @@ namespace elemd
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
 
         std::string utf8 = font::UnicodeToUTF8(key_code);
+
+#ifdef DEBUG
         std::cout << "event: char "
                   << "char: " << key_code << std::endl;
+#endif
 
         for (auto& var : winImpl->_char_callbacks)
         {
@@ -546,9 +559,10 @@ namespace elemd
     {
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
 
+#ifdef DEBUG
         std::cout << "event: scroll "
                   << "xoffset: " << xoffset << " yoffset: " << yoffset << std::endl;
-
+#endif
         for (auto& var : winImpl->_scroll_callbacks)
         {
             var({xoffset, yoffset});

@@ -55,7 +55,7 @@ endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
     SOVERSION 0
-    VERSION 0.1.0
+    VERSION 0.1.1
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
@@ -72,9 +72,11 @@ message("CMAKE_MSVC_RUNTIME_LIBRARY: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
 
 # ---------------- DEPENDENCIES ---------------------#
 
+if(NOT ANDROID)
 # glfw3
 find_package(glfw3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+endif()
 
 # freetype
 find_package(freetype CONFIG REQUIRED)
@@ -97,6 +99,7 @@ else()
 endif()
 
 if (ELEMD_BUILD_EXAMPLES)
+    add_subdirectory(examples/benchmark)
     add_subdirectory(examples/brick_breaker)
     add_subdirectory(examples/game_of_life)
     add_subdirectory(examples/hello_world)
@@ -105,6 +108,7 @@ if (ELEMD_BUILD_EXAMPLES)
     add_subdirectory(examples/window_app)
     add_subdirectory(examples/window_app_runtime)
 
+    set_target_properties(benchmark PROPERTIES FOLDER examples)
     set_target_properties(brick-breaker PROPERTIES FOLDER examples)
     set_target_properties(game-of-life PROPERTIES FOLDER examples)
     set_target_properties(hello-world PROPERTIES FOLDER examples)
@@ -117,6 +121,7 @@ if (ELEMD_BUILD_EXAMPLES)
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         DEPENDS window-app-runtime painter brick-breaker hello-world overview game-of-life
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/benchmark/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/brick_breaker/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/game_of_life/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/hello_world/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
