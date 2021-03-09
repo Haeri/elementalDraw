@@ -1,0 +1,254 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Game Of Life</title>
+  <style>body{margin: 0; overflow: hidden;}</style>
+</head>
+
+<body>
+	<canvas id="mycanvas"></canvas>
+
+  <script>
+  
+const GRID_WIDTH = 900;
+const GRID_HEIGHT = 600;
+const CELL_SIZE = 2;
+
+const END_GENERATION = 8200;
+
+var grid1 = new Array(GRID_WIDTH * GRID_HEIGHT);
+var grid2 = new Array(GRID_WIDTH * GRID_HEIGHT);
+for(let i = 0; i < GRID_WIDTH * GRID_HEIGHT; ++i) {grid1[i] = 0;}
+for(let i = 0; i < GRID_WIDTH * GRID_HEIGHT; ++i) {grid2[i] = 0;}
+
+var current_grid = grid1;
+var next_grid = grid2;
+var flip = false;
+
+var mouse_click = false;
+var mouse_x = 0;
+var mouse_y = 0;
+
+var playing = false;
+var generation = 0;
+var population = 0;
+var last_time = 0;
+
+var canvas
+var ctx;
+
+var stats = []; 
+stats.length = END_GENERATION;
+
+/*
+function draw()
+{
+    if (mouse_click)
+    {
+        let index = Math.floor(mouse_x / CELL_SIZE) + GRID_WIDTH * Math.floor(mouse_y / CELL_SIZE);
+        if (index >= 0)
+        {
+            grid1[index] = 2;
+            grid2[index] = 2;
+            ++population;
+        }
+    }
+}*/
+
+function main_loop()
+{
+    // Tick
+    if (playing)
+    {
+    	//console.log("Tick");
+
+        //if (win->now() - last_time < 0.02)
+        //    continue;
+    
+        //last_time = win->now();
+    
+    	population = 0;
+        if (flip)
+        {
+            current_grid = grid2;
+            next_grid = grid1;
+        }
+        else
+        {
+            current_grid = grid1;
+            next_grid = grid2;
+        }
+        flip = !flip;
+
+        for (let i = 0; i < GRID_WIDTH * GRID_HEIGHT; i++)
+        {
+            let x = Math.floor(i % GRID_WIDTH);
+        	let y = Math.floor(i / GRID_WIDTH);
+
+            let neighbors = 0;
+            if (x == 0 || x == GRID_WIDTH - 1 || y == 0 || y == GRID_HEIGHT - 1)
+            {
+            }
+            else
+            {
+                neighbors += current_grid[i - 1] >= 1 ? 1 : 0;
+                neighbors += current_grid[i + 1] >= 1 ? 1 : 0;
+                neighbors += current_grid[i - GRID_WIDTH] >= 1 ? 1 : 0;
+                neighbors += current_grid[i + GRID_WIDTH] >= 1 ? 1 : 0;
+                neighbors += current_grid[(i - GRID_WIDTH) - 1] >= 1 ? 1 : 0;
+                neighbors += current_grid[(i - GRID_WIDTH) + 1] >= 1 ? 1 : 0;
+                neighbors += current_grid[(i + GRID_WIDTH) - 1] >= 1 ? 1 : 0;
+                neighbors += current_grid[(i + GRID_WIDTH) + 1] >= 1 ? 1 : 0;
+            }
+
+            if (current_grid[i] < 1 && neighbors == 3)
+            {
+                // Spawn
+                next_grid[i] = 2;
+            }
+            else if (current_grid[i] >= 1 && (neighbors < 2 || neighbors > 3))
+            {
+                // Life
+            	next_grid[i] = -1;
+            }
+            else
+            {
+                if (current_grid[i] == -1)
+            	{
+                    next_grid[i] = 0;
+                }
+                else if (current_grid[i] == 2)
+                {
+                    next_grid[i] = 1;
+                }
+                else
+                {
+                    next_grid[i] = current_grid[i];
+                }
+            }
+
+           population += next_grid[i];
+        }
+        ++generation;
+
+        stats.push(Date.now() - last_time);
+    }
+
+    // Draw
+ 	ctx.fillStyle = "rgb(30, 30, 30)";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < GRID_WIDTH * GRID_HEIGHT; i++)
+    {
+        let x = Math.floor(i % GRID_WIDTH);
+        let y = Math.floor(i / GRID_WIDTH);
+
+
+        if (current_grid[i])
+        {
+            let rad = CELL_SIZE / 2.0 - 1;
+
+			if (current_grid[i] == -1)
+            {
+                ctx.fillStyle = "rgba(250, 30, 30, 200)";
+            }
+            else if (current_grid[i] == 2)
+            {
+                ctx.fillStyle = "rgba(30, 250, 30, 200)";
+            }
+            else
+            {
+                ctx.fillStyle = "rgb(220, 220, 220)";
+            }
+
+			//ctx.beginPath();
+			//ctx.arc(x * CELL_SIZE + rad, y * CELL_SIZE + rad, rad, 0, 2 * Math.PI, false);
+			//ctx.fill();
+
+			ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1);
+        }
+     
+        /*
+        ctx->draw_text(x * CELL_SIZE, y * CELL_SIZE,
+                       std::to_string(i) + " (" + std::to_string(x) + ", " +
+        std::to_string(y) + ")");
+          */             
+    }
+/*
+    ctx.font = "10px";
+    ctx.fillStyle = "#1fc600";
+    ctx.fillText("// generation: " + (generation) +
+         		" | population: " + (population) + 
+            	" | delta: " + (Math.floor((Date.now() - last_time))) + "ms", 2, 10+1);
+*/
+    last_time = Date.now();
+
+    if(generation <= END_GENERATION){
+	    setTimeout(function(){ main_loop(); }, 0);
+	}else{
+		console.log(stats);
+	}
+	//window.requestAnimationFrame(main_loop);
+    //ctx->draw_frame();
+}
+
+function main()
+{
+
+    // Configure and create window
+	canvas = document.getElementById("mycanvas");
+	canvas.width = GRID_WIDTH * CELL_SIZE;
+	canvas.height = GRID_HEIGHT * CELL_SIZE
+	ctx = canvas.getContext("2d");
+
+	ctx.fillStyle = "rgb(30, 30, 30)";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+	for (let i = 0; i < GRID_WIDTH * GRID_HEIGHT; i++)
+    {
+        if (i & 7 == 0 || i % 13 == 0 || i % 40 == 0 || i % 39 == 0 || i % 17 == 0 || i % 23 == 0)
+        {
+            grid1[i] = 1;
+            ++population;
+        }
+    }
+    
+
+    // Events
+    /*
+    window.addEventListener('mousedown', (event) => { 
+		mouse_click = true;
+    });
+    window.addEventListener('mouseup', (event) => { 
+		mouse_click = false;
+    });
+    window.addEventListener('mousemove', (event) => { 
+		mouse_x = event.x;
+        mouse_y = event.y;
+
+        draw();
+    });
+    */
+
+    window.addEventListener('keypress', (event) => {
+        if (event.code == "Space")
+        {
+            playing = !playing;
+        }
+    });
+
+    main_loop();
+    //window.requestAnimationFrame(main_loop);
+
+    //let last_time = 0;
+
+}
+
+main();
+
+  </script>
+</body>
+</html>

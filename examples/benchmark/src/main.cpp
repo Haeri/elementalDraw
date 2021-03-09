@@ -27,6 +27,8 @@ int population = 0;
 
 double starting_time = 0;
 
+std::vector<double> stats;
+
 int main(void)
 {
 
@@ -48,7 +50,7 @@ int main(void)
     std::cout << "WIDTH:   " << win->get_width() << "\n";
     std::cout << "HEIGHT:  " << win->get_height() << "\n";
 
-
+    stats.reserve(END_GENERATION);
 
 
     for (int i = 0; i < GRID_WIDTH * GRID_HEIGHT; i++)
@@ -79,9 +81,8 @@ int main(void)
     
     // Main loop
     while (win->is_running() && generation <= END_GENERATION)
-    {
+    {                       
         win->poll_events();
-                
         
         // Tick
         if (playing)
@@ -155,6 +156,9 @@ int main(void)
             }
 
             ++generation;
+
+            
+            stats.push_back(win->now() - last_time);
         }
 
         // Draw
@@ -201,6 +205,8 @@ int main(void)
         last_time = win->now();
 
         ctx->draw_frame();
+
+
     }
 
     int time = (int)((win->now() - starting_time) * 1000);
@@ -210,6 +216,11 @@ int main(void)
     std::cout << "FINAL POPULATION: " << population << "\n";
     std::cout << "AVERAGE MS:       " << (time / (float)generation) << "\n";
     std::cout << "-------------- ENDING BENCHMARK --------------\n";
+
+    for (double &i : stats)
+    {
+        std::cout << i*1000 << std::endl;
+    }
 
     // Cleanup
     win->destroy();
