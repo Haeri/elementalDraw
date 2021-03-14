@@ -3,7 +3,7 @@
 #include <elemd/window.hpp>
 #include <math.h> 
 #include <thread>
-
+#include <vector>
 
 const int GRID_WIDTH = 900;
 const int GRID_HEIGHT = 600;
