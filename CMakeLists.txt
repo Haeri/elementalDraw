@@ -105,6 +105,7 @@ if (ELEMD_BUILD_EXAMPLES)
     add_subdirectory(examples/hello_world)
     add_subdirectory(examples/overview)
     add_subdirectory(examples/painter)
+    add_subdirectory(examples/presenter)
     add_subdirectory(examples/window_app)
     add_subdirectory(examples/window_app_runtime)
 
@@ -114,19 +115,21 @@ if (ELEMD_BUILD_EXAMPLES)
     set_target_properties(hello-world PROPERTIES FOLDER examples)
     set_target_properties(overview PROPERTIES FOLDER examples)
     set_target_properties(painter PROPERTIES FOLDER examples)
+    set_target_properties(presenter PROPERTIES FOLDER examples)
     set_target_properties(window-app PROPERTIES FOLDER examples)
     set_target_properties(window-app-runtime PROPERTIES FOLDER examples)
 
   if (BUILD_SHARED_LIBS)
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
-        DEPENDS window-app-runtime painter brick-breaker hello-world overview game-of-life
+        DEPENDS window-app-runtime painter presenter brick-breaker hello-world overview game-of-life
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/benchmark/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/brick_breaker/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/game_of_life/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/hello_world/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/overview/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/presenter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/window_app_runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMENT "Copy library"
     )

@@ -66,21 +66,21 @@ int main(void)
     {
         win->poll_events();
 
-        // text
+        // draw text
         ctx->set_fill_color(elemd::color("#2e3441"));
         ctx->set_font_size(30);
         ctx->draw_text(55, 60, "elemental UI");        
         
-        // circle
+        // draw circle
         ctx->set_fill_color(elemd::color("#c16069"));
         ctx->fill_circle(80, 135, 15);
 
-        // rounded rectangle outline
+        // draw rounded rectangle outline
         ctx->set_line_width(2);
         ctx->set_stroke_color(elemd::color("#80a0c2"));
         ctx->stroke_rounded_rect(130, 120, 30, 30, 5);
 
-        // rounded image
+        // draw rounded image
         ctx->draw_rounded_image(200, 120, 30, 30, logo, 5);
 
         ctx->draw_frame();

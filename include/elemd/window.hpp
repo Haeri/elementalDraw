@@ -86,6 +86,10 @@ namespace elemd
         void set_scale(float x, float y);
         void set_scale(float scalar);
         void set_offset(float x, float y);
+        void set_fullscreen(bool fullscreen);
+
+        bool is_fullscreen();
+        
         
         void add_resize_listener(std::function<void(resize_event)>callback);
         void add_mouse_move_listener(std::function<void(mouse_move_event)> callback);

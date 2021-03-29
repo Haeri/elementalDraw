@@ -89,6 +89,36 @@ namespace elemd
         impl->_x_offset = x; // * impl->_dpi_scale;
         impl->_y_offset = y; // * impl->_dpi_scale;
     }
+    
+    void Window::set_fullscreen(bool fullscreen)
+    {
+        WindowImpl* impl = getImpl(this);
+
+        if (is_fullscreen() == fullscreen)
+            return;
+        
+        if (fullscreen)
+        {
+            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+            glfwGetWindowPos(impl->_glfw_window, &impl->_last_x_pos, &impl->_last_y_pos);
+            glfwGetWindowSize(impl->_glfw_window, &impl->_last_x_scale, &impl->_last_y_scale);
+
+            glfwSetWindowMonitor(impl->_glfw_window, monitor, 0, 0, mode->width, mode->height, 0);
+        }
+        else
+        {
+            glfwSetWindowMonitor(impl->_glfw_window, nullptr, impl->_last_x_pos, impl->_last_y_pos,
+                                 impl->_last_x_scale, impl->_last_y_scale, 0);
+        }
+    }
+
+    bool Window::is_fullscreen()
+    {
+        WindowImpl* impl = getImpl(this);
+        return glfwGetWindowMonitor(impl->_glfw_window) != nullptr;
+    }
 
     void Window::add_resize_listener(std::function<void(resize_event)> callback)
     {

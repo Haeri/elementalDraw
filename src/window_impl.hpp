@@ -25,6 +25,10 @@ namespace elemd
         float _x_offset = 0;
         float _y_offset = 0;
         float _dpi_scale = 1;
+        int _last_x_pos = -1;
+        int _last_y_pos = -1;
+        int _last_x_scale = -1;
+        int _last_y_scale = -1;
 
         std::vector<std::function<void(resize_event)>> _resize_callbacks;
         std::vector<std::function<void(mouse_move_event)>> _mouse_move_callbacks;
