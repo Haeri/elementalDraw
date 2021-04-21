@@ -31,7 +31,7 @@ if "%1" == "-static" (
 cmake .. ^
 	-DVCPKG_TARGET_TRIPLET="%triplet_value%" ^
 	-DVCPKG_OVERLAY_PORTS="%root_path%\external\custom-ports" ^
-	-DCMAKE_TOOLCHAIN_FILE="%root_path%/external/vcpkg2/scripts/buildsystems/vcpkg.cmake" %build_type%
+	-DCMAKE_TOOLCHAIN_FILE="%root_path%/external/vcpkg/scripts/buildsystems/vcpkg.cmake" %build_type%
 set /a "err=%err%+%errorlevel%"
 
 
