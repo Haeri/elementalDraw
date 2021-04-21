@@ -16,11 +16,12 @@ class WindowConfig(Structure):
 		("resizeable", c_bool),
 		("visible", c_bool),
 		("vsync", c_bool),
+		("native_pixel_size", c_bool),
 		("icon_file", c_char_p)
 	]
 
-	def __init__(self, title="Python Window", width=400, height=600, position_x=-1, position_y=-1, x_scale=-1, y_scale=-1, decorated=True, transparent=False, resizeable=True, visible=True, vsync=True, icon_file=""):
-		super(WindowConfig, self).__init__(title.encode('utf-8'), width, height, position_x, position_y, x_scale, y_scale, decorated, transparent, resizeable, visible, vsync, icon_file.encode("utf-8"))
+	def __init__(self, title="Python Window", width=400, height=600, position_x=-1, position_y=-1, x_scale=-1, y_scale=-1, decorated=True, transparent=False, resizeable=True, visible=True, vsync=False, native_pixel_size=False, icon_file=""):
+		super(WindowConfig, self).__init__(title.encode('utf-8'), width, height, position_x, position_y, x_scale, y_scale, decorated, transparent, resizeable, visible, vsync, native_pixel_size, icon_file.encode("utf-8"))
 
 
 class color(Structure):
@@ -66,7 +67,8 @@ class Context(Structure):
 		lib.register_font.argtypes = [POINTER(Context), POINTER(font)]
     
 		lib.set_font.argtypes = [POINTER(Context), POINTER(font)]
-    
+
+		lib.set_font_size.argtypes = [POINTER(Context), c_int]
 
 		self.obj = object
 
@@ -93,6 +95,9 @@ class Context(Structure):
 	
 	def set_font(self, font):
 		return lib.set_font(self.obj, font.obj)
+	
+	def set_font_size(self, size):
+		return lib.set_font_size(self.obj, size)
 		
 
 class Window(Structure):

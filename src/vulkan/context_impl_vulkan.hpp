@@ -28,17 +28,17 @@ namespace elemd
 
         struct uniform_rect
         {
-            class color color;      // 32   1
-            vec2 vertices[4];       // 64   2
-            float border_radius[4]; // 32   1
+            class color color;      // 16   1
+            vec2 vertices[4];       // 32   2
+            float border_radius[4]; // 16   1
             float sampler_index;    //
             float use_tint;         //
-            vec2 resolution;        // 32   1
-            vec2 uvs[2];            // 32   1
-            float line_width[4];    // 32   1
+            vec2 resolution;        // 16   1
+            vec2 uvs[2];            // 16   1
+            float line_width[4];    // 16   1
             float shadow_size;      //
             float is_msdf[3];       // 16   1
-        };                          // 256
+        };                          // 128
         
         struct draw_sequence
         {

@@ -2,7 +2,9 @@ import time
 from elemd import *
 
 red_color = color(220, 75, 92, 255)
+blue_color = color(75, 148, 220, 255)
 white_color = color(224, 236, 228, 255)
+dark_color = color(56, 58, 61, 255)
 fps_color = color(60, 236, 50, 255)
 
 sec = 0
@@ -16,17 +18,21 @@ def run(win, ctx):
 	global sec, now, last, frames, accum, fps
 
 	win.poll_events()
-
-	ctx.set_fill_color(red_color)
-	ctx.fill_rect(0, 0, 1000, 1000)
 	ctx.set_clear_color(red_color)
+	#ctx.set_clear_color(blue_color)
 
-	ctx.set_fill_color(white_color)
-	
+    # Rectangle
+	ctx.set_fill_color(dark_color)
+	ctx.fill_rect(40, 40, 420, 150)
+
+    # Runnter
 	sec = (time.time() * 100) % 500
-	ctx.fill_rect(30 + sec, 100, 25, 25)
+	ctx.set_fill_color(white_color)
+	ctx.fill_rect(sec, 0, 25, 25)
 
-	ctx.draw_text(70, 40, "Hello From Python!")
+    # Main text
+	ctx.set_font_size(40)
+	ctx.draw_text(70, 60, "Hello From Python!\nThis is fun :D")
 
 	now = time.time()
 	delta = now - last
@@ -39,7 +45,9 @@ def run(win, ctx):
 	frames = frames + 1
 	accum = accum + delta
 	
+	# FPS counter
 	ctx.set_fill_color(fps_color)
+	ctx.set_font_size(16)
 	ctx.draw_text(6, 0, str(fps))
 
 	ctx.draw_frame()

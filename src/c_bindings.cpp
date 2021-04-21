@@ -109,4 +109,9 @@ extern "C"
     {
         ctx->set_font(font);
     }
+
+    ELEMD_API void set_font_size(elemd::Context* ctx, int size)
+    {
+        ctx->set_font_size(size);
+    }
 }

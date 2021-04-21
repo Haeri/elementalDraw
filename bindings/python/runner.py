@@ -4,11 +4,11 @@ import example
 import importlib
 import os
 
-winc = WindowConfig("Python Hello", 600)
+winc = WindowConfig("Python Hello", 500, 300, native_pixel_size = False, icon_file = "./examples/window_app/res/logo.png")
 win = Window(winc)
 ctx = win.create_context()
 
-urbanist = font("./font/Urbanist-Regular.ttf")
+urbanist = font("./examples/window_app/res/font/Urbanist-Regular.ttf")
 ctx.register_font(urbanist);
 
 ctx.prepare()

@@ -5,13 +5,31 @@
 #include <algorithm>
 #include <vector>
 #include <functional>
- 
-struct Slide
-{
-    std::function<void()> draw;
 
+
+enum State
+{
+    IN,
+    SLIDE,
+    OUT
 };
 
+struct Slide
+{
+    std::function<void(Slide*, float)> draw;
+    float transition_in = 0;
+    float transition_out = 0;
+    
+    State state = IN;
+    float in_progress = 0;
+    float out_progress = 0;
+};
+
+
+struct MorphSlide : Slide
+{
+    int state = 0;
+};
 
 int main(void)
 {
@@ -36,6 +54,9 @@ int main(void)
     elemd::image* teams = elemd::image::create("./res/teams_screen.jpg");
 
 
+    // Load video
+    //elemd::video* sea = elemd::video::create("./res/Sea.mp4");
+
     ctx->_tmp_register_image(img);
     ctx->_tmp_register_image(discrod);
     ctx->_tmp_register_image(github);
@@ -50,9 +71,20 @@ int main(void)
 
     int index = 0;
     std::vector<Slide> slides;
-    slides.push_back({[&](void) { ctx->draw_image(0, 0, 300, 300, img); }});
-    slides.push_back({[&](void) { ctx->draw_image(0, 0, 300, 300, discrod); }});
-    slides.push_back({[&](void) { ctx->draw_image(0, 0, 300, 300, github); }});
+    slides.push_back({[&](Slide* s, float dt) {
+                          if (s->state == IN)
+                          {
+                              float p = s->in_progress / s->transition_in;
+                              ctx->draw_image(30, 30 + (20 - p*20), 300, 300, img);
+                          }
+                          else
+                          {
+                              ctx->draw_image(30, 30, 300, 300, img);
+                          }
+                      },
+                      0.1f});
+    slides.push_back({[&](Slide* s, float dt) { ctx->draw_image(0, 0, 300, 300, discrod); }, 3});
+    slides.push_back({[&](Slide* s, float dt) { ctx->draw_image(0, 0, 300, 300, github); }, 3});
 
    
     // Event
@@ -67,12 +99,18 @@ int main(void)
             if (event.key == elemd::KEY_LEFT)
             {
                 if (index > 0)
-                --index;
+                {
+                    --index;
+                    slides[index].state = IN;
+                }
             }
             if (event.key == elemd::KEY_RIGHT)
             {
-                if (index < slides.size()-1)
-                ++index;
+                if (index < slides.size() - 1)
+                {
+                    ++index;
+                    slides[index].state = IN;
+                }
             }
         }
 
@@ -84,26 +122,31 @@ int main(void)
     ctx->_tmp_prepare();
 //    ctx->set_clear_color(dark);
 
+    double last_time = win->now();
+    float dt = 0;
+
     // Main renderloop
     while (win->is_running())
     {
         win->poll_events();
+
+        if (slides[index].state == IN && slides[index].transition_in > 0)
+        {
+            dt = win->now() - last_time;
+            slides[index].in_progress += dt; 
+            last_time = win->now();
+
+            if (slides[index].in_progress >= slides[index].transition_in)
+            {
+                slides[index].state = SLIDE;
+                slides[index].in_progress = 0;
+            }
+        }
+        slides[index].draw(&slides[index], dt);
         
 
-        //ctx->draw_image(0, 0, 30, 30, img);
-        //ctx->draw_image(40, 0, 30, 30, discrod);
-        //ctx->draw_image(80, 0, 30, 30, github);
-        //ctx->draw_image(120, 0, 30, 30, messenger);
-        //ctx->draw_image(160, 0, 30, 30, messenger2);
-        //ctx->draw_image(200, 0, 30, 30, skype);
-        //ctx->draw_image(0, 40, 30, 30, slack);
-        //ctx->draw_image(40, 40, 30, 30, vc);
-        //ctx->draw_image(80, 40, 30, 30, whatsapp);
-        //ctx->draw_image(120, 40, 30, 30, skype2);
-        //ctx->draw_image(160, 40, 30, 30, teams);
-        slides[index].draw();
-
         ctx->draw_frame();
+
     }
 
     // Cleanup
