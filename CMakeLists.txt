@@ -122,7 +122,7 @@ if (ELEMD_BUILD_EXAMPLES)
   if (BUILD_SHARED_LIBS)
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
-        DEPENDS window-app-runtime painter presenter brick-breaker hello-world overview game-of-life
+        DEPENDS benchmark brick-breaker game-of-life hello-world overview painter presenter window-app-runtime  
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} ${CMAKE_BINARY_DIR}/examples/benchmark/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} ${CMAKE_BINARY_DIR}/examples/brick_breaker/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} ${CMAKE_BINARY_DIR}/examples/game_of_life/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
