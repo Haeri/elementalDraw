@@ -71,7 +71,7 @@ jobs:
     - name: Build
       run: |
         cd ./build
-        make -O2 -s -DNDEBUG
+        make CFLAGS='-O2 -s -DNDEBUG' CXXFLAGS='-O2 -s -DNDEBUG'
     - name: Package
       run: ./scripts/package_linux.sh -${{ matrix.type }}
     - name: Upload
