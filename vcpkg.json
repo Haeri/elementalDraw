@@ -11,10 +11,6 @@
     {
       "name": "glfw3",
       "platform": "!android"
-    },
-  	{
-  		"name": "moltenvk",
-  		"platform": "false"
-  	}
+    }
   ]
 }

@@ -71,7 +71,7 @@ jobs:
     - name: Build
       run: |
         cd ./build
-        make config=${{ matrix.conf }}
+        make -O2 -s -DNDEBUG
     - name: Package
       run: ./scripts/package_linux.sh -${{ matrix.type }}
     - name: Upload
@@ -107,7 +107,7 @@ jobs:
     - name: Build
       run: |
         cd ./build
-        make config=${{ matrix.conf }}
+        xcodebuild -project elemd.xcodeproj -configuration ${{ matrix.conf }}
     - name: Package
       run: ./scripts/package_mac.sh -${{ matrix.type }}
     - name: Upload
