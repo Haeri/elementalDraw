@@ -108,6 +108,9 @@ jobs:
       run: |
         cd ./build
         xcodebuild -project elemd.xcodeproj -configuration ${{ matrix.conf }}
+    - name: Debug 2
+      if: ${{ failure() }}
+      run: find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
     - name: Package
       run: ./scripts/package_mac.sh -${{ matrix.type }}
     - name: Upload
