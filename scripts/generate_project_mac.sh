@@ -8,7 +8,7 @@ root_path=$(pwd)
 
 if [ ! -d $root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" ]; then
 	echo "INFO: You forgot to download the submodules. I'll fix that for you."
-    git submodule update --init
+	git submodule update --init
 fi
 
 if [ ! -d "build/" ]; then

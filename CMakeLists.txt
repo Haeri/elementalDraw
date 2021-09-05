@@ -34,11 +34,11 @@ add_compile_definitions("ELEMD_RENDERING_BACKEND_${ELEMD_RENDERING_BACKEND_UPPER
 file(GLOB SOURCE_FILES
     include/${PROJECT_NAME}/*.hpp
     src/*    
- )
- file(GLOB_RECURSE SOURCE_FILES
+)
+file(GLOB_RECURSE SOURCE_FILES
     ${SOURCE_FILES}
     src/${ELEMD_RENDERING_BACKEND}/*
- )
+)
 
 # Microsoft Runtime Library shenanigens
 if(NOT DYNAMIC_RUNTIME_LIBRARY) 
@@ -59,8 +59,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
-	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-	$<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
 
 message("ELEMD_RENDERING_BACKEND: " ${ELEMD_RENDERING_BACKEND_UPPER})

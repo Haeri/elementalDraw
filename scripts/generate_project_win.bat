@@ -12,10 +12,9 @@ cd "%~dp0"
 cd ..
 set root_path=%cd%
 
-
 if not exist "%root_path%\external\vcpkg\scripts\buildsystems\vcpkg.cmake" (
-    echo INFO: You forgot to download the submodules. I'll fix that for you.
-    git submodule update --init
+	echo INFO: You forgot to download the submodules. I'll fix that for you.
+	git submodule update --init
 )
 
 if not exist "build/" (
