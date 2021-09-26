@@ -730,6 +730,29 @@ namespace elemd
         }
     }
 
+    void Context::_upload_video(video* video)
+    {
+        /*
+        ContextImplOpengl* impl = getImpl(this);
+        videoImplOpengl* vid = (videoImplOpengl*)video;
+        if (!vid->_uploaded)
+        {
+            vid->upload();
+            if (vid->images.size() > impl->texture_array_size)
+            {
+                img->_sampler_index = 0;
+                std::cerr << "Too many textures glyps loaded!" << std::endl;
+            }
+            else
+            {
+                vid->_sampler_index = (int)impl->images.size();
+                impl->images.push_back(img);
+            }
+        }
+        */
+    }
+
+
     void Context::_tmp_register_font(font* font)
     {
         ContextImplOpengl* impl = getImpl(this);

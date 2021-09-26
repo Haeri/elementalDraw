@@ -7,6 +7,7 @@
 
 #include "color.hpp"
 #include "image.hpp"
+#include "video.hpp"
 #include "font.hpp"
 
 namespace elemd
@@ -91,6 +92,7 @@ namespace elemd
         void resize_context(int width, int height);
 
         void _tmp_register_image(image* image);
+        void _upload_video(video* video);
         void _tmp_register_font(font* font);
         void _tmp_prepare();
 

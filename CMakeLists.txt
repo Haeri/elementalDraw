@@ -10,7 +10,7 @@ endif()
 if(APPLE)
     set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
 else()
-    set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
+    set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
 endif()
 
 # Options
@@ -69,7 +69,6 @@ message("DYNAMIC_RUNTIME_LIBRARY: ${DYNAMIC_RUNTIME_LIBRARY}")
 message("CMAKE_MSVC_RUNTIME_LIBRARY: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
 
 
-
 # ---------------- DEPENDENCIES ---------------------#
 
 if(NOT ANDROID)
@@ -82,7 +81,11 @@ endif()
 find_package(freetype CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
 
-
+# ffmpeg
+find_package(ffmpeg REQUIRED)
+target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
+target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARIES})
 
 
 # ---------------- EXAMPLES ---------------------#
