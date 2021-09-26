@@ -10,7 +10,6 @@ Portable C++ canvas library with a Vulkan (Windows, Linux) and OpenGL (MacOS) ba
 
 ## Build Requirements
 - [CMake 3.16^](https://cmake.org/download/) 
-- [Python 3^](https://www.python.org/downloads/)
 
 ## Setup
 

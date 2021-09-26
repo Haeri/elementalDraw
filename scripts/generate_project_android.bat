@@ -12,6 +12,11 @@ cd "%~dp0"
 cd ..
 set root_path=%cd%
 
+if not exist "%root_path%\external\vcpkg\scripts\buildsystems\vcpkg.cmake" (
+	echo INFO: You forgot to download the submodules. I'll fix that for you.
+	git submodule update --init
+)
+
 if not exist "build/" (
 	echo INFO: First time setup will take longer as the dependencies need to be downloaded and compiled.
 ) else (
@@ -32,10 +37,10 @@ cmake .. ^
 	-G "MinGW Makefiles" ^
 	-DVCPKG_TARGET_TRIPLET="%triplet_value%" ^
 	-DVCPKG_OVERLAY_PORTS="%root_path%\external\custom-ports" ^
-	-DCMAKE_TOOLCHAIN_FILE="%root_path%/external/vcpkg/scripts/buildsystems/vcpkg.cmake" %build_type% ^
+	-DCMAKE_TOOLCHAIN_FILE="%root_path%\external\vcpkg\scripts\buildsystems\vcpkg.cmake" %build_type% ^
   	-DANDROID_PLATFORM="android-21" ^
   	-DANDROID_ABI="arm64-v8a" ^
-  	-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="%ANDROID_NDK_HOME%/build/cmake/android.toolchain.cmake"
+  	-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="%ANDROID_NDK_HOME%\build\cmake\android.toolchain.cmake"
 set /a "err=%err%+%errorlevel%"
 
 

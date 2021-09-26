@@ -71,7 +71,7 @@ jobs:
     - name: Build
       run: |
         cd ./build
-        make config=${{ matrix.conf }}
+        make CFLAGS='-O2 -s -DNDEBUG' CXXFLAGS='-O2 -s -DNDEBUG'
     - name: Package
       run: ./scripts/package_linux.sh -${{ matrix.type }}
     - name: Upload
@@ -107,7 +107,10 @@ jobs:
     - name: Build
       run: |
         cd ./build
-        make config=${{ matrix.conf }}
+        xcodebuild -project elemd.xcodeproj -configuration ${{ matrix.conf }}
+    - name: Debug 2
+      if: ${{ failure() }}
+      run: find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
     - name: Package
       run: ./scripts/package_mac.sh -${{ matrix.type }}
     - name: Upload

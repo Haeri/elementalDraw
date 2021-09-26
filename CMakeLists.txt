@@ -34,11 +34,11 @@ add_compile_definitions("ELEMD_RENDERING_BACKEND_${ELEMD_RENDERING_BACKEND_UPPER
 file(GLOB SOURCE_FILES
     include/${PROJECT_NAME}/*.hpp
     src/*    
- )
- file(GLOB_RECURSE SOURCE_FILES
+)
+file(GLOB_RECURSE SOURCE_FILES
     ${SOURCE_FILES}
     src/${ELEMD_RENDERING_BACKEND}/*
- )
+)
 
 # Microsoft Runtime Library shenanigens
 if(NOT DYNAMIC_RUNTIME_LIBRARY) 
@@ -59,8 +59,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
-	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-	$<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
 
 message("ELEMD_RENDERING_BACKEND: " ${ELEMD_RENDERING_BACKEND_UPPER})
@@ -90,17 +90,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARIES})
 
 # ---------------- EXAMPLES ---------------------#
 
-if(APPLE)
-    set(CONVERTER_POSTFIX "mac.sh")
-    set(SHARED_LIB_NAME "lib${PROJECT_NAME}.dylib")
-elseif(WIN32) 
-    set(CONVERTER_POSTFIX "win.bat")
-    set(SHARED_LIB_NAME "${PROJECT_NAME}.dll")
-else()
-    set(CONVERTER_POSTFIX "linux.sh")
-    set(SHARED_LIB_NAME "lib${PROJECT_NAME}.so")
-endif()
-
 if (ELEMD_BUILD_EXAMPLES)
     add_subdirectory(examples/benchmark)
     add_subdirectory(examples/brick_breaker)
@@ -125,15 +114,15 @@ if (ELEMD_BUILD_EXAMPLES)
   if (BUILD_SHARED_LIBS)
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
-        DEPENDS window-app-runtime painter presenter brick-breaker hello-world overview game-of-life
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/benchmark/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/brick_breaker/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/game_of_life/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/hello_world/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/overview/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/presenter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} examples/window_app_runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${SHARED_LIB_NAME} 
+        DEPENDS benchmark brick-breaker game-of-life hello-world overview painter presenter window-app-runtime  
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/benchmark/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/brick_breaker/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/game_of_life/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/hello_world/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/overview/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}> 
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/presenter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}> 
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/window_app_runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
         COMMENT "Copy library"
     )
   endif()
