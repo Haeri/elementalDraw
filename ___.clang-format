@@ -1,6 +1,6 @@
 BasedOnStyle: Microsoft
 
-Language: Cpp
+Language: C
 NamespaceIndentation: All
 ColumnLimit: 100
 AccessModifierOffset: -4
