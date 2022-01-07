@@ -1,7 +1,12 @@
 #include "elemd/color.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 
 //#include <iostream>
 //#include <sstream>
@@ -13,69 +18,53 @@
 #define sscanf_cross sscanf
 #endif
 
-#ifdef __cplusplus
-extern "C"
+// HELPER
+float lerp(float a, float b, float t)
 {
-#endif
-
-Color* elemd_color_new() {
-    Color* c = malloc(sizeof(Color));
-    c->r = 0.0f;
-    c->g = 0.0f;
-    c->b = 0.0f;
-    c->a = 0.0f;    
-    return c;
-}
-Color* elemd_color_new(float r, float g, float b) {
-    Color* c = malloc(sizeof(Color));
-    c->r = r;
-    c->g = g;
-    c->b = b;
-    c->a = 1.0f;
-    return c;
-}
-Color* elemd_color_new(float r, float g, float b, float a) {
-    Color* c = malloc(sizeof(Color));
-    c->r = r;
-    c->g = g;
-    c->b = b;
-    c->a = a;
-    return c;
+    return (b - a) * t + a;
 }
 
-Color* elemd_color_new(int r, int g, int b)
-{
-    Color* c = malloc(sizeof(Color));
-    c->r = r / 255.0f;
-    c->g = g / 255.0f;
-    c->b = b / 255.0f;
-    c->a = 1.0f;
-    return c;
+int count_digits(int num) {
+    return num == 0 ? 1 : log10(num) + 1;
 }
 
-Color* elemd_color_new(int r, int g, int b, int a)
+ELEMDColor elemd_color_init() 
 {
-    Color* c = malloc(sizeof(Color));
-    c->r = r / 255.0f;
-    c->g = g / 255.0f;
-    c->b = b / 255.0f;
-    c->a = a / 255.0f;
+    ELEMDColor c = { 0.0f, 0.0f, 0.0f, 0.0f };
+    return c;
+}
+ELEMDColor elemd_color_initf(float r, float g, float b) 
+{
+    ELEMDColor c = { r, g, b, 1.0f };
+    return c;
+}
+ELEMDColor elemd_color_initfa(float r, float g, float b, float a) 
+{
+    ELEMDColor c = { r, g, b, a };
+    return c;
+}
+ELEMDColor elemd_color_initi(int r, int g, int b)
+{
+    ELEMDColor c = { r / 255.0f, g / 255.0f, b / 255.0f, 1.0f };
+    return c;
+}
+ELEMDColor elemd_color_initia(int r, int g, int b, int a)
+{
+    ELEMDColor c = { r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f };
+    return c;
+}
+ELEMDColor elemd_color_initix(int hex)
+{
+    ELEMDColor c;
+    c.r = ((hex >> 16) & 0xFF) / 255.0f;
+    c.g = ((hex >>  8) & 0xFF) / 255.0f;
+    c.b = ((hex      ) & 0xFF) / 255.0f;
+    c.a = 1.0f;
     return c;
 }
 
-Color* elemd_color_new(int hex)
+ELEMDColor elemd_color_initcx(char* hex)
 {
-    Color* c = malloc(sizeof(Color));
-    c->r = ((hex >> 16) & 0xFF) / 255.0f;
-    c->g = ((hex >>  8) & 0xFF) / 255.0f;
-    c->b = ((hex      ) & 0xFF) / 255.0f;
-    c->a = 1.0f;
-    return c;
-}
-
-Color* elemd_color_new(char* hex)
-{
-    Color* c = malloc(sizeof(Color));
     unsigned int r = 0;
     unsigned int g = 0;
     unsigned int b = 0;
@@ -102,110 +91,88 @@ Color* elemd_color_new(char* hex)
         fprintf(stderr, "Warning: Malformed hex color %s. Please use format #RRGGBB or #RRGGBBAA.\n", hex);
     }
 
-    c->r = r / 255.0f;
-    c->g = g / 255.0f;
-    c->b = b / 255.0f;
-    c->a = a / 255.0f;
+    ELEMDColor c = { r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f };
     return c;
 }
-/*
 
-uint8_t color::r()
+
+uint8_t elemd_color_rui(const ELEMDColor* color) 
 {
-    return (uint8_t)std::min((int)(_r * 255), 255);
+    return MIN((uint8_t)(color->r * 255), (uint8_t)255);
+}
+uint8_t elemd_color_gui(const ELEMDColor* color)
+{
+    return MIN((uint8_t)(color->g * 255), (uint8_t)255);
+}
+uint8_t elemd_color_bui(const ELEMDColor* color)
+{
+    return MIN((uint8_t)(color->b * 255), (uint8_t)255);
+}
+uint8_t elemd_color_aui(const ELEMDColor* color)
+{
+    return MIN((uint8_t)(color->a * 255), (uint8_t)255);
 }
 
-uint8_t color::g()
-{
-    return (uint8_t)std::min((int)(_g * 255), 255);
-}
 
-uint8_t color::b()
-{
-    return (uint8_t)std::min((int)(_b * 255), 255);
-}
 
-uint8_t color::a()
-{
-    return (uint8_t)std::min((int)(_a * 255), 255);
-}
 
-float color::rf()
+size_t elemd_color_hex(const ELEMDColor* color, char* out)
 {
-    return _r;
-}
+    // "#rrggbbaa\0 -> 10 Bytes"  
+    //char tmp[10];
+    int hex = 0;
+    size_t len = 0;
 
-float color::gf()
-{
-    return _g;
-}
+    int r = elemd_color_rui(color);
+    int g = elemd_color_gui(color);
+    int b = elemd_color_bui(color);
 
-float color::bf()
-{
-    return _b;
-}
-
-float color::af()
-{
-    return _a;
-}
-
-std::string color::hex()
-{
-    std::stringstream ss;
-    if (_a == 1.0f) {
-        ss << "#" << std::hex << (r() << 16 | g() << 8 | b());
+    if (color->a > 0.0f) {
+        int a = elemd_color_aui(color);
+        len = 8;
+        hex = r << 24 | g << 16 | b << 8 | a;
     }
     else
     {
-        ss << "#" << std::hex << (r() << 24 | g() << 16 | b() << 8 | a());
+        len = 10;
+        hex = r << 16 | g << 8 | b;
     }
-
-    return ss.str();
+    snprintf(out, len, "#%x", hex);
+    return len;
 }
-
-std::string color::rgb()
+size_t elemd_color_rgb(const ELEMDColor* color, char* out)
 {
-    return "rgb(" + std::to_string(r()) + ", " + std::to_string(g()) + ", " + std::to_string(b()) + ")";
+    // "rgb(, , )\0 -> 10 Bytes"
+    int r = elemd_color_rui(color);
+    int g = elemd_color_gui(color);
+    int b = elemd_color_bui(color);
+    size_t len = 10 + count_digits(r) + count_digits(g) + count_digits(b);
+    snprintf(out, strlen(out), "rgb(%i, %i, %i)", r, g, b);
+    return len;
 }
-
-std::string color::rgba()
+size_t elemd_color_rgba(const ELEMDColor* color, char* out)
 {
-    return "rgba(" + std::to_string(r()) + ", " + std::to_string(g()) + ", " +
-            std::to_string(b()) + ", " + std::to_string(a()) + ")";
+    // "rgba(, , , )\0 -> 13 Bytes"    
+    int r = elemd_color_rui(color);
+    int g = elemd_color_gui(color);
+    int b = elemd_color_bui(color);
+    int a = elemd_color_aui(color);
+    size_t len = 13 + count_digits(r) + count_digits(g) + count_digits(b) + count_digits(a);
+    snprintf(out, len, "rgba(%i, %i, %i, %i)", r, g, b, a);
+    return len;
 }
 
-inline float lerp(float a, float b, float t)
-{
-    return (b - a) * t + a;
+
+ELEMDColor elemd_color_lerp(const ELEMDColor* a, const ELEMDColor* b, float t) {
+    float _r = lerp(a->r, b->r, t);
+    float _g = lerp(a->g, b->g, t);
+    float _b = lerp(a->b, b->b, t);
+    float _a = lerp(a->a, b->a, t);
+
+    ELEMDColor c = { _r, _g, _b, _a };
+    return c;
 }
 
-color color::color_lerp(color a, color b, float t)
-{
-    float _r = lerp(a.rf(), b.rf(), t);
-    float _g = lerp(a.gf(), b.gf(), t);
-    float _b = lerp(a.bf(), b.bf(), t);
-    float _a = lerp(a.af(), b.af(), t);
-
-    return elemd::color(_r, _g, _b, _a);
+bool elemd_color_equals(ELEMDColor* a, ELEMDColor* b) {
+    return (a->r == b->r && a->g == b->g && a->b == b->b && a->a == b->a);
 }
-
-bool color::operator==(const color& other) const
-{
-    return (_r == other._r && _g == other._g && _b == other._b && _a == other._a);
-}
-
-bool color::operator!=(const color& other) const
-{
-    return (_r != other._r || _g != other._g || _b != other._b || _a != other._a);
-}
-
-std::ostream& operator<<(std::ostream& os, color c)
-{
-    return os << c.rgba();
-}
-*/
-
-#ifdef __cplusplus
-}
-#endif

@@ -1,4 +1,4 @@
-#include "vulkan_utils.hpp"
+#include "vulkan_utils.h"
 
 #include <iostream>
 #include <fstream>
@@ -43,26 +43,26 @@ namespace elemd::vku
 
         VkShaderModuleCreateInfo shaderModuleCreateInfo{};
         shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        shaderModuleCreateInfo.pNext = nullptr;
+        shaderModuleCreateInfo.pNext = NULL;
         shaderModuleCreateInfo.flags = 0;
         shaderModuleCreateInfo.codeSize = spirvCode.size();
         shaderModuleCreateInfo.pCode = (uint32_t*)spirvCode.data();
 
         vku::err_check(vkCreateShaderModule(VulkanSharedInfo::getInstance()->device,
-                                            &shaderModuleCreateInfo, nullptr, shaderModule));
+                                            &shaderModuleCreateInfo, NULL, shaderModule));
     }
 
     void create_shader_module(std::vector<unsigned char> data, VkShaderModule* shaderModule)
     {
         VkShaderModuleCreateInfo shaderModuleCreateInfo{};
         shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        shaderModuleCreateInfo.pNext = nullptr;
+        shaderModuleCreateInfo.pNext = NULL;
         shaderModuleCreateInfo.flags = 0;
         shaderModuleCreateInfo.codeSize = data.size();
         shaderModuleCreateInfo.pCode = (uint32_t*)data.data();
 
         vku::err_check(vkCreateShaderModule(VulkanSharedInfo::getInstance()->device,
-                                            &shaderModuleCreateInfo, nullptr, shaderModule));
+                                            &shaderModuleCreateInfo, NULL, shaderModule));
     }
 
     std::vector<char> read_shader(const std::string& filename)
@@ -127,7 +127,7 @@ namespace elemd::vku
 
         VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        commandBufferAllocateInfo.pNext = nullptr;
+        commandBufferAllocateInfo.pNext = NULL;
         commandBufferAllocateInfo.commandPool = commandPool;
         commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         commandBufferAllocateInfo.commandBufferCount = 1;
@@ -140,9 +140,9 @@ namespace elemd::vku
 
         VkCommandBufferBeginInfo commandBufferBeginInfo;
         commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        commandBufferBeginInfo.pNext = nullptr;
+        commandBufferBeginInfo.pNext = NULL;
         commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        commandBufferBeginInfo.pInheritanceInfo = nullptr;
+        commandBufferBeginInfo.pInheritanceInfo = NULL;
 
         err_check(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
 
@@ -156,14 +156,14 @@ namespace elemd::vku
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.pNext = nullptr;
+        submitInfo.pNext = NULL;
         submitInfo.waitSemaphoreCount = 0;
-        submitInfo.pWaitSemaphores = nullptr;
-        submitInfo.pWaitDstStageMask = nullptr;
+        submitInfo.pWaitSemaphores = NULL;
+        submitInfo.pWaitDstStageMask = NULL;
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &commandBuffer;
         submitInfo.signalSemaphoreCount = 0;
-        submitInfo.pSignalSemaphores = nullptr;
+        submitInfo.pSignalSemaphores = NULL;
 
         vku::err_check(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 
@@ -181,17 +181,17 @@ namespace elemd::vku
 
         VkBufferCreateInfo bufferCreateInfo{};
         bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferCreateInfo.pNext = nullptr;
+        bufferCreateInfo.pNext = NULL;
         bufferCreateInfo.flags = 0;
         bufferCreateInfo.size = deviceSize;
         bufferCreateInfo.usage = bufferUsageFlags;
         bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         bufferCreateInfo.queueFamilyIndexCount = 0;
-        bufferCreateInfo.pQueueFamilyIndices = nullptr;
+        bufferCreateInfo.pQueueFamilyIndices = NULL;
 
         // --------------- Create Buffer ---------------
 
-        vku::err_check(vkCreateBuffer(VulkanSharedInfo::getInstance()->device, &bufferCreateInfo, nullptr, &buffer));
+        vku::err_check(vkCreateBuffer(VulkanSharedInfo::getInstance()->device, &bufferCreateInfo, NULL, &buffer));
 
         VkMemoryRequirements memoryRequirements{};
         vkGetBufferMemoryRequirements(VulkanSharedInfo::getInstance()->device, buffer,
@@ -199,7 +199,7 @@ namespace elemd::vku
 
         VkMemoryAllocateInfo memoryAllocateInfo{};
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        memoryAllocateInfo.pNext = nullptr;
+        memoryAllocateInfo.pNext = NULL;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
         memoryAllocateInfo.memoryTypeIndex =
             vku::find_memory_type_index(memoryRequirements.memoryTypeBits, memoryPropertyFlags);
@@ -207,7 +207,7 @@ namespace elemd::vku
         // --------------- Allocate Memory ---------------
 
         vku::err_check(vkAllocateMemory(VulkanSharedInfo::getInstance()->device,
-                                        &memoryAllocateInfo, nullptr, &deviceMemory));
+                                        &memoryAllocateInfo, NULL, &deviceMemory));
 
         vkBindBufferMemory(VulkanSharedInfo::getInstance()->device, buffer, deviceMemory, 0);
     }
@@ -285,7 +285,7 @@ namespace elemd::vku
     void print_layers()
     {
         uint32_t layerCount = 0;
-        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+        vkEnumerateInstanceLayerProperties(&layerCount, NULL);
         VkLayerProperties* layerProperties = new VkLayerProperties[layerCount];
         vkEnumerateInstanceLayerProperties(&layerCount, layerProperties);
 
@@ -308,9 +308,9 @@ namespace elemd::vku
     void print_extensions()
     {
         uint32_t extencionCount = 0;
-        vkEnumerateInstanceExtensionProperties(nullptr, &extencionCount, nullptr);
+        vkEnumerateInstanceExtensionProperties(NULL, &extencionCount, NULL);
         VkExtensionProperties* extensionProperties = new VkExtensionProperties[extencionCount];
-        vkEnumerateInstanceExtensionProperties(nullptr, &extencionCount, extensionProperties);
+        vkEnumerateInstanceExtensionProperties(NULL, &extencionCount, extensionProperties);
 
         std::cout << "\"VkExtensionProperties\": [\n";
         for (uint32_t i = 0; i < extencionCount; ++i)

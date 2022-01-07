@@ -16,12 +16,13 @@ endif()
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
+option(ELEMD_BUILD_TEST "Build testig suite" ON)
 option(DYNAMIC_RUNTIME_LIBRARY "Set runtime library to dynamic" ${BUILD_SHARED_LIBS})
 set(ELEMD_RENDERING_BACKEND ${ELEMD_DEFAULT_RENDERING_BACKEND} CACHE STRING "Choose Backend (vulkan, opengl)")
 string(TOUPPER ${ELEMD_RENDERING_BACKEND} ELEMD_RENDERING_BACKEND_UPPER)
 
 # Settings
-#set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINE_HIDDEN YES)
@@ -32,13 +33,16 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_compile_definitions("ELEMD_RENDERING_BACKEND_${ELEMD_RENDERING_BACKEND_UPPER}")
 
 file(GLOB SOURCE_FILES
-    include/${PROJECT_NAME}/*.h
-    src/*    
+#    include/${PROJECT_NAME}/*.h
+#    src/*    
+    include/${PROJECT_NAME}/color.h
+    include/${PROJECT_NAME}/elemental_draw.h
+    src/color.c
 )
-file(GLOB_RECURSE SOURCE_FILES
-    ${SOURCE_FILES}
-    src/${ELEMD_RENDERING_BACKEND}/*
-)
+#file(GLOB_RECURSE SOURCE_FILES
+#    ${SOURCE_FILES}
+#    src/${ELEMD_RENDERING_BACKEND}/*
+#)
 
 # Microsoft Runtime Library shenanigens
 if(NOT DYNAMIC_RUNTIME_LIBRARY) 
@@ -125,6 +129,22 @@ if (ELEMD_BUILD_EXAMPLES)
   endif()
 endif()
 
+
+
+# ---------------- TESTING ---------------------#
+
+if (ELEMD_BUILD_TEST)
+    add_subdirectory(test)
+    set_target_properties(elemd-test PROPERTIES FOLDER test)
+      if (BUILD_SHARED_LIBS)
+        add_custom_command(
+            TARGET ${PROJECT_NAME} POST_BUILD
+            DEPENDS elemd-test
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/test/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
+            COMMENT "Copy library"
+        )
+    endif()
+endif()
 
 
 # ---------------- EXPORT ---------------------#

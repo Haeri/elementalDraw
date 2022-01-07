@@ -1,20 +1,20 @@
 #ifndef ELEMD_VULKAN_CONTEXT_HPP
 #define ELEMD_VULKAN_CONTEXT_HPP
 
-#include "elemd/context.hpp"
+#include "elemd/context.h"
 
 #include <string>
 #include <vector>
 #include <array>
 #include <atomic>
 
-#include "elemd/vec2.hpp"
-#include "elemd/color.hpp"
-#include "vertex.hpp"
-#include "vulkan_shared_info.hpp"
-#include "vulkan_utils.hpp"
-#include "../window_impl.hpp"
-#include "image_impl_vulkan.hpp"
+#include "elemd/vec2.h"
+#include "elemd/color.h"
+#include "vertex.h"
+#include "vulkan_shared_info.h"
+#include "vulkan_utils.h"
+#include "../window_impl.h"
+#include "image_impl_vulkan.h"
 
 #define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536*2
 #define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE UNIFORM_BUFFER_ARRAY_MAX_COUNT * sizeof(uniform_rect)

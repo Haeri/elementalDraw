@@ -1,9 +1,9 @@
-#ifndef ELEMD_WINDOW_HPP
-#define ELEMD_WINDOW_HPP
+#ifndef ELEMD_WINDOW_H
+#define ELEMD_WINDOW_H
 
-#include "elemd/elemental_draw.hpp"
-#include "elemd/event.hpp"
-#include "elemd/vec2.hpp"
+#include "elemd/elemental_draw.h"
+#include "elemd/event.h"
+#include "elemd/vec2.h"
 
 #include <string>
 #include <cstdint>
@@ -41,7 +41,7 @@ namespace elemd
         bool vsync = false;
         bool native_pixel_size = false;
 
-        const char* icon_file = nullptr;
+        const char* icon_file = NULL;
     };
 
     enum CURSOR_TYPE
@@ -120,10 +120,10 @@ namespace elemd
         virtual ~Window() = default;
 
 
-        Context* _context = nullptr;
+        Context* _context = NULL;
         bool _vsync = true;        
     };
 
 } // namespace elemd
 
-#endif // ELEMD_WINDOW_HPP
+#endif // ELEMD_WINDOW_H

@@ -1,10 +1,10 @@
-#include "font_impl_vulkan.hpp"
+#include "font_impl_vulkan.h"
 
 #include <iostream>
 #include <vector>
 #include <map>
 
-#include "image_impl_vulkan.hpp"
+#include "image_impl_vulkan.h"
 
 namespace elemd
 {

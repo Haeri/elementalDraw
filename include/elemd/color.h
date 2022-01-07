@@ -1,8 +1,8 @@
 #ifndef ELEMD_COLOR_H
 #define ELEMD_COLOR_H
 
-//#include <cstdint>
-//#include <string>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include <elemd/elemental_draw.h>
 
@@ -11,46 +11,33 @@ extern "C"
 {
 #endif
 
-typedef struct {
+typedef struct ELEMDColor{
     float r;
     float g;
     float b;
     float a;
-}  Color;
+}  ELEMDColor;
 
-ELEMD_API Color* elemd_color_new();
-ELEMD_API Color* elemd_color_new(float r, float g, float b);
-ELEMD_API Color* elemd_color_new(float r, float g, float b, float a);
-ELEMD_API Color* elemd_color_new(int r, int g, int b);
-ELEMD_API Color* elemd_color_new(int r, int g, int b, int a);
-ELEMD_API Color* elemd_color_new(int hex);
-ELEMD_API Color* elemd_color_new(char* hex);
+ELEMD_API ELEMDColor elemd_color_init();
+ELEMD_API ELEMDColor elemd_color_initf(float r, float g, float b);
+ELEMD_API ELEMDColor elemd_color_initfa(float r, float g, float b, float a);
+ELEMD_API ELEMDColor elemd_color_initi(int r, int g, int b);
+ELEMD_API ELEMDColor elemd_color_initia(int r, int g, int b, int a);
+ELEMD_API ELEMDColor elemd_color_initix(int hex);
+ELEMD_API ELEMDColor elemd_color_initcx(char* hex);
 
-/*
+ELEMD_API uint8_t elemd_color_rui(const ELEMDColor* color);
+ELEMD_API uint8_t elemd_color_gui(const ELEMDColor* color);
+ELEMD_API uint8_t elemd_color_bui(const ELEMDColor* color);
+ELEMD_API uint8_t elemd_color_aui(const ELEMDColor* color);
 
+ELEMD_API size_t elemd_color_hex(const ELEMDColor* color, char* out);
+ELEMD_API size_t elemd_color_rgb(const ELEMDColor* color, char* out);
+ELEMD_API size_t elemd_color_rgba(const ELEMDColor* color, char* out);
 
-        uint8_t r();
-        uint8_t g();
-        uint8_t b();
-        uint8_t a();
+ELEMD_API ELEMDColor elemd_color_lerp(const ELEMDColor* a, const ELEMDColor* b, float t);
+ELEMD_API bool elemd_color_equals(ELEMDColor* a, ELEMDColor* b);
 
-        float rf();
-        float gf();
-        float bf();
-        float af();
-
-        std::string hex();
-        std::string rgb();
-        std::string rgba();
-
-        static color color_lerp(color a, color b, float t);
-
-        bool operator==(const color& other) const;
-        bool operator!=(const color& other) const;
-
-        friend std::ostream& operator<<(std::ostream& os, color c);
-
-*/
 #ifdef __cplusplus
 }
 #endif

@@ -2,9 +2,9 @@
 #define ELEMD_FONT_HPP
 
 #include <map>
-#include <elemd/elemental_draw.hpp>
-#include <elemd/vec2.hpp>
-#include <elemd/image.hpp>
+#include <elemd/elemental_draw.h>
+#include <elemd/vec2.h>
+#include <elemd/image.h>
 
 #define LOADED_HEIGHT 128
 //#define NUM_GLYPHS 128

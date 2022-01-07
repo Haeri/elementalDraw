@@ -5,7 +5,7 @@
 #include <vector>
 #include <cstring>
 
-#include "vulkan_shared_info.hpp"
+#include "vulkan_shared_info.h"
 
 namespace elemd::vku 
 {
@@ -72,8 +72,8 @@ namespace elemd::vku
 
         // --------------- Cleanup ---------------
 
-        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, stagingBuffer, nullptr);
-        vkFreeMemory(VulkanSharedInfo::getInstance()->device, stagingBufferDeviceMemory, nullptr);
+        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, stagingBuffer, NULL);
+        vkFreeMemory(VulkanSharedInfo::getInstance()->device, stagingBufferDeviceMemory, NULL);
     }
 
     void create_shader_module(const std::string& filename, VkShaderModule* shaderModule);

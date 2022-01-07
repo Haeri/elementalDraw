@@ -1,7 +1,7 @@
 #ifndef ELEMD_EVENT_HPP
 #define ELEMD_EVENT_HPP
 
-#include "elemental_draw.hpp"
+#include "elemental_draw.h"
 
 namespace elemd
 {

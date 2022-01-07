@@ -1,4 +1,4 @@
-#include "elemd/context.hpp"
+#include "elemd/context.h"
 
 namespace elemd
 {
@@ -19,7 +19,7 @@ namespace elemd
 
     void Context::set_font(font* font)
     {
-        if (font == nullptr)
+        if (font == NULL)
         {
             _font = _default_font;
         }

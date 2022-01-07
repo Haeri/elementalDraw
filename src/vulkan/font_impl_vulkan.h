@@ -1,7 +1,7 @@
 #ifndef ELEMD_FONT_IMPL_VULKAN_HPP
 #define ELEMD_FONT_IMPL_VULKAN_HPP
 
-#include "elemd/font.hpp"
+#include "elemd/font.h"
 
 #include "glad/vulkan.h"
 #include <ft2build.h>

@@ -1,14 +1,14 @@
-#include "window_impl.hpp"
+#include "window_impl.h"
 
 #include <iostream>
 #include "stb_image.h"
 
-#include "elemd/context.hpp"
+#include "elemd/context.h"
 
 #if defined(ELEMD_RENDERING_BACKEND_VULKAN)
-#include "vulkan/vulkan_shared_info.hpp"
+#include "vulkan/vulkan_shared_info.h"
 #elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
-#include "opengl/opengl_shared_info.hpp"
+#include "opengl/opengl_shared_info.h"
 #endif
 
 #include <GLFW/glfw3.h>
@@ -109,7 +109,7 @@ namespace elemd
         }
         else
         {
-            glfwSetWindowMonitor(impl->_glfw_window, nullptr, impl->_last_x_pos, impl->_last_y_pos,
+            glfwSetWindowMonitor(impl->_glfw_window, NULL, impl->_last_x_pos, impl->_last_y_pos,
                                  impl->_last_x_scale, impl->_last_y_scale, 0);
         }
     }
@@ -117,7 +117,7 @@ namespace elemd
     bool Window::is_fullscreen()
     {
         WindowImpl* impl = getImpl(this);
-        return glfwGetWindowMonitor(impl->_glfw_window) != nullptr;
+        return glfwGetWindowMonitor(impl->_glfw_window) != NULL;
     }
 
     void Window::add_resize_listener(std::function<void(resize_event)> callback)
@@ -181,7 +181,7 @@ namespace elemd
     void Window::set_cursor(Cursor* cursor)
     {
         WindowImpl* impl = getImpl(this);
-        if (cursor == nullptr) {
+        if (cursor == NULL) {
             glfwSetCursor(impl->_glfw_window, NULL);
             return;
         }
@@ -450,7 +450,7 @@ namespace elemd
 
     void WindowImpl::load_icon(const WindowConfig& config)
     {
-        if (config.icon_file == nullptr)
+        if (config.icon_file == NULL)
             return;
 
         GLFWimage icon[1];

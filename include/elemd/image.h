@@ -1,7 +1,7 @@
 #ifndef ELEMD_IMAGE_HPP
 #define ELEMD_IMAGE_HPP
 
-#include <elemd/elemental_draw.hpp>
+#include <elemd/elemental_draw.h>
 
 #include <map>
 #include <string>
@@ -32,7 +32,7 @@ namespace elemd
 
         std::string _name;
 
-        unsigned char* _data = nullptr;
+        unsigned char* _data = NULL;
 
         image() = default;
         virtual ~image() = default;

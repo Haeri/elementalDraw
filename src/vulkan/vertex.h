@@ -4,8 +4,8 @@
 #include <array>
 
 #include "glad/vulkan.h"
-#include "elemd/vec2.hpp"
-#include "elemd/color.hpp"
+#include "elemd/vec2.h"
+#include "elemd/color.h"
 
 namespace elemd
 {

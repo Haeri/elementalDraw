@@ -4,7 +4,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "elemd/window.hpp"
+#include "elemd/window.h"
 
 struct GLFWwindow;
 struct GLFWcursor;
@@ -17,7 +17,7 @@ namespace elemd
         WindowImpl(const WindowConfig& config);
         ~WindowImpl();
 
-        GLFWwindow* _glfw_window = nullptr;
+        GLFWwindow* _glfw_window = NULL;
         uint32_t _windowCount = 0;
 
         float _x_scale = 1;

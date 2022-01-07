@@ -19,7 +19,7 @@ namespace elemd
         uint32_t physicalDeviceCount = -1;
 
         VkInstance instance = VK_NULL_HANDLE;
-        VkPhysicalDevice* physicalDevices = nullptr;
+        VkPhysicalDevice* physicalDevices = NULL;
         VkDevice device = VK_NULL_HANDLE;
         VkPhysicalDevice bestPhysicalDevice = VK_NULL_HANDLE;
 

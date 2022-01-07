@@ -1,4 +1,4 @@
-#include "image_impl_vulkan.hpp"
+#include "image_impl_vulkan.h"
 
 #include <algorithm>
 #include <iostream>
@@ -9,8 +9,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-#include "vulkan_shared_info.hpp"
-#include "vulkan_utils.hpp"
+#include "vulkan_shared_info.h"
+#include "vulkan_utils.h"
 
 namespace elemd
 {
@@ -41,7 +41,7 @@ namespace elemd
     {
         stbi_uc* data =
             stbi_load(file_path.c_str(), &_width, &_height, &_components, STBI_rgb_alpha);
-        if (data != nullptr)
+        if (data != NULL)
         {
             _data = data;
             _image_index[file_path] = this;
@@ -95,11 +95,11 @@ namespace elemd
 
         if (_uploaded)
         {        
-            vkDestroySampler(device, _sampler, nullptr);
-            vkDestroyImageView(device, _imageView, nullptr);
+            vkDestroySampler(device, _sampler, NULL);
+            vkDestroyImageView(device, _imageView, NULL);
             
-            vkDestroyImage(device, _image, nullptr);
-            vkFreeMemory(device, _deviceMemory, nullptr);
+            vkDestroyImage(device, _image, NULL);
+            vkFreeMemory(device, _deviceMemory, NULL);
             
             _uploaded = false;
         }
@@ -143,7 +143,7 @@ namespace elemd
 
         VkImageCreateInfo imageCreateInfo{};
         imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageCreateInfo.pNext = nullptr;
+        imageCreateInfo.pNext = NULL;
         imageCreateInfo.flags = 0;
         imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
         imageCreateInfo.format = format;
@@ -158,22 +158,22 @@ namespace elemd
                                 VK_IMAGE_USAGE_SAMPLED_BIT;
         imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageCreateInfo.queueFamilyIndexCount = 0;
-        imageCreateInfo.pQueueFamilyIndices = nullptr;
+        imageCreateInfo.pQueueFamilyIndices = NULL;
         imageCreateInfo.initialLayout = _imageLayout;
 
-        vku::err_check(vkCreateImage(device, &imageCreateInfo, nullptr, &_image));
+        vku::err_check(vkCreateImage(device, &imageCreateInfo, NULL, &_image));
 
         VkMemoryRequirements memoryRequirements{};
         vkGetImageMemoryRequirements(device, _image, &memoryRequirements);
 
         VkMemoryAllocateInfo memoryAllocateInfo{};
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        memoryAllocateInfo.pNext = nullptr;
+        memoryAllocateInfo.pNext = NULL;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
         memoryAllocateInfo.memoryTypeIndex = vku::find_memory_type_index(
         memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-        vku::err_check(vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &_deviceMemory));
+        vku::err_check(vkAllocateMemory(device, &memoryAllocateInfo, NULL, &_deviceMemory));
 
         vkBindImageMemory(device, _image, _deviceMemory, 0);
 
@@ -186,8 +186,8 @@ namespace elemd
         }
 
 
-        vkDestroyBuffer(device, stagingBuffer, nullptr);
-        vkFreeMemory(device, stagingDeviceMemory, nullptr);
+        vkDestroyBuffer(device, stagingBuffer, NULL);
+        vkFreeMemory(device, stagingDeviceMemory, NULL);
 
         if (_mipLevels > 1)
         {
@@ -197,7 +197,7 @@ namespace elemd
 
         VkImageViewCreateInfo imageViewCreateInfo{};
         imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        imageViewCreateInfo.pNext = nullptr;
+        imageViewCreateInfo.pNext = NULL;
         imageViewCreateInfo.flags = 0;
         imageViewCreateInfo.image = _image;
         imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -213,12 +213,12 @@ namespace elemd
         imageViewCreateInfo.subresourceRange.layerCount = 1;
 
 
-        vku::err_check(vkCreateImageView(device, &imageViewCreateInfo, nullptr, &_imageView));
+        vku::err_check(vkCreateImageView(device, &imageViewCreateInfo, NULL, &_imageView));
         
 
         VkSamplerCreateInfo samplerCreateInfo{};
         samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerCreateInfo.pNext = nullptr;
+        samplerCreateInfo.pNext = NULL;
         samplerCreateInfo.flags = 0;
         samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
         samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
@@ -236,7 +236,7 @@ namespace elemd
         samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
         samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 
-        vku::err_check(vkCreateSampler(device, &samplerCreateInfo, nullptr, &_sampler));
+        vku::err_check(vkCreateSampler(device, &samplerCreateInfo, NULL, &_sampler));
 
         _uploaded = true;
     }
@@ -274,7 +274,7 @@ namespace elemd
 
         VkImageMemoryBarrier imageMemoryBarrier{};
         imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        imageMemoryBarrier.pNext = nullptr;
+        imageMemoryBarrier.pNext = NULL;
         if (_imageLayout == VK_IMAGE_LAYOUT_PREINITIALIZED && layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
         {
             imageMemoryBarrier.srcAccessMask = 0;
@@ -308,8 +308,8 @@ namespace elemd
         imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
         imageMemoryBarrier.subresourceRange.layerCount = 1;
 
-        vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0,
-                             nullptr, 1,
+        vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, NULL, 0,
+                             NULL, 1,
                              &imageMemoryBarrier);
 
         vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
@@ -356,7 +356,7 @@ namespace elemd
             barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
             vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                 VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1,
+                                 VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1,
                                  &barrier);
 
             VkImageBlit blit{};
@@ -383,7 +383,7 @@ namespace elemd
             barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
             vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr,
+                                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL,
                                  1, &barrier);
 
             if (mipWidth > 1)
@@ -399,7 +399,7 @@ namespace elemd
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
         vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1,
+                             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1,
                              &barrier);
 
         vku::endSingleTimeCommands(commandBuffer, commandPool, queue);

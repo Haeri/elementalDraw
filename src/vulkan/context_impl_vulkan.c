@@ -1,4 +1,4 @@
-#include "context_impl_vulkan.hpp"
+#include "context_impl_vulkan.h"
 
 #include <GLFW/glfw3.h>
 #include <algorithm>
@@ -7,9 +7,9 @@
 #include <locale> // for std::wstring_convert
 
 #include "../resources.h"
-#include "../window_impl.hpp"
-#include "font_impl_vulkan.hpp"
-#include "vulkan_shared_info.hpp"
+#include "../window_impl.h"
+#include "font_impl_vulkan.h"
+#include "vulkan_shared_info.h"
 
 namespace elemd
 {
@@ -296,7 +296,7 @@ namespace elemd
     {
         ContextImplVulkan* impl = getImpl(this);
 
-        if (_font == nullptr)
+        if (_font == NULL)
         {
             std::cerr << "Error: No font loaded!" << std::endl;
             return;
@@ -624,7 +624,7 @@ namespace elemd
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.pNext = nullptr;
+        submitInfo.pNext = NULL;
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = &(impl->semaphoreImageAvailable);
         submitInfo.pWaitDstStageMask = waitStageMask;
@@ -637,13 +637,13 @@ namespace elemd
 
         VkPresentInfoKHR presentInfoKHR{};
         presentInfoKHR.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-        presentInfoKHR.pNext = nullptr;
+        presentInfoKHR.pNext = NULL;
         presentInfoKHR.waitSemaphoreCount = 1;
         presentInfoKHR.pWaitSemaphores = &(impl->semaphoreRenderingComplete);
         presentInfoKHR.swapchainCount = 1;
         presentInfoKHR.pSwapchains = &(impl->swapchain);
         presentInfoKHR.pImageIndices = &imageIndex;
-        presentInfoKHR.pResults = nullptr;
+        presentInfoKHR.pResults = NULL;
 
         vku::err_check(vkQueuePresentKHR(impl->queue, &presentInfoKHR));
 
@@ -711,7 +711,7 @@ namespace elemd
     {
         _default_font = font::create(default_font.data(), default_font.size());
         _tmp_register_font(_default_font);
-        if (_font == nullptr)
+        if (_font == NULL)
         {
             set_font(_default_font);
         }
@@ -752,7 +752,7 @@ namespace elemd
         // --------------- Create WIndow Surface ---------------
 
         vku::err_check(glfwCreateWindowSurface(VulkanSharedInfo::getInstance()->instance,
-                                               _window->getGLFWWindow(), nullptr, &surface));
+                                               _window->getGLFWWindow(), NULL, &surface));
     }
 
     void ContextImplVulkan::create_queue()
@@ -791,7 +791,7 @@ namespace elemd
         uint32_t surfaceFormatCount = 0;
         vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(
             VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &surfaceFormatCount,
-            nullptr));
+            NULL));
         VkSurfaceFormatKHR* surfaceFormats = new VkSurfaceFormatKHR[surfaceFormatCount];
         vku::err_check(vkGetPhysicalDeviceSurfaceFormatsKHR(
             VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &surfaceFormatCount,
@@ -832,7 +832,7 @@ namespace elemd
         uint32_t presentModeCount = 0;
         vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(
             VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &presentModeCount,
-            nullptr));
+            NULL));
         VkPresentModeKHR* presentModes = new VkPresentModeKHR[presentModeCount];
         vku::err_check(vkGetPhysicalDeviceSurfacePresentModesKHR(
             VulkanSharedInfo::getInstance()->bestPhysicalDevice, surface, &presentModeCount,
@@ -847,7 +847,7 @@ namespace elemd
 
         VkSwapchainCreateInfoKHR swapchainCreateInfo{};
         swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        swapchainCreateInfo.pNext = nullptr;
+        swapchainCreateInfo.pNext = NULL;
         swapchainCreateInfo.flags = 0;
         swapchainCreateInfo.surface = surface;
         swapchainCreateInfo.minImageCount = selectedImageCount;
@@ -858,7 +858,7 @@ namespace elemd
         swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         swapchainCreateInfo.queueFamilyIndexCount = 0;
-        swapchainCreateInfo.pQueueFamilyIndices = nullptr;
+        swapchainCreateInfo.pQueueFamilyIndices = NULL;
         swapchainCreateInfo.preTransform = surfaceCapabilities.currentTransform;
         swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         swapchainCreateInfo.presentMode = selectedPresentMode;
@@ -868,7 +868,7 @@ namespace elemd
         // --------------- Create Swapchain ---------------
 
         vku::err_check(vkCreateSwapchainKHR(VulkanSharedInfo::getInstance()->device,
-                                            &swapchainCreateInfo, nullptr, &swapchain));
+                                            &swapchainCreateInfo, NULL, &swapchain));
 
         // --------------- Cleanup ---------------
 
@@ -882,7 +882,7 @@ namespace elemd
 
         vku::err_check(vkGetSwapchainImagesKHR(
             VulkanSharedInfo::getInstance()->device, swapchain,
-            &VulkanSharedInfo::getInstance()->actualSwapchainImageCount, nullptr));
+            &VulkanSharedInfo::getInstance()->actualSwapchainImageCount, NULL));
         VkImage* swapchainImages =
             new VkImage[VulkanSharedInfo::getInstance()->actualSwapchainImageCount];
         vku::err_check(vkGetSwapchainImagesKHR(
@@ -896,7 +896,7 @@ namespace elemd
         {
             VkImageViewCreateInfo imageViewCreateInfo{};
             imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            imageViewCreateInfo.pNext = nullptr;
+            imageViewCreateInfo.pNext = NULL;
             imageViewCreateInfo.flags = 0;
             imageViewCreateInfo.image = swapchainImages[i];
             imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -912,7 +912,7 @@ namespace elemd
             imageViewCreateInfo.subresourceRange.layerCount = 1;
 
             vku::err_check(vkCreateImageView(VulkanSharedInfo::getInstance()->device,
-                                             &imageViewCreateInfo, nullptr, &imageViews[i]));
+                                             &imageViewCreateInfo, NULL, &imageViews[i]));
         }
 
         // --------------- Cleanup ---------------
@@ -947,13 +947,13 @@ namespace elemd
         subpassDescription.flags = 0;
         subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpassDescription.inputAttachmentCount = 0;
-        subpassDescription.pInputAttachments = nullptr;
+        subpassDescription.pInputAttachments = NULL;
         subpassDescription.colorAttachmentCount = 1;
         subpassDescription.pColorAttachments = &attachmentReference;
-        subpassDescription.pResolveAttachments = nullptr;
-        subpassDescription.pDepthStencilAttachment = nullptr;
+        subpassDescription.pResolveAttachments = NULL;
+        subpassDescription.pDepthStencilAttachment = NULL;
         subpassDescription.preserveAttachmentCount = 0;
-        subpassDescription.pPreserveAttachments = nullptr;
+        subpassDescription.pPreserveAttachments = NULL;
 
         // --------------- Create Subpass Dependency ---------------
 
@@ -971,7 +971,7 @@ namespace elemd
 
         VkRenderPassCreateInfo renderPassCreateInfo{};
         renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassCreateInfo.pNext = nullptr;
+        renderPassCreateInfo.pNext = NULL;
         renderPassCreateInfo.flags = 0;
         renderPassCreateInfo.attachmentCount = 1;
         renderPassCreateInfo.pAttachments = &attachmentDescription;
@@ -983,7 +983,7 @@ namespace elemd
         // --------------- Create Render Pass ---------------
 
         vku::err_check(vkCreateRenderPass(VulkanSharedInfo::getInstance()->device,
-                                          &renderPassCreateInfo, nullptr, &renderPass));
+                                          &renderPassCreateInfo, NULL, &renderPass));
     }
 
     void ContextImplVulkan::create_descriptor_set_layout()
@@ -994,7 +994,7 @@ namespace elemd
         /// uniformDescriptorSetLayoutBinding.descriptorCount = 1;
         /// uniformDescriptorSetLayoutBinding.stageFlags =
         /// VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-        /// uniformDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
+        /// uniformDescriptorSetLayoutBinding.pImmutableSamplers = NULL;
 
         VkDescriptorSetLayoutBinding storageDescriptorSetLayoutBinding{};
         storageDescriptorSetLayoutBinding.binding = 0;
@@ -1002,7 +1002,7 @@ namespace elemd
         storageDescriptorSetLayoutBinding.descriptorCount = 1;
         storageDescriptorSetLayoutBinding.stageFlags =
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-        storageDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
+        storageDescriptorSetLayoutBinding.pImmutableSamplers = NULL;
 
         VkDescriptorSetLayoutBinding samplerDescriptorSetLayoutBinding{};
         samplerDescriptorSetLayoutBinding.binding = 1;
@@ -1010,7 +1010,7 @@ namespace elemd
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         samplerDescriptorSetLayoutBinding.descriptorCount = texture_array_size;
         samplerDescriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-        samplerDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
+        samplerDescriptorSetLayoutBinding.pImmutableSamplers = NULL;
 
         std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings = {
             /// uniformDescriptorSetLayoutBinding,
@@ -1027,7 +1027,7 @@ namespace elemd
         VkDescriptorSetLayoutBindingFlagsCreateInfo descriptorSetLayoutBindingFlagsCreateInfo{};
         descriptorSetLayoutBindingFlagsCreateInfo.sType =
             VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
-        descriptorSetLayoutBindingFlagsCreateInfo.pNext = nullptr;
+        descriptorSetLayoutBindingFlagsCreateInfo.pNext = NULL;
         descriptorSetLayoutBindingFlagsCreateInfo.bindingCount =
             (uint32_t)descriptorBindingFlags.size();
         descriptorSetLayoutBindingFlagsCreateInfo.pBindingFlags = descriptorBindingFlags.data();
@@ -1040,7 +1040,7 @@ namespace elemd
         descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
 
         vku::err_check(vkCreateDescriptorSetLayout(VulkanSharedInfo::getInstance()->device,
-                                                   &descriptorSetLayoutCreateInfo, nullptr,
+                                                   &descriptorSetLayoutCreateInfo, NULL,
                                                    &descriptorSetLayout));
     }
 
@@ -1061,23 +1061,23 @@ namespace elemd
 
         VkPipelineShaderStageCreateInfo shaderStageCreateInfoVert{};
         shaderStageCreateInfoVert.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shaderStageCreateInfoVert.pNext = nullptr;
+        shaderStageCreateInfoVert.pNext = NULL;
         shaderStageCreateInfoVert.flags = 0;
         shaderStageCreateInfoVert.stage = VK_SHADER_STAGE_VERTEX_BIT;
         shaderStageCreateInfoVert.module = *vertShaderModule;
         shaderStageCreateInfoVert.pName = "main";
-        shaderStageCreateInfoVert.pSpecializationInfo = nullptr;
+        shaderStageCreateInfoVert.pSpecializationInfo = NULL;
 
         // --------------- Create Pipeline Shader Stage Create Info ---------------
 
         VkPipelineShaderStageCreateInfo shaderStageCreateInfoFrag{};
         shaderStageCreateInfoFrag.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shaderStageCreateInfoFrag.pNext = nullptr;
+        shaderStageCreateInfoFrag.pNext = NULL;
         shaderStageCreateInfoFrag.flags = 0;
         shaderStageCreateInfoFrag.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
         shaderStageCreateInfoFrag.module = *fragShaderModule;
         shaderStageCreateInfoFrag.pName = "main";
-        shaderStageCreateInfoFrag.pSpecializationInfo = nullptr;
+        shaderStageCreateInfoFrag.pSpecializationInfo = NULL;
 
         VkPipelineShaderStageCreateInfo shaderStages[] = {shaderStageCreateInfoVert,
                                                           shaderStageCreateInfoFrag};
@@ -1093,7 +1093,7 @@ namespace elemd
         VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo{};
         pipelineVertexInputStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        pipelineVertexInputStateCreateInfo.pNext = nullptr;
+        pipelineVertexInputStateCreateInfo.pNext = NULL;
         pipelineVertexInputStateCreateInfo.flags = 0;
         /*
         pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
@@ -1105,16 +1105,16 @@ namespace elemd
             vertexInputAttributeDescription.data();
         */
         pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
-        pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr;
+        pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = NULL;
         pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
-        pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
+        pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = NULL;
 
         // --------------- Create Pipeline Input Assembly State Create Info ---------------
 
         VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo{};
         pipelineInputAssemblyStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-        pipelineInputAssemblyStateCreateInfo.pNext = nullptr;
+        pipelineInputAssemblyStateCreateInfo.pNext = NULL;
         pipelineInputAssemblyStateCreateInfo.flags = 0;
         pipelineInputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
@@ -1136,7 +1136,7 @@ namespace elemd
         VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo{};
         pipelineViewportStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        pipelineViewportStateCreateInfo.pNext = nullptr;
+        pipelineViewportStateCreateInfo.pNext = NULL;
         pipelineViewportStateCreateInfo.flags = 0;
         pipelineViewportStateCreateInfo.viewportCount = 1;
         pipelineViewportStateCreateInfo.pViewports = &viewport;
@@ -1148,7 +1148,7 @@ namespace elemd
         VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo{};
         pipelineRasterizationStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-        pipelineRasterizationStateCreateInfo.pNext = nullptr;
+        pipelineRasterizationStateCreateInfo.pNext = NULL;
         pipelineRasterizationStateCreateInfo.flags = 0;
         pipelineRasterizationStateCreateInfo.depthClampEnable = VK_FALSE;
         pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
@@ -1166,12 +1166,12 @@ namespace elemd
         VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo{};
         pipelineMultisampleStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-        pipelineMultisampleStateCreateInfo.pNext = nullptr;
+        pipelineMultisampleStateCreateInfo.pNext = NULL;
         pipelineMultisampleStateCreateInfo.flags = 0;
         pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
         pipelineMultisampleStateCreateInfo.sampleShadingEnable = VK_TRUE;
         pipelineMultisampleStateCreateInfo.minSampleShading = 1.0f;
-        pipelineMultisampleStateCreateInfo.pSampleMask = nullptr;
+        pipelineMultisampleStateCreateInfo.pSampleMask = NULL;
         pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
         pipelineMultisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
@@ -1194,7 +1194,7 @@ namespace elemd
         VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo{};
         pipelineColorBlendStateCreateInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-        pipelineColorBlendStateCreateInfo.pNext = nullptr;
+        pipelineColorBlendStateCreateInfo.pNext = NULL;
         pipelineColorBlendStateCreateInfo.flags = 0;
         pipelineColorBlendStateCreateInfo.logicOpEnable = VK_FALSE;
         pipelineColorBlendStateCreateInfo.logicOp = VK_LOGIC_OP_NO_OP;
@@ -1209,7 +1209,7 @@ namespace elemd
 
         VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo{};
         pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-        pipelineDynamicStateCreateInfo.pNext = nullptr;
+        pipelineDynamicStateCreateInfo.pNext = NULL;
         pipelineDynamicStateCreateInfo.flags = 0;
         pipelineDynamicStateCreateInfo.dynamicStateCount = 2;
         pipelineDynamicStateCreateInfo.pDynamicStates = dynamicStates;
@@ -1218,33 +1218,33 @@ namespace elemd
 
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutCreateInfo.pNext = nullptr;
+        pipelineLayoutCreateInfo.pNext = NULL;
         pipelineLayoutCreateInfo.flags = 0;
         pipelineLayoutCreateInfo.setLayoutCount = 1;
         pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-        pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+        pipelineLayoutCreateInfo.pPushConstantRanges = NULL;
 
         // --------------- Create Pipeline Layout ---------------
 
         vku::err_check(vkCreatePipelineLayout(VulkanSharedInfo::getInstance()->device,
-                                              &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
+                                              &pipelineLayoutCreateInfo, NULL, &pipelineLayout));
 
         // --------------- Create Graphics Pipeline Create Info ---------------
 
         VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
         graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        graphicsPipelineCreateInfo.pNext = nullptr;
+        graphicsPipelineCreateInfo.pNext = NULL;
         graphicsPipelineCreateInfo.flags = 0;
         graphicsPipelineCreateInfo.stageCount = 2;
         graphicsPipelineCreateInfo.pStages = shaderStages;
         graphicsPipelineCreateInfo.pVertexInputState = &pipelineVertexInputStateCreateInfo;
         graphicsPipelineCreateInfo.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo;
-        graphicsPipelineCreateInfo.pTessellationState = nullptr;
+        graphicsPipelineCreateInfo.pTessellationState = NULL;
         graphicsPipelineCreateInfo.pViewportState = &pipelineViewportStateCreateInfo;
         graphicsPipelineCreateInfo.pRasterizationState = &pipelineRasterizationStateCreateInfo;
         graphicsPipelineCreateInfo.pMultisampleState = &pipelineMultisampleStateCreateInfo;
-        graphicsPipelineCreateInfo.pDepthStencilState = nullptr;
+        graphicsPipelineCreateInfo.pDepthStencilState = NULL;
         graphicsPipelineCreateInfo.pColorBlendState = &pipelineColorBlendStateCreateInfo;
         graphicsPipelineCreateInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
         graphicsPipelineCreateInfo.layout = pipelineLayout;
@@ -1257,7 +1257,7 @@ namespace elemd
 
         vku::err_check(vkCreateGraphicsPipelines(VulkanSharedInfo::getInstance()->device,
                                                  VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo,
-                                                 nullptr, &pipeline));
+                                                 NULL, &pipeline));
     }
 
     void ContextImplVulkan::create_framebuffer()
@@ -1271,7 +1271,7 @@ namespace elemd
         {
             VkFramebufferCreateInfo frameBufferCreateInfo{};
             frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            frameBufferCreateInfo.pNext = nullptr;
+            frameBufferCreateInfo.pNext = NULL;
             frameBufferCreateInfo.flags = 0;
             frameBufferCreateInfo.renderPass = renderPass;
             frameBufferCreateInfo.attachmentCount = 1;
@@ -1281,7 +1281,7 @@ namespace elemd
             frameBufferCreateInfo.layers = 1;
 
             vku::err_check(vkCreateFramebuffer(VulkanSharedInfo::getInstance()->device,
-                                               &frameBufferCreateInfo, nullptr,
+                                               &frameBufferCreateInfo, NULL,
                                                &(frameBuffers[i])));
         }
     }
@@ -1292,14 +1292,14 @@ namespace elemd
 
         VkCommandPoolCreateInfo commandPoolCreateInfo{};
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        commandPoolCreateInfo.pNext = nullptr;
+        commandPoolCreateInfo.pNext = NULL;
         commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         commandPoolCreateInfo.queueFamilyIndex = VulkanSharedInfo::getInstance()->queueFamilyIndex;
 
         // --------------- Create Command Pool ---------------
 
         vku::err_check(vkCreateCommandPool(VulkanSharedInfo::getInstance()->device,
-                                           &commandPoolCreateInfo, nullptr, &commandPool));
+                                           &commandPoolCreateInfo, NULL, &commandPool));
     }
 
     void ContextImplVulkan::create_command_buffers()
@@ -1308,7 +1308,7 @@ namespace elemd
 
         VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        commandBufferAllocateInfo.pNext = nullptr;
+        commandBufferAllocateInfo.pNext = NULL;
         commandBufferAllocateInfo.commandPool = commandPool;
         commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         commandBufferAllocateInfo.commandBufferCount =
@@ -1328,9 +1328,9 @@ namespace elemd
 
         VkCommandBufferBeginInfo commandBufferBeginInfo{};
         commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        commandBufferBeginInfo.pNext = nullptr;
+        commandBufferBeginInfo.pNext = NULL;
         commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-        commandBufferBeginInfo.pInheritanceInfo = nullptr;
+        commandBufferBeginInfo.pInheritanceInfo = NULL;
 
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
@@ -1338,7 +1338,7 @@ namespace elemd
 
             VkRenderPassBeginInfo renderPassBeginInfo{};
             renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassBeginInfo.pNext = nullptr;
+            renderPassBeginInfo.pNext = NULL;
             renderPassBeginInfo.renderPass = renderPass;
             renderPassBeginInfo.framebuffer = frameBuffers[i];
             renderPassBeginInfo.renderArea.offset = {0, 0};
@@ -1377,7 +1377,7 @@ namespace elemd
                 vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
                 vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+                                        pipelineLayout, 0, 1, &descriptorSet, 0, NULL);
 
                 /// vkCmdDrawIndexed(commandBuffers[i], (uint32_t)rect_indices.size(),
                 ///                 uniforms.size(), 0, 0, 0);
@@ -1402,25 +1402,25 @@ namespace elemd
 
         VkFenceCreateInfo fenceCreateInfo{};
         fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        fenceCreateInfo.pNext = nullptr;
+        fenceCreateInfo.pNext = NULL;
         fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
         vku::err_check(vkCreateFence(VulkanSharedInfo::getInstance()->device, &fenceCreateInfo,
-                                     nullptr, &renderFence));
+                                     NULL, &renderFence));
 
         // --------------- Create Semaphore Create Info ---------------
 
         VkSemaphoreCreateInfo semaphoreCreateInfo{};
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-        semaphoreCreateInfo.pNext = nullptr;
+        semaphoreCreateInfo.pNext = NULL;
         semaphoreCreateInfo.flags = 0;
 
         // --------------- Create Semaphores ---------------
 
         vku::err_check(vkCreateSemaphore(VulkanSharedInfo::getInstance()->device,
-                                         &semaphoreCreateInfo, nullptr, &semaphoreImageAvailable));
+                                         &semaphoreCreateInfo, NULL, &semaphoreImageAvailable));
         vku::err_check(vkCreateSemaphore(VulkanSharedInfo::getInstance()->device,
-                                         &semaphoreCreateInfo, nullptr,
+                                         &semaphoreCreateInfo, NULL,
                                          &semaphoreRenderingComplete));
     }
 
@@ -1451,15 +1451,15 @@ namespace elemd
         vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool,
                              VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
                              commandBuffers);
-        vkDestroyCommandPool(VulkanSharedInfo::getInstance()->device, commandPool, nullptr);
+        vkDestroyCommandPool(VulkanSharedInfo::getInstance()->device, commandPool, NULL);
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-            vkDestroyFramebuffer(VulkanSharedInfo::getInstance()->device, frameBuffers[i], nullptr);
+            vkDestroyFramebuffer(VulkanSharedInfo::getInstance()->device, frameBuffers[i], NULL);
         }
-        vkDestroyRenderPass(VulkanSharedInfo::getInstance()->device, renderPass, nullptr);
+        vkDestroyRenderPass(VulkanSharedInfo::getInstance()->device, renderPass, NULL);
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-            vkDestroyImageView(VulkanSharedInfo::getInstance()->device, imageViews[i], nullptr);
+            vkDestroyImageView(VulkanSharedInfo::getInstance()->device, imageViews[i], NULL);
         }
 
         delete[] commandBuffers;
@@ -1476,7 +1476,7 @@ namespace elemd
         create_command_buffers();
         record_command_buffers();
 
-        vkDestroySwapchainKHR(VulkanSharedInfo::getInstance()->device, oldSwapchain, nullptr);
+        vkDestroySwapchainKHR(VulkanSharedInfo::getInstance()->device, oldSwapchain, NULL);
 
         resizing = false;
     }
@@ -1526,53 +1526,53 @@ namespace elemd
         vkDeviceWaitIdle(VulkanSharedInfo::getInstance()->device);
 
         vkDestroyDescriptorSetLayout(VulkanSharedInfo::getInstance()->device, descriptorSetLayout,
-                                     nullptr);
-        vkDestroyDescriptorPool(VulkanSharedInfo::getInstance()->device, descriptorPool, nullptr);
+                                     NULL);
+        vkDestroyDescriptorPool(VulkanSharedInfo::getInstance()->device, descriptorPool, NULL);
         /// vkFreeMemory(VulkanSharedInfo::getInstance()->device, uniformBufferDeviceMemory,
-        /// nullptr); vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, uniformBuffer,
-        /// nullptr);
+        /// NULL); vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, uniformBuffer,
+        /// NULL);
 
-        vkFreeMemory(VulkanSharedInfo::getInstance()->device, storageBufferDeviceMemory, nullptr);
-        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, storageBuffer, nullptr);
+        vkFreeMemory(VulkanSharedInfo::getInstance()->device, storageBufferDeviceMemory, NULL);
+        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, storageBuffer, NULL);
 
-        vkDestroyFence(VulkanSharedInfo::getInstance()->device, renderFence, nullptr);
+        vkDestroyFence(VulkanSharedInfo::getInstance()->device, renderFence, NULL);
         vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreImageAvailable,
-                           nullptr);
+                           NULL);
         vkDestroySemaphore(VulkanSharedInfo::getInstance()->device, semaphoreRenderingComplete,
-                           nullptr);
+                           NULL);
 
-        vkFreeMemory(VulkanSharedInfo::getInstance()->device, indexBufferDeviceMemory, nullptr);
-        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, indexBuffer, nullptr);
+        vkFreeMemory(VulkanSharedInfo::getInstance()->device, indexBufferDeviceMemory, NULL);
+        vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, indexBuffer, NULL);
 
         //        vkFreeMemory(VulkanSharedInfo::getInstance()->device, vertexBufferDeviceMemory,
-        //        nullptr); vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer,
-        //        nullptr);
+        //        NULL); vkDestroyBuffer(VulkanSharedInfo::getInstance()->device, vertexBuffer,
+        //        NULL);
 
         vkFreeCommandBuffers(VulkanSharedInfo::getInstance()->device, commandPool,
                              VulkanSharedInfo::getInstance()->actualSwapchainImageCount,
                              commandBuffers);
-        vkDestroyCommandPool(VulkanSharedInfo::getInstance()->device, commandPool, nullptr);
+        vkDestroyCommandPool(VulkanSharedInfo::getInstance()->device, commandPool, NULL);
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-            vkDestroyFramebuffer(VulkanSharedInfo::getInstance()->device, frameBuffers[i], nullptr);
+            vkDestroyFramebuffer(VulkanSharedInfo::getInstance()->device, frameBuffers[i], NULL);
         }
 
-        vkDestroyPipeline(VulkanSharedInfo::getInstance()->device, pipeline, nullptr);
+        vkDestroyPipeline(VulkanSharedInfo::getInstance()->device, pipeline, NULL);
 
-        vkDestroyRenderPass(VulkanSharedInfo::getInstance()->device, renderPass, nullptr);
+        vkDestroyRenderPass(VulkanSharedInfo::getInstance()->device, renderPass, NULL);
 
-        vkDestroyPipelineLayout(VulkanSharedInfo::getInstance()->device, pipelineLayout, nullptr);
+        vkDestroyPipelineLayout(VulkanSharedInfo::getInstance()->device, pipelineLayout, NULL);
 
-        vkDestroyShaderModule(VulkanSharedInfo::getInstance()->device, *vertShaderModule, nullptr);
-        vkDestroyShaderModule(VulkanSharedInfo::getInstance()->device, *fragShaderModule, nullptr);
+        vkDestroyShaderModule(VulkanSharedInfo::getInstance()->device, *vertShaderModule, NULL);
+        vkDestroyShaderModule(VulkanSharedInfo::getInstance()->device, *fragShaderModule, NULL);
 
         for (uint32_t i = 0; i < VulkanSharedInfo::getInstance()->actualSwapchainImageCount; ++i)
         {
-            vkDestroyImageView(VulkanSharedInfo::getInstance()->device, imageViews[i], nullptr);
+            vkDestroyImageView(VulkanSharedInfo::getInstance()->device, imageViews[i], NULL);
         }
 
-        vkDestroySwapchainKHR(VulkanSharedInfo::getInstance()->device, swapchain, nullptr);
-        vkDestroySurfaceKHR(VulkanSharedInfo::getInstance()->instance, surface, nullptr);
+        vkDestroySwapchainKHR(VulkanSharedInfo::getInstance()->device, swapchain, NULL);
+        vkDestroySurfaceKHR(VulkanSharedInfo::getInstance()->instance, surface, NULL);
 
         delete[] commandBuffers;
         delete[] frameBuffers;
@@ -1638,21 +1638,21 @@ namespace elemd
 
         VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
         descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        descriptorPoolCreateInfo.pNext = nullptr;
+        descriptorPoolCreateInfo.pNext = NULL;
         descriptorPoolCreateInfo.flags = 0;
         descriptorPoolCreateInfo.maxSets = 1;
         descriptorPoolCreateInfo.poolSizeCount = (uint32_t)descriptorPoolSizes.size();
         descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
 
         vku::err_check(vkCreateDescriptorPool(VulkanSharedInfo::getInstance()->device,
-                                              &descriptorPoolCreateInfo, nullptr, &descriptorPool));
+                                              &descriptorPoolCreateInfo, NULL, &descriptorPool));
     }
 
     void ContextImplVulkan::create_descriptor_set()
     {
         VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
         descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        descriptorSetAllocateInfo.pNext = nullptr;
+        descriptorSetAllocateInfo.pNext = NULL;
         descriptorSetAllocateInfo.descriptorPool = descriptorPool;
         descriptorSetAllocateInfo.descriptorSetCount = 1;
         descriptorSetAllocateInfo.pSetLayouts = &descriptorSetLayout;
@@ -1669,15 +1669,15 @@ namespace elemd
 
         VkWriteDescriptorSet uniformWriteDescriptorSet;
         uniformWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        uniformWriteDescriptorSet.pNext = nullptr;
+        uniformWriteDescriptorSet.pNext = NULL;
         uniformWriteDescriptorSet.dstSet = descriptorSet;
         uniformWriteDescriptorSet.dstBinding = 0;
         uniformWriteDescriptorSet.dstArrayElement = 0;
         uniformWriteDescriptorSet.descriptorCount = 1;
         uniformWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        uniformWriteDescriptorSet.pImageInfo = nullptr;
+        uniformWriteDescriptorSet.pImageInfo = NULL;
         uniformWriteDescriptorSet.pBufferInfo = &descriptorBufferInfo;
-        uniformWriteDescriptorSet.pTexelBufferView = nullptr;
+        uniformWriteDescriptorSet.pTexelBufferView = NULL;
         */
 
         // Storage Buffer
@@ -1689,15 +1689,15 @@ namespace elemd
 
         VkWriteDescriptorSet storageWriteDescriptorSet{};
         storageWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        storageWriteDescriptorSet.pNext = nullptr;
+        storageWriteDescriptorSet.pNext = NULL;
         storageWriteDescriptorSet.dstSet = descriptorSet;
         storageWriteDescriptorSet.dstBinding = 0;
         storageWriteDescriptorSet.dstArrayElement = 0;
         storageWriteDescriptorSet.descriptorCount = 1;
         storageWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        storageWriteDescriptorSet.pImageInfo = nullptr;
+        storageWriteDescriptorSet.pImageInfo = NULL;
         storageWriteDescriptorSet.pBufferInfo = &descriptorStorageBufferInfo;
-        storageWriteDescriptorSet.pTexelBufferView = nullptr;
+        storageWriteDescriptorSet.pTexelBufferView = NULL;
 
         std::vector<VkDescriptorImageInfo> descriptorImageInfos;
         //[images.size()];
@@ -1740,15 +1740,15 @@ namespace elemd
 
         VkWriteDescriptorSet samplerWriteDescriptorSet{};
         samplerWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        samplerWriteDescriptorSet.pNext = nullptr;
+        samplerWriteDescriptorSet.pNext = NULL;
         samplerWriteDescriptorSet.dstSet = descriptorSet;
         samplerWriteDescriptorSet.dstBinding = 1;
         samplerWriteDescriptorSet.dstArrayElement = 0;
         samplerWriteDescriptorSet.descriptorCount = (uint32_t)descriptorImageInfos.size();
         samplerWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         samplerWriteDescriptorSet.pImageInfo = descriptorImageInfos.data();
-        samplerWriteDescriptorSet.pBufferInfo = nullptr;
-        samplerWriteDescriptorSet.pTexelBufferView = nullptr;
+        samplerWriteDescriptorSet.pBufferInfo = NULL;
+        samplerWriteDescriptorSet.pTexelBufferView = NULL;
 
         std::vector<VkWriteDescriptorSet> writeDescriptorSets = {/// uniformWriteDescriptorSet,
                                                                  storageWriteDescriptorSet,
@@ -1756,7 +1756,7 @@ namespace elemd
 
         vkUpdateDescriptorSets(VulkanSharedInfo::getInstance()->device,
                                (uint32_t)writeDescriptorSets.size(), writeDescriptorSets.data(), 0,
-                               nullptr);
+                               NULL);
     }
 
     /*

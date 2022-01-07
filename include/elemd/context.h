@@ -2,12 +2,12 @@
 #define ELEMD_CONTEXT_HPP
 
 
-#include <elemd/elemental_draw.hpp>
+#include <elemd/elemental_draw.h>
 #include <cstdint>
 
-#include "color.hpp"
-#include "image.hpp"
-#include "font.hpp"
+#include "color.h"
+#include "image.h"
+#include "font.h"
 
 namespace elemd
 {
@@ -107,8 +107,8 @@ namespace elemd
         color _stroke_color;
         float _line_width = 1;
         int _font_size = 10;
-        font* _font = nullptr;
-        font* _default_font = nullptr;
+        font* _font = NULL;
+        font* _default_font = NULL;
     };
 } // namespace elemd
 

@@ -1,15 +1,15 @@
-#include "vulkan_shared_info.hpp"
+#include "vulkan_shared_info.h"
 
 #include <vector>
 #include <iostream>
 
-#include "elemd/elemental_draw.hpp"
+#include "elemd/elemental_draw.h"
 #include "GLFW/glfw3.h"
-#include "vulkan_utils.hpp"
+#include "vulkan_utils.h"
 
 namespace elemd
 {
-    VulkanSharedInfo* VulkanSharedInfo::_instance = nullptr;
+    VulkanSharedInfo* VulkanSharedInfo::_instance = NULL;
 
     VulkanSharedInfo::VulkanSharedInfo()
     {
@@ -22,8 +22,8 @@ namespace elemd
 
     VulkanSharedInfo::~VulkanSharedInfo()
     {
-        vkDestroyDevice(device, nullptr);
-        vkDestroyInstance(instance, nullptr);
+        vkDestroyDevice(device, NULL);
+        vkDestroyInstance(instance, NULL);
 
         gladLoaderUnloadVulkan();
 
@@ -32,7 +32,7 @@ namespace elemd
 
     VulkanSharedInfo* VulkanSharedInfo::getInstance()
     {
-        if (_instance == nullptr)
+        if (_instance == NULL)
         {
             _instance = new VulkanSharedInfo();
         }
@@ -42,7 +42,7 @@ namespace elemd
 
     void VulkanSharedInfo::destroy()
     {
-        if (_instance != nullptr)
+        if (_instance != NULL)
         {
             delete _instance;
         }
@@ -63,7 +63,7 @@ namespace elemd
 
         VkApplicationInfo applicationInfo{};
         applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        applicationInfo.pNext = nullptr;
+        applicationInfo.pNext = NULL;
         applicationInfo.pApplicationName = "UI Application"; // TODO: Pass down from application
         applicationInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         applicationInfo.pEngineName = ELEMD_LIBRARY_NAME;
@@ -87,7 +87,7 @@ namespace elemd
         // --------------- Find Layer ---------------
 
         uint32_t layerCount;
-        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+        vkEnumerateInstanceLayerProperties(&layerCount, NULL);
         std::vector<VkLayerProperties> availableLayers(layerCount);
         vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
@@ -113,7 +113,7 @@ namespace elemd
 
         VkInstanceCreateInfo instanceCreateInfo{};
         instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        instanceCreateInfo.pNext = nullptr;
+        instanceCreateInfo.pNext = NULL;
         instanceCreateInfo.flags = 0;
         instanceCreateInfo.pApplicationInfo = &applicationInfo;
         instanceCreateInfo.enabledLayerCount = (uint32_t)validationLayers.size();
@@ -123,13 +123,13 @@ namespace elemd
 
         // --------------- Create Instance ---------------
 
-        vku::err_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
+        vku::err_check(vkCreateInstance(&instanceCreateInfo, NULL, &instance));
     }
 
     void VulkanSharedInfo::create_physical_devices()
     {
         // --------------- Get Physical Devices ---------------
-        vku::err_check(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr));
+        vku::err_check(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, NULL));
 
         if (physicalDeviceCount == 0)
         {
@@ -163,7 +163,7 @@ namespace elemd
 
         VkDeviceQueueCreateInfo deviceQueueCreateInfo{};
         deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        deviceQueueCreateInfo.pNext = nullptr;
+        deviceQueueCreateInfo.pNext = NULL;
         deviceQueueCreateInfo.flags = 0;
         deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndex;
         deviceQueueCreateInfo.queueCount = queueCount;
@@ -191,7 +191,7 @@ namespace elemd
         deviceCreateInfo.queueCreateInfoCount = 1;
         deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
         deviceCreateInfo.enabledLayerCount = 0;
-        deviceCreateInfo.ppEnabledLayerNames = nullptr;
+        deviceCreateInfo.ppEnabledLayerNames = NULL;
         deviceCreateInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
         deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
         deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
@@ -199,7 +199,7 @@ namespace elemd
         // --------------- Create Device ---------------
 
         vku::err_check(vkCreateDevice(bestPhysicalDevice, &deviceCreateInfo,
-                                      nullptr, &device));
+                                      NULL, &device));
     
     }
 

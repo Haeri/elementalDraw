@@ -1,6 +1,6 @@
-#include "elemd/elemental_draw.hpp"
-#include "elemd/window.hpp"
-#include "elemd/context.hpp"
+#include "elemd/elemental_draw.h"
+#include "elemd/window.h"
+#include "elemd/context.h"
 
 extern "C"
 {

@@ -1,7 +1,7 @@
 #ifndef ELEMD_IMAGE_IMPL_VULKAN_HPP
 #define ELEMD_IMAGE_IMPL_VULKAN_HPP
 
-#include "elemd/image.hpp"
+#include "elemd/image.h"
 
 #include <map>
 #include <string>

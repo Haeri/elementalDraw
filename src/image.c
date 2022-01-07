@@ -1,4 +1,4 @@
-#include "elemd/image.hpp"
+#include "elemd/image.h"
 
 namespace elemd
 {
