@@ -7,11 +7,6 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
-
-//#include <iostream>
-//#include <sstream>
-//#include <algorithm>
-
 #ifdef _MSC_VER
 #define sscanf_cross sscanf_s
 #else
@@ -118,8 +113,7 @@ uint8_t elemd_color_aui(const ELEMDColor* color)
 
 size_t elemd_color_hex(const ELEMDColor* color, char* out)
 {
-    // "#rrggbbaa\0 -> 10 Bytes"  
-    //char tmp[10];
+    // "#rrggbbaa\0 -> 10 bytes"  
     int hex = 0;
     size_t len = 0;
 
@@ -142,17 +136,17 @@ size_t elemd_color_hex(const ELEMDColor* color, char* out)
 }
 size_t elemd_color_rgb(const ELEMDColor* color, char* out)
 {
-    // "rgb(, , )\0 -> 10 Bytes"
+    // "rgb(, , )\0 -> 10 bytes"
     int r = elemd_color_rui(color);
     int g = elemd_color_gui(color);
     int b = elemd_color_bui(color);
     size_t len = 10 + count_digits(r) + count_digits(g) + count_digits(b);
-    snprintf(out, strlen(out), "rgb(%i, %i, %i)", r, g, b);
+    snprintf(out, len, "rgb(%i, %i, %i)", r, g, b);
     return len;
 }
 size_t elemd_color_rgba(const ELEMDColor* color, char* out)
 {
-    // "rgba(, , , )\0 -> 13 Bytes"    
+    // "rgba(, , , )\0 -> 13 bytes"    
     int r = elemd_color_rui(color);
     int g = elemd_color_gui(color);
     int b = elemd_color_bui(color);
