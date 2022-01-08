@@ -35,9 +35,12 @@ add_compile_definitions("ELEMD_RENDERING_BACKEND_${ELEMD_RENDERING_BACKEND_UPPER
 file(GLOB SOURCE_FILES
 #    include/${PROJECT_NAME}/*.h
 #    src/*    
-    include/${PROJECT_NAME}/color.h
     include/${PROJECT_NAME}/elemental_draw.h
+    include/${PROJECT_NAME}/color.h
     src/color.c
+
+    #include/${PROJECT_NAME}/vec2.h
+    #src/vec2.c
 )
 #file(GLOB_RECURSE SOURCE_FILES
 #    ${SOURCE_FILES}

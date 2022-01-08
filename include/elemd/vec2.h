@@ -1,98 +1,92 @@
-#ifndef ELEMD_VEC2_HPP
-#define ELEMD_VEC2_HPP
+#ifndef ELEMD_VEC2_H
+#define ELEMD_VEC2_H
+
+#include <stdbool.h>
 
 #include <elemd/elemental_draw.h>
 
-#include <iostream>
-
-namespace elemd
+#ifdef __cplusplus
+extern "C"
 {
-    class ELEMD_API vec2
-    {
-    public:
-        static const vec2 ZERO;
-        static const vec2 ONE;
+#endif
 
-        vec2() : _x(0), _y(0)
-        {
-        }
-        vec2(float xy) : _x(xy), _y(xy)
-        {
-        }
-        vec2(float x, float y) : _x(x), _y(y)
-        {
-        }
-        vec2(int x, int y) : _x((float)x), _y((float)y)
-        {
-        }
+typedef struct vec2
+{
+    float x;
+    float y;
+} vec2;
 
-        bool equals(const vec2& other);
-        float length();
-        float lengthSqrd();
-        float distance(const vec2& other);
-        float distanceSqrd(const vec2& other);
-        vec2 normalize() const;
+const vec2 VEC2_ZERO = { 0.0f, 0.0f };
+const vec2 VEC2_ONE = { 1.0f, 1.0f };
 
-        bool operator==(const vec2& other) const;
-        bool operator!=(const vec2& other) const;
-        vec2 operator/(const float& scalar) const;
-        vec2 operator*(const float& scalar) const;
-        vec2 operator-(const vec2& other) const;
-        vec2 operator+(const vec2& other) const;
+ELEMD_API vec2 ed_vec2_init();
+ELEMD_API vec2 ed_vec2_initf(float xy);
+ELEMD_API vec2 ed_vec2_init2f(float x, float y);
+ELEMD_API vec2 ed_vec2_init2i(int x, int y);
 
-        static vec2 lerp(vec2 start, vec2 target, float percent);
+bool ed_vec2_equals(const vec2& other);
+float ed_vec2_length();
+float ed_vec2_lengthSqrd();
+float ed_vec2_distance(const vec2& other);
+float ed_vec2_distance_sqrd(const vec2& other);
+vec2 ed_vec2_normalize() const;
 
-        friend std::ostream& operator<<(std::ostream& os, vec2 m);
+bool operator==(const vec2& other) const;
+bool operator!=(const vec2& other) const;
+vec2 operator/(const float& scalar) const;
+vec2 operator*(const float& scalar) const;
+vec2 operator-(const vec2& other) const;
+vec2 operator+(const vec2& other) const;
 
-        float get_x();
-        float get_y();
-        float& x();
-        float& y();
+static vec2 ed_vec2_lerp(vec2 start, vec2 target, float percent);
 
-    private:
-        float _x;
-        float _y;
-    };
+friend std::ostream& operator<<(std::ostream& os, vec2 m);
+
+float get_x();
+float get_y();
+float& x();
+float& y();
 
 
-    inline vec2 vec2::normalize() const
-    {
-        vec2 ret = *this;
-        return ret / ret.length();
-    }
+inline vec2 vec2::normalize() const
+{
+    vec2 ret = *this;
+    return ret / ret.length();
+}
 
-    inline bool vec2::operator==(const vec2& other) const
-    {
-        return (_x == other._x && _y == other._y);
-    }
+inline bool vec2::operator==(const vec2& other) const
+{
+    return (_x == other._x && _y == other._y);
+}
 
-    inline bool vec2::operator!=(const vec2& other) const
-    {
-        return (_x != other._x || _y != other._y);
-    }
+inline bool vec2::operator!=(const vec2& other) const
+{
+    return (_x != other._x || _y != other._y);
+}
 
-    inline vec2 vec2::operator/(const float& scalar) const
-    {
-        return vec2(_x / scalar, _y / scalar);
-    }
+inline vec2 vec2::operator/(const float& scalar) const
+{
+    return vec2(_x / scalar, _y / scalar);
+}
 
-    inline vec2 vec2::operator*(const float& scalar) const
-    {
-        return vec2(_x * scalar, _y * scalar);
-    }
+inline vec2 vec2::operator*(const float& scalar) const
+{
+    return vec2(_x * scalar, _y * scalar);
+}
 
-    inline vec2 vec2::operator-(const vec2& other) const
-    {
-        return vec2(_x - other._x, _y - other._y);
-    }
+inline vec2 vec2::operator-(const vec2& other) const
+{
+    return vec2(_x - other._x, _y - other._y);
+}
 
-    inline vec2 vec2::operator+(const vec2& other) const
-    {
-        return vec2(_x + other._x, _y + other._y);
-    }
+inline vec2 vec2::operator+(const vec2& other) const
+{
+    return vec2(_x + other._x, _y + other._y);
+}
 
 
+#ifdef __cplusplus
+}
+#endif
 
-} // namespace elemd
-
-#endif // ELEMD_VEC2_HPP
+#endif // ELEMD_VEC2_H
