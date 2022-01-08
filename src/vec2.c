@@ -19,6 +19,7 @@ vec2 ed_vec2_init2i(int x, int y)
     return (vec2) { x, y };
 }
 
+
 bool vec2::equals(const vec2& other)
 {
     return (_x == other._x && _y == other._y);

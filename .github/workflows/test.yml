@@ -3,7 +3,7 @@ name: C++ Builder
 on: 
   push:
     branches:
-    - master 
+    - port-to-c
 
 jobs:
 
@@ -32,17 +32,6 @@ jobs:
     - name: Build
       run: |
         MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
-    - name: Package
-      run: ./scripts/package_win.bat -${{ matrix.type }} -s
-    - name: Upload
-      uses: actions/upload-artifact@v2
-      with:
-        name: elemd_x64-windows
-        path: |
-          ./lib
-          ./bin
-          ./include
-          ./samples
     
   build-linux:
    name: Linux Build
@@ -72,17 +61,6 @@ jobs:
       run: |
         cd ./build
         make CFLAGS='-O2 -s -DNDEBUG' CXXFLAGS='-O2 -s -DNDEBUG'
-    - name: Package
-      run: ./scripts/package_linux.sh -${{ matrix.type }}
-    - name: Upload
-      uses: actions/upload-artifact@v2
-      with:
-        name: elemd_x64-linux
-        path: |
-          ./bin
-          ./lib
-          ./include
-          ./samples
 
   build-mac:
    name: Mac Build
@@ -108,17 +86,3 @@ jobs:
       run: |
         cd ./build
         xcodebuild -project elemd.xcodeproj -configuration ${{ matrix.conf }}
-    - name: Debug 2
-      if: ${{ failure() }}
-      run: find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
-    - name: Package
-      run: ./scripts/package_mac.sh -${{ matrix.type }}
-    - name: Upload
-      uses: actions/upload-artifact@v2
-      with:
-        name: elemd_x64-macos
-        path: |
-          ./bin
-          ./lib
-          ./include
-          ./samples
