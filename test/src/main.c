@@ -21,4 +21,6 @@ int main(int argc, char* argv[]) {
 	{
 		printf("Test suite finished with %i failed tests!", err_count);
 	}
+
+	return err_count;
 }

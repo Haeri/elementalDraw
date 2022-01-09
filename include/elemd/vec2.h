@@ -16,8 +16,8 @@ typedef struct vec2
     float y;
 } vec2;
 
-const vec2 VEC2_ZERO = { 0.0f, 0.0f };
-const vec2 VEC2_ONE = { 1.0f, 1.0f };
+extern const vec2 VEC2_ZERO;
+extern const vec2 VEC2_ONE;
 
 ELEMD_API vec2 ed_vec2_init();
 ELEMD_API vec2 ed_vec2_initf(float xy);

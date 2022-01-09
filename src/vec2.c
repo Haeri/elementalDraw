@@ -2,6 +2,9 @@
 
 #include <math.h>
 
+const vec2 VEC2_ZERO = { 0.0f, 0.0f };
+const vec2 VEC2_ONE = { 1.0f, 1.0f };
+
 vec2 ed_vec2_init() 
 {
     return (vec2) {0.0f, 0.0f};
