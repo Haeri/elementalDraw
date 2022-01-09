@@ -1,18 +1,15 @@
-#include <stdio.h>
+#ifndef ELEMD_TEST_COLOR_H
+#define ELEMD_TEST_COLOR_H
+
+#include <string.h>
+
+#include "test_utility.h"
 
 #include "elemd/color.h"
 
-void print_fail() {
-	printf("\t- \033[0;31mFAIL\033[0m\n");
-}
-
-void print_ok() {
-	printf("\t- \033[0;32mOK\033[0m\n");
-}
-
-int main(int argc, char* argv[]) {
+int test_color() {
 	int err_count = 0;
-	printf("Testing Color\n--------------\n");
+	printf("Testing color\n--------------\n");
 
 	{
 		printf("ed_color_init");
@@ -93,7 +90,7 @@ int main(int argc, char* argv[]) {
 
 	// ed_color_rgb
 	{
-		printf("ed_color_rgb\t");
+		printf("ed_color_rgb");
 		color in = { 1.0f, 0.5f, 0.0f, 1.0f };
 		char rgb[64];
 		const char expected[] = "rgb(255, 127, 0)";
@@ -138,17 +135,8 @@ int main(int argc, char* argv[]) {
 			printf("Should:\t%s\nGiven:\t%s", expected, rgba);
 		}
 	}
-	
-	printf("\n---------- SUMMARY ----------\n");
-	if (err_count == 0) 
-	{
-		printf("Test suite finished succesfuly!");
-	}
-	else
-	{
-		printf("Test suite finished with %i failed tests!", err_count);
-	}
 
-
-	return 0;
+	return err_count;
 }
+
+#endif // ELEMD_TEST_COLOR_H

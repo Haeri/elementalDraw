@@ -20,58 +20,65 @@ vec2 ed_vec2_init2i(int x, int y)
 }
 
 
-bool vec2::equals(const vec2& other)
+bool ed_vec2_equals(const vec2* a, const vec2* b)
 {
-    return (_x == other._x && _y == other._y);
+    return (a->x == b->x && a->y == b->y);
 }
 
-float vec2::length()
+float ed_vec2_length(const vec2* vec)
 {
-    return sqrt(_x * _x + _y * _y);
+    return sqrt(vec->x * vec->x + vec->y * vec->y);
 }
 
-float vec2::lengthSqrd()
+float ed_vec2_lengthSqrd(const vec2* vec)
 {
-    return _x * _x + _y * _y;
+    return vec->x * vec->x + vec->y * vec->y;
 }
 
-float vec2::distance(const vec2& other)
+float ed_vec2_distance(const vec2* a, const vec2* b)
 {
-    return (*this - other).length();
+    vec2 sub = ed_vec2_sub(a, b);
+    return ed_vec2_length(&sub);
 }
 
-float vec2::distanceSqrd(const vec2& other)
+float ed_vec2_distance_sqrd(const vec2* a, const vec2* b)
 {
-    return (*this - other).lengthSqrd();
+    vec2 sub = ed_vec2_sub(a, b);
+    return ed_vec2_lengthSqrd(&sub);
 }
 
-vec2 vec2::lerp(vec2 start, vec2 target, float percent)
+vec2 ed_vec2_normalize(const vec2* vec) 
 {
-    return vec2(start.x() + percent * (target.x() - start.x()),
-                    start.y() + percent * (target.y() - start.y()));
+    return ed_vec2_div(vec, ed_vec2_length(vec));
 }
 
-float vec2::get_x()
+vec2 ed_vec2_lerp(const vec2* a, const vec2* b, float t)
 {
-    return _x;
+    return (vec2) {
+        a->x + t * (b->x - a->x),
+        a->y + t * (b->y - a->y)
+    };
 }
 
-float vec2::get_y()
+
+
+
+vec2 ed_vec2_div(const vec2* vec, float scalar)
 {
-    return _y;
+    return (vec2) { vec->x / scalar, vec->y / scalar };
 }
 
-float& vec2::x()
+vec2 ed_vec2_mul(const vec2* vec, float scalar)
 {
-    return _x;
+    return (vec2) { vec->x * scalar, vec->y * scalar };
 }
 
-float& vec2::y()
+vec2 ed_vec2_sub(const vec2* a, const vec2* b)
 {
-    return _y;
+    return (vec2) { a->x - b->x, a->y - b->y };
 }
 
-std::ostream& operator<<(std::ostream& os, vec2 m)
+vec2 ed_vec2_add(const vec2* a, const vec2* b)
 {
-    return os << "(" << m.x() << ", " << m.y() << ")";
+    return (vec2) { a->x + b->x, a->y + b->y };
 }
