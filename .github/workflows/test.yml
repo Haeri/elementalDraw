@@ -64,7 +64,7 @@ jobs:
         cd ./build
         make CFLAGS='-O2 -s -DNDEBUG' CXXFLAGS='-O2 -s -DNDEBUG'
     - name: Test
-      run: ./build/test/Release/elemd-test
+      run: ./build/test/elemd-test
 
   build-mac:
    name: Mac Build
@@ -91,4 +91,4 @@ jobs:
         cd ./build
         xcodebuild -project elemd.xcodeproj -configuration ${{ matrix.conf }}
     - name: Test
-      run: ./build/test/elemd-test
+      run: ./build/test/Release/elemd-test

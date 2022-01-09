@@ -41,6 +41,8 @@ file(GLOB SOURCE_FILES
 
     include/${PROJECT_NAME}/vec2.h
     src/vec2.c
+
+    include/${PROJECT_NAME}/event.h
 )
 #file(GLOB_RECURSE SOURCE_FILES
 #    ${SOURCE_FILES}
