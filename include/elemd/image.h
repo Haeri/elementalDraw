@@ -10,15 +10,13 @@ extern "C"
 {
 #endif
 
-//static std::map<std::string, image*> _image_index;
-
 typedef struct image 
 {
 	int width;
 	int height;
 	int components;
 	
-	char* name;
+	//char* name;
 	unsigned char* data;
 
 	void* _impl;
@@ -26,7 +24,7 @@ typedef struct image
 
 image* _image_default();
 
-ELEMD_API image* ed_image_create(char* file_path);
+ELEMD_API image* ed_image_create(const char* file_path);
 ELEMD_API image* ed_image_create2(int width, int height, int components, unsigned char* data);
 ELEMD_API void ed_image_destroy(image* img);
 

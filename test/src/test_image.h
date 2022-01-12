@@ -36,12 +36,14 @@ int test_image() {
 		}
 	}
 
+	bool img_created = false;
 	// ed_image_write_to_file
 	{
 		printf("ed_image_write_to_file");				
 		if (ed_image_write_to_file(img, img_path))
 		{
 			print_ok();
+			img_created = true;
 		}
 		else
 		{
@@ -49,10 +51,10 @@ int test_image() {
 			print_fail();
 		}
 	}
-
+	
 	// ed_image_create
 	{
-		printf("ed_image_create");
+		printf("ed_image_create\t");
 		img = ed_image_create(img_path);
 		if (img->data[0] == data[0] &&
 			img->data[1] == data[1] &&
@@ -68,19 +70,17 @@ int test_image() {
 		}
 	}
 
+	if (img_created) {
+		remove(img_path);
+	}
+
 	// ed_image_destroy
 	{
 		printf("ed_image_destroy");
 		ed_image_destroy(img);
-		if (true)
-		{
-			print_ok();
-		}
-		else
-		{
-			err_count++;
-			print_fail();
-		}
+		
+		// Assumed success else ther would be a segfault
+		print_ok();		
 	}
 
 	return err_count;

@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-//#include "elemd/image.h"
 #include "../utils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -13,7 +12,7 @@
 
 
 /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
-image* ed_image_create(char* file_path) {
+image* ed_image_create(const char* file_path) {
     return imageImplOpengl_create(file_path);
 }
 image* ed_image_create2(int width, int height, int components, unsigned char* data) {
@@ -25,10 +24,10 @@ void ed_image_destroy(image* img) {
 
 
 
-image* imageImplOpengl_create(char* file_path) {
+image* imageImplOpengl_create(const char* file_path) {
     return imageImplOpengl_create2(file_path, true);
 }
-image* imageImplOpengl_create2(char* file_path, bool generate_mips)
+image* imageImplOpengl_create2(const char* file_path, bool generate_mips)
 {
     imageImplOpengl* impl = malloc(sizeof(imageImplOpengl));
     image* img = _image_default();
@@ -40,7 +39,7 @@ image* imageImplOpengl_create2(char* file_path, bool generate_mips)
     {
         img->data = data;
         img->components = 4;
-        img->name = file_path;
+        //img->name = file_path;
             
         if (generate_mips)
         {
@@ -78,11 +77,13 @@ image* imageImplOpengl_create4(int width, int height, int components, unsigned c
     img->components = components;
     img->data = data;
 
+    /*
     srand(time(NULL));
     int i = rand() * 9;
     size_t needed = snprintf(NULL, 0, "IMG%i", i)+1;
     img->name = malloc(needed);
     snprintf(img->name, needed, "IMG%i", i);
+    */
 
     if (generate_mips)
     {
@@ -109,7 +110,7 @@ void imageImplOpengl_destroy(image* img)
             stbi_image_free(img->data);
         }
         else {
-            free(img->data);
+            //free(img->data);
         }
             
         impl->loaded = false;
@@ -122,7 +123,7 @@ void imageImplOpengl_destroy(image* img)
     }
 
     free(impl);
-    free(img->name);
+    //free(img->name);
     free(img);
 }
 

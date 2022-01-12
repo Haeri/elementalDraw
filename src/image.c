@@ -6,15 +6,12 @@
 #include <stb_image_write.h>
 
 
-
-//std::map<std::string, image*> image::_image_index;
-
 image* _image_default() {
 	image* img = malloc(sizeof(image));
 	img->width = -1;
 	img->height = -1;
 	img->components = -1;
-	img->name = NULL;
+	//img->name = NULL;
 	img->data = NULL;
 	img->_impl = NULL;
 	return img;
