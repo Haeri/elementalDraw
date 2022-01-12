@@ -1,142 +1,167 @@
-#include "image_impl_opengl.hpp"
+#include "image_impl_opengl.h"
 
-#include <algorithm>
-#include <iostream>
-#include <cstring>
-#include <cmath>
+#include <time.h>
+#include <stdlib.h>
+#include <math.h>
+
+//#include "elemd/image.h"
+#include "../utils.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
 
-namespace elemd
+
+
+/* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
+image* ed_image_create(char* file_path) {
+    return imageImplOpengl_create(file_path);
+}
+image* ed_image_create2(int width, int height, int components, unsigned char* data) {
+    return imageImplOpengl_create3(width, height, components, data);
+}
+void ed_image_destroy(image* img) {
+    imageImplOpengl_destroy(img);
+}
+
+
+
+image* imageImplOpengl_create(char* file_path) {
+    return imageImplOpengl_create2(file_path, true);
+}
+image* imageImplOpengl_create2(char* file_path, bool generate_mips)
 {
-    /* ------------------------ DOWNCAST ------------------------ */
-
-    inline imageImplOpengl* getImpl(image* ptr)
+    imageImplOpengl* impl = malloc(sizeof(imageImplOpengl));
+    image* img = _image_default();
+    img->_impl = impl;
+    
+    stbi_uc* data =
+        stbi_load(file_path, &img->width, &img->height, &img->components, STBI_rgb_alpha);
+    if (data != NULL)
     {
-        return (imageImplOpengl*)ptr;
-    }
-    inline const imageImplOpengl* getImpl(const image* ptr)
-    {
-        return (const imageImplOpengl*)ptr;
-    }
-
-    /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
-
-    image* image::create(std::string file_path)
-    {
-        return new imageImplOpengl(file_path);
-    }
-
-    image* image::create(int width, int height, int components, unsigned char* data)
-    {
-        return new imageImplOpengl(width, height, components, data);
-    }
-
-    imageImplOpengl::imageImplOpengl(std::string file_path, bool generate_mips)
-    {
-        stbi_uc* data =
-            stbi_load(file_path.c_str(), &_width, &_height, &_components, STBI_rgb_alpha);
-        if (data != nullptr)
-        {
-            _data = data;
-            _image_index[file_path] = this;
-            _managed = true;
-            _components = 4;
-            _name = file_path;
+        img->data = data;
+        img->components = 4;
+        img->name = file_path;
             
-
-            if (generate_mips)
-            {
-                _mipLevels =
-                    static_cast<uint32_t>(std::floor(std::log2(std::max(_width, _height)))) + 1;
-            }
-
-            _loaded = true;
-        }
-        else
-        {
-            std::cerr << "Error: Could not load image at " << file_path << std::endl;
-        }
-    }
-
-    imageImplOpengl::imageImplOpengl(int width, int height, int components, unsigned char* data,
-                                     bool generate_mips)
-    {
-        _width = width;
-        _height = height;
-        _components = components;
-        _data = data;
-        _name = "noname_" + std::to_string(rand() % 10000);
-
         if (generate_mips)
         {
-            _mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+            impl->mip_levels = (GLuint)(floor(log2(_max(img->width, img->height)))) + 1;
         }
-
-        _managed = true;
-        _loaded = true;
-    }
-
-    imageImplOpengl::~imageImplOpengl()
-    {        
-        if (_loaded && _managed)
+        else 
         {
-            stbi_image_free(_data); 
-            
-            _loaded = false;
+            impl->mip_levels = 1;
         }
 
-        if (_uploaded)
-        {               
-            glDeleteTextures(1, &_image);
-            _uploaded = false;
-        }
+        impl->uploaded = false;
+        impl->managed = true;
+        impl->loaded = true;
     }
-
-    void imageImplOpengl::upload()
+    else
     {
-        if (!_loaded)
-            return;
+        fprintf(stderr, "Error: Could not load image at %s\n", file_path);
+    }
 
-        glGenTextures(1, &_image);
-        glBindTexture(GL_TEXTURE_2D, _image);
+    return img;
+}
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _width, _height, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, _data);
+image* imageImplOpengl_create3(int width, int height, int components, unsigned char* data) {
+    return imageImplOpengl_create4(width, height, components, data, true);
+}
+image* imageImplOpengl_create4(int width, int height, int components, unsigned char* data,
+                                    bool generate_mips)
+{
+    imageImplOpengl* impl = malloc(sizeof(imageImplOpengl));
+    image* img = _image_default();
+    img->_impl = impl;
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    img->width = width;
+    img->height = height;
+    img->components = components;
+    img->data = data;
 
-        if (_mipLevels > 1)
-        {
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glGenerateMipmap(GL_TEXTURE_2D);
+    srand(time(NULL));
+    int i = rand() * 9;
+    size_t needed = snprintf(NULL, 0, "IMG%i", i)+1;
+    img->name = malloc(needed);
+    snprintf(img->name, needed, "IMG%i", i);
+
+    if (generate_mips)
+    {
+        impl->mip_levels = (GLuint)(floor(log2(_max(img->width, img->height)))) + 1;
+    }
+    else
+    {
+        impl->mip_levels = 1;
+    }
+
+    impl->uploaded = false;
+    impl->managed = false;
+    impl->loaded = true;
+
+    return img;
+}
+
+void imageImplOpengl_destroy(image* img)
+{        
+    imageImplOpengl* impl = (imageImplOpengl*)img->_impl;
+    if (impl->loaded)
+    {
+        if (impl->managed) {
+            stbi_image_free(img->data);
         }
-        else
-        {
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        else {
+            free(img->data);
         }
+            
+        impl->loaded = false;
+    }
+
+    if (impl->uploaded)
+    {               
+        glDeleteTextures(1, &impl->buffer_id);
+        impl->uploaded = false;
+    }
+
+    free(impl);
+    free(img->name);
+    free(img);
+}
+
+void image_upload(image* img)
+{
+    imageImplOpengl* impl = (imageImplOpengl*)img->_impl;
+
+    if (!impl->loaded)
+        return;
+
+    glGenTextures(1, &impl->buffer_id);
+    glBindTexture(GL_TEXTURE_2D, impl->buffer_id);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, img->width, img->height, 0, GL_RGBA,
+                    GL_UNSIGNED_BYTE, img->data);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    if (impl->mip_levels > 1)
+    {
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
 
         
-        _uploaded = true;
-    }
+    impl->uploaded = true;
+}
 
-    void imageImplOpengl::bind(GLuint texture_unit)
-    {
-        glActiveTexture(GL_TEXTURE0 + texture_unit);
-        glBindTexture(GL_TEXTURE_2D, _image);
-    }
+void image_bind(image* img, GLuint texture_unit)
+{
+    imageImplOpengl* impl = (imageImplOpengl*)img->_impl;
 
-    void imageImplOpengl::writeToFile()
-    {
-        if (stbi_write_png(("out_" +_name + ".png").c_str(), _width, _height, _components, _data, 0) == 0)
-        {
-            std::cerr << "error during saving" << std::endl;
-        }
-    }
-
-} // namespace elemd
+    glActiveTexture(GL_TEXTURE0 + texture_unit);
+    glBindTexture(GL_TEXTURE_2D, impl->buffer_id);
+}

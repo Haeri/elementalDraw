@@ -1,33 +1,14 @@
-#ifndef ELEMD_OPENGL_SHARED_INFO_HPP
-#define ELEMD_OPENGL_SHARED_INFO_HPP
+#ifndef ELEMD_OPENGL_SHARED_INFO_H
+#define ELEMD_OPENGL_SHARED_INFO_H
 
 #define GLAD_GL_IMPLEMENTATION
 #include "glad/gl.h"
 
-#include <string>
+typedef struct OpenglSharedInfo {
+	int MAX_UNIFORM_BLOCK_SIZE;
+}OpenglSharedInfo;
 
-
-namespace elemd
-{
-    class OpenglSharedInfo
-    {
-    public:
-        static int MAX_UNIFORM_BLOCK_SIZE;
-
-        static OpenglSharedInfo* getInstance();
-        static void destroy();
-
-    private:
-        static OpenglSharedInfo* _instance;
-
-        OpenglSharedInfo();
-        OpenglSharedInfo(const OpenglSharedInfo&)
-        {}
-        ~OpenglSharedInfo();
-
-        void load_opengl();
-    };
-
-} // namespace elemd
+OpenglSharedInfo* OpenglSharedInfo_create();
+void OpenglSharedInfo_destroy(OpenglSharedInfo* openglSharedInfo);
 
 #endif // ELEMD_VULKAN_SHARED_INFO_HPP

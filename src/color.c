@@ -5,8 +5,7 @@
 #include <string.h>
 #include <math.h>
 
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#define MAX(a,b) (((a)>(b))?(a):(b))
+#include "utils.h"
 
 #ifdef _MSC_VER
 #define sscanf_cross sscanf_s
@@ -96,19 +95,19 @@ color ed_color_initcx(char* hex)
 
 uint8_t ed_color_rui(const color* color) 
 {
-    return MIN((uint8_t)(color->r * 255), (uint8_t)255);
+    return _min((uint8_t)(color->r * 255), (uint8_t)255);
 }
 uint8_t ed_color_gui(const color* color)
 {
-    return MIN((uint8_t)(color->g * 255), (uint8_t)255);
+    return _min((uint8_t)(color->g * 255), (uint8_t)255);
 }
 uint8_t ed_color_bui(const color* color)
 {
-    return MIN((uint8_t)(color->b * 255), (uint8_t)255);
+    return _min((uint8_t)(color->b * 255), (uint8_t)255);
 }
 uint8_t ed_color_aui(const color* color)
 {
-    return MIN((uint8_t)(color->a * 255), (uint8_t)255);
+    return _min((uint8_t)(color->a * 255), (uint8_t)255);
 }
 
 

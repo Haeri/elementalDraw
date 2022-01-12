@@ -1,62 +1,39 @@
-#include "opengl_shared_info.hpp"
+#include "opengl_shared_info.h"
 
-#include <vector>
-#include <iostream>
-
-#include "elemd/elemental_draw.hpp"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "GLFW/glfw3.h"
 
-namespace elemd
+void load_opengl(OpenglSharedInfo* osi);
+
+OpenglSharedInfo* OpenglSharedInfo_create() {
+    OpenglSharedInfo* osi = malloc(sizeof(OpenglSharedInfo));
+    load_opengl(osi);
+    return osi;
+}
+void OpenglSharedInfo_destroy(OpenglSharedInfo* openglSharedInfo) 
 {
-    int OpenglSharedInfo::MAX_UNIFORM_BLOCK_SIZE = -1;
-    OpenglSharedInfo* OpenglSharedInfo::_instance = nullptr;
+    free(openglSharedInfo);
+    openglSharedInfo = NULL;
+}
 
-    OpenglSharedInfo::OpenglSharedInfo()
+void load_opengl(OpenglSharedInfo * osi)
+{
+    // --------------- Load Vulkan ---------------
+
+    int version = gladLoadGL(glfwGetProcAddress);
+    if (version == 0)
     {
-        load_opengl();
+        fprintf(stderr, "Could not load the OpenGL context\n");
+        glfwTerminate();
+        exit(EXIT_FAILURE);
     }
 
-    OpenglSharedInfo::~OpenglSharedInfo()
-    {
-        
-    }
+    const GLubyte* vendor = glGetString(GL_VENDOR);     // Returns the vendor
+    const GLubyte* renderer = glGetString(GL_RENDERER); // Returns a hint to the model
 
-    OpenglSharedInfo* OpenglSharedInfo::getInstance()
-    {
-        if (_instance == nullptr)
-        {
-            _instance = new OpenglSharedInfo();
-        }
-
-        return _instance;
-    }
-
-    void OpenglSharedInfo::destroy()
-    {
-        if (_instance != nullptr)
-        {
-            delete _instance;
-        }
-    }
-
-    void OpenglSharedInfo::load_opengl()
-    {
-        // --------------- Load Vulkan ---------------
-
-        int version = gladLoadGL(glfwGetProcAddress);
-        if (version == 0)
-        {
-            std::cerr << "Could not load the OpenGL context" << std::endl;
-            glfwTerminate();
-            exit(EXIT_FAILURE);
-        }
-
-        const GLubyte* vendor = glGetString(GL_VENDOR);     // Returns the vendor
-        const GLubyte* renderer = glGetString(GL_RENDERER); // Returns a hint to the model
-
-        std::cout << "BACKEND: OpenGL " << GLAD_VERSION_MAJOR(version) << "."
-                  << GLAD_VERSION_MINOR(version) <<  " - " << vendor << " " << renderer << std::endl;
-        glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &MAX_UNIFORM_BLOCK_SIZE);
-
-    }
-} // namespace elemd
+    printf("BACKEND: OpenGL %i.%i - %s %s\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version), vendor, renderer);
+    
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &osi->MAX_UNIFORM_BLOCK_SIZE);
+}

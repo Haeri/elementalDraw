@@ -1,43 +1,41 @@
-#ifndef ELEMD_IMAGE_HPP
-#define ELEMD_IMAGE_HPP
+#ifndef ELEMD_IMAGE_H
+#define ELEMD_IMAGE_H
+
+#include <stdbool.h>
 
 #include <elemd/elemental_draw.h>
 
-#include <map>
-#include <string>
-
-namespace elemd
+#ifdef __cplusplus
+extern "C"
 {
-    class ELEMD_API image
-    {
-    public:
-        static image* create(std::string file_path);
-        static image* create(int width, int height, int components, unsigned char* data);
+#endif
 
-        unsigned char* get_data();
-        int get_width();
-        int get_height();
-        int get_channels();
-        void set_name(std::string name);
+//static std::map<std::string, image*> _image_index;
 
-        void destroy();
+typedef struct image 
+{
+	int width;
+	int height;
+	int components;
+	
+	char* name;
+	unsigned char* data;
 
-    protected:
-        static std::map<std::string, image*> _image_index;
+	void* _impl;
+} image;
 
-        int _width = -1;
-        int _height = -1;
-        int _components = -1;
-        bool _managed = false;
+image* _image_default();
 
-        std::string _name;
+ELEMD_API image* ed_image_create(char* file_path);
+ELEMD_API image* ed_image_create2(int width, int height, int components, unsigned char* data);
+ELEMD_API void ed_image_destroy(image* img);
 
-        unsigned char* _data = NULL;
+ELEMD_API bool ed_image_write_to_file(image* img, const char* file_path);
 
-        image() = default;
-        virtual ~image() = default;
-    };
 
-} // namespace elemd
+#ifdef __cplusplus
+}
+#endif
 
-#endif // ELEMD_IMAGE_HPP
+
+#endif // ELEMD_IMAGE_H

@@ -35,6 +35,9 @@ add_compile_definitions("ELEMD_RENDERING_BACKEND_${ELEMD_RENDERING_BACKEND_UPPER
 file(GLOB SOURCE_FILES
 #    include/${PROJECT_NAME}/*.h
 #    src/*    
+
+    src/utils.h
+
     include/${PROJECT_NAME}/elemental_draw.h
     include/${PROJECT_NAME}/color.h
     src/color.c
@@ -43,6 +46,18 @@ file(GLOB SOURCE_FILES
     src/vec2.c
 
     include/${PROJECT_NAME}/event.h
+    src/event.h
+
+    include/${PROJECT_NAME}/image.h
+    src/image.c
+
+    src/opengl/opengl_shared_info.h
+    src/opengl/opengl_shared_info.c
+
+    src/opengl/image_impl_opengl.h
+    src/opengl/image_impl_opengl.c
+
+    src/opengl/glad/*.*
 )
 #file(GLOB_RECURSE SOURCE_FILES
 #    ${SOURCE_FILES}
@@ -141,7 +156,7 @@ endif()
 if (ELEMD_BUILD_TEST)
     add_subdirectory(test)
     set_target_properties(elemd-test PROPERTIES FOLDER test)
-      if (BUILD_SHARED_LIBS)
+    if (BUILD_SHARED_LIBS)
         add_custom_command(
             TARGET ${PROJECT_NAME} POST_BUILD
             DEPENDS elemd-test
