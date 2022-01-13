@@ -27,6 +27,12 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINE_HIDDEN YES)
 
+#https://stackoverflow.com/questions/67643381/how-to-update-windows-sdk-on-windows-latest-on-github-action
+if (WIN32)
+    set(CMAKE_SYSTEM_VERSION 10.0)
+endif()
+
+
 # Enable folder view in solution explorer
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
