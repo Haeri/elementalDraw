@@ -10,7 +10,7 @@ extern "C"
 {
 #endif
 
-typedef struct image 
+typedef struct Image 
 {
 	int width;
 	int height;
@@ -20,15 +20,15 @@ typedef struct image
 	unsigned char* data;
 
 	void* _impl;
-} image;
+} Image;
 
-image* _image_default();
+Image* _image_default();
 
-ELEMD_API image* ed_image_create(const char* file_path);
-ELEMD_API image* ed_image_create2(int width, int height, int components, unsigned char* data);
-ELEMD_API void ed_image_destroy(image* img);
+ELEMD_API Image* ed_image_create(const char* file_path);
+ELEMD_API Image* ed_image_create2(int width, int height, int components, unsigned char* data);
+ELEMD_API void ed_image_destroy(Image* img);
 
-ELEMD_API bool ed_image_write_to_file(image* img, const char* file_path);
+ELEMD_API bool ed_image_write_to_file(Image* img, const char* file_path);
 
 
 #ifdef __cplusplus

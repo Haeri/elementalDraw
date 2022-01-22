@@ -6,8 +6,8 @@
 #include <stb_image_write.h>
 
 
-image* _image_default() {
-	image* img = malloc(sizeof(image));
+Image* _image_default() {
+	Image* img = malloc(sizeof(Image));
 	img->width = -1;
 	img->height = -1;
 	img->components = -1;
@@ -18,7 +18,7 @@ image* _image_default() {
 }
 
 
-bool ed_image_write_to_file(image* img, const char* file_path)
+bool ed_image_write_to_file(Image* img, const char* file_path)
 {
 	bool ret = stbi_write_png(file_path, img->width, img->height, img->components, img->data, img->width * img->components);
 	if (ret == 0)

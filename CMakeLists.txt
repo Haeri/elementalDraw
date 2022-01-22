@@ -27,9 +27,9 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINE_HIDDEN YES)
 
-#https://stackoverflow.com/questions/67643381/how-to-update-windows-sdk-on-windows-latest-on-github-action
+#https://developercommunity.visualstudio.com/t/stdc17-generates-warning-compiling-windowsh/1249671
 if (WIN32)
-    set(CMAKE_SYSTEM_VERSION 10.0)
+    set(CMAKE_SYSTEM_VERSION 10.0.20348.0)
 endif()
 
 

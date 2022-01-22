@@ -14,7 +14,7 @@ int test_image() {
 	printf("Testing image\n--------------\n");
 
 	uint8_t data[] = {255, 255, 255, 255};
-	image* img;
+	Image* img;
 	const char img_path[] = "test.png";
 
 	// ed_image_create2
