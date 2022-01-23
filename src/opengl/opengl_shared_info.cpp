@@ -41,7 +41,7 @@ namespace elemd
 
     void OpenglSharedInfo::load_opengl()
     {
-        // --------------- Load Vulkan ---------------
+        // --------------- Load Opengl ---------------
 
         int version = gladLoadGL(glfwGetProcAddress);
         if (version == 0)
