@@ -13,6 +13,9 @@ else()
     set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
 endif()
 
+# Hardcoding during port
+set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
+
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
@@ -45,6 +48,7 @@ file(GLOB SOURCE_FILES
     src/utils.h
 
     include/${PROJECT_NAME}/elemental_draw.h
+
     include/${PROJECT_NAME}/color.h
     src/color.c
 
@@ -56,6 +60,10 @@ file(GLOB SOURCE_FILES
 
     include/${PROJECT_NAME}/image.h
     src/image.c
+
+    #include/${PROJECT_NAME}/window.h
+    #src/window_impl.h
+    #src/window_impl.c
 
     src/opengl/opengl_shared_info.h
     src/opengl/opengl_shared_info.c

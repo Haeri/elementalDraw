@@ -5,9 +5,9 @@
 #include "elemd/event.h"
 #include "elemd/vec2.h"
 
-#include <string>
-#include <cstdint>
-#include <functional>
+//#include <string>
+//#include <cstdint>
+//#include <functional>
 
 //#define ELEMD_ICON "./elemd_res/elemd_icon.png"
 
@@ -17,113 +17,105 @@
 #define ELEMD_BACKEND "OpenGL"
 #endif
 
-namespace elemd
+enum CURSOR_TYPE
 {
-    class Context;
+    ARROW_CURSOR = 0x00036001,
+    IBEAM_CURSOR = 0x00036002,
+    CROSSHAIR_CURSOR = 0x00036003,
+    HAND_CURSOR = 0x00036004,
+    HRESIZE_CURSOR = 0x00036005,
+    VRESIZE_CURSOR = 0x00036006
+};
 
-    extern "C" struct ELEMD_API WindowConfig
-    {
-        const char* title;
+typedef struct windowConfig
+{
+    const char* title;
 
-        int width = 500;
-        int height = 600;
+    int width; // = 500;
+    int height; // = 600;
 
-        int position_x = -1;
-        int position_y = -1;
+    int position_x; // = -1;
+    int position_y; // = -1;
 
-        float x_scale = 1;
-        float y_scale = 1;
+    float x_scale; // = 1;
+    float y_scale; // = 1;
 
-        bool decorated = true;
-        bool transparent = false;
-        bool resizeable = true;
-        bool visible = true;
-        bool vsync = false;
-        bool native_pixel_size = false;
+    bool decorated; // = true;
+    bool transparent; // = false;
+    bool resizeable; // = true;
+    bool visible; // = true;
+    bool vsync; // = false;
+    bool native_pixel_size; // = false;
 
-        const char* icon_file = NULL;
-    };
+    const char* icon_file; // = NULL;
+} windowConfig;
 
-    enum CURSOR_TYPE
-    {
-        ARROW_CURSOR = 0x00036001,
-        IBEAM_CURSOR = 0x00036002,
-        CROSSHAIR_CURSOR = 0x00036003,
-        HAND_CURSOR = 0x00036004,
-        HRESIZE_CURSOR = 0x00036005,
-        VRESIZE_CURSOR = 0x00036006
-    };
 
-    extern "C" struct ELEMD_API Cursor
-    {
-        int width;
-        int height;
-        int hot_x;
-        int hot_y;
-        unsigned char* data;
-    };
 
-    class ELEMD_API Window
-    {
-    public:
-        static Window* create(WindowConfig config);
+typedef struct Cursor
+{
+    int width;
+    int height;
+    int hot_x;
+    int hot_y;
+    unsigned char* data;
+} Cursor;
 
-        Context* create_context();
-        Context* get_context();
-        bool is_running();
-        bool get_vsync();
-        int get_width();
-        int get_height();
-        elemd::vec2 get_position();
-        elemd::vec2 get_scale();
-        elemd::vec2 get_offset();
-        float get_dpi_scale();
+typedef struct Context Context;
 
-        void set_title(const std::string& title);
-        void set_position(int x, int y);
-        void set_size(int width, int height);
-        void set_vsync(bool vsync);
-        void set_scale(float x, float y);
-        void set_scale(float scalar);
-        void set_offset(float x, float y);
-        void set_fullscreen(bool fullscreen);
+typedef struct Window {
+    Context* _context;
+    bool _vsync;
 
-        bool is_fullscreen();
+    void* _impl;
+
+} Window;
+
+
+Window* ed_window_create(WindowConfig config);
+void ed_window_destroy(Window* window);
+
+bool ed_window_is_fullscreen(Window* window);
+bool ed_window_is_running(Window* window);
+bool ed_window_get_vsync(Window* window);
+int ed_window_get_width(Window* window);
+int ed_window_get_height(Window* window);
+vec2 ed_window_get_position(Window* window);
+vec2 ed_window_get_scale(Window* window);
+vec2 ed_window_get_offset(Window* window);
+float ed_window_get_dpi_scale(Window* window);
+
+void ed_window_set_title(Window* window, const char* title);
+void ed_window_set_position(Window* window, int x, int y);
+void ed_window_set_size(Window* window, int width, int height);
+void ed_window_set_vsync(Window* window, bool vsync);
+void ed_window_set_scale(Window* window, float x, float y);
+void ed_window_set_scale2(Window* window, float scalar);
+void ed_window_set_offset(Window* window, float x, float y);
+void ed_window_set_fullscreen(Window* window, bool fullscreen);
+void ed_window_set_cursor(Window* window, CURSOR_TYPE cursor_type);
+void ed_window_set_cursor2(Window* window, Cursor* cursor);
+
+void ed_window_add_resize_listener(Window* window, void(*callback)(resize_event));
+void ed_window_add_mouse_move_listener(Window* window, void(*callback)(mouse_move_event));
+void ed_window_add_mouse_click_listener(Window* window, void(*callback)(mouse_button_event));
+void ed_window_add_key_listener(Window* window, void(*callback)(key_event));
+void ed_window_add_char_listener(Window* window, void(*callback)(char_event));
+void ed_window_add_scroll_listener(Window* window, void(*callback)(scroll_event));
+void ed_window_reset_listener(Window* window);
+
+void ed_window_minimize(Window* window);
+void ed_window_maximize(Window* window);
+void ed_window_restore(Window* window);
+void ed_window_close(Window* window);
+
+Context* ed_window_create_context(Window* window);
+Context* ed_window_get_context(Window* window);
+
+void ed_window_poll_events();
+void ed_window_wait_events();
+void ed_window_wait_events_time(float time);
+void ed_window_trigger_events();
+double ed_window_now();
         
-        
-        void add_resize_listener(std::function<void(resize_event)>callback);
-        void add_mouse_move_listener(std::function<void(mouse_move_event)> callback);
-        void add_mouse_click_listener(std::function<void(mouse_button_event)> callback);
-        void add_key_listener(std::function<void(key_event)> callback);
-        void add_char_listener(std::function<void(char_event)> callback);
-        void add_scroll_listener(std::function<void(scroll_event)> callback);
-        void reset_listener();
-
-        void set_cursor(CURSOR_TYPE cursor_type);
-        void set_cursor(Cursor* cursor);
-
-        void minimize();
-        void maximize();
-        void restore();
-        void close();
-
-        void destroy();
-        void poll_events();
-        void wait_events();
-        void wait_events(float time);
-
-        static void trigger_events();
-        static double now();
-
-    protected:
-        Window() = default;
-        virtual ~Window() = default;
-
-
-        Context* _context = NULL;
-        bool _vsync = true;        
-    };
-
-} // namespace elemd
-
 #endif // ELEMD_WINDOW_H
