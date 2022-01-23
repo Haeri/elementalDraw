@@ -13,13 +13,15 @@ Portable C++ canvas library with a Vulkan (Windows, Linux) and OpenGL (MacOS) ba
 
 ## Setup
 
-### <img height="14" src="https://image.flaticon.com/icons/svg/888/888882.svg"> Windows
+### <img height="14" src="https://cdn-icons-png.flaticon.com/512/220/220215.png"> Windows
+
 ```cmd
 git clone https://github.com/Haeri/ElementalDraw.git  --recursive
 cd ElementalDraw
 ./scripts/generate_project_win.bat
 ```
-### <img height="16" src="https://image.flaticon.com/icons/svg/226/226772.svg"> Linux
+### <img height="18" src="https://cdn-icons-png.flaticon.com/512/226/226772.png"> Linux
+
 ```bash
 git clone https://github.com/Haeri/ElementalDraw.git  --recursive
 cd ElementalDraw
@@ -28,7 +30,8 @@ sudo apt install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev cma
 ./scripts/generate_project_linux.sh
 ```
 
-### <img height="16" src="https://image.flaticon.com/icons/svg/2/2235.svg"> Mac
+### <img height="18" src="https://cdn-icons-png.flaticon.com/512/179/179309.png"> macOS
+
 ```bash
 git clone https://github.com/Haeri/ElementalDraw.git  --recursive
 cd ElementalDraw

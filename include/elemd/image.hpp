@@ -28,7 +28,7 @@ namespace elemd
         int _width = -1;
         int _height = -1;
         int _components = -1;
-        bool _managed = false;
+        bool _loaded = false;
 
         std::string _name;
 

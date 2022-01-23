@@ -22,7 +22,6 @@ namespace elemd
         int _sampler_index = -1;
         uint32_t _mipLevels = 1;
 
-        bool _loaded = false;
         bool _uploaded = false;
 
         void upload();

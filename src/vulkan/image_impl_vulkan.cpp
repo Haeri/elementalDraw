@@ -44,10 +44,10 @@ namespace elemd
         if (data != nullptr)
         {
             _data = data;
-            _image_index[file_path] = this;
-            _managed = true;
+            _image_index[file_path] = this;            
             _components = 4;
             _name = file_path;
+            _loaded = true;
             
 
             if (generate_mips)
@@ -56,7 +56,6 @@ namespace elemd
                     static_cast<uint32_t>(std::floor(std::log2(std::max(_width, _height)))) + 1;
             }
 
-            _loaded = true;
         }
         else
         {
@@ -72,25 +71,27 @@ namespace elemd
         _components = components;
         _data = data;
         _name = "noname_" + std::to_string(rand() % 10000);
+        _loaded = false;
 
         if (generate_mips)
         {
             _mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
         }
-
-        _managed = true;
-        _loaded = true;
     }
 
     imageImplVulkan::~imageImplVulkan()
     {
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         
-        if (_loaded && _managed)
+        if (_loaded)
         {
             stbi_image_free(_data); 
             
             _loaded = false;
+        }
+        else if (_data != nullptr)
+        {
+            delete[] _data;
         }
 
         if (_uploaded)
@@ -107,7 +108,7 @@ namespace elemd
 
     void imageImplVulkan::upload(const VkCommandPool& commandPool, const VkQueue& queue)
     {
-        if (!_loaded)
+        if (_data == nullptr)
             return;
 
         VkDevice device = VulkanSharedInfo::getInstance()->device;
