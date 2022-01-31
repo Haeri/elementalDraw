@@ -59,7 +59,7 @@ int main(void)
     elemd::Context* ctx = win->create_context();
 
     // load image
-    elemd::image* logo = elemd::image::create("./res/logo.png");
+    elemd::Image* logo = elemd::Image::create("./res/logo.png");
 
     ctx->set_clear_color(elemd::color("#e5e9f0"));
 
@@ -86,6 +86,7 @@ int main(void)
         ctx->draw_rounded_image(200, 120, 30, 30, logo, 5);
 
         ctx->draw_frame();
+        ctx->present_frame();
     }
     
     return 0;

@@ -24,6 +24,11 @@ if [ "$1" = "-static" ]; then
 	mkdir -p samples/game_of_life
 	cp ./build/examples/game_of_life/game-of-life ./samples/game_of_life
 
+	# Platformer
+	mkdir -p samples/platformer
+	cp -R ./build/examples/platformer/res ./samples/platformer
+	cp ./build/examples/platformer/platformer ./samples/platformer
+
 	# Benchmark
 	mkdir -p samples/benchmark
 	cp ./build/examples/benchmark/benchmark ./samples/benchmark
