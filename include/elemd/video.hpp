@@ -16,17 +16,17 @@ struct SwsContext;
 namespace elemd
 {
 
-    class ELEMD_API video
+    class ELEMD_API Video
     {
     public:
-        static video* create(std::string file_path);
+        static Video* create(std::string file_path);
         
         unsigned char* get_data();
         int get_width();
         int get_height();        
         void set_name(std::string name);
         
-        image* get_frame(int index);
+        Image* get_frame(int index);
 
         void destroy();
 
@@ -37,11 +37,12 @@ namespace elemd
         int _height = -1;
         std::string _name;
 
-        unsigned char* _data = nullptr;
-        image* _image;
+        AVFrame* _gl_frame;
+        //unsigned char* _data = nullptr;
+        Image* _image;
 
-        video() = default;
-        virtual ~video() = default;
+        Video() = default;
+        virtual ~Video() = default;
 
         struct VideoReaderState
         {
@@ -58,11 +59,11 @@ namespace elemd
             SwsContext* sws_scaler_ctx;
         } _vr_state;
 
-        bool video_reader_open(video::VideoReaderState* state, const char* filename);
-        bool video_reader_read_frame(video::VideoReaderState* state, uint8_t* frame_buffer,
+        bool video_reader_open(Video::VideoReaderState* state, const char* filename);
+        bool video_reader_read_frame(Video::VideoReaderState* state, uint8_t* frame_buffer,
                                      int64_t* pts);
-        bool video_reader_seek_frame(video::VideoReaderState* state, int64_t ts);
-        void video_reader_close(video::VideoReaderState* state);
+        bool video_reader_seek_frame(Video::VideoReaderState* state, int64_t ts);
+        void video_reader_close(Video::VideoReaderState* state);
 
     };
 

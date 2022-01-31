@@ -30,6 +30,10 @@ int main(void)
     elemd::Image* anim = elemd::Image::create("./res/anim.png");
     ctx->_tmp_register_image(anim);
 
+    // Load video
+    elemd::Video* video = elemd::Video::create("./res/Sea.mp4");
+    //ctx->_tmp
+
     // Load fonts
     elemd::Font* monserat_light = elemd::Font::create("./res/font/Montserrat-Light.ttf");
     ctx->_tmp_register_font(monserat_light);

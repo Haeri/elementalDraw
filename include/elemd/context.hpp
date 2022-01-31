@@ -92,7 +92,7 @@ namespace elemd
         int get_height();
         void resize_context(int width, int height);
 
-        void _upload_video(video* video);
+        void _upload_video(Video* video);
         void _tmp_register_image(Image* image);
         void _tmp_register_font(Font* font);
 

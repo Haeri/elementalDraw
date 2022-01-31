@@ -742,7 +742,7 @@ namespace elemd
         }
     }
 
-    void Context::_upload_video(video* video)
+    void Context::_upload_video(Video* video)
     {
         /*
         ContextImplOpengl* impl = getImpl(this);

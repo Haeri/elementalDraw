@@ -1,5 +1,7 @@
 #include "elemd/video.hpp"
 
+#include <iostream>
+
 extern "C"
 {
 #include <inttypes.h>
@@ -10,32 +12,32 @@ extern "C"
 
 namespace elemd
 {
-    unsigned char* video::get_data()
+    unsigned char* Video::get_data()
     {
         return _data;
     }
     
-    int video::get_width()
+    int Video::get_width()
     {
         return _width;
     }
     
-    int video::get_height()
+    int Video::get_height()
     {
         return _height;
     }
 
-    void video::set_name(std::string name)
+    void Video::set_name(std::string name)
     {
         _name = name;
     }
 
-    image* video::get_frame(int index)
+    Image* Video::get_frame(int index)
     {
         return nullptr;
     }
 
-    void video::destroy()
+    void Video::destroy()
     {
         delete this;
     }
@@ -66,8 +68,11 @@ namespace elemd
         }
     }
 
-    bool video::video_reader_open(video::VideoReaderState* state, const char* filename)
+    bool Video::video_reader_open(Video::VideoReaderState* state, const char* filename)
     {
+
+        av_register_all();
+        avformat_network_init();
 
         // Unpack members of state
         auto& width = state->width;
@@ -83,15 +88,28 @@ namespace elemd
         av_format_ctx = avformat_alloc_context();
         if (!av_format_ctx)
         {
-            printf("Couldn't created AVFormatContext\n");
+            std::cerr << "ERROR: Couldn't created AVFormatContext" << std::endl;
             return false;
         }
 
         if (avformat_open_input(&av_format_ctx, filename, NULL, NULL) != 0)
         {
-            printf("Couldn't open video file\n");
+            std::cerr << "ERROR: Couldn't open video file" << std::endl;
             return false;
         }
+
+        
+	// find stream info
+        if (avformat_find_stream_info(av_format_ctx, NULL) < 0)
+        {
+            std::cerr << "ERROR: failed to get stream info" << std::endl;
+            //clearAppData(&data);
+            return false;
+        }
+
+        // dump debug info
+        av_dump_format(av_format_ctx, 0, filename, 0);
+
 
         // Find the first valid video stream inside the file
         video_stream_index = -1;
@@ -138,6 +156,7 @@ namespace elemd
             return false;
         }
 
+        _gl_frame = av_frame_alloc();
         av_frame = av_frame_alloc();
         if (!av_frame)
         {
@@ -154,7 +173,7 @@ namespace elemd
         return true;
     }
 
-    bool video::video_reader_read_frame(video::VideoReaderState* state, uint8_t* frame_buffer,
+    bool Video::video_reader_read_frame(Video::VideoReaderState* state, uint8_t* frame_buffer,
                                         int64_t* pts)
     {
 
@@ -224,7 +243,7 @@ namespace elemd
         return true;
     }
 
-    bool video::video_reader_seek_frame(video::VideoReaderState* state, int64_t ts)
+    bool Video::video_reader_seek_frame(Video::VideoReaderState* state, int64_t ts)
     {
 
         // Unpack members of state
@@ -274,7 +293,7 @@ namespace elemd
         return true;
     }
 
-    void video::video_reader_close(video::VideoReaderState* state)
+    void Video::video_reader_close(Video::VideoReaderState* state)
     {
         sws_freeContext(state->sws_scaler_ctx);
         avformat_close_input(&state->av_format_ctx);

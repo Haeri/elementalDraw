@@ -1,25 +1,33 @@
-#include "video_impl_opengl.h"
+#include "video_impl_opengl.hpp"
+
 #include <stdlib.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
+extern "C"
+{
+#include <inttypes.h>
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+}
 
 namespace elemd
 {
     /* ------------------------ DOWNCAST ------------------------ */
 
-    inline videoImplOpengl* getImpl(video* ptr)
+    inline videoImplOpengl* getImpl(Video* ptr)
     {
         return (videoImplOpengl*)ptr;
     }
-    inline const videoImplOpengl* getImpl(const video* ptr)
+    inline const videoImplOpengl* getImpl(const Video* ptr)
     {
         return (const videoImplOpengl*)ptr;
     }
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
-    video* video::create(std::string file_path)
+    Video* Video::create(std::string file_path)
     {
         return new videoImplOpengl(file_path);
     }
@@ -43,8 +51,16 @@ namespace elemd
         }
         */
 
-        _data =
-            (unsigned char*)malloc(_vr_state.width * _vr_state.height * 4 * sizeof(unsigned char));
+        int size = _vr_state.width * _vr_state.height * 4;
+        uint8_t* internal_buffer = (uint8_t*)malloc(size * sizeof(uint8_t));
+
+        avpicture_fill((AVPicture*)data.gl_frame, internal_buffer, AV_PIX_FMT_RGB24,
+                       data.codec_ctx->width, data.codec_ctx->height);
+        data.packet = (AVPacket*)av_malloc(sizeof(AVPacket));
+
+        
+        //_data =
+//            (unsigned char*)malloc(_vr_state.width * _vr_state.height * 4 * sizeof(unsigned char));
             
         int64_t pts;
         if (!video_reader_read_frame(&_vr_state, _data, &pts))
@@ -52,7 +68,7 @@ namespace elemd
             printf("Couldn't load video frame\n");
         }
 
-        _image = image::create(_vr_state.width, _vr_state.height, 4, _data);
+        _image = Image::create(_vr_state.width, _vr_state.height, 4, _data);
     }
 
     videoImplOpengl::~videoImplOpengl()
