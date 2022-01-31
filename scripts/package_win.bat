@@ -25,7 +25,7 @@ if "%1" == "-static" (
 
 	:: Platformer
 	xcopy ".\build\examples\platformer\res" ".\samples\platformer\res" /I/E
-	xcopy ".\build\examples\platformer\Release\hello-world.exe" ".\samples\platformer\"
+	xcopy ".\build\examples\platformer\Release\platformer.exe" ".\samples\platformer\"
 
 	:: Benchmark
 	xcopy ".\build\examples\benchmark\Release\benchmark.exe" ".\samples\benchmark\"
