@@ -572,7 +572,7 @@ namespace elemd
     {
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
 
-        std::string utf8 = font::UnicodeToUTF8(key_code);
+        std::string utf8 = Font::UnicodeToUTF8(key_code);
 
 #ifdef DEBUG
         std::cout << "event: char "

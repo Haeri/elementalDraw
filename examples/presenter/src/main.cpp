@@ -42,17 +42,17 @@ int main(void)
     elemd::Context* ctx = win->create_context();
 
     // Load image
-    elemd::image* img = elemd::image::create("./res/logo.png");
-    elemd::image* discrod = elemd::image::create("./res/discord_logo.png");
-    elemd::image* github = elemd::image::create("./res/github_screen.png");
-    elemd::image* messenger = elemd::image::create("./res/messenger_logo.png");
-    elemd::image* messenger2 = elemd::image::create("./res/messenger_screen.png");
-    elemd::image* skype = elemd::image::create("./res/skype_logo.png");
-    elemd::image* skype2 = elemd::image::create("./res/skype_screen.gif");
-    elemd::image* slack = elemd::image::create("./res/slack_screen.png");
-    elemd::image* vc = elemd::image::create("./res/vscode_screen.png");
-    elemd::image* whatsapp = elemd::image::create("./res/whatsapp_screen.jpg");
-    elemd::image* teams = elemd::image::create("./res/teams_screen.jpg");
+    elemd::Image* img = elemd::Image::create("./res/logo.png");
+    elemd::Image* discrod = elemd::Image::create("./res/discord_logo.png");
+    elemd::Image* github = elemd::Image::create("./res/github_screen.png");
+    elemd::Image* messenger = elemd::Image::create("./res/messenger_logo.png");
+    elemd::Image* messenger2 = elemd::Image::create("./res/messenger_screen.png");
+    elemd::Image* skype = elemd::Image::create("./res/skype_logo.png");
+    elemd::Image* skype2 = elemd::Image::create("./res/skype_screen.gif");
+    elemd::Image* slack = elemd::Image::create("./res/slack_screen.png");
+    elemd::Image* vc = elemd::Image::create("./res/vscode_screen.png");
+    elemd::Image* whatsapp = elemd::Image::create("./res/whatsapp_screen.jpg");
+    elemd::Image* teams = elemd::Image::create("./res/teams_screen.jpg");
 
 
     // Load video
@@ -145,8 +145,9 @@ int main(void)
         }
         slides[index].draw(&slides[index], dt);
         
-
+        
         ctx->draw_frame();
+        ctx->present_frame();
 
     }
 

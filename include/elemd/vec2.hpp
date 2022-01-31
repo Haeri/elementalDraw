@@ -42,7 +42,8 @@ namespace elemd
 
         static vec2 lerp(vec2 start, vec2 target, float percent);
 
-        friend std::ostream& operator<<(std::ostream& os, vec2 m);
+        std::string to_string(int precision = 8);
+        friend ELEMD_API std::ostream& operator<<(std::ostream& os, vec2 m);
 
         float get_x();
         float get_y();

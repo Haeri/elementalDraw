@@ -8,11 +8,22 @@
 
 namespace elemd
 {
-    class ELEMD_API image
+    enum ImageFiltering
+    {
+        NEAREST, LINEAR
+    };
+    struct ImageConfig
+    {
+        bool mipmaps = false;
+        ImageFiltering imagefiltering = LINEAR;
+    };
+
+    class ELEMD_API Image
     {
     public:
-        static image* create(std::string file_path);
-        static image* create(int width, int height, int components, unsigned char* data);
+        static Image* create(std::string file_path, ImageConfig imageConfig = {});
+        static Image* create(int width, int height, int components, unsigned char* data,
+                             ImageConfig imageConfig = {});
 
         unsigned char* get_data();
         int get_width();
@@ -23,19 +34,20 @@ namespace elemd
         void destroy();
 
     protected:
-        static std::map<std::string, image*> _image_index;
+        static std::map<std::string, Image*> _image_index;
 
         int _width = -1;
         int _height = -1;
         int _components = -1;
-        bool _managed = false;
+        bool _loaded = false;
+        ImageConfig _imageConfig = {};
 
         std::string _name;
 
         unsigned char* _data = nullptr;
 
-        image() = default;
-        virtual ~image() = default;
+        Image() = default;
+        virtual ~Image() = default;
     };
 
 } // namespace elemd

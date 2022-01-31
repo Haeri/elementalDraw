@@ -23,22 +23,22 @@ int main(void)
     elemd::Context* ctx = win->create_context();
 
     // Load image
-    elemd::image* img = elemd::image::create("./res/logo.png");
+    elemd::Image* img = elemd::Image::create("./res/logo.png");
     ctx->_tmp_register_image(img);
 
     // Load animation
-    elemd::image* anim = elemd::image::create("./res/anim.png");
+    elemd::Image* anim = elemd::Image::create("./res/anim.png");
     ctx->_tmp_register_image(anim);
 
     // Load fonts
-    elemd::font* monserat_light = elemd::font::create("./res/font/Montserrat-Light.ttf");
+    elemd::Font* monserat_light = elemd::Font::create("./res/font/Montserrat-Light.ttf");
     ctx->_tmp_register_font(monserat_light);
     
-    elemd::font* monserat_black = elemd::font::create("./res/font/Montserrat-Black.ttf");
+    elemd::Font* monserat_black = elemd::Font::create("./res/font/Montserrat-Black.ttf");
     ctx->_tmp_register_font(monserat_black);
     
     
-    elemd::font* icon_font = elemd::font::create("./res/font/feather.ttf");
+    elemd::Font* icon_font = elemd::Font::create("./res/font/feather.ttf");
     ctx->_tmp_register_font(icon_font);
 
 
@@ -269,8 +269,8 @@ int main(void)
 
 
 
-
         ctx->draw_frame();
+        ctx->present_frame();
     }
 
     // Cleanup

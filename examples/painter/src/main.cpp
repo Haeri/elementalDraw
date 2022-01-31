@@ -25,13 +25,13 @@ struct brush_paint
     float size;
 };
 
-elemd::image* cust;
+elemd::Image* cust;
 std::vector<unsigned char> im_data;
 std::vector<brush_paint> points;
 std::vector<brush_paint> color_paints;
 
 
-void draw(elemd::Context* ctx, elemd::image* brush)
+void draw(elemd::Context* ctx, elemd::Image* brush)
 {
     for (auto& point : points)
     {
@@ -60,6 +60,7 @@ void draw(elemd::Context* ctx, elemd::image* brush)
 
 
     ctx->draw_frame();
+    ctx->present_frame();
 }
 
 int main(void)
@@ -76,7 +77,7 @@ int main(void)
     elemd::Context* ctx = win->create_context();
 
 
-    elemd::image* brush = elemd::image::create("./res/brush.png");
+    elemd::Image* brush = elemd::Image::create("./res/brush.png");
     ctx->_tmp_register_image(brush);
 
     win->add_mouse_click_listener([&](elemd::mouse_button_event event) {

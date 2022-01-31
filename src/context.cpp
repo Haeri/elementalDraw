@@ -17,7 +17,7 @@ namespace elemd
         _line_width = width;
     }
 
-    void Context::set_font(font* font)
+    void Context::set_font(Font* font)
     {
         if (font == nullptr)
         {

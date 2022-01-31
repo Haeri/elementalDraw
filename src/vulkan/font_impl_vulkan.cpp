@@ -10,23 +10,23 @@ namespace elemd
 {
     /* ------------------------ DOWNCAST ------------------------ */
 
-    inline fontImplVulkan* getImpl(font* ptr)
+    inline fontImplVulkan* getImpl(Font* ptr)
     {
         return (fontImplVulkan*)ptr;
     }
-    inline const fontImplVulkan* getImpl(const font* ptr)
+    inline const fontImplVulkan* getImpl(const Font* ptr)
     {
         return (const fontImplVulkan*)ptr;
     }
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
-    font* font::create(std::string file_path)
+    Font* Font::create(std::string file_path)
     {
         return new fontImplVulkan(file_path);
     }
 
-    font* font::create(unsigned char* buffer, size_t size)
+    Font* Font::create(unsigned char* buffer, size_t size)
     {
         return new fontImplVulkan(buffer, size);
     }

@@ -1,6 +1,6 @@
 {
   "name": "elemd",
-  "version-string": "0.1.1",
+  "version-string": "0.1.2",
   "homepage": "https://github.com/Haeri/ElementalDraw",
   "description": "Portable C++ canvas library with a Vulkan backend",
   "dependencies": 

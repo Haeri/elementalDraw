@@ -29,12 +29,12 @@ extern "C"
 
 
     // FONT
-    ELEMD_API elemd::font* font_new(char* file_path)
+    ELEMD_API elemd::Font* font_new(char* file_path)
     {
-        return elemd::font::create(file_path);
+        return elemd::Font::create(file_path);
     }
 
-    ELEMD_API void font_delete(elemd::font* font)
+    ELEMD_API void font_delete(elemd::Font* font)
     {
         return font->destroy();
     }
@@ -74,10 +74,16 @@ extern "C"
     {
         return ctx->_tmp_prepare();
     }
+    
 
     ELEMD_API void draw_frame(elemd::Context* ctx)
     {
-        ctx->draw_frame();
+        ctx->present_frame();
+    }
+
+    ELEMD_API void present_frame(elemd::Context* ctx)
+    {
+        ctx->present_frame();
     }
 
     ELEMD_API void fill_rect(elemd::Context* ctx, float x, float y, float width, float height)
@@ -100,12 +106,12 @@ extern "C"
         ctx->set_clear_color(*color);
     }
 
-    ELEMD_API void register_font(elemd::Context* ctx, elemd::font* font)
+    ELEMD_API void register_font(elemd::Context* ctx, elemd::Font* font)
     {
         ctx->_tmp_register_font(font);
     }
 
-    ELEMD_API void set_font(elemd::Context* ctx, elemd::font* font)
+    ELEMD_API void set_font(elemd::Context* ctx, elemd::Font* font)
     {
         ctx->set_font(font);
     }

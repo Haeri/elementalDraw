@@ -55,7 +55,7 @@ endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
     SOVERSION 0
-    VERSION 0.1.1
+    VERSION 0.1.2
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
@@ -97,6 +97,7 @@ if (ELEMD_BUILD_EXAMPLES)
     add_subdirectory(examples/hello_world)
     add_subdirectory(examples/overview)
     add_subdirectory(examples/painter)
+    add_subdirectory(examples/platformer)
     add_subdirectory(examples/presenter)
     add_subdirectory(examples/window_app)
     add_subdirectory(examples/window_app_runtime)
@@ -107,6 +108,7 @@ if (ELEMD_BUILD_EXAMPLES)
     set_target_properties(hello-world PROPERTIES FOLDER examples)
     set_target_properties(overview PROPERTIES FOLDER examples)
     set_target_properties(painter PROPERTIES FOLDER examples)
+    set_target_properties(platformer PROPERTIES FOLDER examples)
     set_target_properties(presenter PROPERTIES FOLDER examples)
     set_target_properties(window-app PROPERTIES FOLDER examples)
     set_target_properties(window-app-runtime PROPERTIES FOLDER examples)
@@ -114,13 +116,14 @@ if (ELEMD_BUILD_EXAMPLES)
   if (BUILD_SHARED_LIBS)
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
-        DEPENDS benchmark brick-breaker game-of-life hello-world overview painter presenter window-app-runtime  
+        DEPENDS benchmark brick-breaker game-of-life hello-world overview painter platformer presenter window-app-runtime  
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/benchmark/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/brick_breaker/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/game_of_life/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/hello_world/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/overview/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}> 
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/platformer/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}> 
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/presenter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}> 
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/window_app_runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
         COMMENT "Copy library"

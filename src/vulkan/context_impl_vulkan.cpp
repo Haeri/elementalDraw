@@ -6,7 +6,7 @@
 #include <cstring>
 #include <locale> // for std::wstring_convert
 
-#include "../resources.h"
+#include "../resources.hpp"
 #include "../window_impl.hpp"
 #include "font_impl_vulkan.hpp"
 #include "vulkan_shared_info.hpp"
@@ -361,26 +361,26 @@ namespace elemd
         }
     }
 
-    void Context::draw_image(float x, float y, float width, float height, image* image, bool tint)
+    void Context::draw_image(float x, float y, float width, float height, Image* image, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, 0, 0, 0, 0, tint);
     }
 
-    void Context::draw_image(float x, float y, float width, float height, image* image, float src_x,
+    void Context::draw_image(float x, float y, float width, float height, Image* image, float src_x,
                              float src_y, float src_width, float src_height, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, 0, 0, 0, 0, src_x, src_y, src_width,
                            src_height, tint);
     }
 
-    void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
+    void Context::draw_rounded_image(float x, float y, float width, float height, Image* image,
                                      float border_radius, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, border_radius, border_radius, border_radius,
                            border_radius, tint);
     }
 
-    void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
+    void Context::draw_rounded_image(float x, float y, float width, float height, Image* image,
                                      float radius_nw, float radius_ne, float radius_se,
                                      float radius_sw, bool tint)
     {
@@ -388,7 +388,7 @@ namespace elemd
                            0, 0, (float)image->get_width(), (float)image->get_height(), tint);
     }
 
-    void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
+    void Context::draw_rounded_image(float x, float y, float width, float height, Image* image,
                                      float radius_nw, float radius_ne, float radius_se,
                                      float radius_sw, float src_x, float src_y, float src_width,
                                      float src_height, bool tint)
@@ -604,7 +604,7 @@ namespace elemd
         impl->wait_for_render_fence();
         /// impl->update_uniforms();
         impl->update_storage();
-        //if (rerecord || impl->dirty)
+        // if (rerecord || impl->dirty)
         {
             impl->record_command_buffers();
             impl->dirty = false;
@@ -613,12 +613,11 @@ namespace elemd
         impl->draw_sequence_chain.clear();
         impl->draw_sequence_chain.push_back({0, {{0, 0}, {(uint32_t)_width, (uint32_t)_height}}});
 
-
-        uint32_t imageIndex;
+        //uint32_t imageIndex;
         vku::err_check(vkAcquireNextImageKHR(VulkanSharedInfo::getInstance()->device,
                                              impl->swapchain, std::numeric_limits<uint64_t>::max(),
                                              impl->semaphoreImageAvailable, VK_NULL_HANDLE,
-                                             &imageIndex));
+                                             &impl->imageIndex));
 
         VkPipelineStageFlags waitStageMask[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
@@ -629,11 +628,18 @@ namespace elemd
         submitInfo.pWaitSemaphores = &(impl->semaphoreImageAvailable);
         submitInfo.pWaitDstStageMask = waitStageMask;
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &(impl->commandBuffers[imageIndex]);
+        submitInfo.pCommandBuffers = &(impl->commandBuffers[impl->imageIndex]);
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &(impl->semaphoreRenderingComplete);
 
-        vku::err_check(vkQueueSubmit(impl->queue, 1, &submitInfo, impl->renderFence));
+        vku::err_check(vkQueueSubmit(impl->queue, 1, &submitInfo, impl->renderFence));        
+    }
+
+    void Context::present_frame()
+    {
+        ContextImplVulkan* impl = getImpl(this);
+        if (impl->imageIndex == -1 || impl->headless)
+            return;
 
         VkPresentInfoKHR presentInfoKHR{};
         presentInfoKHR.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -642,7 +648,7 @@ namespace elemd
         presentInfoKHR.pWaitSemaphores = &(impl->semaphoreRenderingComplete);
         presentInfoKHR.swapchainCount = 1;
         presentInfoKHR.pSwapchains = &(impl->swapchain);
-        presentInfoKHR.pImageIndices = &imageIndex;
+        presentInfoKHR.pImageIndices = &impl->imageIndex;
         presentInfoKHR.pResults = nullptr;
 
         vku::err_check(vkQueuePresentKHR(impl->queue, &presentInfoKHR));
@@ -665,7 +671,7 @@ namespace elemd
         }
     }
 
-    void Context::_tmp_register_image(image* image)
+    void Context::_tmp_register_image(Image* image)
     {
         ContextImplVulkan* impl = getImpl(this);
         imageImplVulkan* img = (imageImplVulkan*)image;
@@ -685,7 +691,7 @@ namespace elemd
         }
     }
 
-    void Context::_tmp_register_font(font* font)
+    void Context::_tmp_register_font(Font* font)
     {
         ContextImplVulkan* impl = getImpl(this);
         fontImplVulkan* fiv = (fontImplVulkan*)font;
@@ -709,7 +715,7 @@ namespace elemd
 
     void Context::_tmp_prepare()
     {
-        _default_font = font::create(default_font.data(), default_font.size());
+        _default_font = Font::create(default_font.data(), default_font.size());
         _tmp_register_font(_default_font);
         if (_font == nullptr)
         {
@@ -1431,7 +1437,7 @@ namespace elemd
         buffer[1] = 0;
         buffer[2] = 0;
         buffer[3] = 0;
-        dummy = new imageImplVulkan(1, 1, 4, buffer, false);
+        dummy = new imageImplVulkan(1, 1, 4, buffer, {});
         dummy->upload(commandPool, queue);
     }
 

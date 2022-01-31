@@ -258,7 +258,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
     _ctx = ctx;
     initial_scale = _win->get_scale().get_x();
 
-    elemd::font* urbanist = elemd::font::create("./res/font/Urbanist-Regular.ttf");
+    elemd::Font* urbanist = elemd::Font::create("./res/font/Urbanist-Regular.ttf");
     ctx->_tmp_register_font(urbanist);
     ctx->set_font(urbanist);
 
@@ -449,6 +449,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
 
 
             ctx->draw_frame();
+            ctx->present_frame();
 
             ++frames;
             render_accumulator = dmod(render_accumulator, target_render_ms);

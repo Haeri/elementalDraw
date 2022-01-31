@@ -23,6 +23,10 @@ if "%1" == "-static" (
 	:: Game Of Life
 	xcopy ".\build\examples\game_of_life\Release\game-of-life.exe" ".\samples\game_of_life\"
 
+	:: Platformer
+	xcopy ".\build\examples\platformer\res" ".\samples\platformer\res" /I/E
+	xcopy ".\build\examples\platformer\Release\platformer.exe" ".\samples\platformer\"
+
 	:: Benchmark
 	xcopy ".\build\examples\benchmark\Release\benchmark.exe" ".\samples\benchmark\"
 

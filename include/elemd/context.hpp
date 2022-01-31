@@ -41,15 +41,15 @@ namespace elemd
         void draw_pixel(float x, float y);
         void draw_text(float x, float y, std::string text);
         void draw_text(float x, float y, std::u32string text);
-        void draw_image(float x, float y, float width, float height, image* image, bool tint = false);
-        void draw_image(float x, float y, float width, float height, image* image, float src_x,
+        void draw_image(float x, float y, float width, float height, Image* image, bool tint = false);
+        void draw_image(float x, float y, float width, float height, Image* image, float src_x,
                         float src_y, float src_width, float src_height, bool tint = false);
-        void draw_rounded_image(float x, float y, float width, float height, image* image,
+        void draw_rounded_image(float x, float y, float width, float height, Image* image,
                                 float border_radius, bool tint = false);
-        void draw_rounded_image(float x, float y, float width, float height, image* image,
+        void draw_rounded_image(float x, float y, float width, float height, Image* image,
                                 float radius_nw, float radius_ne, float radius_se, float radius_sw,
                                 bool tint = false);
-        void draw_rounded_image(float x, float y, float width, float height, image* image,
+        void draw_rounded_image(float x, float y, float width, float height, Image* image,
                                 float radius_nw, float radius_ne, float radius_se, float radius_sw,
                                 float src_x, float src_y, float src_width, float src_height,
                                 bool tint = false);
@@ -66,7 +66,7 @@ namespace elemd
         void set_fill_color(color color);
         void set_stroke_color(color color);
         void set_line_width(float width);
-        void set_font(font* font);
+        void set_font(Font* font);
         void set_font_size(int size);
 
         // TODO: To implement
@@ -86,14 +86,16 @@ namespace elemd
         void clear_rect(float x, float y, float width, float height);
 
         void draw_frame();
+        void present_frame();
 
         int get_width();
         int get_height();
         void resize_context(int width, int height);
 
-        void _tmp_register_image(image* image);
         void _upload_video(video* video);
-        void _tmp_register_font(font* font);
+        void _tmp_register_image(Image* image);
+        void _tmp_register_font(Font* font);
+
         void _tmp_prepare();
 
         virtual void destroy() = 0;
@@ -109,8 +111,8 @@ namespace elemd
         color _stroke_color;
         float _line_width = 1;
         int _font_size = 10;
-        font* _font = nullptr;
-        font* _default_font = nullptr;
+        Font* _font = nullptr;
+        Font* _default_font = nullptr;
     };
 } // namespace elemd
 

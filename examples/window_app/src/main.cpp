@@ -101,15 +101,15 @@ extern "C"
             mouse_y = event.y;
         });
 
-        elemd::image* img = elemd::image::create("./res/wallpaper.jpg");
-        elemd::image* logo = elemd::image::create("./res/logo.png");
-        elemd::image* grid = elemd::image::create("./res/grid.png");
+        elemd::Image* img = elemd::Image::create("./res/wallpaper.jpg");
+        elemd::Image* logo = elemd::Image::create("./res/logo.png");
+        elemd::Image* grid = elemd::Image::create("./res/grid.png");
 
         ctx->_tmp_register_image(img);
         ctx->_tmp_register_image(logo);
         ctx->_tmp_register_image(grid);
         
-        elemd::font* urbanist = elemd::font::create("./res/font/Urbanist-Regular.ttf");
+        elemd::Font* urbanist = elemd::Font::create("./res/font/Urbanist-Regular.ttf");
         ctx->_tmp_register_font(urbanist);
         ctx->set_font(urbanist);
 
@@ -265,6 +265,7 @@ extern "C"
                 ctx->stroke_rect(130, 130, 100, 100);
 
                 ctx->draw_frame();
+                ctx->present_frame();
 
                 ++frames;
                 render_accumulator = 0;

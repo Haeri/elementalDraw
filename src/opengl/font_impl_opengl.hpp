@@ -8,7 +8,7 @@
 
 namespace elemd
 {
-    class fontImplOpengl : public font
+    class fontImplOpengl : public Font
     {
     public:
         fontImplOpengl(std::string file_path);
