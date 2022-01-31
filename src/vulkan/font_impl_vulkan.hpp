@@ -9,7 +9,7 @@
 
 namespace elemd
 {
-    class fontImplVulkan : public font
+    class fontImplVulkan : public Font
     {
     public:
         fontImplVulkan(std::string file_path);

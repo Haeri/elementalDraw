@@ -2,34 +2,34 @@
 
 namespace elemd
 {
-    std::map<std::string, image*> image::_image_index;
+    std::map<std::string, Image*> Image::_image_index;
 
-    unsigned char* image::get_data()
+    unsigned char* Image::get_data()
     {
         return _data;
     }
 
-    int image::get_width()
+    int Image::get_width()
     {
         return _width;
     }
 
-    int image::get_height()
+    int Image::get_height()
     {
         return _height;
     }
 
-    int image::get_channels()
+    int Image::get_channels()
     {
         return _components;
     }
 
-    void image::set_name(std::string name)
+    void Image::set_name(std::string name)
     {
         _name = name;
     }
 
-    void image::destroy()
+    void Image::destroy()
     {
         delete this;
     }

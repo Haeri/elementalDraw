@@ -5,6 +5,10 @@
 
 class Player : public Entity
 {
+public:
+    Player(elemd::Context* ctx, elemd::Image* img) : Entity(ctx, img)
+    {
+    }    
 
 };
 

@@ -8,27 +8,27 @@
 
 namespace elemd
 {
-    std::map<unsigned int, character>& font::get_characters()
+    std::map<unsigned int, character>& Font::get_characters()
     {
         return _characters;
     }
 
-    float font::get_line_height()
+    float Font::get_line_height()
     {
         return _line_height;
     }
 
-    void font::destroy()
+    void Font::destroy()
     {
         delete this;
     }
 
-    elemd::image* font::get_image()
+    elemd::Image* Font::get_image()
     {
         return _texture_atlas;
     }
 
-    std::string font::fit_substring(std::string text, int width, int font_size)
+    std::string Font::fit_substring(std::string text, int width, int font_size)
     {
         std::string _ret = "";
         int index = fit_one_substring(text, width, font_size);
@@ -67,7 +67,7 @@ namespace elemd
         return _ret;
     }
 
-    vec2 font::measure_dimensions(std::string text, int font_size)
+    vec2 Font::measure_dimensions(std::string text, int font_size)
     {
         float x = 0;
         float y = 0;
@@ -117,7 +117,7 @@ namespace elemd
         return elemd::vec2(width, height);
     }
 
-    std::string font::UnicodeToUTF8(unsigned int unicode)
+    std::string Font::UnicodeToUTF8(unsigned int unicode)
     {
         std::string out;
 
@@ -144,7 +144,7 @@ namespace elemd
         return out;
     }
 
-    void font::load_from_file(std::string file_path) 
+    void Font::load_from_file(std::string file_path) 
     {
         std::ifstream file(file_path, std::ios::binary | std::ios::ate);
         if (file)
@@ -165,7 +165,7 @@ namespace elemd
         }
     }
 
-    void font::load_from_memory(unsigned char* data, size_t size)
+    void Font::load_from_memory(unsigned char* data, size_t size)
     {
         FT_Library ft_library;
         FT_Face face;
@@ -287,10 +287,10 @@ namespace elemd
         FT_Done_Face(face);
         FT_Done_FreeType(ft_library);
 
-        _texture_atlas = image::create(tex_width, tex_height, 4, pixels);
+        _texture_atlas = Image::create(tex_width, tex_height, 4, pixels);
     }
 
-    int font::fit_one_substring(std::string text, int width, int font_size)
+    int Font::fit_one_substring(std::string text, int width, int font_size)
     {
         int character_index = 0;
         int last_word_index = 0;

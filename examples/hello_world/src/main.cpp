@@ -19,11 +19,11 @@ int main(void)
     elemd::Context* ctx = win->create_context();
 
     // load image
-    elemd::image* bg = elemd::image::create("./res/logo.png");
+    elemd::Image* bg = elemd::Image::create("./res/logo.png");
     ctx->_tmp_register_image(bg);
 
     // load font
-    elemd::font* monserat = elemd::font::create("./res/font/Montserrat-Light.ttf");
+    elemd::Font* monserat = elemd::Font::create("./res/font/Montserrat-Light.ttf");
     ctx->_tmp_register_font(monserat);
 
 
@@ -53,8 +53,8 @@ int main(void)
         // rounded image
         ctx->draw_rounded_image(200, 120, 30, 30, bg, 5);
  
-
         ctx->draw_frame();
+        ctx->present_frame();
     }
 
     // Cleanup

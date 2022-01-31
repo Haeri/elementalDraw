@@ -225,6 +225,7 @@ int main(void)
         last_time = win->now();
 
         ctx->draw_frame();
+        ctx->present_frame();
     }
 
     // Cleanup

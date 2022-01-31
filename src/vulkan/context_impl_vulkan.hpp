@@ -71,6 +71,8 @@ namespace elemd
         bool headless = false;
         bool dirty = true;
 
+        uint32_t imageIndex = -1;
+
         VkClearValue clearValue = {};
         VkFormat selectedImageFormat;
 

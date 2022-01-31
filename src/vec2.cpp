@@ -1,6 +1,9 @@
 #include "elemd/vec2.hpp"
 
 #include <math.h>
+#include <string>
+#include <sstream>
+#include <iomanip>
 
 namespace elemd
 {
@@ -38,6 +41,13 @@ namespace elemd
                         start.y() + percent * (target.y() - start.y()));
     }
 
+    std::string vec2::to_string(int precision)
+    {
+        std::stringstream stream;
+        stream << "(" << std::fixed << std::setprecision(precision) << _x << ", " << _y << ")";
+        return stream.str();
+    }
+
     float vec2::get_x()
     {
         return _x;
@@ -60,7 +70,7 @@ namespace elemd
 
     std::ostream& operator<<(std::ostream& os, vec2 m)
     {
-        return os << "(" << m.x() << ", " << m.y() << ")";
+        return os << m.to_string();
     }
 
 } // namespace elemd

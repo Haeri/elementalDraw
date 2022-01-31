@@ -10,12 +10,12 @@
 
 namespace elemd
 {
-    class imageImplOpengl : public image
+    class imageImplOpengl : public Image
     {
     public:
-        imageImplOpengl(std::string file_path, bool generate_mips = true);
+        imageImplOpengl(std::string file_path, ImageConfig imageConfig);
         imageImplOpengl(int width, int height, int components, unsigned char* data,
-                        bool generate_mips = true);
+                        ImageConfig imageConfig);
         ~imageImplOpengl();
 
         GLuint _image;

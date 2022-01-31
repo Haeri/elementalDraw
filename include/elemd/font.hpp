@@ -19,16 +19,16 @@ namespace elemd
         int advance;    // Horizontal offset to advance to next glyph
     };
 
-    class ELEMD_API font
+    class ELEMD_API Font
     {
     public:
-        static font* create(std::string file_path);
-        static font* create(unsigned char* buffer, size_t size);
+        static Font* create(std::string file_path);
+        static Font* create(unsigned char* buffer, size_t size);
 
         std::map<unsigned int, character>& get_characters();
         float get_line_height();
         void destroy();
-        elemd::image* get_image();
+        elemd::Image* get_image();
 
         std::string fit_substring(std::string text, int width, int font_size);
         vec2 measure_dimensions(std::string text, int font_size);
@@ -41,11 +41,11 @@ namespace elemd
 
         float _line_height = 0;
         
-        image* _texture_atlas;
+        Image* _texture_atlas;
         std::map<unsigned int, character> _characters;
 
-        font() = default;
-        virtual ~font() = default;
+        Font() = default;
+        virtual ~Font() = default;
 
 
         void load_from_file(std::string file_path);

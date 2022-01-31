@@ -10,12 +10,12 @@
 
 namespace elemd
 {
-    class imageImplVulkan : public image
+    class imageImplVulkan : public Image
     {
     public:
-        imageImplVulkan(std::string file_path, bool generate_mips = true);
+        imageImplVulkan(std::string file_path, ImageConfig imageConfig);
         imageImplVulkan(int width, int height, int components, unsigned char* data,
-                        bool generate_mips = true);
+                        ImageConfig imageConfig);
         ~imageImplVulkan();
 
         VkImage _image;
@@ -25,6 +25,7 @@ namespace elemd
         VkSampler _sampler;
         int _sampler_index = -1;
         uint32_t _mipLevels = 1;
+        ImageConfig _imageConfig = {};
 
         bool _uploaded = false;
 

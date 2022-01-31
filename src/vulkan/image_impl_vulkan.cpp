@@ -16,56 +16,67 @@ namespace elemd
 {
     /* ------------------------ DOWNCAST ------------------------ */
 
-    inline imageImplVulkan* getImpl(image* ptr)
+    inline imageImplVulkan* getImpl(Image* ptr)
     {
         return (imageImplVulkan*)ptr;
     }
-    inline const imageImplVulkan* getImpl(const image* ptr)
+    inline const imageImplVulkan* getImpl(const Image* ptr)
     {
         return (const imageImplVulkan*)ptr;
     }
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
-    image* image::create(std::string file_path)
+    Image* Image::create(std::string file_path, ImageConfig imageConfig)
     {
-        return new imageImplVulkan(file_path);
+        return new imageImplVulkan(file_path, imageConfig);
     }
 
-    image* image::create(int width, int height, int components, unsigned char* data)
+    Image* Image::create(int width, int height, int components, unsigned char* data,
+                         ImageConfig imageConfig)
     {
-        return new imageImplVulkan(width, height, components, data);
+        return new imageImplVulkan(width, height, components, data, imageConfig);
     }
 
-    imageImplVulkan::imageImplVulkan(std::string file_path, bool generate_mips)
+    imageImplVulkan::imageImplVulkan(std::string file_path, ImageConfig imageConfig)
     {
+        _imageConfig = imageConfig;
         stbi_uc* data =
             stbi_load(file_path.c_str(), &_width, &_height, &_components, STBI_rgb_alpha);
         if (data != nullptr)
         {
             _data = data;
-            _image_index[file_path] = this;            
+            _image_index[file_path] = this;
             _components = 4;
             _name = file_path;
             _loaded = true;
-            
 
-            if (generate_mips)
+            if (imageConfig.mipmaps)
             {
                 _mipLevels =
                     static_cast<uint32_t>(std::floor(std::log2(std::max(_width, _height)))) + 1;
             }
-
         }
         else
         {
             std::cerr << "Error: Could not load image at " << file_path << std::endl;
+            _width = 1;
+            _height = 1;
+            _components = 4;
+            _data = new unsigned char[4];
+            _data[0] = 255;
+            _data[1] = 0;
+            _data[2] = 255;
+            _data[3] = 255;
+            _name = "noname_" + std::to_string(rand() % 10000);
+            _loaded = false;
         }
     }
 
     imageImplVulkan::imageImplVulkan(int width, int height, int components, unsigned char* data,
-                                     bool generate_mips)
+                                     ImageConfig imageConfig)
     {
+        _imageConfig = imageConfig;
         _width = width;
         _height = height;
         _components = components;
@@ -73,7 +84,7 @@ namespace elemd
         _name = "noname_" + std::to_string(rand() % 10000);
         _loaded = false;
 
-        if (generate_mips)
+        if (imageConfig.mipmaps)
         {
             _mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
         }
@@ -114,7 +125,7 @@ namespace elemd
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkPhysicalDevice physicalDevice = VulkanSharedInfo::getInstance()->bestPhysicalDevice;
 
-        //VkDeviceSize imageSize = _width * _height * 4;
+        // VkDeviceSize imageSize = _width * _height * 4;
         VkDeviceSize actualImageSize = _width * _height * _components;
 
         VkBuffer stagingBuffer{};
@@ -127,10 +138,9 @@ namespace elemd
 
         void* rawData;
         vkMapMemory(device, stagingDeviceMemory, 0, actualImageSize, 0, &rawData);
-        //std::memset(rawData, 0, imageSize);
+        // std::memset(rawData, 0, imageSize);
         std::memcpy(rawData, _data, actualImageSize);
         vkUnmapMemory(device, stagingDeviceMemory);
-
 
         VkFormat format;
         if (_components == 1)
@@ -172,7 +182,7 @@ namespace elemd
         memoryAllocateInfo.pNext = nullptr;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
         memoryAllocateInfo.memoryTypeIndex = vku::find_memory_type_index(
-        memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
         vku::err_check(vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &_deviceMemory));
 
@@ -180,12 +190,11 @@ namespace elemd
 
         changeLayout(commandPool, queue, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         writeBuffer(commandPool, queue, stagingBuffer);
-        
-        if(_mipLevels <= 1)
+
+        if (_mipLevels <= 1)
         {
             changeLayout(commandPool, queue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         }
-
 
         vkDestroyBuffer(device, stagingBuffer, nullptr);
         vkFreeMemory(device, stagingDeviceMemory, nullptr);
@@ -194,7 +203,6 @@ namespace elemd
         {
             generateMipmaps(commandPool, queue, format);
         }
-
 
         VkImageViewCreateInfo imageViewCreateInfo{};
         imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -213,17 +221,22 @@ namespace elemd
         imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
         imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-
         vku::err_check(vkCreateImageView(device, &imageViewCreateInfo, nullptr, &_imageView));
-        
 
         VkSamplerCreateInfo samplerCreateInfo{};
         samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         samplerCreateInfo.pNext = nullptr;
         samplerCreateInfo.flags = 0;
-        samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
-        samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
-        samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        samplerCreateInfo.magFilter = _imageConfig.imagefiltering == ImageFiltering::LINEAR
+                                          ? VK_FILTER_LINEAR
+                                          : VK_FILTER_NEAREST;
+        samplerCreateInfo.minFilter = _imageConfig.imagefiltering == ImageFiltering::LINEAR
+                                          ? VK_FILTER_LINEAR
+                                          : VK_FILTER_NEAREST;
+        samplerCreateInfo.mipmapMode = _imageConfig.imagefiltering == ImageFiltering::LINEAR
+                                           ? VK_SAMPLER_MIPMAP_MODE_LINEAR
+                                           : VK_SAMPLER_MIPMAP_MODE_NEAREST;
+
         samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;

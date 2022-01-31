@@ -10,23 +10,23 @@ namespace elemd
 {
     /* ------------------------ DOWNCAST ------------------------ */
 
-    inline fontImplOpengl* getImpl(font* ptr)
+    inline fontImplOpengl* getImpl(Font* ptr)
     {
         return (fontImplOpengl*)ptr;
     }
-    inline const fontImplOpengl* getImpl(const font* ptr)
+    inline const fontImplOpengl* getImpl(const Font* ptr)
     {
         return (const fontImplOpengl*)ptr;
     }
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
-    font* font::create(std::string file_path)
+    Font* Font::create(std::string file_path)
     {
         return new fontImplOpengl(file_path);
     }
 
-    font* font::create(unsigned char* buffer, size_t size)
+    Font* Font::create(unsigned char* buffer, size_t size)
     {
         return new fontImplOpengl(buffer, size);
     }

@@ -8,7 +8,7 @@
 
 #include "../window_impl.hpp"
 #include "font_impl_opengl.hpp"
-#include "../resources.h"
+#include "../resources.hpp"
 
 #include "opengl_shared_info.hpp"
 
@@ -371,33 +371,33 @@ namespace elemd
     }
 
 
-    void Context::draw_image(float x, float y, float width, float height, image* image, bool tint)
+    void Context::draw_image(float x, float y, float width, float height, Image* image, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, 0, 0, 0, 0, tint);
     }
 
-    void Context::draw_image(float x, float y, float width, float height, image* image, float src_x,
+    void Context::draw_image(float x, float y, float width, float height, Image* image, float src_x,
                              float src_y, float src_width, float src_height, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, 0, 0, 0, 0, src_x, src_y, src_width,
                            src_height, tint);
     }
 
-    void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
+    void Context::draw_rounded_image(float x, float y, float width, float height, Image* image,
                                      float border_radius, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, border_radius, border_radius, border_radius,
                            border_radius, tint);
     }
 
-    void Context::draw_rounded_image(float x, float y, float width, float height, image* image, float radius_nw, float radius_ne, float radius_se,
+    void Context::draw_rounded_image(float x, float y, float width, float height, Image* image, float radius_nw, float radius_ne, float radius_se,
                                      float radius_sw, bool tint)
     {
         draw_rounded_image(x, y, width, height, image, radius_nw, radius_ne, radius_se, radius_sw,
                            0, 0, (float)image->get_width(), (float)image->get_height(), tint);
     }
 
-    void Context::draw_rounded_image(float x, float y, float width, float height, image* image,
+    void Context::draw_rounded_image(float x, float y, float width, float height, Image* image,
                                      float radius_nw, float radius_ne, float radius_se,
                                      float radius_sw, float src_x, float src_y, float src_width,
                                      float src_height, bool tint)
@@ -640,36 +640,36 @@ namespace elemd
             impl->images[i]->bind(i);
         }
 
-        //std::cout << "------------- DRAW CALL START ------------- \n";
+        // std::cout << "------------- DRAW CALL START ------------- \n";
         for (int i = 0; i < impl->draw_call_indices.size(); ++i)
         {
             if (impl->draw_call_indices[i].type == ContextImplOpengl::draw_call_type::COLOR)
             {
-                //std::cout << i + 1 << " CALL TYPE: COLOR\n";
+                // std::cout << i + 1 << " CALL TYPE: COLOR\n";
                 int batch_length = impl->storage.size() - impl->draw_call_indices[i].instance_index;
                 if (impl->draw_call_indices.size() > i + 1)
                 {
                     batch_length = impl->draw_call_indices[i + 1].instance_index -
                                    impl->draw_call_indices[i].instance_index;
                 }
-                //std::cout << "\tSTART: " << impl->draw_call_indices[i].instance_index << " batch_length: " << batch_length << "\n";
+                // std::cout << "\tSTART: " << impl->draw_call_indices[i].instance_index << "
+                // batch_length: " << batch_length << "\n";
 
-                //impl->update_uniform_buffer();
+                // impl->update_uniform_buffer();
 
                 glBindBuffer(GL_UNIFORM_BUFFER, impl->storageBuffer);
                 GLsizei size = (GLsizei)(batch_length * sizeof(ContextImplOpengl::uniform_rect));
-                                                 
+
                 glBufferSubData(GL_UNIFORM_BUFFER, 0, size,
                                 &(impl->storage[impl->draw_call_indices[i].instance_index]));
 
                 glBindVertexArray(impl->vertex_array_object);
-                glDrawElementsInstanced(
-                    GL_TRIANGLES, (GLsizei)impl->rect_indices.size(), GL_UNSIGNED_INT, 0,
-                    (GLsizei)batch_length);
+                glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)impl->rect_indices.size(),
+                                        GL_UNSIGNED_INT, 0, (GLsizei)batch_length);
             }
             else if (impl->draw_call_indices[i].type == ContextImplOpengl::draw_call_type::SCISSOR)
             {
-                //std::cout << i + 1 << " CALL TYPE: SCISSOR\n";
+                // std::cout << i + 1 << " CALL TYPE: SCISSOR\n";
                 ContextImplOpengl::scissor_primitive sp =
                     impl->scissor_primitives[impl->draw_call_indices[i].scissor_index];
                 glEnable(GL_SCISSOR_TEST);
@@ -678,20 +678,32 @@ namespace elemd
             else if (impl->draw_call_indices[i].type ==
                      ContextImplOpengl::draw_call_type::SCISSOR_CLEAR)
             {
-                //std::cout << i + 1 << " CALL TYPE: SCISSOR_CLEAR\n";
+                // std::cout << i + 1 << " CALL TYPE: SCISSOR_CLEAR\n";
                 glDisable(GL_SCISSOR_TEST);
             }
         }
-        
-        //std::cout << " TOTAL COLOR UNITS: " << impl->storage.size() << "\n";
 
-        glfwSwapBuffers(impl->_window->getGLFWWindow());
-
-        impl->storage.clear();
+                impl->storage.clear();
         impl->draw_call_indices.clear();
         impl->scissor_primitives.clear();
         impl->current_color_call_cnt = 0;
         impl->current_type = ContextImplOpengl::UNSET;
+
+        glFlush();
+        glFinish();      
+    }
+
+    void Context::present_frame()
+    {
+        ContextImplOpengl* impl = getImpl(this);
+        if (!impl->rendering || impl->headless)
+            return;
+
+        //std::cout << " TOTAL COLOR UNITS: " << impl->storage.size() << "\n";
+
+        glfwSwapBuffers(impl->_window->getGLFWWindow());
+
+
         impl->rendering = false;
     }
 
@@ -710,7 +722,7 @@ namespace elemd
         }
     }
 
-    void Context::_tmp_register_image(image* image)
+    void Context::_tmp_register_image(Image* image)
     {
         ContextImplOpengl* impl = getImpl(this);
         imageImplOpengl* img = (imageImplOpengl*)image;
@@ -730,7 +742,7 @@ namespace elemd
         }
     }
 
-    void Context::_tmp_register_font(font* font)
+    void Context::_tmp_register_font(Font* font)
     {
         ContextImplOpengl* impl = getImpl(this);
         fontImplOpengl* fiv = (fontImplOpengl*)font;
@@ -755,7 +767,7 @@ namespace elemd
     void Context::_tmp_prepare()
     {
         
-        _default_font = font::create(default_font.data(), default_font.size());
+        _default_font = Font::create(default_font.data(), default_font.size());
         _tmp_register_font(_default_font);
         if (_font == nullptr)
         {
@@ -842,7 +854,7 @@ namespace elemd
         buffer[1] = 0;
         buffer[2] = 0;
         buffer[3] = 0;
-        dummy = new imageImplOpengl(1, 1, 4, buffer, false);
+        dummy = new imageImplOpengl(1, 1, 4, buffer, {});
         dummy->upload();
     }
 
