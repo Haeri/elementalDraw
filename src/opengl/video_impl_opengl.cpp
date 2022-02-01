@@ -4,13 +4,9 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
-extern "C"
-{
-#include <inttypes.h>
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-}
+#include <iostream>
+
+
 
 namespace elemd
 {
@@ -34,82 +30,147 @@ namespace elemd
 
     videoImplOpengl::videoImplOpengl(std::string file_path)
     {
-        
-        if (!video_reader_open(&_vr_state, file_path.c_str()))
+
+        // initialize libav
+        av_register_all();
+        avformat_network_init();
+
+        // open video
+        if (avformat_open_input(&fmt_ctx, file_path.c_str(), NULL, NULL) < 0)
         {
-            printf("Couldn't open video file (make sure you set a video file that exists)\n");
+            std::cout << "failed to open input" << std::endl;
+            // clearAppData(&data);
             return;
         }
 
+        // find stream info
+        if (avformat_find_stream_info(fmt_ctx, NULL) < 0)
+        {
+            std::cout << "failed to get stream info" << std::endl;
+            // clearAppData(&data);
+            return;
+        }
+
+        // find the video stream
+        for (unsigned int i = 0; i < fmt_ctx->nb_streams; ++i)
+        {
+            if (fmt_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+            {
+                stream_idx = i;
+                break;
+            }
+        }
+
+        if (stream_idx == -1)
+        {
+            std::cout << "failed to find video stream" << std::endl;
+            //clearAppData(&data);
+            return;
+        }
+
+        video_stream = fmt_ctx->streams[stream_idx];
+        codec_ctx = video_stream->codec;
+
+        // find the decoder
+        decoder = avcodec_find_decoder(codec_ctx->codec_id);
+        if (decoder == NULL)
+        {
+            std::cout << "failed to find decoder" << std::endl;
+            //clearAppData(&data);
+            return;
+        }
+
+        // open the decoder
+        if (avcodec_open2(codec_ctx, decoder, NULL) < 0)
+        {
+            std::cout << "failed to open codec" << std::endl;
+            //clearAppData(&data);
+            return;
+        }
+
+        // allocate the video frames
+        av_frame = av_frame_alloc();
+        gl_frame = av_frame_alloc();
+        int size =
+            avpicture_get_size(AV_PIX_FMT_RGB24, codec_ctx->width, codec_ctx->height);
+        uint8_t* internal_buffer = (uint8_t*)av_malloc(size * sizeof(uint8_t));
+        avpicture_fill((AVPicture*)gl_frame, internal_buffer, AV_PIX_FMT_RGB24,
+                       codec_ctx->width, codec_ctx->height);
+        packet = (AVPacket*)av_malloc(sizeof(AVPacket));
+
+
+        _image = elemd::Image::create(codec_ctx->width, codec_ctx->height, 3, internal_buffer);
+
         _loaded = true;
-
-        /*
-        if (memalign((void**)&frame_data, ALIGNMENT, frame_width * frame_height * 4) != 0)
-        {
-            printf("Couldn't allocate frame buffer\n");
-            return 1;
-        }
-        */
-
-        int size = _vr_state.width * _vr_state.height * 4;
-        uint8_t* internal_buffer = (uint8_t*)malloc(size * sizeof(uint8_t));
-
-        avpicture_fill((AVPicture*)data.gl_frame, internal_buffer, AV_PIX_FMT_RGB24,
-                       data.codec_ctx->width, data.codec_ctx->height);
-        data.packet = (AVPacket*)av_malloc(sizeof(AVPacket));
-
-        
-        //_data =
-//            (unsigned char*)malloc(_vr_state.width * _vr_state.height * 4 * sizeof(unsigned char));
-            
-        int64_t pts;
-        if (!video_reader_read_frame(&_vr_state, _data, &pts))
-        {
-            printf("Couldn't load video frame\n");
-        }
-
-        _image = Image::create(_vr_state.width, _vr_state.height, 4, _data);
     }
 
     videoImplOpengl::~videoImplOpengl()
     {
         if (_loaded)
         {
-            video_reader_close(&_vr_state);
+            avformat_close_input(&fmt_ctx);
+
+            if (av_frame)
+                av_free(av_frame);
+            if (gl_frame)
+                av_free(gl_frame);
+            if (packet)
+                av_free(packet);
+            if (codec_ctx)
+                avcodec_close(codec_ctx);
+            if (fmt_ctx)
+                avformat_free_context(fmt_ctx);
+
+            _image->destroy();
+
             _loaded = false;
         }
-
-        if (_uploaded)
-        {
-            //glDeleteTextures(1, &_image);
-            _uploaded = false;
-        }
     }
 
-    void videoImplOpengl::upload()
-    { /*
-        if (!_loaded)
-            return;
-
-        glGenTextures(1, &_image);
-        glBindTexture(GL_TEXTURE_2D, _image);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                     _data);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        _uploaded = true;*/
-    }
-
-    void videoImplOpengl::bind(GLuint texture_unit)
+    void Video::read_next()
     {
-        /*
-        glActiveTexture(GL_TEXTURE0 + texture_unit);
-        glBindTexture(GL_TEXTURE_2D, _image);*/
+        videoImplOpengl* impl = getImpl(this);
+        do
+        {
+            if (av_read_frame(impl->fmt_ctx, impl->packet) < 0)
+            {
+                av_free_packet(impl->packet);
+                return;
+            }
+
+            if (impl->packet->stream_index == impl->stream_idx)
+            {
+                int frame_finished = 0;
+
+                if (avcodec_decode_video2(impl->codec_ctx, impl->av_frame, &frame_finished,
+                                          impl->packet) < 0)
+                {
+                    av_free_packet(impl->packet);
+                    return;
+                }
+
+                if (frame_finished)
+                {
+                    if (!impl->conv_ctx)
+                    {
+                        impl->conv_ctx =
+                            sws_getContext(impl->codec_ctx->width, impl->codec_ctx->height,
+                                           impl->codec_ctx->pix_fmt, impl->codec_ctx->width,
+                                           impl->codec_ctx->height,
+                            AV_PIX_FMT_RGB24,
+                                           SWS_BICUBIC, NULL, NULL, NULL);
+                    }
+
+                    sws_scale(impl->conv_ctx, impl->av_frame->data, impl->av_frame->linesize, 0,
+                              impl->codec_ctx->height, impl->gl_frame->data,
+                              impl->gl_frame->linesize);
+
+                    _image->update_data(impl->gl_frame->data[0]);
+                   
+                }
+            }
+
+            av_free_packet(impl->packet);
+        } while (impl->packet->stream_index != impl->stream_idx);
     }
 } // namespace elemd

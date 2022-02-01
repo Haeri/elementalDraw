@@ -2,12 +2,7 @@
 
 namespace elemd
 {
-    std::map<std::string, Image*> Image::_image_index;
-
-    unsigned char* Image::get_data()
-    {
-        return _data;
-    }
+    std::map<std::string, Image*> Image::_image_index;    
 
     int Image::get_width()
     {

@@ -25,11 +25,14 @@ namespace elemd
         static Image* create(int width, int height, int components, unsigned char* data,
                              ImageConfig imageConfig = {});
 
-        unsigned char* get_data();
+        
         int get_width();
         int get_height();
         int get_channels();
         void set_name(std::string name);
+
+        void update_data(unsigned char* data);
+        void write_to_file(std::string file_path);
 
         void destroy();
 

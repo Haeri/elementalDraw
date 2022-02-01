@@ -22,12 +22,16 @@ namespace elemd
         int _sampler_index = -1;
         uint32_t _mipLevels = 1;
 
+        GLenum _type;
+        GLint _internal_format;
+
         bool _uploaded = false;
 
         void upload();
         void bind(GLuint texture_unit);
-        
-        void writeToFile();
+
+    private:
+        void init_format();
     };
 
 } // namespace elemd

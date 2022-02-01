@@ -18,7 +18,7 @@ int main(void)
     // Configure and create window
     elemd::WindowConfig winc = elemd::WindowConfig{"Overview", width, 550};
     winc.icon_file = "./res/logo.png";
-    winc.transparent = true;
+    //winc.transparent = true;
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
 
@@ -30,9 +30,19 @@ int main(void)
     elemd::Image* anim = elemd::Image::create("./res/anim.png");
     ctx->_tmp_register_image(anim);
 
+
+    int gradient_index = 0;
+    int gradient_width = 200;
+    int gradient_height = 100;
+    unsigned char* gradient_data = new unsigned char[gradient_height * gradient_width *4];
+    
+    elemd::Image* gradient =
+        elemd::Image::create(gradient_width, gradient_height, 4, gradient_data);
+    ctx->_tmp_register_image(gradient);
+
     // Load video
-    elemd::Video* video = elemd::Video::create("./res/Sea.mp4");
-    //ctx->_tmp
+    elemd::Video* video = elemd::Video::create("./res/waves.mp4");
+    ctx->_tmp_register_image(video->get_frame(0));
 
     // Load fonts
     elemd::Font* monserat_light = elemd::Font::create("./res/font/Montserrat-Light.ttf");
@@ -88,6 +98,9 @@ int main(void)
     float mouse_x;
     float mouse_y;
 
+    float is_ctrl = false;
+    float scroll_y = 0;
+
     // Event
     std::string text = "I see this as an absolute win!";
     win->add_char_listener([&](elemd::char_event event) { 
@@ -95,12 +108,23 @@ int main(void)
     });
 
     win->add_scroll_listener([&](elemd::scroll_event event) {
-        elemd::vec2 scale = win->get_scale();
-        float deltax = std::clamp(scale.x() + (float)event.yoffset / 6.0f, min_scale, max_scale);
-        float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, min_scale, max_scale);       
+        if (is_ctrl)
+        {
+            elemd::vec2 scale = win->get_scale();
+            float deltax =
+                std::clamp(scale.x() + (float)event.yoffset / 6.0f, min_scale, max_scale);
+            float deltay =
+                std::clamp(scale.y() + (float)event.yoffset / 6.0f, min_scale, max_scale);
 
-        win->set_scale(deltax, deltay);
-        //win->set_offset((-mouse_x), (-mouse_y));
+            win->set_scale(deltax, deltay);
+        }
+        else
+        {
+            scroll_y += event.yoffset * 32.0f;
+            scroll_y = std::clamp(scroll_y, -400.0f, 0.0f);
+            win->set_offset(0, scroll_y);
+        }
+        // win->set_offset((-mouse_x), (-mouse_y));
     });
 
     win->add_mouse_move_listener([&](elemd::mouse_move_event event) {
@@ -111,6 +135,7 @@ int main(void)
     });
 
     win->add_key_listener([&](elemd::key_event event) {
+        is_ctrl = (event.mods == elemd::KEY_MOD_CONTROL);
         
         if (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT)
         {
@@ -138,13 +163,21 @@ int main(void)
     ctx->_tmp_prepare();
     ctx->set_clear_color(dark);
 
+
     // Main renderloop
     while (win->is_running())
     {
         win->poll_events();
-        
+
+        video->read_next();
+        ctx->set_fill_color({0, 0, 0, 60});
+        ctx->draw_image(0, 0, video->get_width(), video->get_height(),
+                                video->get_frame(0), true);
+
+
+
         // Text
-        ctx->set_fill_color(white);        
+        ctx->set_fill_color(white);
 
         /*
         int offset = 10;
@@ -153,24 +186,24 @@ int main(void)
             ctx->set_font_size(i);
             ctx->draw_text(20, offset, std::to_string(i) + "px  " +text);
             offset += i;
-        }*/
-                        
+        }
+        */
         
         // Text
         ctx->set_font(monserat_black);
         ctx->set_font_size(18);
-        ctx->draw_text(20, 20, "Well to be honest");        
-        
-        ctx->set_font(monserat_light);        
+        ctx->draw_text(20, 20, "Well to be honest");
+
+        ctx->set_font(monserat_light);
         ctx->set_font_size(12);
         std::string formated = monserat_light->fit_substring(text, width - 2 * 20, 12);
-        ctx->draw_text(20, 45, formated);        
+        ctx->draw_text(20, 45, formated);
 
         ctx->set_font(icon_font);
         ctx->set_font_size(18);
         ctx->draw_text(440, 80, icons);
 
-        ctx->set_font(nullptr);        
+        ctx->set_font(nullptr);
         ctx->set_font_size(14);
         ctx->draw_text(440, 360,
                        U"Numbers:  0123456789\n"
@@ -178,7 +211,6 @@ int main(void)
                        U"Capital:       ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
                        U"Small:         abcdefghijklmnopqrstuvwxyz\n"
                        U"Umlaut:      ÖÄÜöäüéèàêâ");
-
 
         // Circle
         ctx->set_fill_color(red);
@@ -192,7 +224,6 @@ int main(void)
         ctx->set_fill_color(blue);
         ctx->fill_rounded_rect(120, 80, 80, 30, 10);
 
-        
         ctx->set_line_width(1);
 
         // Circle outline
@@ -207,10 +238,9 @@ int main(void)
         ctx->set_stroke_color(blue);
         ctx->stroke_rounded_rect(320, 80, 80, 30, 10);
 
-        
         // Image
         ctx->draw_image(20, 130, 80, 80, img);
-        
+
         // Timted image
         ctx->set_fill_color(elemd::color(10, 10, 255));
         ctx->draw_image(120, 130, 80, 80, img, true);
@@ -218,12 +248,12 @@ int main(void)
         // Rounded image
         ctx->draw_rounded_image(220, 130, 80, 80, img, 10, 10, 10, 10, 400, 400, 1600, 1600);
 
-
         // Image animation
-        ctx->set_fill_color(elemd::color::color_lerp(
-            elemd::color(200, 30, 30), elemd::color(30, 200, 30), (sin(color_phase++ / 100.0f)+1)/2.0f));
+        ctx->set_fill_color(elemd::color::color_lerp(elemd::color(200, 30, 30),
+                                                     elemd::color(30, 200, 30),
+                                                     (sin(color_phase++ / 100.0f) + 1) / 2.0f));
         ctx->draw_image(320, 130, 80, 80, anim, anim_x, anim_y, anim_w, anim_h, true);
-        if (elemd::Window::now() - last_time > anim_speed/1000.0f)
+        if (elemd::Window::now() - last_time > anim_speed / 1000.0f)
         {
             ++frame;
             frame %= max_frames;
@@ -232,17 +262,15 @@ int main(void)
 
             last_time = elemd::Window::now();
         }
-        
-
 
         for (size_t i = 0; i < 10; i++)
         {
-            ctx->set_line_width(i+1);
-            
+            ctx->set_line_width(i + 1);
+
             // Stroke Circle
             ctx->set_stroke_color(red);
             ctx->stroke_circle(35 + i * (30 + 10), 245, 15);
-            
+
             // Stroke Rectangle
             ctx->set_stroke_color(green);
             ctx->stroke_rect(20 + i * (30 + 10), 280, 30, 30);
@@ -252,13 +280,11 @@ int main(void)
             ctx->stroke_rounded_rect(20 + i * (30 + 10), 330, 30, 30, 10);
         }
 
-
         for (size_t i = 0; i < 10; i++)
         {
             // Circle shadow
             ctx->set_fill_color(red);
-            ctx->draw_circle_shadow(35 + i * (30 + 10), 395, 15, i *6);
-            
+            ctx->draw_circle_shadow(35 + i * (30 + 10), 395, 15, i * 6);
 
             // Rectangle shadow
             ctx->set_fill_color(green);
@@ -268,8 +294,23 @@ int main(void)
             ctx->set_fill_color(blue);
             ctx->draw_rounded_rect_shadow(20 + i * (30 + 10), 480, 30, 30, 10, i * 6);
         }
+        
+
+        ctx->draw_image(30, 550, 100, 50, gradient);
+
+        if (gradient_index < gradient_width * gradient_height)
+        {
+            gradient_data[gradient_index] = 255;
+            gradient_data[gradient_index + 1] = 0;
+            gradient_data[gradient_index + 2] = 0;
+            gradient_data[gradient_index + 3] = 255;
+            gradient_index += 4;
+            gradient->update_data(gradient_data);
+        }
 
 
+        //video->read_next();
+        ctx->draw_rounded_image(180, 550, video->get_width()/3, video->get_height()/3, video->get_frame(0), 20);
 
 
 
@@ -279,6 +320,7 @@ int main(void)
 
     // Cleanup
     icon_font->destroy();
+    gradient->destroy();
     monserat_black->destroy();
     monserat_light->destroy();
     anim->destroy();
