@@ -9,12 +9,12 @@
 
 namespace elemd
 {
-    class fontImplVulkan : public Font
+    class FontImplVulkan : public Font
     {
     public:
-        fontImplVulkan(std::string file_path);
-        fontImplVulkan(unsigned char* buffer, size_t size);
-        ~fontImplVulkan();
+        FontImplVulkan(std::string file_path);
+        FontImplVulkan(unsigned char* buffer, size_t size);
+        ~FontImplVulkan();
 
         bool _loaded = false;
         bool _uploaded = false;

@@ -9,7 +9,6 @@
 
 namespace elemd
 {
-
     class ELEMD_API Video
     {
     public:
@@ -26,7 +25,7 @@ namespace elemd
 
     protected:
         std::string _name;
-        Image* _image;
+        Image* _image = nullptr;
 
         Video() = default;
         virtual ~Video() = default;

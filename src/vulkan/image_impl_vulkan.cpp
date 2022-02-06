@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <cmath>
-#define STB_IMAGE_IMPLEMENTATION
+
 #include <stb_image.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
@@ -13,32 +13,41 @@
 #include "vulkan_utils.hpp"
 
 namespace elemd
-{
+{    
     /* ------------------------ DOWNCAST ------------------------ */
 
-    inline imageImplVulkan* getImpl(Image* ptr)
+    inline ImageImplVulkan* getImpl(Image* ptr)
     {
-        return (imageImplVulkan*)ptr;
+        return (ImageImplVulkan*)ptr;
     }
-    inline const imageImplVulkan* getImpl(const Image* ptr)
+    inline const ImageImplVulkan* getImpl(const Image* ptr)
     {
-        return (const imageImplVulkan*)ptr;
+        return (const ImageImplVulkan*)ptr;
     }
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
     Image* Image::create(std::string file_path, ImageConfig imageConfig)
     {
-        return new imageImplVulkan(file_path, imageConfig);
+        return new ImageImplVulkan(file_path, imageConfig);
     }
 
     Image* Image::create(int width, int height, int components, unsigned char* data,
                          ImageConfig imageConfig)
     {
-        return new imageImplVulkan(width, height, components, data, imageConfig);
+        return new ImageImplVulkan(width, height, components, data, imageConfig);
     }
 
-    imageImplVulkan::imageImplVulkan(std::string file_path, ImageConfig imageConfig)
+    void Image::write_to_file(std::string file_path)
+    {
+        if (stbi_write_png((file_path + "/out_" + _name + ".png").c_str(), _width, _height,
+                           _components, _data, 0) == 0)
+        {
+            std::cerr << "error during saving" << std::endl;
+        }
+    }
+
+    ImageImplVulkan::ImageImplVulkan(std::string file_path, ImageConfig imageConfig)
     {
         _imageConfig = imageConfig;
         stbi_uc* data =
@@ -63,17 +72,13 @@ namespace elemd
             _width = 1;
             _height = 1;
             _components = 4;
-            _data = new unsigned char[4];
-            _data[0] = 255;
-            _data[1] = 0;
-            _data[2] = 255;
-            _data[3] = 255;
+            _data = _dummy_data;
             _name = "noname_" + std::to_string(rand() % 10000);
             _loaded = false;
         }
     }
 
-    imageImplVulkan::imageImplVulkan(int width, int height, int components, unsigned char* data,
+    ImageImplVulkan::ImageImplVulkan(int width, int height, int components, unsigned char* data,
                                      ImageConfig imageConfig)
     {
         _imageConfig = imageConfig;
@@ -90,7 +95,7 @@ namespace elemd
         }
     }
 
-    imageImplVulkan::~imageImplVulkan()
+    ImageImplVulkan::~ImageImplVulkan()
     {
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         
@@ -100,13 +105,13 @@ namespace elemd
             
             _loaded = false;
         }
-        else if (_data != nullptr)
-        {
-            delete[] _data;
-        }
+       
 
         if (_uploaded)
         {        
+            vkDestroyBuffer(device, _stagingBuffer, nullptr);
+            vkFreeMemory(device, _stagingDeviceMemory, nullptr);
+
             vkDestroySampler(device, _sampler, nullptr);
             vkDestroyImageView(device, _imageView, nullptr);
             
@@ -117,7 +122,7 @@ namespace elemd
         }
     }
 
-    void imageImplVulkan::upload(const VkCommandPool& commandPool, const VkQueue& queue)
+    void ImageImplVulkan::upload(const VkCommandPool& commandPool, const VkQueue& queue)
     {
         if (_data == nullptr)
             return;
@@ -125,22 +130,18 @@ namespace elemd
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkPhysicalDevice physicalDevice = VulkanSharedInfo::getInstance()->bestPhysicalDevice;
 
-        // VkDeviceSize imageSize = _width * _height * 4;
-        VkDeviceSize actualImageSize = _width * _height * _components;
+        VkDeviceSize actualImageSize = _width * _height * _components;              
 
-        VkBuffer stagingBuffer{};
-        VkDeviceMemory stagingDeviceMemory{};
-
-        vku::create_buffer(actualImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer,
+        vku::create_buffer(actualImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, _stagingBuffer,
                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                           stagingDeviceMemory);
+                           _stagingDeviceMemory);
 
         void* rawData;
-        vkMapMemory(device, stagingDeviceMemory, 0, actualImageSize, 0, &rawData);
+        vkMapMemory(device, _stagingDeviceMemory, 0, actualImageSize, 0, &rawData);
         // std::memset(rawData, 0, imageSize);
         std::memcpy(rawData, _data, actualImageSize);
-        vkUnmapMemory(device, stagingDeviceMemory);
+        vkUnmapMemory(device, _stagingDeviceMemory);
 
         VkFormat format;
         if (_components == 1)
@@ -188,20 +189,16 @@ namespace elemd
 
         vkBindImageMemory(device, _image, _deviceMemory, 0);
 
-        changeLayout(commandPool, queue, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-        writeBuffer(commandPool, queue, stagingBuffer);
+        change_layout(commandPool, queue, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        write_buffer(commandPool, queue, _stagingBuffer);
 
         if (_mipLevels <= 1)
         {
-            changeLayout(commandPool, queue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            change_layout(commandPool, queue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         }
-
-        vkDestroyBuffer(device, stagingBuffer, nullptr);
-        vkFreeMemory(device, stagingDeviceMemory, nullptr);
-
         if (_mipLevels > 1)
         {
-            generateMipmaps(commandPool, queue, format);
+            generate_mipmaps(commandPool, queue, format);
         }
 
         VkImageViewCreateInfo imageViewCreateInfo{};
@@ -255,7 +252,42 @@ namespace elemd
         _uploaded = true;
     }
 
-    void imageImplVulkan::writeBuffer(const VkCommandPool& commandPool, const VkQueue& queue,
+    void ImageImplVulkan::upload_update(const VkCommandPool& commandPool, const VkQueue& queue)
+    {
+        VkDevice device = VulkanSharedInfo::getInstance()->device;
+
+        VkDeviceSize actualImageSize = _width * _height * _components;
+
+        void* rawData;
+        vkMapMemory(device, _stagingDeviceMemory, 0, actualImageSize, 0, &rawData);
+        // std::memset(rawData, 0, imageSize);
+        std::memcpy(rawData, _data, actualImageSize);
+        vkUnmapMemory(device, _stagingDeviceMemory);
+
+        VkFormat format;
+        if (_components == 1)
+        {
+            format = VK_FORMAT_R8_UNORM;
+        }
+        else
+        {
+            format = VK_FORMAT_R8G8B8A8_UNORM;
+        }
+
+        change_layout(commandPool, queue, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        write_buffer(commandPool, queue, _stagingBuffer);
+
+        if (_mipLevels <= 1)
+        {
+            change_layout(commandPool, queue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        }
+        if (_mipLevels > 1)
+        {
+            generate_mipmaps(commandPool, queue, format);
+        }
+    }
+
+    void ImageImplVulkan::write_buffer(const VkCommandPool& commandPool, const VkQueue& queue,
                                       VkBuffer buffer)
     {
         VkDevice device = VulkanSharedInfo::getInstance()->device;
@@ -278,7 +310,7 @@ namespace elemd
         vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
     }
 
-    void imageImplVulkan::changeLayout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout)
+    void ImageImplVulkan::change_layout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout)
     {
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkCommandBuffer commandBuffer = vku::beginSingleTimeCommands(commandPool);
@@ -331,7 +363,7 @@ namespace elemd
         _imageLayout = layout;
     }
 
-    void imageImplVulkan::generateMipmaps(const VkCommandPool& commandPool, const VkQueue& queue,
+    void ImageImplVulkan::generate_mipmaps(const VkCommandPool& commandPool, const VkQueue& queue,
                                           const VkFormat& format)
     {
         VkPhysicalDevice physical_device = VulkanSharedInfo::getInstance()->bestPhysicalDevice;
@@ -417,22 +449,14 @@ namespace elemd
                              &barrier);
 
         vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
-    }
+    }   
 
-    void imageImplVulkan::writeToFile()
-    {
-        if (stbi_write_png(("out_" +_name + ".png").c_str(), _width, _height, _components, _data, 0) == 0)
-        {
-            std::cerr << "error during saving" << std::endl;
-        }
-    }
-
-    VkSampler imageImplVulkan::getSampler()
+    VkSampler ImageImplVulkan::get_sampler()
     {
         return _sampler;
     }
 
-    VkImageView imageImplVulkan::getImageView()
+    VkImageView ImageImplVulkan::get_image_view()
     {
         return _imageView;
     }

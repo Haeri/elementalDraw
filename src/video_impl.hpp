@@ -1,9 +1,8 @@
-#ifndef ELEMD_VIDEO_IMPL_OPENGL_HPP
-#define ELEMD_VIDEO_IMPL_OPENGL_HPP
+#ifndef ELEMD_VIDEO_IMPL_HPP
+#define ELEMD_VIDEO_IMPL_HPP
 
 #include "elemd/video.hpp"
 
-#include "opengl_shared_info.hpp"
 #include <map>
 #include <string>
 
@@ -17,11 +16,11 @@ extern "C"
 
 namespace elemd
 {
-    class videoImplOpengl : public Video
+    class VideoImpl : public Video
     {
     public:
-        videoImplOpengl(std::string file_path);
-        ~videoImplOpengl();
+        VideoImpl(std::string file_path);
+        ~VideoImpl();
 
         bool _loaded = false;
 
@@ -38,4 +37,4 @@ namespace elemd
 
 } // namespace elemd
 
-#endif // ELEMD_VIDEO_IMPL_OPENGL_HPP
+#endif // ELEMD_VIDEO_IMPL_HPP

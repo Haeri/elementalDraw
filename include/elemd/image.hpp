@@ -32,9 +32,13 @@ namespace elemd
         void set_name(std::string name);
 
         void update_data(unsigned char* data);
+        // TODO: data might not be up tp date with what is on the GPU. We need to pull down the 
+        // newest data and write that to file.
         void write_to_file(std::string file_path);
 
         void destroy();
+
+        static void cleanup();
 
     protected:
         static std::map<std::string, Image*> _image_index;
@@ -47,6 +51,7 @@ namespace elemd
 
         std::string _name;
 
+        static unsigned char* _dummy_data;
         unsigned char* _data = nullptr;
 
         Image() = default;

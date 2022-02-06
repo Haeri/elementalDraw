@@ -66,8 +66,8 @@ namespace elemd
         };
 
        
-        imageImplOpengl* dummy;
-        std::vector<imageImplOpengl*> images;
+        ImageImplOpengl* dummy;
+        std::vector<ImageImplOpengl*> images;
 
         //std::vector<vertex> rect_vertices = {{vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
         std::vector<uint32_t> rect_indices = {0, 1, 2, 1, 3, 2};

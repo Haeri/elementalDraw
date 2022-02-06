@@ -10,43 +10,43 @@ namespace elemd
 {
     /* ------------------------ DOWNCAST ------------------------ */
 
-    inline fontImplOpengl* getImpl(Font* ptr)
+    inline FontImplOpengl* getImpl(Font* ptr)
     {
-        return (fontImplOpengl*)ptr;
+        return (FontImplOpengl*)ptr;
     }
-    inline const fontImplOpengl* getImpl(const Font* ptr)
+    inline const FontImplOpengl* getImpl(const Font* ptr)
     {
-        return (const fontImplOpengl*)ptr;
+        return (const FontImplOpengl*)ptr;
     }
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
     Font* Font::create(std::string file_path)
     {
-        return new fontImplOpengl(file_path);
+        return new FontImplOpengl(file_path);
     }
 
     Font* Font::create(unsigned char* buffer, size_t size)
     {
-        return new fontImplOpengl(buffer, size);
+        return new FontImplOpengl(buffer, size);
     }
 
 
-    fontImplOpengl::fontImplOpengl(std::string file_path)
+    FontImplOpengl::FontImplOpengl(std::string file_path)
     {
         load_from_file(file_path);
 
         _loaded = true;
     }
 
-    fontImplOpengl::fontImplOpengl(unsigned char* buffer, size_t size)
+    FontImplOpengl::FontImplOpengl(unsigned char* buffer, size_t size)
     {
         load_from_memory(buffer, size);
 
         _loaded = true;
     }
 
-    fontImplOpengl::~fontImplOpengl()
+    FontImplOpengl::~FontImplOpengl()
     {
         if (_uploaded)
         {
@@ -54,12 +54,12 @@ namespace elemd
         }
     }
 
-    void fontImplOpengl::upload()
+    void FontImplOpengl::upload()
     {
         if (!_loaded)
             return;
 
-        imageImplOpengl* iiv = (imageImplOpengl*)_texture_atlas;
+        ImageImplOpengl* iiv = (ImageImplOpengl*)_texture_atlas;
         iiv->upload();
 
         _uploaded = true;

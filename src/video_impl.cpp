@@ -1,4 +1,4 @@
-#include "video_impl_opengl.hpp"
+#include "video_impl.hpp"
 
 #include <stdlib.h>
 #include <GLFW/glfw3.h>
@@ -12,23 +12,23 @@ namespace elemd
 {
     /* ------------------------ DOWNCAST ------------------------ */
 
-    inline videoImplOpengl* getImpl(Video* ptr)
+    inline VideoImpl* getImpl(Video* ptr)
     {
-        return (videoImplOpengl*)ptr;
+        return (VideoImpl*)ptr;
     }
-    inline const videoImplOpengl* getImpl(const Video* ptr)
+    inline const VideoImpl* getImpl(const Video* ptr)
     {
-        return (const videoImplOpengl*)ptr;
+        return (const VideoImpl*)ptr;
     }
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
     Video* Video::create(std::string file_path)
     {
-        return new videoImplOpengl(file_path);
+        return new VideoImpl(file_path);
     }
 
-    videoImplOpengl::videoImplOpengl(std::string file_path)
+    VideoImpl::VideoImpl(std::string file_path)
     {
 
         // initialize libav
@@ -104,7 +104,7 @@ namespace elemd
         _loaded = true;
     }
 
-    videoImplOpengl::~videoImplOpengl()
+    VideoImpl::~VideoImpl()
     {
         if (_loaded)
         {
@@ -129,7 +129,7 @@ namespace elemd
 
     void Video::read_next()
     {
-        videoImplOpengl* impl = getImpl(this);
+        VideoImpl* impl = getImpl(this);
         do
         {
             if (av_read_frame(impl->fmt_ctx, impl->packet) < 0)

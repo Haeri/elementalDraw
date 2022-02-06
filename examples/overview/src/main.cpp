@@ -45,11 +45,12 @@ int main(void)
     ctx->_tmp_register_image(video->get_frame(0));
 
     // Load fonts
+    elemd::Font* monserat_black = elemd::Font::create("./res/font/Montserrat-Black.ttf");
+    ctx->_tmp_register_font(monserat_black);
+
     elemd::Font* monserat_light = elemd::Font::create("./res/font/Montserrat-Light.ttf");
     ctx->_tmp_register_font(monserat_light);
     
-    elemd::Font* monserat_black = elemd::Font::create("./res/font/Montserrat-Black.ttf");
-    ctx->_tmp_register_font(monserat_black);
     
     
     elemd::Font* icon_font = elemd::Font::create("./res/font/feather.ttf");
@@ -170,7 +171,8 @@ int main(void)
         win->poll_events();
 
         video->read_next();
-        ctx->set_fill_color({0, 0, 0, 60});
+        ctx->_tmp_update_image(video->get_frame(0));
+        ctx->set_fill_color({60, 60, 60});
         ctx->draw_image(0, 0, video->get_width(), video->get_height(),
                                 video->get_frame(0), true);
 
@@ -306,6 +308,7 @@ int main(void)
             gradient_data[gradient_index + 3] = 255;
             gradient_index += 4;
             gradient->update_data(gradient_data);
+            ctx->_tmp_update_image(gradient);
         }
 
 
@@ -317,6 +320,9 @@ int main(void)
         ctx->draw_frame();
         ctx->present_frame();
     }
+
+
+    delete[] gradient_data;
 
     // Cleanup
     icon_font->destroy();

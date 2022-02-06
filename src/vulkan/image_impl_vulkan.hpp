@@ -10,13 +10,13 @@
 
 namespace elemd
 {
-    class imageImplVulkan : public Image
+    class ImageImplVulkan : public Image
     {
     public:
-        imageImplVulkan(std::string file_path, ImageConfig imageConfig);
-        imageImplVulkan(int width, int height, int components, unsigned char* data,
+        ImageImplVulkan(std::string file_path, ImageConfig imageConfig);
+        ImageImplVulkan(int width, int height, int components, unsigned char* data,
                         ImageConfig imageConfig);
-        ~imageImplVulkan();
+        ~ImageImplVulkan();
 
         VkImage _image;
         VkDeviceMemory _deviceMemory;
@@ -27,17 +27,19 @@ namespace elemd
         uint32_t _mipLevels = 1;
         ImageConfig _imageConfig = {};
 
+        VkDeviceMemory _stagingDeviceMemory = {};
+        VkBuffer _stagingBuffer = {};
+
         bool _uploaded = false;
 
         void upload(const VkCommandPool& commandPool, const VkQueue& queue);
-        void writeBuffer(const VkCommandPool& commandPool, const VkQueue& queue, VkBuffer buffer);
-        void changeLayout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout);
-        void generateMipmaps(const VkCommandPool& commandPool, const VkQueue& queue, const VkFormat& format);
-        
-        void writeToFile();
+        void upload_update(const VkCommandPool& commandPool, const VkQueue& queue);
+        void write_buffer(const VkCommandPool& commandPool, const VkQueue& queue, VkBuffer buffer);
+        void change_layout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout);
+        void generate_mipmaps(const VkCommandPool& commandPool, const VkQueue& queue, const VkFormat& format);        
 
-        VkSampler getSampler();
-        VkImageView getImageView();
+        VkSampler get_sampler();
+        VkImageView get_image_view();
     };
 
 } // namespace elemd

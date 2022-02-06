@@ -10,8 +10,9 @@ endif()
 if(APPLE)
     set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
 else()
-    set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
+    set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
 endif()
+
 
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)

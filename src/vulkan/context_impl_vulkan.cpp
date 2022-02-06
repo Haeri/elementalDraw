@@ -113,7 +113,7 @@ namespace elemd
     }
 
     // VK_PRIMITIVE_TOPOLOGY_POINT_LIST
-    void Context::draw_pixel(float x, float y)
+    void Context::draw_pixel(float x, float y, color color)
     {
         std::cout << "WARNING: Context::draw_pixel is not implemented!\n";
     }
@@ -308,7 +308,7 @@ namespace elemd
         float initialX = x;
         float scale = (float)_font_size / LOADED_HEIGHT;
         std::map<unsigned int, character> characters = _font->get_characters();
-        imageImplVulkan* img = (imageImplVulkan*)_font->get_image();
+        ImageImplVulkan* img = (ImageImplVulkan*)_font->get_image();
 
         for (char32_t& token : text)
         {
@@ -394,7 +394,7 @@ namespace elemd
                                      float src_height, bool tint)
     {
         ContextImplVulkan* impl = getImpl(this);
-        imageImplVulkan* img = (imageImplVulkan*)image;
+        ImageImplVulkan* img = (ImageImplVulkan*)image;
 
         x += impl->_window->_x_offset;
         y += impl->_window->_y_offset;
@@ -674,14 +674,14 @@ namespace elemd
     void Context::_tmp_register_image(Image* image)
     {
         ContextImplVulkan* impl = getImpl(this);
-        imageImplVulkan* img = (imageImplVulkan*)image;
+        ImageImplVulkan* img = (ImageImplVulkan*)image;
         if (!img->_uploaded)
         {
             img->upload(impl->commandPool, impl->queue);
             if (impl->images.size() > impl->texture_array_size)
             {
                 img->_sampler_index = 0;
-                std::cerr << "Too many textures glyps loaded!" << std::endl;
+                std::cerr << "Too many textures loaded!" << std::endl;
             }
             else
             {
@@ -694,12 +694,12 @@ namespace elemd
     void Context::_tmp_register_font(Font* font)
     {
         ContextImplVulkan* impl = getImpl(this);
-        fontImplVulkan* fiv = (fontImplVulkan*)font;
+        FontImplVulkan* fiv = (FontImplVulkan*)font;
         if (!fiv->_uploaded)
         {
             fiv->upload(impl->commandPool, impl->queue);
 
-            imageImplVulkan* img = (imageImplVulkan*)font->get_image();
+            ImageImplVulkan* img = (ImageImplVulkan*)font->get_image();
             if (impl->images.size() > impl->texture_array_size)
             {
                 img->_sampler_index = 0;
@@ -711,6 +711,14 @@ namespace elemd
                 impl->images.push_back(img);
             }
         }
+    }
+
+    void Context::_tmp_update_image(Image* image)
+    {
+        ContextImplVulkan* impl = getImpl(this);
+        ImageImplVulkan* img = (ImageImplVulkan*)image;
+
+        img->upload_update(impl->commandPool, impl->queue);
     }
 
     void Context::_tmp_prepare()
@@ -1437,7 +1445,7 @@ namespace elemd
         buffer[1] = 0;
         buffer[2] = 0;
         buffer[3] = 0;
-        dummy = new imageImplVulkan(1, 1, 4, buffer, {});
+        dummy = new ImageImplVulkan(1, 1, 4, buffer, {});
         dummy->upload(commandPool, queue);
     }
 
