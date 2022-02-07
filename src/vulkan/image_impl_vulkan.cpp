@@ -124,6 +124,11 @@ namespace elemd
             
             _uploaded = false;
         }
+
+        if (_components == 2 || _components == 3)
+        {
+            delete[] _padded_data;
+        }
     }
 
     void ImageImplVulkan::upload(const VkCommandPool& commandPool, const VkQueue& queue)
@@ -134,7 +139,12 @@ namespace elemd
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkPhysicalDevice physicalDevice = VulkanSharedInfo::getInstance()->bestPhysicalDevice;
 
-        VkDeviceSize actualImageSize = _width * _height * _components;              
+        
+           
+        
+        
+        
+        VkDeviceSize actualImageSize = _width * _height * (_components == 1 ? 1 : 4);
 
         vku::create_buffer(actualImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, _stagingBuffer,
                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
@@ -144,7 +154,7 @@ namespace elemd
         void* rawData;
         vkMapMemory(device, _stagingDeviceMemory, 0, actualImageSize, 0, &rawData);
         // std::memset(rawData, 0, imageSize);
-        std::memcpy(rawData, _data, actualImageSize);
+        std::memcpy(rawData, _padded_data, actualImageSize);
         vkUnmapMemory(device, _stagingDeviceMemory);
 
 
@@ -252,12 +262,13 @@ namespace elemd
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         //_imageLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
 
-        VkDeviceSize actualImageSize = _width * _height * _components;
+        pad_data();
+        VkDeviceSize actualImageSize = _width * _height * (_components == 1 ? 1 : 4);
 
         void* rawData;
         vkMapMemory(device, _stagingDeviceMemory, 0, actualImageSize, 0, &rawData);
         // std::memset(rawData, 0, imageSize);
-        std::memcpy(rawData, _data, actualImageSize);
+        std::memcpy(rawData, _padded_data, actualImageSize);
         vkUnmapMemory(device, _stagingDeviceMemory);
 
 
@@ -468,10 +479,37 @@ namespace elemd
             break;
         case 2:            
         case 3:            
+            _padded_data = new unsigned char[4 * _width * _height];
         case 4:
         default:
             _format = VK_FORMAT_R8G8B8A8_UNORM;
             break;
+        }
+        pad_data();
+    }
+
+    void ImageImplVulkan::pad_data()
+    {
+        if (_components == 1 || _components == 4)
+        {
+            _padded_data = _data;
+        }
+        else if (_components == 2)
+        {            
+            for (int i = 0; i < _width * _height; i++)
+            {
+                _padded_data[i * 4] = _data[i *2];
+                _padded_data[i * 4 + 1] = _data[i * 2 + 1];
+            }
+        }
+        else if (_components == 3)
+        {
+            for (int i = 0; i < _width*_height; i++)
+            {
+                _padded_data[i*4] = _data[i*3];
+                _padded_data[i*4+1] = _data[i*3+1];
+                _padded_data[i*4+2] = _data[i*3+2];
+            }
         }
     }   
 

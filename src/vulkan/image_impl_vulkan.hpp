@@ -33,6 +33,8 @@ namespace elemd
         VkFormat _format = {};
         bool _uploaded = false;
 
+        unsigned char* _padded_data = nullptr;
+
         void upload(const VkCommandPool& commandPool, const VkQueue& queue);
         void upload_update(const VkCommandPool& commandPool, const VkQueue& queue);
         void write_buffer(const VkCommandPool& commandPool, const VkQueue& queue, VkBuffer buffer);
@@ -45,6 +47,7 @@ namespace elemd
 
     private:
         void init_format();
+        void pad_data();
     };
 
 } // namespace elemd

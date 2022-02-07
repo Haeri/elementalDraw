@@ -116,10 +116,10 @@ namespace elemd
                 av_free(gl_frame);
             if (packet)
                 av_free(packet);
-            if (codec_ctx)
-                avcodec_close(codec_ctx);
-            if (fmt_ctx)
-                avformat_free_context(fmt_ctx);
+            //if (codec_ctx)
+            //    avcodec_close(codec_ctx);
+            //if (fmt_ctx)
+            //    avformat_free_context(fmt_ctx);
 
             _image->destroy();
 
