@@ -184,6 +184,7 @@ namespace elemd
         case 1:
             _type = GL_RED;
             _internal_format = GL_R16F;
+            break;
         case 2:
             _type = GL_RG;
             _internal_format = GL_RG16F;

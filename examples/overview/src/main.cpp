@@ -170,11 +170,11 @@ int main(void)
     {
         win->poll_events();
 
-        video->read_next();
-        ctx->_tmp_update_image(video->get_frame(0));
+        //video->read_next();
+       // ctx->_tmp_update_image(video->get_frame(0));
         ctx->set_fill_color({60, 60, 60});
-        ctx->draw_image(0, 0, video->get_width(), video->get_height(),
-                                video->get_frame(0), true);
+       // ctx->draw_image(0, 0, video->get_width(), video->get_height(),
+       //                         video->get_frame(0), true);
 
 
 
@@ -313,7 +313,7 @@ int main(void)
 
 
         //video->read_next();
-        ctx->draw_rounded_image(180, 550, video->get_width()/3, video->get_height()/3, video->get_frame(0), 20);
+        //ctx->draw_rounded_image(180, 550, video->get_width()/3, video->get_height()/3, video->get_frame(0), 20);
 
 
 

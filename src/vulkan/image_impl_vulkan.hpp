@@ -30,6 +30,7 @@ namespace elemd
         VkDeviceMemory _stagingDeviceMemory = {};
         VkBuffer _stagingBuffer = {};
 
+        VkFormat _format = {};
         bool _uploaded = false;
 
         void upload(const VkCommandPool& commandPool, const VkQueue& queue);
@@ -38,8 +39,12 @@ namespace elemd
         void change_layout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout);
         void generate_mipmaps(const VkCommandPool& commandPool, const VkQueue& queue, const VkFormat& format);        
 
+
         VkSampler get_sampler();
         VkImageView get_image_view();
+
+    private:
+        void init_format();
     };
 
 } // namespace elemd

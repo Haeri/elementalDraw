@@ -76,6 +76,8 @@ namespace elemd
             _name = "noname_" + std::to_string(rand() % 10000);
             _loaded = false;
         }
+
+        init_format();
     }
 
     ImageImplVulkan::ImageImplVulkan(int width, int height, int components, unsigned char* data,
@@ -93,6 +95,8 @@ namespace elemd
         {
             _mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
         }
+
+        init_format();
     }
 
     ImageImplVulkan::~ImageImplVulkan()
@@ -143,22 +147,13 @@ namespace elemd
         std::memcpy(rawData, _data, actualImageSize);
         vkUnmapMemory(device, _stagingDeviceMemory);
 
-        VkFormat format;
-        if (_components == 1)
-        {
-            format = VK_FORMAT_R8_UNORM;
-        }
-        else
-        {
-            format = VK_FORMAT_R8G8B8A8_UNORM;
-        }
 
         VkImageCreateInfo imageCreateInfo{};
         imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageCreateInfo.pNext = nullptr;
         imageCreateInfo.flags = 0;
         imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageCreateInfo.format = format;
+        imageCreateInfo.format = _format;
         imageCreateInfo.extent.width = _width;
         imageCreateInfo.extent.height = _height;
         imageCreateInfo.extent.depth = 1;
@@ -198,7 +193,7 @@ namespace elemd
         }
         if (_mipLevels > 1)
         {
-            generate_mipmaps(commandPool, queue, format);
+            generate_mipmaps(commandPool, queue, _format);
         }
 
         VkImageViewCreateInfo imageViewCreateInfo{};
@@ -207,7 +202,7 @@ namespace elemd
         imageViewCreateInfo.flags = 0;
         imageViewCreateInfo.image = _image;
         imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        imageViewCreateInfo.format = format;
+        imageViewCreateInfo.format = _format;
         imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
         imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
         imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -255,6 +250,7 @@ namespace elemd
     void ImageImplVulkan::upload_update(const VkCommandPool& commandPool, const VkQueue& queue)
     {
         VkDevice device = VulkanSharedInfo::getInstance()->device;
+        //_imageLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
 
         VkDeviceSize actualImageSize = _width * _height * _components;
 
@@ -264,15 +260,6 @@ namespace elemd
         std::memcpy(rawData, _data, actualImageSize);
         vkUnmapMemory(device, _stagingDeviceMemory);
 
-        VkFormat format;
-        if (_components == 1)
-        {
-            format = VK_FORMAT_R8_UNORM;
-        }
-        else
-        {
-            format = VK_FORMAT_R8G8B8A8_UNORM;
-        }
 
         change_layout(commandPool, queue, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         write_buffer(commandPool, queue, _stagingBuffer);
@@ -283,7 +270,7 @@ namespace elemd
         }
         if (_mipLevels > 1)
         {
-            generate_mipmaps(commandPool, queue, format);
+            generate_mipmaps(commandPool, queue, _format);
         }
     }
 
@@ -321,12 +308,22 @@ namespace elemd
         VkImageMemoryBarrier imageMemoryBarrier{};
         imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         imageMemoryBarrier.pNext = nullptr;
-        if (_imageLayout == VK_IMAGE_LAYOUT_PREINITIALIZED && layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        if (_imageLayout == VK_IMAGE_LAYOUT_PREINITIALIZED &&
+            layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
         {
             imageMemoryBarrier.srcAccessMask = 0;
             imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        }
+        else if (_imageLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
+                 layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+            sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
         }
         else if (_imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
@@ -449,7 +446,8 @@ namespace elemd
                              &barrier);
 
         vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
-    }   
+    }
+
 
     VkSampler ImageImplVulkan::get_sampler()
     {
@@ -461,6 +459,21 @@ namespace elemd
         return _imageView;
     }
 
+    void ImageImplVulkan::init_format()
+    {
+        switch (_components)
+        {
+        case 1:
+            _format = VK_FORMAT_R8_UNORM;
+            break;
+        case 2:            
+        case 3:            
+        case 4:
+        default:
+            _format = VK_FORMAT_R8G8B8A8_UNORM;
+            break;
+        }
+    }   
 
 
 } // namespace elemd
