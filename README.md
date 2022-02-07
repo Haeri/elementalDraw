@@ -1,9 +1,8 @@
 # Elemental Draw
 
-![C++ Builder](https://github.com/Haeri/ElementalDraw/workflows/C++%20Builder/badge.svg)
+![build](https://github.com/Haeri/ElementalDraw/workflows/C++%20Builder/badge.svg)
 ![Version](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/Haeri/ElementalDraw/master/vcpkg.json&label=version&query=$['version-string']&color=blue)
 [![License](https://img.shields.io/github/license/Haeri/ElementalDraw.svg)](https://github.com/Haeri/ElementalDraw/blob/master/LICENSE)
-![Size](https://img.shields.io/github/languages/code-size/haeri/elementalDraw)
 
 Portable C++ canvas library with a Vulkan (Windows, Linux) and OpenGL (MacOS) backend.
 
@@ -26,7 +25,7 @@ cd ElementalDraw
 git clone https://github.com/Haeri/ElementalDraw.git  --recursive
 cd ElementalDraw
 sudo apt update
-sudo apt install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev cmake curl unzip tar
+sudo apt install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev cmake curl unzip tar nasm
 ./scripts/generate_project_linux.sh
 ```
 
@@ -35,6 +34,7 @@ sudo apt install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev cma
 ```bash
 git clone https://github.com/Haeri/ElementalDraw.git  --recursive
 cd ElementalDraw
+brew install nasm
 ./scripts/generate_project_mac.sh
 ```
 
@@ -43,7 +43,8 @@ Dependencies will be automatically managed through vcpkg if this repo is cloned 
 - [glfw3](https://www.glfw.org/)
 - [glslang](https://github.com/KhronosGroup/glslang)
 - [stb](https://github.com/nothings/stb)
-- [freetype](https://www.freetype.org/)
+- [freetype](https://www.freetype.org)
+- [ffmpeg](https://www.ffmpeg.org)
 
 
 ## Simple API

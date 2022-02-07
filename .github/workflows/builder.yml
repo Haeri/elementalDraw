@@ -59,7 +59,7 @@ jobs:
     - name: Setup Environment
       run: |
         sudo apt update
-        sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
+        sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev nasm
     - name: Generate Solution
       run: ./scripts/generate_project_linux.sh -${{ matrix.type }}
     - name: Debug
@@ -96,6 +96,8 @@ jobs:
       uses: actions/checkout@v2
       with:
         submodules: 'true'
+    - name: Setup Environment
+      run: brew install nasm
     - name: Generate Solution
       run: ./scripts/generate_project_mac.sh -${{ matrix.type }}
     - name: Debug
