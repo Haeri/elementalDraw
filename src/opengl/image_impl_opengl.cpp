@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <cmath>
-#define STB_IMAGE_IMPLEMENTATION
+
 #include <stb_image.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
@@ -13,29 +13,38 @@ namespace elemd
 {
     /* ------------------------ DOWNCAST ------------------------ */
 
-    inline imageImplOpengl* getImpl(Image* ptr)
+    inline ImageImplOpengl* getImpl(Image* ptr)
     {
-        return (imageImplOpengl*)ptr;
+        return (ImageImplOpengl*)ptr;
     }
-    inline const imageImplOpengl* getImpl(const Image* ptr)
+    inline const ImageImplOpengl* getImpl(const Image* ptr)
     {
-        return (const imageImplOpengl*)ptr;
+        return (const ImageImplOpengl*)ptr;
     }
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
     Image* Image::create(std::string file_path, ImageConfig imageConfig)
     {
-        return new imageImplOpengl(file_path, imageConfig);
+        return new ImageImplOpengl(file_path, imageConfig);
     }
 
     Image* Image::create(int width, int height, int components, unsigned char* data,
                          ImageConfig imageConfig)
     {
-        return new imageImplOpengl(width, height, components, data, imageConfig);
+        return new ImageImplOpengl(width, height, components, data, imageConfig);
     }
 
-    imageImplOpengl::imageImplOpengl(std::string file_path, ImageConfig imageConfig)
+    void Image::write_to_file(std::string file_path)
+    {
+        if (stbi_write_png((file_path + "/out_" + _name + ".png").c_str(), _width, _height,
+                           _components, _data, 0) == 0)
+        {
+            std::cerr << "error during saving" << std::endl;
+        }
+    }
+
+    ImageImplOpengl::ImageImplOpengl(std::string file_path, ImageConfig imageConfig)
     {
         _imageConfig = imageConfig;
         stbi_uc* data =
@@ -62,17 +71,15 @@ namespace elemd
             _width = 1;
             _height = 1;
             _components = 4;
-            _data = new unsigned char[4];
-            _data[0] = 255;
-            _data[1] = 0;
-            _data[2] = 255;
-            _data[3] = 255;
+            _data = _dummy_data;
             _name = "noname_" + std::to_string(rand() % 10000);
             _loaded = false;
         }
+
+        init_format();
     }
 
-    imageImplOpengl::imageImplOpengl(int width, int height, int components, unsigned char* data,
+    ImageImplOpengl::ImageImplOpengl(int width, int height, int components, unsigned char* data,
                                      ImageConfig imageConfig)
     {
         _imageConfig = imageConfig;
@@ -88,19 +95,16 @@ namespace elemd
             _mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
         }
 
+        init_format();
     }
 
-    imageImplOpengl::~imageImplOpengl()
+    ImageImplOpengl::~ImageImplOpengl()
     {        
         if (_loaded)
         {
             stbi_image_free(_data);
 
             _loaded = false;
-        }
-        else if (_data != nullptr)
-        {
-            delete[] _data;
         }
 
         if (_uploaded)
@@ -110,7 +114,7 @@ namespace elemd
         }
     }
 
-    void imageImplOpengl::upload()
+    void ImageImplOpengl::upload()
     {
         if (_data == nullptr)
             return;
@@ -118,7 +122,7 @@ namespace elemd
         glGenTextures(1, &_image);
         glBindTexture(GL_TEXTURE_2D, _image);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _width, _height, 0, GL_RGBA,
+        glTexImage2D(GL_TEXTURE_2D, 0, _internal_format, _width, _height, 0, _type,
                      GL_UNSIGNED_BYTE, _data);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -161,18 +165,40 @@ namespace elemd
         _uploaded = true;
     }
 
-    void imageImplOpengl::bind(GLuint texture_unit)
+    void ImageImplOpengl::upload_update()
+    {
+        glBindTexture(GL_TEXTURE_2D, _image);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, _type, GL_UNSIGNED_BYTE, _data);
+    }
+
+    void ImageImplOpengl::bind(GLuint texture_unit)
     {
         glActiveTexture(GL_TEXTURE0 + texture_unit);
         glBindTexture(GL_TEXTURE_2D, _image);
     }
 
-    void imageImplOpengl::writeToFile()
+    void ImageImplOpengl::init_format()
     {
-        if (stbi_write_png(("out_" +_name + ".png").c_str(), _width, _height, _components, _data, 0) == 0)
+        switch (_components)
         {
-            std::cerr << "error during saving" << std::endl;
+        case 1:
+            _type = GL_RED;
+            _internal_format = GL_R16F;
+            break;
+        case 2:
+            _type = GL_RG;
+            _internal_format = GL_RG16F;
+            break;
+        case 3:
+            _type = GL_RGB;
+            _internal_format = GL_RGB16F;
+            break;
+        case 4:
+        default:
+            _type = GL_RGBA;
+            _internal_format = GL_RGBA16F;
+            break;
         }
-    }
+    }    
 
 } // namespace elemd

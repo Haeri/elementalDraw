@@ -367,6 +367,7 @@ namespace elemd
         glfwDestroyWindow(_glfw_window);
         --_windowCount;
 
+        Image::cleanup();
         _context->destroy();
 
         for (auto& cursor : _default_cursors)

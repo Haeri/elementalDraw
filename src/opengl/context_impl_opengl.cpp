@@ -116,7 +116,7 @@ namespace elemd
     }
 
     // VK_PRIMITIVE_TOPOLOGY_POINT_LIST
-    void Context::draw_pixel(float x, float y)
+    void Context::draw_pixel(float x, float y, color color)
     {
         std::cout << "WARNING: Context::draw_pixel is not implemented!\n";
     }
@@ -316,7 +316,7 @@ namespace elemd
         float initialX = x;
         float scale = (float)_font_size / LOADED_HEIGHT;
         std::map<unsigned int, character> characters = _font->get_characters();
-        imageImplOpengl* img = (imageImplOpengl*)_font->get_image();
+        ImageImplOpengl* img = (ImageImplOpengl*)_font->get_image();
 
         for (char32_t &token : text)
         {
@@ -403,7 +403,7 @@ namespace elemd
                                      float src_height, bool tint)
     {
         ContextImplOpengl* impl = getImpl(this);
-        imageImplOpengl* img = (imageImplOpengl*)image;
+        ImageImplOpengl* img = (ImageImplOpengl*)image;
 
         x += impl->_window->_x_offset;
         y += impl->_window->_y_offset;
@@ -725,7 +725,7 @@ namespace elemd
     void Context::_tmp_register_image(Image* image)
     {
         ContextImplOpengl* impl = getImpl(this);
-        imageImplOpengl* img = (imageImplOpengl*)image;
+        ImageImplOpengl* img = (ImageImplOpengl*)image;
         if (!img->_uploaded)
         {
             img->upload();
@@ -745,12 +745,12 @@ namespace elemd
     void Context::_tmp_register_font(Font* font)
     {
         ContextImplOpengl* impl = getImpl(this);
-        fontImplOpengl* fiv = (fontImplOpengl*)font;
+        FontImplOpengl* fiv = (FontImplOpengl*)font;
         if (!fiv->_uploaded)
         {
             fiv->upload();
             
-            imageImplOpengl* img = (imageImplOpengl*)font->get_image();
+            ImageImplOpengl* img = (ImageImplOpengl*)font->get_image();
             if (impl->images.size() > impl->texture_array_size)
             {
                 img->_sampler_index = 0;
@@ -762,6 +762,12 @@ namespace elemd
                 impl->images.push_back(img);
             }
         }
+    }
+
+    void Context::_tmp_update_image(Image* image)
+    {
+        ImageImplOpengl* img = (ImageImplOpengl*)image;   
+        img->upload_update();
     }
 
     void Context::_tmp_prepare()
@@ -854,7 +860,7 @@ namespace elemd
         buffer[1] = 0;
         buffer[2] = 0;
         buffer[3] = 0;
-        dummy = new imageImplOpengl(1, 1, 4, buffer, {});
+        dummy = new ImageImplOpengl(1, 1, 4, buffer, {});
         dummy->upload();
     }
 

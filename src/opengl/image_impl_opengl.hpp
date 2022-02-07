@@ -10,24 +10,29 @@
 
 namespace elemd
 {
-    class imageImplOpengl : public Image
+    class ImageImplOpengl : public Image
     {
     public:
-        imageImplOpengl(std::string file_path, ImageConfig imageConfig);
-        imageImplOpengl(int width, int height, int components, unsigned char* data,
+        ImageImplOpengl(std::string file_path, ImageConfig imageConfig);
+        ImageImplOpengl(int width, int height, int components, unsigned char* data,
                         ImageConfig imageConfig);
-        ~imageImplOpengl();
+        ~ImageImplOpengl();
 
         GLuint _image;
         int _sampler_index = -1;
         uint32_t _mipLevels = 1;
 
+        GLenum _type;
+        GLint _internal_format;
+
         bool _uploaded = false;
 
         void upload();
+        void upload_update();
         void bind(GLuint texture_unit);
-        
-        void writeToFile();
+
+    private:
+        void init_format();
     };
 
 } // namespace elemd

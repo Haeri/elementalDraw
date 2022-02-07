@@ -13,6 +13,7 @@ else()
     set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
 endif()
 
+
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
@@ -69,7 +70,6 @@ message("DYNAMIC_RUNTIME_LIBRARY: ${DYNAMIC_RUNTIME_LIBRARY}")
 message("CMAKE_MSVC_RUNTIME_LIBRARY: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
 
 
-
 # ---------------- DEPENDENCIES ---------------------#
 
 if(NOT ANDROID)
@@ -82,7 +82,11 @@ endif()
 find_package(freetype CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
 
-
+# ffmpeg
+find_package(ffmpeg REQUIRED)
+target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
+target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARIES})
 
 
 # ---------------- EXAMPLES ---------------------#

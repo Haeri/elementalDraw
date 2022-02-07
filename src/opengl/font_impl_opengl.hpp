@@ -8,12 +8,12 @@
 
 namespace elemd
 {
-    class fontImplOpengl : public Font
+    class FontImplOpengl : public Font
     {
     public:
-        fontImplOpengl(std::string file_path);
-        fontImplOpengl(unsigned char* buffer, size_t size);
-        ~fontImplOpengl();
+        FontImplOpengl(std::string file_path);
+        FontImplOpengl(unsigned char* buffer, size_t size);
+        ~FontImplOpengl();
 
         bool _loaded = false;
         bool _uploaded = false;

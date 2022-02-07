@@ -7,6 +7,7 @@
 
 #include "color.hpp"
 #include "image.hpp"
+#include "video.hpp"
 #include "font.hpp"
 
 namespace elemd
@@ -37,7 +38,7 @@ namespace elemd
         void fill_polygon(float x, float y);
 
         // TODO: To implement
-        void draw_pixel(float x, float y);
+        void draw_pixel(float x, float y, color color);
         void draw_text(float x, float y, std::string text);
         void draw_text(float x, float y, std::u32string text);
         void draw_image(float x, float y, float width, float height, Image* image, bool tint = false);
@@ -73,9 +74,6 @@ namespace elemd
         // TODO: To implement
         void change_layer();
 
-        // TODO: To implement
-        void add_mask();
-
         void set_rect_mask(float x, float y, float width, float height);
         void remove_rect_mask();
 
@@ -93,6 +91,8 @@ namespace elemd
 
         void _tmp_register_image(Image* image);
         void _tmp_register_font(Font* font);
+        void _tmp_update_image(Image* image);
+
         void _tmp_prepare();
 
         virtual void destroy() = 0;

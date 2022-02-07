@@ -10,43 +10,43 @@ namespace elemd
 {
     /* ------------------------ DOWNCAST ------------------------ */
 
-    inline fontImplVulkan* getImpl(Font* ptr)
+    inline FontImplVulkan* getImpl(Font* ptr)
     {
-        return (fontImplVulkan*)ptr;
+        return (FontImplVulkan*)ptr;
     }
-    inline const fontImplVulkan* getImpl(const Font* ptr)
+    inline const FontImplVulkan* getImpl(const Font* ptr)
     {
-        return (const fontImplVulkan*)ptr;
+        return (const FontImplVulkan*)ptr;
     }
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
 
     Font* Font::create(std::string file_path)
     {
-        return new fontImplVulkan(file_path);
+        return new FontImplVulkan(file_path);
     }
 
     Font* Font::create(unsigned char* buffer, size_t size)
     {
-        return new fontImplVulkan(buffer, size);
+        return new FontImplVulkan(buffer, size);
     }
 
 
-    fontImplVulkan::fontImplVulkan(std::string file_path)
+    FontImplVulkan::FontImplVulkan(std::string file_path)
     {
         load_from_file(file_path);
 
         _loaded = true;
     }
 
-    fontImplVulkan::fontImplVulkan(unsigned char* buffer, size_t size)
+    FontImplVulkan::FontImplVulkan(unsigned char* buffer, size_t size)
     {
         load_from_memory(buffer, size);
 
         _loaded = true;
     }
 
-    fontImplVulkan::~fontImplVulkan()
+    FontImplVulkan::~FontImplVulkan()
     {
         if (_uploaded)
         {
@@ -54,12 +54,12 @@ namespace elemd
         }
     }
 
-    void fontImplVulkan::upload(const VkCommandPool& commandPool, const VkQueue& queue)
+    void FontImplVulkan::upload(const VkCommandPool& commandPool, const VkQueue& queue)
     {
         if (!_loaded)
             return;
 
-        imageImplVulkan* iiv = (imageImplVulkan*)_texture_atlas;
+        ImageImplVulkan* iiv = (ImageImplVulkan*)_texture_atlas;
         iiv->upload(commandPool, queue);
 
         _uploaded = true;

@@ -8,6 +8,7 @@
   	"glslang", 
   	"stb", 
   	"freetype",
+    "ffmpeg",
     {
       "name": "glfw3",
       "platform": "!android"
