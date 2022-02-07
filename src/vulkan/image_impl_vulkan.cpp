@@ -496,20 +496,30 @@ namespace elemd
         }
         else if (_components == 2)
         {            
+            // Copy 2 components. Third and forht components are going to be 0 by default
+
             for (int i = 0; i < _width * _height; i++)
             {
-                _padded_data[i * 4] = _data[i *2];
-                _padded_data[i * 4 + 1] = _data[i * 2 + 1];
+                *(uint16_t*)&_padded_data[i * 4] = *(uint16_t*)&_data[i * 2];
             }
         }
         else if (_components == 3)
         {
-            for (int i = 0; i < _width*_height; i++)
+            // Copy 4 components and replace the forth one
+            // Only go up to -1 since the last one would pick entry out of bounds
+
+            for (int i = 0; i < _width*_height-1; i++)
             {
-                _padded_data[i*4] = _data[i*3];
-                _padded_data[i*4+1] = _data[i*3+1];
-                _padded_data[i*4+2] = _data[i*3+2];
+                *(uint32_t*)&_padded_data[i * 4] = *(uint32_t*)&_data[i * 3];
+                _padded_data[i * 4 + 3] = 255;
             }
+
+            // Do the last one manually
+            int last = _width * _height -1;
+            _padded_data[last * 4] = _data[last * 3];
+            _padded_data[last * 4 + 1] = _data[last * 3 + 1];
+            _padded_data[last * 4 + 2] = _data[last * 3 + 2];
+            _padded_data[last * 4 + 3] = 255;
         }
     }   
 
