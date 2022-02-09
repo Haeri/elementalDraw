@@ -27,12 +27,11 @@ namespace elemd
 
         AVFormatContext* format_context = nullptr;
         int video_stream_index = -1;
-        //AVStream* video_stream = nullptr;
         AVCodecContext* codec_context = nullptr;
         AVCodec* codec = nullptr;
         AVCodecParameters* codec_parameters = nullptr;
         AVPacket* packet = nullptr;
-        //AVFrame* av_frame = nullptr;
+        AVFrame* av_frame = nullptr;
         AVFrame* gl_frame = nullptr;
         SwsContext* conv_ctx = nullptr;
     };
