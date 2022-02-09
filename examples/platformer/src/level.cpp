@@ -72,14 +72,14 @@ void Level::loadLevelFile(std::string filePath, Player* p)
         {
             std::getline(levelFile, line);
 
-            char* token = strtok(line.data(), ", ");
+            char* token = strtok(line.data(), " ");
             _data[y * _cols] = *token;
-            std::cout << token << /*"(" << (y * _cols) << ")" <<*/ ", ";
+            std::cout << token << /*"(" << (y * _cols) << ")" <<*/ " ";
             
 
             for (int x = 1; x < _cols; ++x)
             {
-                token = strtok(NULL, ", ");
+                token = strtok(NULL, " ");
                 _data[y * _cols + x] = *token;
 
                 if (*token == '$')
@@ -88,7 +88,7 @@ void Level::loadLevelFile(std::string filePath, Player* p)
                     spawned = true;
                 }
 
-                std::cout << token << /*"(" << (y * _cols + x) << ")" <<*/ ", ";
+                std::cout << token << /*"(" << (y * _cols + x) << ")" <<*/ " ";
                 
             }
             std::cout << std::endl;

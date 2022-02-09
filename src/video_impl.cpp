@@ -30,13 +30,10 @@ namespace elemd
 
     VideoImpl::VideoImpl(std::string file_path)
     {
-
-        // initialize libav
-        av_register_all();
-        avformat_network_init();
+        format_context = avformat_alloc_context(); 
 
         // open video
-        if (avformat_open_input(&fmt_ctx, file_path.c_str(), NULL, NULL) < 0)
+        if (avformat_open_input(&format_context, file_path.c_str(), NULL, NULL) < 0)
         {
             std::cout << "failed to open input" << std::endl;
             // clearAppData(&data);
@@ -44,7 +41,7 @@ namespace elemd
         }
 
         // find stream info
-        if (avformat_find_stream_info(fmt_ctx, NULL) < 0)
+        if (avformat_find_stream_info(format_context, NULL) < 0)
         {
             std::cout << "failed to get stream info" << std::endl;
             // clearAppData(&data);
@@ -52,54 +49,67 @@ namespace elemd
         }
 
         // find the video stream
-        for (unsigned int i = 0; i < fmt_ctx->nb_streams; ++i)
+        for (unsigned int i = 0; i < format_context->nb_streams; ++i)
         {
-            if (fmt_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+            AVCodecParameters* local_codec_parameters = format_context->streams[i]->codecpar;     
+            AVCodec* local_codec = avcodec_find_decoder(local_codec_parameters->codec_id);
+
+            if (local_codec == nullptr)
             {
-                stream_idx = i;
-                break;
+                continue;
+            }
+
+            if (format_context->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+            {
+                if (video_stream_index == -1)
+                {
+                    video_stream_index = i;
+                    codec = local_codec;
+                    codec_parameters = local_codec_parameters;
+                }
             }
         }
 
-        if (stream_idx == -1)
+        if (video_stream_index == -1)
         {
             std::cout << "failed to find video stream" << std::endl;
-            //clearAppData(&data);
             return;
         }
 
-        video_stream = fmt_ctx->streams[stream_idx];
-        codec_ctx = video_stream->codec;
+        codec_context = avcodec_alloc_context3(codec);
 
-        // find the decoder
-        decoder = avcodec_find_decoder(codec_ctx->codec_id);
-        if (decoder == NULL)
+        if(avcodec_parameters_to_context(codec_context, codec_parameters) < 0)
         {
-            std::cout << "failed to find decoder" << std::endl;
-            //clearAppData(&data);
+            std::cout << "failed to copy codec params to codec context" << std::endl;
             return;
         }
 
-        // open the decoder
-        if (avcodec_open2(codec_ctx, decoder, NULL) < 0)
+        // open the codec
+        if (avcodec_open2(codec_context, codec, NULL) < 0)
         {
             std::cout << "failed to open codec" << std::endl;
-            //clearAppData(&data);
             return;
         }
 
         // allocate the video frames
-        av_frame = av_frame_alloc();
+        //av_frame = av_frame_alloc();
         gl_frame = av_frame_alloc();
-        int size =
-            avpicture_get_size(AV_PIX_FMT_RGB24, codec_ctx->width, codec_ctx->height);
-        uint8_t* internal_buffer = (uint8_t*)av_malloc(size * sizeof(uint8_t));
-        avpicture_fill((AVPicture*)gl_frame, internal_buffer, AV_PIX_FMT_RGB24,
-                       codec_ctx->width, codec_ctx->height);
-        packet = (AVPacket*)av_malloc(sizeof(AVPacket));
 
+        packet = av_packet_alloc();
+        if (!packet)
+        {
+            std::cout << "failed to create packet" << std::endl;
+            return;
+        }
 
-        _image = elemd::Image::create(codec_ctx->width, codec_ctx->height, 3, internal_buffer);
+       	int frame_bytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, codec_context->width,
+                                                   codec_context->height, 16);
+        uint8_t* internal_buffer = (uint8_t*)av_malloc(frame_bytes * sizeof(uint8_t));
+        av_image_fill_arrays(gl_frame->data, gl_frame->linesize, internal_buffer,
+                             AV_PIX_FMT_RGB24, codec_context->width, codec_context->height, 1);
+        
+
+        _image = elemd::Image::create(codec_context->width, codec_context->height, 3, internal_buffer);
 
         _loaded = true;
     }
@@ -108,18 +118,17 @@ namespace elemd
     {
         if (_loaded)
         {
-            avformat_close_input(&fmt_ctx);
+            avformat_close_input(&format_context);
 
-            if (av_frame)
-                av_free(av_frame);
-            if (gl_frame)
-                av_free(gl_frame);
             if (packet)
-                av_free(packet);
-            //if (codec_ctx)
-            //    avcodec_close(codec_ctx);
-            //if (fmt_ctx)
-            //    avformat_free_context(fmt_ctx);
+                av_packet_free(&packet);
+            //if (av_frame)
+                //av_frame_free(&av_frame);
+            if (gl_frame)
+                av_frame_free(&gl_frame);
+            if (codec_context)
+                avcodec_free_context(&codec_context);
+
 
             _image->destroy();
 
@@ -127,50 +136,95 @@ namespace elemd
         }
     }
 
+    int decode_packet(elemd::Image* image, AVPacket* pPacket, AVCodecContext* pCodecContext, AVFrame* pFrame)
+    {
+        // Supply raw packet data as input to a decoder
+        // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga58bc4bf1e0ac59e27362597e467efff3
+        int response = avcodec_send_packet(pCodecContext, pPacket);
+
+        if (response < 0)
+        {
+            std::cout << "Error while sending a packet to the decoder\n";
+            return response;
+        }
+
+        while (response >= 0)
+        {
+            // Return decoded output data (into a frame) from a decoder
+            // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga11e6542c4e66d3028668788a1a74217c
+            response = avcodec_receive_frame(pCodecContext, pFrame);
+            if (response == AVERROR(EAGAIN) || response == AVERROR_EOF)
+            {
+                break;
+            }
+            else if (response < 0)
+            {
+                std::cout << "Error while receiving a frame from the decoder\n";
+                return response;
+            }
+
+            if (response >= 0)
+            {
+                /*                std::cout << "Frame %d (type=%c, size=%d bytes, format=%d) pts %d key_frame %d [DTS %d]",
+                        pCodecContext->frame_number, av_get_picture_type_char(pFrame->pict_type),
+                        pFrame->pkt_size, pFrame->format, pFrame->pts, pFrame->key_frame,
+                        pFrame->coded_picture_number);
+                        */
+
+           
+                // save a grayscale frame into a .pgm file
+                image->update_data(pFrame->data[0]);
+
+                //save_gray_frame(pFrame->data[0], pFrame->linesize[0], pFrame->width, pFrame->height,
+                //                frame_filename);
+            }
+        }
+        return 0;
+    }
+
     void Video::read_next()
     {
         VideoImpl* impl = getImpl(this);
+
+        int response = 0;
+
         do
         {
-            if (av_read_frame(impl->fmt_ctx, impl->packet) < 0)
+
+            if (impl->packet->stream_index == impl->video_stream_index)
             {
-                av_free_packet(impl->packet);
-                return;
-            }
+                response =
+                    decode_packet(impl->_image, impl->packet, impl->codec_context, impl->gl_frame);
 
-            if (impl->packet->stream_index == impl->stream_idx)
-            {
-                int frame_finished = 0;
+                if (response < 0)
+                    break;
 
-                if (avcodec_decode_video2(impl->codec_ctx, impl->av_frame, &frame_finished,
-                                          impl->packet) < 0)
-                {
-                    av_free_packet(impl->packet);
-                    return;
-                }
+                //_image->update_data(impl->gl_frame->data[0]);
 
+                /*
                 if (frame_finished)
                 {
                     if (!impl->conv_ctx)
                     {
                         impl->conv_ctx =
-                            sws_getContext(impl->codec_ctx->width, impl->codec_ctx->height,
-                                           impl->codec_ctx->pix_fmt, impl->codec_ctx->width,
-                                           impl->codec_ctx->height,
+                            sws_getContext(impl->codec_context->width, impl->codec_context->height,
+                                           impl->codec_context->pix_fmt, impl->codec_context->width,
+                                           impl->codec_context->height,
                             AV_PIX_FMT_RGB24,
                                            SWS_BICUBIC, NULL, NULL, NULL);
                     }
 
                     sws_scale(impl->conv_ctx, impl->av_frame->data, impl->av_frame->linesize, 0,
-                              impl->codec_ctx->height, impl->gl_frame->data,
+                              impl->codec_context->height, impl->gl_frame->data,
                               impl->gl_frame->linesize);
 
-                    _image->update_data(impl->gl_frame->data[0]);
-                   
+
+
                 }
+                */
             }
 
-            av_free_packet(impl->packet);
-        } while (impl->packet->stream_index != impl->stream_idx);
+            av_packet_unref(impl->packet);
+        } while (av_read_frame(impl->format_context, impl->packet));
     }
 } // namespace elemd

@@ -11,6 +11,7 @@ extern "C"
 #include <inttypes.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 }
 
@@ -24,13 +25,14 @@ namespace elemd
 
         bool _loaded = false;
 
-        AVFormatContext* fmt_ctx = nullptr;
-        int stream_idx = -1;
-        AVStream* video_stream = nullptr;
-        AVCodecContext* codec_ctx = nullptr;
-        AVCodec* decoder = nullptr;
+        AVFormatContext* format_context = nullptr;
+        int video_stream_index = -1;
+        //AVStream* video_stream = nullptr;
+        AVCodecContext* codec_context = nullptr;
+        AVCodec* codec = nullptr;
+        AVCodecParameters* codec_parameters = nullptr;
         AVPacket* packet = nullptr;
-        AVFrame* av_frame = nullptr;
+        //AVFrame* av_frame = nullptr;
         AVFrame* gl_frame = nullptr;
         SwsContext* conv_ctx = nullptr;
     };

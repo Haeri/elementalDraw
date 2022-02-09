@@ -23,6 +23,9 @@ int main()
 
     elemd::ImageConfig imgc = {false, elemd::NEAREST};
 
+    elemd::Font* silkscreen = elemd::Font::create("./res/font/silkscreen/slkscr.ttf");
+    ctx->_tmp_register_font(silkscreen);
+
     // load image
     elemd::Image* mapTileMap = elemd::Image::create("./res/tiles_packed.png", imgc);
     ctx->_tmp_register_image(mapTileMap);
@@ -32,6 +35,7 @@ int main()
 
     ctx->_tmp_prepare();
 
+    ctx->set_font(silkscreen);
     ctx->set_clear_color({223, 246, 245, 255});
 
     Player* player = new Player(ctx, characterTileMap);
@@ -96,7 +100,7 @@ int main()
 
     long long frame_count = -1;
 
-    elemd::vec2 cam = {0, 0};
+    elemd::vec2 cam = {0, 0};    
 
     ctx->draw_frame();
 
@@ -173,7 +177,7 @@ int main()
         player->render(cam, delta_time);
 
         // Draw Info
-        ctx->set_font_size(14);
+        ctx->set_font_size(18);
         ctx->set_fill_color({30, 30, 30, 255});
         int dth = (int)(delta_time * 1000) * 100.0f;
         int dtfr = (int)(delta_time * 100000) - dth;
@@ -187,6 +191,7 @@ int main()
     delete player;
 
     // Cleanup
+    silkscreen->destroy();
     mapTileMap->destroy();
     characterTileMap->destroy();
     win->destroy();
