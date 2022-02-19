@@ -7,7 +7,6 @@
 
 #include "color.hpp"
 #include "image.hpp"
-#include "video.hpp"
 #include "font.hpp"
 
 namespace elemd

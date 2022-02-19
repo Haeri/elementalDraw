@@ -40,9 +40,6 @@ int main(void)
         elemd::Image::create(gradient_width, gradient_height, 4, gradient_data);
     ctx->_tmp_register_image(gradient);
 
-    // Load video
-    elemd::Video* video = elemd::Video::create("./res/waves.mp4");
-    ctx->_tmp_register_image(video->get_frame(0));
 
     // Load fonts
     elemd::Font* monserat_black = elemd::Font::create("./res/font/Montserrat-Black.ttf");
@@ -169,14 +166,6 @@ int main(void)
     while (win->is_running())
     {
         win->poll_events();
-
-        video->read_next();
-        ctx->_tmp_update_image(video->get_frame(0));
-        ctx->set_fill_color({60, 60, 60});
-        ctx->draw_image(0, 0, video->get_width(), video->get_height(),
-                                video->get_frame(0), true);
-
-
 
         // Text
         ctx->set_fill_color(white);
@@ -309,12 +298,7 @@ int main(void)
             gradient_index += 4;
             gradient->update_data(gradient_data);
             ctx->_tmp_update_image(gradient);
-        }
-
-
-        video->read_next();
-        ctx->draw_rounded_image(180, 550, video->get_width()/3, video->get_height()/3, video->get_frame(0), 20);
-
+        }        
 
 
         ctx->draw_frame();
@@ -327,7 +311,6 @@ int main(void)
     // Cleanup
     icon_font->destroy();
     gradient->destroy();
-    video->destroy();
     monserat_black->destroy();
     monserat_light->destroy();
     anim->destroy();

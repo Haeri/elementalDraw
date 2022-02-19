@@ -1,7 +1,6 @@
 ﻿#include <elemd/color.hpp>
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
-#include <elemd/video.hpp>
 #include <math.h> 
 #include <algorithm>
 #include <vector>

@@ -201,4 +201,5 @@ namespace elemd
             av_seek_frame(impl->format_context, impl->video_stream_index, 0, AVSEEK_FLAG_FRAME);
         }
     }
+
 } // namespace elemd

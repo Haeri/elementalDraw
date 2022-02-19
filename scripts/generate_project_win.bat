@@ -37,6 +37,7 @@ cmake .. ^
 	-DVCPKG_TARGET_TRIPLET="%triplet_value%" ^
 	-DVCPKG_OVERLAY_PORTS="%root_path%\external\custom-ports" ^
 	-DCMAKE_TOOLCHAIN_FILE="%root_path%\external\vcpkg\scripts\buildsystems\vcpkg.cmake" %build_type%
+::	-DVCPKG_MANIFEST_FEATURES="video"
 set /a "err=%err%+%errorlevel%"
 
 

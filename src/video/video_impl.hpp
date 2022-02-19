@@ -1,7 +1,7 @@
 #ifndef ELEMD_VIDEO_IMPL_HPP
 #define ELEMD_VIDEO_IMPL_HPP
 
-#include "elemd/video.hpp"
+#include "elemd/video/video.hpp"
 
 #include <map>
 #include <string>

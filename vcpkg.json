@@ -3,12 +3,19 @@
   "version-string": "0.1.2",
   "homepage": "https://github.com/Haeri/ElementalDraw",
   "description": "Portable C++ canvas library with a Vulkan backend",
+  "features": {
+    "video": {
+      "description": "Enable video loading and playyback with ffmpeg",
+      "dependencies": [
+        "ffmpeg"
+      ]
+    }
+  },
   "dependencies": 
   [  	 
   	"glslang", 
-  	"stb", 
-  	"freetype",
-    "ffmpeg",
+  	"stb",
+    "freetype",    
     {
       "name": "glfw3",
       "platform": "!android"

@@ -13,15 +13,21 @@ else()
     set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
 endif()
 
+if(DEFINED VCPKG_MANIFEST_FEATURES)
+ if(VCPKG_MANIFEST_FEATURES STREQUAL "video")
+    set(VCPKG_VIDEO_FEATURE TRUE)
+ endif()
+endif()
+
 
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
-option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
 option(DYNAMIC_RUNTIME_LIBRARY "Set runtime library to dynamic" ${BUILD_SHARED_LIBS})
-set(ELEMD_RENDERING_BACKEND ${ELEMD_DEFAULT_RENDERING_BACKEND} CACHE STRING "Choose Backend (vulkan, opengl)")
-string(TOUPPER ${ELEMD_RENDERING_BACKEND} ELEMD_RENDERING_BACKEND_UPPER)
+option(ELEMD_VIDEO "Enable video loading and playyback with ffmpeg" ${VCPKG_VIDEO_FEATURE})
+option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
 
 # Settings
+set(ELEMD_RENDERING_BACKEND ${ELEMD_DEFAULT_RENDERING_BACKEND} CACHE STRING "Choose Backend (vulkan, opengl)")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -30,6 +36,7 @@ set(CMAKE_VISIBILITY_INLINE_HIDDEN YES)
 # Enable folder view in solution explorer
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+string(TOUPPER ${ELEMD_RENDERING_BACKEND} ELEMD_RENDERING_BACKEND_UPPER)
 add_compile_definitions("ELEMD_RENDERING_BACKEND_${ELEMD_RENDERING_BACKEND_UPPER}")
 
 file(GLOB SOURCE_FILES
@@ -41,14 +48,23 @@ file(GLOB_RECURSE SOURCE_FILES
     src/${ELEMD_RENDERING_BACKEND}/*
 )
 
+if(ELEMD_VIDEO)
+    file(GLOB SOURCE_FILES
+        ${SOURCE_FILES}
+        include/${PROJECT_NAME}/video/*.hpp
+        src/video/*    
+    )
+endif()
+
 # Microsoft Runtime Library shenanigens
 if(NOT DYNAMIC_RUNTIME_LIBRARY) 
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
+
 # ffmpeg fails on linux so we use this for shared version as well
 # relocation R_X86_64_PC32 against symbol `ff_pw_9' can not be used when making a shared object; recompile with -fPIC
-if (UNIX AND NOT APPLE AND BUILD_SHARED_LIBS)
+if (ELEMD_VIDEO AND UNIX AND NOT APPLE AND BUILD_SHARED_LIBS)
     set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-Bsymbolic")
 endif()
 
@@ -71,7 +87,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-message("ELEMD_RENDERING_BACKEND: " ${ELEMD_RENDERING_BACKEND_UPPER})
+message("VCPKG_MANIFEST_FEATURES: ${VCPKG_MANIFEST_FEATURES}")
+message("ELEMD_RENDERING_BACKEND: ${ELEMD_RENDERING_BACKEND_UPPER}")
 message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 message("DYNAMIC_RUNTIME_LIBRARY: ${DYNAMIC_RUNTIME_LIBRARY}")
 message("CMAKE_MSVC_RUNTIME_LIBRARY: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
@@ -93,12 +110,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
 find_path(STB_INCLUDE_DIRS "stb.h")
 target_include_directories(${PROJECT_NAME} PRIVATE ${STB_INCLUDE_DIRS})
 
-# ffmpeg
-find_package(FFMPEG REQUIRED)
-target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
-target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARIES})
-
+if (ELEMD_VIDEO)
+    # ffmpeg
+    find_package(FFMPEG REQUIRED)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
+    target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARIES})
+endif()
 
 # ---------------- EXAMPLES ---------------------#
 
@@ -125,6 +143,11 @@ if (ELEMD_BUILD_EXAMPLES)
     set_target_properties(window-app PROPERTIES FOLDER examples)
     set_target_properties(window-app-runtime PROPERTIES FOLDER examples)
 
+    if (ELEMD_VIDEO)
+        add_subdirectory(examples/video)
+        set_target_properties(video PROPERTIES FOLDER examples)
+    endif()
+
   if (BUILD_SHARED_LIBS)
     add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
@@ -140,6 +163,16 @@ if (ELEMD_BUILD_EXAMPLES)
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/window_app_runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
         COMMENT "Copy library"
     )
+
+    if (ELEMD_VIDEO)
+        add_custom_command(
+            TARGET ${PROJECT_NAME} POST_BUILD
+            DEPENDS video  
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/video/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
+            COMMENT "Copy video library"
+        )
+    endif()
+
   endif()
 endif()
 
