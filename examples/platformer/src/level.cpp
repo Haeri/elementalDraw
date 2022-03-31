@@ -35,6 +35,11 @@ int Level::getTileSize()
     return _tileSize;
 }
 
+int Level::getTextureSize()
+{
+    return _textureSize;
+}
+
 int Level::getRows()
 {
     return _rows;

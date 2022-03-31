@@ -37,6 +37,7 @@ namespace elemd
         bool operator!=(const vec2& other) const;
         vec2 operator/(const float& scalar) const;
         vec2 operator*(const float& scalar) const;
+        vec2 operator*(const vec2& other) const;
         vec2 operator-(const vec2& other) const;
         vec2 operator+(const vec2& other) const;
 
@@ -45,8 +46,8 @@ namespace elemd
         std::string to_string(int precision = 8);
         friend ELEMD_API std::ostream& operator<<(std::ostream& os, vec2 m);
 
-        float get_x();
-        float get_y();
+        float get_x() const;
+        float get_y() const;
         float& x();
         float& y();
 
@@ -77,10 +78,26 @@ namespace elemd
         return vec2(_x / scalar, _y / scalar);
     }
 
+    inline vec2 operator/(const float& scalar, const vec2& vec)
+    {
+        return vec2(scalar / vec.get_x(), scalar / vec.get_y());
+    }
+
     inline vec2 vec2::operator*(const float& scalar) const
     {
         return vec2(_x * scalar, _y * scalar);
     }
+
+    inline vec2 vec2::operator*(const vec2& other) const
+    {
+        return vec2(other._x * _x,  other._y * _y);
+    }
+
+    inline vec2 operator*(float scalar, const vec2& vec)
+    {
+        return vec2(vec.get_x() * scalar, vec.get_y() * scalar);
+    }
+
 
     inline vec2 vec2::operator-(const vec2& other) const
     {

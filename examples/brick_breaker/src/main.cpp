@@ -29,6 +29,7 @@ double second_accumulator = 0;
 double render_accumulator = 0;
 double poll_accumulator = 0;
 int frames = 0;
+int fps = 0;
 bool reload = false;
 float initial_scale = -1;
 
@@ -82,6 +83,8 @@ float paddle_speed = 100.0f;
 float paddle_width = 80;
 float paddle_height = 10;
 
+bool left_key = false;
+bool right_key = false;
 elemd::vec2 ball_pos;
 elemd::vec2 ball_velocity;
 float ball_speed = 4;
@@ -270,6 +273,31 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
 
         if (event.key == elemd::KEY_LEFT)
         {
+            if (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT)
+            {
+                left_key = true;
+                start_vel = -1;
+            }
+            else if (event.action == elemd::ACTION_RELEASE)
+            {
+                left_key = false;
+            }
+        }
+        else if (event.key == elemd::KEY_RIGHT)
+        {
+            if (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT)
+            {
+                right_key = true;
+                start_vel = 1;
+            }
+            else if (event.action == elemd::ACTION_RELEASE)
+            {
+                right_key = false;
+            }
+        }
+        /*
+        if (event.key == elemd::KEY_LEFT)
+        {
             paddle_velocity.x() += -1 * paddle_speed * (float)poll_accumulator;
             start_vel = -1;
         }
@@ -277,7 +305,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
         {
             paddle_velocity.x() += 1 * paddle_speed * (float)poll_accumulator;
             start_vel = 1;
-        }
+        }*/
 
         if (!start_game && start_vel != 0)
         {
@@ -315,7 +343,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
         if (second_accumulator >= 1.0)
         {
             InstrumentationTimer timer("Second");
-            std::cout << frames << std::endl;
+            fps = frames;
             frames = 0;
             second_accumulator = dmod(second_accumulator, 1);
         }
@@ -361,7 +389,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
             }
 
             ctx->set_fill_color(paddle_color);
-            ctx->fill_rect(paddle_pos.x(), paddle_pos.y(), paddle_width, paddle_height);
+            ctx->fill_rounded_rect(paddle_pos.x(), paddle_pos.y(), paddle_width, paddle_height, 2);
 
             // Power Up
 
@@ -390,10 +418,19 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
             for (power_up& pu : power_pus)
             {
                 ctx->set_fill_color(pu.color);
-                ctx->fill_rounded_rect(pu.pos.x(), pu.pos.y(), 20, 10, 1);
+                ctx->fill_rounded_rect(pu.pos.x(), pu.pos.y(), 20, 10, 2);
             }
 
             // Ball
+            if (left_key)
+            {
+                paddle_velocity.x() += -1 * paddle_speed * (float)poll_accumulator;
+            }
+            else if (right_key)
+            {
+                paddle_velocity.x() += 1 * paddle_speed * (float)poll_accumulator;
+            }
+
 
             ball_pos = ball_pos + ball_velocity;
             if (ball_pos.get_x() > WIDTH - ball_radius)
@@ -447,6 +484,9 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
                                "Press Arrow keys\n        to start");
             }
 
+            ctx->set_fill_color({200, 200, 200, 150});
+            ctx->set_font_size(12);
+            ctx->draw_text(4, 4, "FPS " + std::to_string(fps));
 
             ctx->draw_frame();
             ctx->present_frame();
@@ -465,7 +505,8 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
         if (sleep > 0)
         {
             InstrumentationTimer timer("Sleep");
-            std::this_thread::sleep_for(std::chrono::duration<double, std::ratio<1>>(sleep));
+            // Sleep is not accurate
+            //std::this_thread::sleep_for(std::chrono::duration<double, std::ratio<1>>(sleep));
         }
     }
 
@@ -499,6 +540,7 @@ int main()
     //wc.transparent = true;
     //wc.decorated = false;
     wc.resizeable = false;
+    wc.vsync = true;
     _win = elemd::Window::create(wc);
     _ctx = _win->create_context();
 

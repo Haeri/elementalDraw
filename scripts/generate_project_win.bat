@@ -23,9 +23,6 @@ if not exist "build/" (
 	rmdir /S /Q "build"
 )
 
-mkdir "build"
-cd build
-
 set build_type=
 set triplet_value=x64-windows
 if "%1" == "-static" (
@@ -33,7 +30,7 @@ if "%1" == "-static" (
 	set triplet_value=x64-windows-static
 )
 
-cmake .. ^
+cmake -B "build" -S . ^
 	-DVCPKG_TARGET_TRIPLET="%triplet_value%" ^
 	-DVCPKG_OVERLAY_PORTS="%root_path%\external\custom-ports" ^
 	-DCMAKE_TOOLCHAIN_FILE="%root_path%\external\vcpkg\scripts\buildsystems\vcpkg.cmake" %build_type%

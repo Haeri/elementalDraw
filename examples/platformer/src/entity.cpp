@@ -18,7 +18,7 @@ int sign(float x)
 }
 
 
-void Entity::tick(double dt)
+void Entity::simulate(double dt)
 {
     // Accumulate Vertical velocuty
     _vel.y() = _vel.y() + _gravity * _mass * dt;

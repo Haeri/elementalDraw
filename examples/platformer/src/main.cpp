@@ -38,47 +38,13 @@ int main()
     ctx->set_font(silkscreen);
     ctx->set_clear_color({223, 246, 245, 255});
 
-    Player* player = new Player(ctx, characterTileMap);
+    Player* player = new Player(win, characterTileMap);
 
     Level level = Level(18);
     level.loadLevelFile("./res/level_0.level", player);
 
-    bool left_key = false, right_key = false;
-
-    win->add_key_listener([&](elemd::key_event event) {
-        int start_vel = 0;
-
-        if (event.key == elemd::KEY_LEFT)
-        {
-            if (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT)
-            {
-                left_key = true;
-            }
-            else if (event.action == elemd::ACTION_RELEASE)
-            {
-                left_key = false;
-            }
-        }
-        else if (event.key == elemd::KEY_RIGHT)
-        {
-            if (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT)
-            {
-                right_key = true;
-            }
-            else if (event.action == elemd::ACTION_RELEASE)
-            {
-                right_key = false;
-            }
-        }
-
-        if (event.key == elemd::KEY_UP)
-        {
-            if (event.action == elemd::ACTION_PRESS)
-            {
-                player->jump();
-            }
-        }
-
+    
+    win->add_key_listener([&](elemd::key_event event) {        
         if (event.key == elemd::KEY_R && event.mods == elemd::KEY_MOD_CONTROL)
         {
             level.loadLevelFile("./res/level_0.level", player);
@@ -131,17 +97,9 @@ int main()
         frame_start = frame_end;
 
         win->poll_events();
-
-        if (left_key)
-        {
-            player->move(true, delta_time);
-        }
-        else if (right_key)
-        {
-            player->move(false, delta_time);
-        }
-
-        player->tick(delta_time);
+        
+        player->doInput(delta_time);       
+        player->simulate(delta_time);
 
         float padding_left =
             player->getPosition().get_x() - screenWidth / 2 - screenWidth / cameraPadding;
@@ -170,7 +128,7 @@ int main()
                 ctx->draw_image(x * level.getTileSize() - cam.get_x(),
                                 y * level.getTileSize() - cam.get_y(), level.getTileSize(),
                                 level.getTileSize(), mapTileMap, b.uv.x(), b.uv.y(),
-                                level.getTileSize(), level.getTileSize());
+                                level.getTextureSize(), level.getTextureSize());
             }
         }
 
