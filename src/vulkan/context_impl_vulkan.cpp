@@ -5,6 +5,7 @@
 #include <codecvt> // for std::codecvt_utf8
 #include <cstring>
 #include <locale> // for std::wstring_convert
+#include <limits>
 
 #include "../resources.hpp"
 #include "../window_impl.hpp"
