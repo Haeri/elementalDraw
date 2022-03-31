@@ -35,7 +35,7 @@ jobs:
     - name: Package
       run: ./scripts/package_win.bat -${{ matrix.type }} -s
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: elemd_x64-windows
         path: |
@@ -74,13 +74,15 @@ jobs:
         make CFLAGS='-O2 -s -DNDEBUG' CXXFLAGS='-O2 -s -DNDEBUG'
     - name: Package
       run: ./scripts/package_linux.sh -${{ matrix.type }}
-    - name: Archive
-      run: tar -cvf elemd_x64-linux.tar ./bin ./lib ./include ./samples
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: elemd_x64-linux
-        path: elemd_x64-linux.tar
+        path: |
+          ./bin
+          ./lib
+          ./include
+          ./samples
 
   build-mac:
    name: Mac Build
@@ -113,10 +115,12 @@ jobs:
       run: find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
     - name: Package
       run: ./scripts/package_mac.sh -${{ matrix.type }}
-    - name: Archive
-      run: tar -cvf elemd_x64-macos.tar ./bin ./lib ./include ./samples
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload
+      uses: actions/upload-artifact@v2
       with:
         name: elemd_x64-macos
-        path: elemd_x64-macos.tar
+        path: |
+          ./bin
+          ./lib
+          ./include
+          ./samples
