@@ -4,6 +4,7 @@
 #include <elemd/vec2.hpp>
 
 #include <algorithm>
+#include <cmath>
 
 struct rect
 {

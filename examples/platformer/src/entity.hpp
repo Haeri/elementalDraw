@@ -29,7 +29,7 @@ private :
 
     Level* _level = nullptr;
 
-    rect* rect = nullptr;
+    rect* _rect = nullptr;
 
     float _width = 24;
     float _height = 24;
