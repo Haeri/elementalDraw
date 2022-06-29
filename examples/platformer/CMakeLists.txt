@@ -16,4 +16,4 @@ add_custom_command(
     COMMENT "Copying resource files"
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE elemd)
+target_link_libraries(${PROJECT_NAME} PRIVATE elemd ${CMAKE_DL_LIBS})
