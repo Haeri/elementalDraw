@@ -14,6 +14,7 @@ class Audio
 {
 public:
     Audio();
+    ~Audio();
 
     void registerSound(std::string filename, std::string name);
     void playSound(std::string name);

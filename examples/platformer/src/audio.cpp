@@ -4,27 +4,17 @@
 #include "miniaudio.h"
 
 
-/*
-void data_callback(void* pUserData, ma_uint8* pBuffer, int bufferSizeInBytes)
-{
-    /* Reading is just a matter of reading straight from the engine. * /
-    ma_uint32 bufferSizeInFrames =
-        (ma_uint32)bufferSizeInBytes /
-        ma_get_bytes_per_frame(ma_format_f32, ma_engine_get_channels(&g_engine));
-    ma_engine_read_pcm_frames(&g_engine, pBuffer, bufferSizeInFrames, NULL);
-}
-*/
-
 Audio::Audio()
 {
     ma_result result;
-    //ma_engine_config engineConfig;
+    _engine = new ma_engine;
+    ma_engine_config engineConfig;
 
-    //engineConfig = ma_engine_config_init();
-    //engineConfig.channels = CHANNELS;
-    //engineConfig.sampleRate = SAMPLE_RATE;
+    engineConfig = ma_engine_config_init();
+    engineConfig.channels = CHANNELS;
+    engineConfig.sampleRate = SAMPLE_RATE;
 
-    result = ma_engine_init(NULL, _engine);
+    result = ma_engine_init(&engineConfig, _engine);
     if (result != MA_SUCCESS)
     {
         printf("Failed to initialize audio engine.");
@@ -32,10 +22,23 @@ Audio::Audio()
     }
 }
 
+Audio::~Audio()
+{
+    for (auto sound: _sounds)
+    {
+        ma_sound_uninit(sound);
+        delete sound;
+    }
+
+    ma_engine_uninit(_engine);
+    delete _engine;
+}
+
 void Audio::registerSound(std::string filename, std::string name)
 {
-    ma_result result = ma_sound_init_from_file(_engine, filename.c_str(), 0, NULL, NULL,
-                                               *(_sounds.data()));
+    ma_sound* s = new ma_sound;
+    _sounds.push_back(s);
+    ma_result result = ma_sound_init_from_file(_engine, filename.c_str(), 0, NULL, NULL, s);
     if (result != MA_SUCCESS)
     {
         printf("Failed to initialize sound.");
