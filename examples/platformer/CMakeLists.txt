@@ -3,7 +3,9 @@ project(${PROJECT_NAME})
 
 file(GLOB_RECURSE SOURCE_FILES
         src/*.hpp
-        src/*.cpp)
+        src/*.cpp
+	src/*.h
+	src/*.c)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 

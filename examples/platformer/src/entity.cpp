@@ -26,7 +26,7 @@ void Entity::simulate(double dt)
     // Apply velocity
     _pos = _pos + _vel * dt;
 
-    groundCollision();
+    levelCollision();
 
     // Accumulate Horizontal velocuty
     float friction = 0;
@@ -130,7 +130,7 @@ void Entity::jump()
     _vel.y() = -_jumpForce;
 }
 
-void Entity::groundCollision()
+void Entity::levelCollision()
 {
     /*
         tl  tm  tr
@@ -197,7 +197,7 @@ void Entity::groundCollision()
         _vel.y() = 0;
     }
 
-        // Collidion right
+    // Collidion right
     elemd::vec2 rt = {_pos.x() + _width, _pos.y()};
     elemd::vec2 rm = {_pos.x() + _width, _pos.y() + _height / 2};
     elemd::vec2 rb = {_pos.x() + _width, _pos.y() + _height - 1};

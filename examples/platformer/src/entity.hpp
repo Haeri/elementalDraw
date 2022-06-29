@@ -25,7 +25,7 @@ public:
     void jump();
 
 private :
-    void groundCollision();
+    void levelCollision();
 
     Level* _level = nullptr;
 
