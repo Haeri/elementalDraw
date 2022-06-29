@@ -16,6 +16,9 @@ add_custom_command(
     COMMENT "Copying resource files"
 )
 
-# -ldl = CMAKE_DL_LIBS
-# -lpthread = CMAKE_THREAD_LIBS_INIT
-target_link_libraries(${PROJECT_NAME} PRIVATE elemd ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+# miniaudio needs to link stuff on linux
+if(UNIX AND NOT APPLE)
+    target_link_libraries(${PROJECT_NAME} PRIVATE elemd pthread m dl)
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE elemd)
+endif()
