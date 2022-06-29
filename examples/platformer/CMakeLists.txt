@@ -16,4 +16,6 @@ add_custom_command(
     COMMENT "Copying resource files"
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE elemd ${CMAKE_DL_LIBS})
+# -ldl = CMAKE_DL_LIBS
+# -lpthread = CMAKE_THREAD_LIBS_INIT
+target_link_libraries(${PROJECT_NAME} PRIVATE elemd ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
