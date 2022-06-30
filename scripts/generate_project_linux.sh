@@ -17,16 +17,23 @@ else
 	rm -rf build
 fi
 
-mkdir "build"
-cd build
-
 build_type=""
+feature_list=""
 
-if [ "$1" = "-static" ]; then
-	build_type="-DBUILD_SHARED_LIBS=OFF"
-fi
+for var in "$@"
+do
+	if [ "$var" = "-static" ]; then
+		build_type="-DBUILD_SHARED_LIBS=OFF"
+	fi
+	if [ "$var" = "-audio" ]; then
+		feature_list="-DELEMD_AUDIO=ON $feature_list"
+	)
+	if [ "$var" = "-video" ]; then
+		feature_list="-DELEMD_VIDEO=ON $feature_list"
+	)
+done
 
-cmake .. -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type
+cmake -B "build" -S . -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
 err=$?
 
 if [ $err -ne 0 ]; then

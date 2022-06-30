@@ -1,5 +1,16 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Features
+option(ELEMD_AUDIO "Enable audio loading and playyback with miniaudio" OFF)
+if(ELEMD_AUDIO)
+  list(APPEND VCPKG_MANIFEST_FEATURES "audio")
+endif()
+
+option(ELEMD_VIDEO "Enable video loading and playyback with ffmpeg" OFF)
+if(ELEMD_VIDEO)
+  list(APPEND VCPKG_MANIFEST_FEATURES "video")
+endif()
+
 set(PROJECT_NAME elemd)
 project(${PROJECT_NAME} LANGUAGES CXX C)
 
@@ -13,17 +24,10 @@ else()
     set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
 endif()
 
-if(DEFINED VCPKG_MANIFEST_FEATURES)
- if(VCPKG_MANIFEST_FEATURES STREQUAL "video")
-    set(VCPKG_VIDEO_FEATURE TRUE)
- endif()
-endif()
-
 
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
 option(DYNAMIC_RUNTIME_LIBRARY "Set runtime library to dynamic" ${BUILD_SHARED_LIBS})
-option(ELEMD_VIDEO "Enable video loading and playyback with ffmpeg" ${VCPKG_VIDEO_FEATURE})
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
 
 # Settings
@@ -53,6 +57,13 @@ if(ELEMD_VIDEO)
         ${SOURCE_FILES}
         include/${PROJECT_NAME}/video/*.hpp
         src/video/*    
+    )
+endif()
+if(ELEMD_AUDIO)
+    file(GLOB SOURCE_FILES
+        ${SOURCE_FILES}
+        include/${PROJECT_NAME}/audio/*.hpp
+        src/audio/*    
     )
 endif()
 
@@ -93,7 +104,6 @@ message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 message("DYNAMIC_RUNTIME_LIBRARY: ${DYNAMIC_RUNTIME_LIBRARY}")
 message("CMAKE_MSVC_RUNTIME_LIBRARY: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
 
-
 # ---------------- DEPENDENCIES ---------------------#
 
 if(NOT ANDROID)
@@ -116,6 +126,12 @@ if (ELEMD_VIDEO)
     target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
     target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARIES})
+endif()
+
+if (ELEMD_AUDIO)
+    # miniaudio
+    find_path(MINIAUDIO_INCLUDE_DIRS "miniaudio.h")
+    target_include_directories(${PROJECT_NAME} PRIVATE ${MINIAUDIO_INCLUDE_DIRS})
 endif()
 
 # ---------------- EXAMPLES ---------------------#

@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - master
+    - dev
 
 jobs:
 
@@ -22,7 +23,7 @@ jobs:
     - name: Setup Environment
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Generate Solution
-      run: ./scripts/generate_project_win.bat -${{ matrix.type }} -s
+      run: ./scripts/generate_project_win.bat -${{ matrix.type }} -video -audio -s
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -61,7 +62,7 @@ jobs:
         sudo apt update
         sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev nasm
     - name: Generate Solution
-      run: ./scripts/generate_project_linux.sh -${{ matrix.type }}
+      run: ./scripts/generate_project_linux.sh -${{ matrix.type }} -video -audio
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -99,7 +100,7 @@ jobs:
     - name: Setup Environment
       run: brew install nasm
     - name: Generate Solution
-      run: ./scripts/generate_project_mac.sh -${{ matrix.type }}
+      run: ./scripts/generate_project_mac.sh -${{ matrix.type }} -video -audio
     - name: Debug
       if: ${{ failure() }}
       run: |
