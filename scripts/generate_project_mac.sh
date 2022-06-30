@@ -27,10 +27,10 @@ do
 	fi
 	if [ "$var" = "-audio" ]; then
 		feature_list="-DELEMD_AUDIO=ON $feature_list"
-	)
+	fi
 	if [ "$var" = "-video" ]; then
 		feature_list="-DELEMD_VIDEO=ON $feature_list"
-	)
+	fi
 done
 
 cmake -B "build" -S . -G Xcode -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports"  -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
