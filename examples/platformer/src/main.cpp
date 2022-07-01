@@ -14,7 +14,7 @@
 int main()
 {
 
-   Audio audio;
+   elemd::Audio audio;
    audio.registerSound("./res/music.mp3", "music");
    audio.playSound("./res/music.mp3");
    audio.registerSound("./res/audio/jump.wav", "jump");

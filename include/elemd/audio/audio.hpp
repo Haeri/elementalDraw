@@ -10,18 +10,21 @@
 struct ma_engine;
 struct ma_sound;
 
-class Audio
+namespace elemd
 {
-public:
-    Audio();
-    ~Audio();
+    class Audio
+    {
+    public:
+        Audio();
+        ~Audio();
 
-    void registerSound(std::string filename, std::string name);
-    void playSound(std::string name);
+        void registerSound(std::string filename, std::string name);
+        void playSound(std::string name);
 
-private:
-    ma_engine* _engine;
-    std::vector<ma_sound*> _sounds;
-};
+    private:
+        ma_engine* _engine;
+        std::vector<ma_sound*> _sounds;
+    };
+} // namespace elemd
 
-#endif
+#endif AUDIO_HPP

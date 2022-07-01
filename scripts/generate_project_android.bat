@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 
 :: Store caller path
 set old_path=%cd%
@@ -34,10 +35,10 @@ for %%A in (%*) do (
 		set triplet_value=x64-windows-static
 	)
 	if "%%A" == "-audio" (
-		set feature_list="-DELEMD_AUDIO=ON %feature_list%"
+		set "feature_list=!feature_list! -DELEMD_AUDIO=ON"
 	)
 	if "%%A" == "-video" (
-		set feature_list="-DELEMD_VIDEO=ON %feature_list%"
+		set "feature_list=!feature_list! -DELEMD_VIDEO=ON"
 	)
 
 	if "%%A" == "-s" (
