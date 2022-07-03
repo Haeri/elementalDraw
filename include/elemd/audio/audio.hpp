@@ -1,8 +1,10 @@
-#ifndef AUDIO_H
-#define AUDIO_H
+#ifndef ELEMD_AUDIO_H
+#define ELEMD_AUDIO_H
 
 #include <vector>
 #include <string>
+
+#include <elemd/elemental_draw.hpp>
 
 #define CHANNELS 2 /* Must be stereo for this example. */
 #define SAMPLE_RATE 48000
@@ -12,7 +14,7 @@ struct ma_sound;
 
 namespace elemd
 {
-    class Audio
+    class ELEMD_API Audio
     {
     public:
         Audio();
@@ -27,4 +29,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif AUDIO_HPP
+#endif // ELEMD_AUDIO_HPP

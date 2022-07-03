@@ -132,6 +132,11 @@ if (ELEMD_AUDIO)
     # miniaudio
     find_path(MINIAUDIO_INCLUDE_DIRS "miniaudio.h")
     target_include_directories(${PROJECT_NAME} PRIVATE ${MINIAUDIO_INCLUDE_DIRS})
+    
+    # miniaudio needs to link stuff on linux
+    if(UNIX AND NOT APPLE)
+        target_link_libraries(${PROJECT_NAME} PRIVATE pthread m dl)    
+    endif()
 endif()
 
 # ---------------- EXAMPLES ---------------------#

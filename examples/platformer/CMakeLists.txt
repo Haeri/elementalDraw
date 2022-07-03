@@ -16,9 +16,4 @@ add_custom_command(
     COMMENT "Copying resource files"
 )
 
-# miniaudio needs to link stuff on linux
-if(UNIX AND NOT APPLE)
-    target_link_libraries(${PROJECT_NAME} PRIVATE elemd pthread m dl)
-else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE elemd)
-endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE elemd)
