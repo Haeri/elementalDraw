@@ -13,7 +13,7 @@
 #include "vertex.hpp"
 #include "vulkan_shared_info.hpp"
 #include "vulkan_utils.hpp"
-#include "../window_impl.hpp"
+#include "../../window_impl.hpp"
 #include "image_impl_vulkan.hpp"
 
 #define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536*2

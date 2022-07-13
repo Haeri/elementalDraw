@@ -13,6 +13,8 @@
 
 #if defined(ELEMD_RENDERING_BACKEND_VULKAN)
 #define ELEMD_BACKEND "Vulkan"
+#elif defined(ELEMD_RENDERING_BACKEND_METAL)
+#define ELEMD_BACKEND "Metal"
 #elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
 #define ELEMD_BACKEND "OpenGL"
 #endif

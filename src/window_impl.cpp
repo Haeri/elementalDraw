@@ -6,9 +6,11 @@
 #include "elemd/context.hpp"
 
 #if defined(ELEMD_RENDERING_BACKEND_VULKAN)
-#include "vulkan/vulkan_shared_info.hpp"
+#include "backends/vulkan/vulkan_shared_info.hpp"
+#elif defined(ELEMD_RENDERING_BACKEND_METAL)
+#include "backends/metal/metal_shared_info.hpp"
 #elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
-#include "opengl/opengl_shared_info.hpp"
+#include "backends/opengl/opengl_shared_info.hpp"
 #endif
 
 #include <GLFW/glfw3.h>
@@ -344,6 +346,8 @@ namespace elemd
         glfwDefaultWindowHints();
 #if defined(ELEMD_RENDERING_BACKEND_VULKAN)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#elif defined(ELEMD_RENDERING_BACKEND_METAL)
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -383,6 +387,8 @@ namespace elemd
         {
 #if defined(ELEMD_RENDERING_BACKEND_VULKAN)
             VulkanSharedInfo::destroy();
+#elif defined(ELEMD_RENDERING_BACKEND_METAL)
+            MetalSharedInfo::destroy();
 #elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
             OpenglSharedInfo::destroy();
 #endif
@@ -407,6 +413,8 @@ namespace elemd
 #ifndef NDEBUG
 #if defined(ELEMD_RENDERING_BACKEND_VULKAN)
         full_title += " - [Vulkan]";
+#elif defined(ELEMD_RENDERING_BACKEND_METAL)
+        full_title += " - [Metal]";
 #elif defined(ELEMD_RENDERING_BACKEND_OPENGL)
         full_title += " - [OpenGL]";
 #endif

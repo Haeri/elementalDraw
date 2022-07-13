@@ -7,8 +7,8 @@
 #include <locale> // for std::wstring_convert
 #include <limits>
 
-#include "../resources.hpp"
-#include "../window_impl.hpp"
+#include "../../resources.hpp"
+#include "../../window_impl.hpp"
 #include "font_impl_vulkan.hpp"
 #include "vulkan_shared_info.hpp"
 

@@ -19,11 +19,12 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 if(APPLE)
-    set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
+    #set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
+    set(ELEMD_DEFAULT_RENDERING_BACKEND "metal")
 else()
     set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
 endif()
-
+set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
 
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
@@ -31,7 +32,7 @@ option(DYNAMIC_RUNTIME_LIBRARY "Set runtime library to dynamic" ${BUILD_SHARED_L
 option(ELEMD_BUILD_EXAMPLES "Build the example programs" ${ELEMD_STANDALONE})
 
 # Settings
-set(ELEMD_RENDERING_BACKEND ${ELEMD_DEFAULT_RENDERING_BACKEND} CACHE STRING "Choose Backend (vulkan, opengl)")
+set(ELEMD_RENDERING_BACKEND ${ELEMD_DEFAULT_RENDERING_BACKEND} CACHE STRING "Choose Backend (vulkan, metal, opengl)")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -49,7 +50,7 @@ file(GLOB SOURCE_FILES
 )
 file(GLOB_RECURSE SOURCE_FILES
     ${SOURCE_FILES}
-    src/${ELEMD_RENDERING_BACKEND}/*
+    src/backends/${ELEMD_RENDERING_BACKEND}/*
 )
 
 if(ELEMD_VIDEO)
@@ -119,6 +120,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
 # stb
 find_path(STB_INCLUDE_DIRS "stb_c_lexer.h")
 target_include_directories(${PROJECT_NAME} PRIVATE ${STB_INCLUDE_DIRS})
+
+if (APPLE)
+    find_library(NS_FOUNDATION Foundation)
+    find_library(METAL_LIBRARY Metal)
+    find_library(QUARTZCORE_LIBRARY QuartzCore)
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${METAL_LIBRARY} ${QUARTZCORE_LIBRARY} ${NS_FOUNDATION})
+endif()
 
 if (ELEMD_VIDEO)
     # ffmpeg
