@@ -22,7 +22,7 @@ namespace elemd
         int _sampler_index = -1;
         uint32_t _mipLevels = 1;
 
-        enum _type;
+        //enum _type;
         int _internal_format;
 
         bool _uploaded = false;

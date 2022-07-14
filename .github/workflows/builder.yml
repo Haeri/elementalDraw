@@ -24,7 +24,8 @@ jobs:
     - name: Setup Environment
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Generate Solution
-      run: ./scripts/generate_project_win.bat -${{ matrix.type }} -video -audio -s
+    # removing -video flag till https://github.com/microsoft/vcpkg/issues/23021 is fixed
+      run: ./scripts/generate_project_win.bat -${{ matrix.type }} -audio -s
     - name: Debug
       if: ${{ failure() }}
       run: |
