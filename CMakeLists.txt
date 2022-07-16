@@ -121,12 +121,15 @@ target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
 find_path(STB_INCLUDE_DIRS "stb_c_lexer.h")
 target_include_directories(${PROJECT_NAME} PRIVATE ${STB_INCLUDE_DIRS})
 
+# metal-cpp
 if (APPLE)
-    find_library(NS_FOUNDATION Foundation)
-    find_library(METAL_LIBRARY Metal)
-    find_library(QUARTZCORE_LIBRARY QuartzCore)
-
+    find_library(METAL_LIBRARY Metal REQUIRED)
+    find_library(QUARTZCORE_LIBRARY QuartzCore REQUIRED)
+    find_library(NS_FOUNDATION Foundation REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${METAL_LIBRARY} ${QUARTZCORE_LIBRARY} ${NS_FOUNDATION})
+
+    find_path(METAL_CPP_INCLUDE_DIRS "Foundation/Foundation.hpp")
+    target_include_directories(${PROJECT_NAME} PRIVATE ${METAL_CPP_INCLUDE_DIRS})
 endif()
 
 if (ELEMD_VIDEO)

@@ -1,0 +1,7 @@
+{
+  "name": "metal-cpp",
+  "version-string": "1.0.0",
+  "description": "Metal-cpp is a low-overhead C++ interface for Metal that helps you add Metal functionality to graphics apps, games, and game engines that are written in C++.",
+  "homepage": "https://developer.apple.com/metal/cpp/",
+  "supports": "osx"
+}

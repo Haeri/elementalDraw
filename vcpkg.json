@@ -25,6 +25,10 @@
         {
             "name": "glfw3",
             "platform": "!android"
+        },
+        {
+          "name": "metal-cpp",
+          "platform": "osx"
         }
     ]
 }
