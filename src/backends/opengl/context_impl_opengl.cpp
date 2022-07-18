@@ -6,9 +6,9 @@
 #include <locale>  // for std::wstring_convert
 #include <GLFW/glfw3.h>
 
-#include "../window_impl.hpp"
+#include "../../window_impl.hpp"
 #include "font_impl_opengl.hpp"
-#include "../resources.hpp"
+#include "../../resources.hpp"
 
 #include "opengl_shared_info.hpp"
 

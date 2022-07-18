@@ -10,7 +10,7 @@
 
 #include "elemd/vec2.hpp"
 #include "elemd/color.hpp"
-#include "../window_impl.hpp"
+#include "../../window_impl.hpp"
 #include "image_impl_opengl.hpp"
 
 //#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536*2

@@ -3,6 +3,9 @@
 #include <vector>
 #include <iostream>
 
+#define GLAD_GL_IMPLEMENTATION
+#include "glad/gl.h"
+
 #include "elemd/elemental_draw.hpp"
 #include "GLFW/glfw3.h"
 

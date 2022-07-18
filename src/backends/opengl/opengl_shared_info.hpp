@@ -1,7 +1,6 @@
 #ifndef ELEMD_OPENGL_SHARED_INFO_HPP
 #define ELEMD_OPENGL_SHARED_INFO_HPP
 
-#define GLAD_GL_IMPLEMENTATION
 #include "glad/gl.h"
 
 #include <string>
