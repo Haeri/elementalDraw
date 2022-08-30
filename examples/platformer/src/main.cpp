@@ -1,24 +1,19 @@
-﻿#include <elemd/color.hpp>
+﻿#include <elemd/audio/audio.hpp>
+#include <elemd/color.hpp>
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
-#include <elemd/audio/audio.hpp>
 
-
-#include "player.hpp"
 #include "level.hpp"
+#include "player.hpp"
 
 #include <iostream>
 
-
-
 int main()
 {
-
-   elemd::Audio audio;
-   audio.registerSound("./res/music.mp3", "music");
-   audio.playSound("./res/music.mp3");
-   audio.registerSound("./res/audio/jump.wav", "jump");
-  
+    elemd::Audio audio;
+    audio.registerSound("./res/music.mp3", "music");
+    audio.playSound("./res/music.mp3");
+    audio.registerSound("./res/audio/jump.wav", "jump");
 
     const int screenWidth = 18 * 16;
     const int screenHeight = 18 * 12;
@@ -54,8 +49,7 @@ int main()
     Level level = Level(18);
     level.loadLevelFile("./res/levels/level_0.level", player);
 
-    
-    win->add_key_listener([&](elemd::key_event event) {        
+    win->add_key_listener([&](elemd::key_event event) {
         if (event.key == elemd::KEY_R && event.mods == elemd::KEY_MOD_CONTROL)
         {
             level.loadLevelFile("./res/levels/level_0.level", player);
@@ -82,7 +76,7 @@ int main()
 
     long long frame_count = -1;
 
-    elemd::vec2 cam = {0, 0};    
+    elemd::vec2 cam = {0, 0};
 
     ctx->draw_frame();
 
@@ -113,8 +107,8 @@ int main()
         frame_start = frame_end;
 
         win->poll_events();
-        
-        player->doInput(delta_time);       
+
+        player->doInput(delta_time);
         player->simulate(delta_time);
 
         float padding_left =

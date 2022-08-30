@@ -25,7 +25,6 @@ else()
     set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
 endif()
 
-
 # Options
 option(BUILD_SHARED_LIBS "Build as shared/dynamic library" ON)
 option(DYNAMIC_RUNTIME_LIBRARY "Set runtime library to dynamic" ${BUILD_SHARED_LIBS})
