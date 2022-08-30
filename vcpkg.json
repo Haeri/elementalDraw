@@ -27,8 +27,8 @@
             "platform": "!android"
         },
         {
-          "name": "metal-cpp",
-          "platform": "osx"
+            "name": "metal-cpp",
+            "platform": "osx"
         }
     ]
 }
