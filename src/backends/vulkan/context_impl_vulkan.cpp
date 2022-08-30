@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <codecvt> // for std::codecvt_utf8
 #include <cstring>
-#include <locale> // for std::wstring_convert
 #include <limits>
+#include <locale> // for std::wstring_convert
 
 #include "../../resources.hpp"
 #include "../../window_impl.hpp"
@@ -577,7 +577,6 @@ namespace elemd
             {(int)impl->storage.size(), {{0, 0}, {(uint32_t)_width, (uint32_t)_height}}});
     }
 
-
     void Context::clear()
     {
         std::cout << "WARNING: Context::clear is not implemented!\n";
@@ -614,7 +613,7 @@ namespace elemd
         impl->draw_sequence_chain.clear();
         impl->draw_sequence_chain.push_back({0, {{0, 0}, {(uint32_t)_width, (uint32_t)_height}}});
 
-        //uint32_t imageIndex;
+        // uint32_t imageIndex;
         vku::err_check(vkAcquireNextImageKHR(VulkanSharedInfo::getInstance()->device,
                                              impl->swapchain, std::numeric_limits<uint64_t>::max(),
                                              impl->semaphoreImageAvailable, VK_NULL_HANDLE,
@@ -633,7 +632,7 @@ namespace elemd
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &(impl->semaphoreRenderingComplete);
 
-        vku::err_check(vkQueueSubmit(impl->queue, 1, &submitInfo, impl->renderFence));        
+        vku::err_check(vkQueueSubmit(impl->queue, 1, &submitInfo, impl->renderFence));
     }
 
     void Context::present_frame()
@@ -1364,7 +1363,7 @@ namespace elemd
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo,
                                  VK_SUBPASS_CONTENTS_INLINE);
 
-            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);            
+            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
             for (int s = 0; s < draw_sequence_chain.size(); ++s)
             {
@@ -1382,7 +1381,6 @@ namespace elemd
                     sequence_length =
                         draw_sequence_chain[s + 1].start_index - draw_sequence_chain[s].start_index;
                 }
-
 
                 vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
                 vkCmdSetScissor(commandBuffers[i], 0, 1, &draw_sequence_chain[s].scissor);

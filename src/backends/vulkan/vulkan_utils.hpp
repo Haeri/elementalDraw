@@ -1,13 +1,13 @@
 #ifndef ELEMD_VULKAN_UTILS_HPP
 #define ELEMD_VULKAN_UTILS_HPP
 
+#include <cstring>
 #include <string>
 #include <vector>
-#include <cstring>
 
 #include "vulkan_shared_info.hpp"
 
-namespace elemd::vku 
+namespace elemd::vku
 {
     struct best_device_info
     {
@@ -17,18 +17,15 @@ namespace elemd::vku
         uint32_t queue_count;
     };
 
-
     /* --------------- PRINTEER --------------- */
     void err(std::string message);
     void print_layers();
     void print_extensions();
     void print_physical_devices();
     void print_selected_device();
-    
+
     bool err_check(const VkResult& result);
     std::string device_type(const VkPhysicalDeviceType& deviceType);
-
-
 
     /* --------------- GENERATOR --------------- */
 
@@ -43,7 +40,8 @@ namespace elemd::vku
                      const VkCommandPool& commandPool, const VkQueue& queue);
     template <typename T>
     void create_and_upload_buffer(std::vector<T> data, const VkBufferUsageFlags& usageFlags,
-                                  VkBuffer& buffer, VkDeviceMemory& deviceMemory, const VkCommandPool& commandPool, const VkQueue& queue)
+                                  VkBuffer& buffer, VkDeviceMemory& deviceMemory,
+                                  const VkCommandPool& commandPool, const VkQueue& queue)
     {
 
         // --------------- Create Staging Buffer and Memory ---------------
@@ -82,11 +80,11 @@ namespace elemd::vku
 
     /* --------------- SELECTOR --------------- */
 
-    best_device_info select_physical_device(VkPhysicalDevice* physicalDevices, uint32_t count);    
+    best_device_info select_physical_device(VkPhysicalDevice* physicalDevices, uint32_t count);
     uint32_t find_memory_type_index(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     VkPresentModeKHR select_present_mode(const VkPresentModeKHR* presentModes,
                                          uint32_t presentModeCount, bool vsync);
 
-}
+} // namespace elemd::vku
 
 #endif // ELEMD_VULKAN_UTILS_HPP

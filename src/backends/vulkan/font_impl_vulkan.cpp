@@ -1,8 +1,8 @@
 #include "font_impl_vulkan.hpp"
 
 #include <iostream>
-#include <vector>
 #include <map>
+#include <vector>
 
 #include "image_impl_vulkan.hpp"
 
@@ -30,7 +30,6 @@ namespace elemd
     {
         return new FontImplVulkan(buffer, size);
     }
-
 
     FontImplVulkan::FontImplVulkan(std::string file_path)
     {

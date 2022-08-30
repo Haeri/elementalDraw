@@ -1,8 +1,8 @@
 #ifndef ELEMD_AUDIO_H
 #define ELEMD_AUDIO_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <elemd/elemental_draw.hpp>
 

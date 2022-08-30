@@ -1,7 +1,7 @@
 #include "vulkan_utils.hpp"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 namespace elemd::vku
 {
@@ -111,14 +111,14 @@ namespace elemd::vku
             delete[] queueFamilyProperties;
         }
 
-
-//        bestDeviceIndex = 1;
-//        maxQueueCount = 1;
+        //        bestDeviceIndex = 1;
+        //        maxQueueCount = 1;
 
         VkPhysicalDeviceProperties properties{};
         vkGetPhysicalDeviceProperties(physicalDevices[bestDeviceIndex], &properties);
 
-        return best_device_info{properties.deviceName, bestDeviceIndex, bestQueuFamily, maxQueueCount};
+        return best_device_info{properties.deviceName, bestDeviceIndex, bestQueuFamily,
+                                maxQueueCount};
     }
 
     VkCommandBuffer beginSingleTimeCommands(const VkCommandPool& commandPool)
@@ -191,7 +191,8 @@ namespace elemd::vku
 
         // --------------- Create Buffer ---------------
 
-        vku::err_check(vkCreateBuffer(VulkanSharedInfo::getInstance()->device, &bufferCreateInfo, nullptr, &buffer));
+        vku::err_check(vkCreateBuffer(VulkanSharedInfo::getInstance()->device, &bufferCreateInfo,
+                                      nullptr, &buffer));
 
         VkMemoryRequirements memoryRequirements{};
         vkGetBufferMemoryRequirements(VulkanSharedInfo::getInstance()->device, buffer,
@@ -227,8 +228,7 @@ namespace elemd::vku
         endSingleTimeCommands(commandBuffer, commandPool, queue);
     }
 
-    uint32_t find_memory_type_index(uint32_t typeFilter,
-                                    VkMemoryPropertyFlags properties)
+    uint32_t find_memory_type_index(uint32_t typeFilter, VkMemoryPropertyFlags properties)
     {
         VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties{};
         vkGetPhysicalDeviceMemoryProperties(VulkanSharedInfo::getInstance()->bestPhysicalDevice,
@@ -413,8 +413,7 @@ namespace elemd::vku
     {
 
         std::cout << "\"selected_device\": {\n"
-                  << "\t\"deviceName\": " << VulkanSharedInfo::getInstance()->hardware_name
-                  << ",\n"
+                  << "\t\"deviceName\": " << VulkanSharedInfo::getInstance()->hardware_name << ",\n"
                   << "\t\"queueCount\": " << VulkanSharedInfo::getInstance()->queueCount << ",\n"
                   << "\t\"queueFamilyIndex\": " << VulkanSharedInfo::getInstance()->queueFamilyIndex
                   << "\n"
@@ -503,9 +502,9 @@ namespace elemd::vku
                 break;
             // case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR:
             //	err("The display used by a swapchain does not use the same presentable image layout,
-            //or is incompatible in a way that prevents sharing an image."); 	break; case
+            // or is incompatible in a way that prevents sharing an image."); 	break; case
             // VK_ERROR_INVALID_SHADER_NV: 	err("One or more shaders failed to compile or link. More
-            //details are reported back to the application via VK_EXT_debug_report if enabled.");
+            // details are reported back to the application via VK_EXT_debug_report if enabled.");
             //	break;
             case VK_ERROR_OUT_OF_POOL_MEMORY:
                 err("A pool memory allocation has failed. This must only be returned if no attempt "
@@ -526,19 +525,18 @@ namespace elemd::vku
                 break;
             // case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:
             //	err("An operation on a swapchain created with
-            //VK_FULL_SCREEN_EXCLUSIVE_APPLICATION_CONTROLLED_EXT failed as it did not have exlusive
-            //full-screen access. This may occur due to implementation-dependent reasons, outside of
-            //the application's control."); 	break;
+            // VK_FULL_SCREEN_EXCLUSIVE_APPLICATION_CONTROLLED_EXT failed as it did not have
+            // exlusive full-screen access. This may occur due to implementation-dependent reasons,
+            // outside of the application's control."); 	break;
             default:
                 err("An unknown error has occurred; either the application has provided invalid "
                     "input, or an implementation failure has occurred");
                 break;
             }
 
- #ifdef _MSC_VER
+#ifdef _MSC_VER
             __debugbreak();
 #endif // MSVC
-
 
             return false;
         }
@@ -547,4 +545,4 @@ namespace elemd::vku
             return true;
         }
     }
-}
+} // namespace elemd::vku

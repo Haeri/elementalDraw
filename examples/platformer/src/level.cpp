@@ -1,7 +1,7 @@
 #include "level.hpp"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string.h>
 
 #include "player.hpp"
@@ -20,12 +20,12 @@ Level::~Level()
 
 Block Level::getAt(int x, int y)
 {
-    //std::cout << "At " << y * _cols + x << "\n";
+    // std::cout << "At " << y * _cols + x << "\n";
     if (x < 0 || y < 0 || x >= _cols || y >= _rows)
     {
-        return BlockDb['o'];        
-    }    
-    
+        return BlockDb['o'];
+    }
+
     unsigned char id = _data[y * _cols + x];
     return BlockDb[id];
 }
@@ -80,7 +80,6 @@ void Level::loadLevelFile(std::string filePath, Player* p)
             char* token = strtok(line.data(), " ");
             _data[y * _cols] = *token;
             std::cout << token << /*"(" << (y * _cols) << ")" <<*/ " ";
-            
 
             for (int x = 1; x < _cols; ++x)
             {
@@ -94,11 +93,10 @@ void Level::loadLevelFile(std::string filePath, Player* p)
                 }
 
                 std::cout << token << /*"(" << (y * _cols + x) << ")" <<*/ " ";
-                
             }
             std::cout << std::endl;
         }
-        
+
         levelFile.close();
 
         if (!spawned)

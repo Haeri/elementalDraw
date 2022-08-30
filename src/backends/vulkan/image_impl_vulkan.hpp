@@ -38,9 +38,10 @@ namespace elemd
         void upload(const VkCommandPool& commandPool, const VkQueue& queue);
         void upload_update(const VkCommandPool& commandPool, const VkQueue& queue);
         void write_buffer(const VkCommandPool& commandPool, const VkQueue& queue, VkBuffer buffer);
-        void change_layout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout);
-        void generate_mipmaps(const VkCommandPool& commandPool, const VkQueue& queue, const VkFormat& format);        
-
+        void change_layout(const VkCommandPool& commandPool, const VkQueue& queue,
+                           const VkImageLayout& layout);
+        void generate_mipmaps(const VkCommandPool& commandPool, const VkQueue& queue,
+                              const VkFormat& format);
 
         VkSampler get_sampler();
         VkImageView get_image_view();

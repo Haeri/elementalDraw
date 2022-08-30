@@ -56,7 +56,6 @@ namespace elemd
         float _y;
     };
 
-
     inline vec2 vec2::normalize() const
     {
         vec2 ret = *this;
@@ -90,14 +89,13 @@ namespace elemd
 
     inline vec2 vec2::operator*(const vec2& other) const
     {
-        return vec2(other._x * _x,  other._y * _y);
+        return vec2(other._x * _x, other._y * _y);
     }
 
     inline vec2 operator*(float scalar, const vec2& vec)
     {
         return vec2(vec.get_x() * scalar, vec.get_y() * scalar);
     }
-
 
     inline vec2 vec2::operator-(const vec2& other) const
     {
@@ -108,8 +106,6 @@ namespace elemd
     {
         return vec2(_x + other._x, _y + other._y);
     }
-
-
 
 } // namespace elemd
 

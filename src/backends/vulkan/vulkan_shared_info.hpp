@@ -30,7 +30,9 @@ namespace elemd
         static VulkanSharedInfo* _instance;
 
         VulkanSharedInfo();
-        VulkanSharedInfo(const VulkanSharedInfo&) {}
+        VulkanSharedInfo(const VulkanSharedInfo&)
+        {
+        }
         ~VulkanSharedInfo();
 
         void preload_vulkan();

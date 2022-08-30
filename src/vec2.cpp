@@ -1,9 +1,9 @@
 #include "elemd/vec2.hpp"
 
-#include <math.h>
-#include <string>
-#include <sstream>
 #include <iomanip>
+#include <math.h>
+#include <sstream>
+#include <string>
 
 namespace elemd
 {
@@ -38,7 +38,7 @@ namespace elemd
     vec2 vec2::lerp(vec2 start, vec2 target, float percent)
     {
         return vec2(start.x() + percent * (target.x() - start.x()),
-                        start.y() + percent * (target.y() - start.y()));
+                    start.y() + percent * (target.y() - start.y()));
     }
 
     std::string vec2::to_string(int precision)

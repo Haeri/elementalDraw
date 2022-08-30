@@ -1,9 +1,9 @@
 #include "image_impl_vulkan.hpp"
 
 #include <algorithm>
-#include <iostream>
-#include <cstring>
 #include <cmath>
+#include <cstring>
+#include <iostream>
 
 #include <stb_image.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -13,7 +13,7 @@
 #include "vulkan_utils.hpp"
 
 namespace elemd
-{    
+{
     /* ------------------------ DOWNCAST ------------------------ */
 
     inline ImageImplVulkan* getImpl(Image* ptr)
@@ -102,26 +102,25 @@ namespace elemd
     ImageImplVulkan::~ImageImplVulkan()
     {
         VkDevice device = VulkanSharedInfo::getInstance()->device;
-        
+
         if (_loaded)
         {
-            stbi_image_free(_data); 
-            
+            stbi_image_free(_data);
+
             _loaded = false;
         }
-       
 
         if (_uploaded)
-        {        
+        {
             vkDestroyBuffer(device, _stagingBuffer, nullptr);
             vkFreeMemory(device, _stagingDeviceMemory, nullptr);
 
             vkDestroySampler(device, _sampler, nullptr);
             vkDestroyImageView(device, _imageView, nullptr);
-            
+
             vkDestroyImage(device, _image, nullptr);
             vkFreeMemory(device, _deviceMemory, nullptr);
-            
+
             _uploaded = false;
         }
 
@@ -139,11 +138,6 @@ namespace elemd
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkPhysicalDevice physicalDevice = VulkanSharedInfo::getInstance()->bestPhysicalDevice;
 
-        
-           
-        
-        
-        
         VkDeviceSize actualImageSize = _width * _height * (_components == 1 ? 1 : 4);
 
         vku::create_buffer(actualImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, _stagingBuffer,
@@ -156,7 +150,6 @@ namespace elemd
         // std::memset(rawData, 0, imageSize);
         std::memcpy(rawData, _padded_data, actualImageSize);
         vkUnmapMemory(device, _stagingDeviceMemory);
-
 
         VkImageCreateInfo imageCreateInfo{};
         imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -271,7 +264,6 @@ namespace elemd
         std::memcpy(rawData, _padded_data, actualImageSize);
         vkUnmapMemory(device, _stagingDeviceMemory);
 
-
         change_layout(commandPool, queue, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         write_buffer(commandPool, queue, _stagingBuffer);
 
@@ -286,7 +278,7 @@ namespace elemd
     }
 
     void ImageImplVulkan::write_buffer(const VkCommandPool& commandPool, const VkQueue& queue,
-                                      VkBuffer buffer)
+                                       VkBuffer buffer)
     {
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkCommandBuffer commandBuffer = vku::beginSingleTimeCommands(commandPool);
@@ -308,7 +300,8 @@ namespace elemd
         vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
     }
 
-    void ImageImplVulkan::change_layout(const VkCommandPool& commandPool, const VkQueue& queue, const VkImageLayout& layout)
+    void ImageImplVulkan::change_layout(const VkCommandPool& commandPool, const VkQueue& queue,
+                                        const VkImageLayout& layout)
     {
         VkDevice device = VulkanSharedInfo::getInstance()->device;
         VkCommandBuffer commandBuffer = vku::beginSingleTimeCommands(commandPool);
@@ -355,7 +348,7 @@ namespace elemd
         imageMemoryBarrier.newLayout = layout;
         imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        imageMemoryBarrier.image = _image; 
+        imageMemoryBarrier.image = _image;
         imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
         imageMemoryBarrier.subresourceRange.levelCount = _mipLevels;
@@ -363,8 +356,7 @@ namespace elemd
         imageMemoryBarrier.subresourceRange.layerCount = 1;
 
         vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0,
-                             nullptr, 1,
-                             &imageMemoryBarrier);
+                             nullptr, 1, &imageMemoryBarrier);
 
         vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
 
@@ -372,7 +364,7 @@ namespace elemd
     }
 
     void ImageImplVulkan::generate_mipmaps(const VkCommandPool& commandPool, const VkQueue& queue,
-                                          const VkFormat& format)
+                                           const VkFormat& format)
     {
         VkPhysicalDevice physical_device = VulkanSharedInfo::getInstance()->bestPhysicalDevice;
 
@@ -386,7 +378,7 @@ namespace elemd
             throw std::runtime_error("texture image format does not support linear blitting!");
         }
 
-        VkCommandBuffer commandBuffer = vku::beginSingleTimeCommands(commandPool);        
+        VkCommandBuffer commandBuffer = vku::beginSingleTimeCommands(commandPool);
 
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -459,7 +451,6 @@ namespace elemd
         vku::endSingleTimeCommands(commandBuffer, commandPool, queue);
     }
 
-
     VkSampler ImageImplVulkan::get_sampler()
     {
         return _sampler;
@@ -477,8 +468,8 @@ namespace elemd
         case 1:
             _format = VK_FORMAT_R8_UNORM;
             break;
-        case 2:            
-        case 3:            
+        case 2:
+        case 3:
             _padded_data = new unsigned char[4 * _width * _height];
         case 4:
         default:
@@ -495,7 +486,7 @@ namespace elemd
             _padded_data = _data;
         }
         else if (_components == 2)
-        {            
+        {
             // Copy 2 components. Third and forht components are going to be 0 by default
 
             for (int i = 0; i < _width * _height; i++)
@@ -508,20 +499,19 @@ namespace elemd
             // Copy 4 components and replace the forth one
             // Only go up to -1 since the last one would pick entry out of bounds
 
-            for (int i = 0; i < _width*_height-1; i++)
+            for (int i = 0; i < _width * _height - 1; i++)
             {
                 *(uint32_t*)&_padded_data[i * 4] = *(uint32_t*)&_data[i * 3];
                 _padded_data[i * 4 + 3] = 255;
             }
 
             // Do the last one manually
-            int last = _width * _height -1;
+            int last = _width * _height - 1;
             _padded_data[last * 4] = _data[last * 3];
             _padded_data[last * 4 + 1] = _data[last * 3 + 1];
             _padded_data[last * 4 + 2] = _data[last * 3 + 2];
             _padded_data[last * 4 + 3] = 255;
         }
-    }   
-
+    }
 
 } // namespace elemd

@@ -1,10 +1,10 @@
 #ifndef FILE_WATCH_HPP
 #define FILE_WATCH_HPP
 
+#include <atomic>
+#include <map>
 #include <string>
 #include <thread>
-#include <map>
-#include <atomic>
 
 class IReloadableFile
 {
@@ -30,12 +30,12 @@ private:
     static std::atomic<bool> _checking;
     static std::atomic<bool> _shouldRun;
     static std::thread _timeThread;
-    //static std::thread _workThread;
+    // static std::thread _workThread;
     static std::map<std::string, TimeStampedFile> _watchList;
 
     static void checkValidity();
-private:
 
+private:
 };
 
 #endif // FILE_WATCH_HPP

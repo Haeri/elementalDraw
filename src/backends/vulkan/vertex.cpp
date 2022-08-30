@@ -20,20 +20,20 @@ namespace elemd
         attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
         attributeDescriptions[0].offset = offsetof(point_vertex, position);
 
-        //attributeDescriptions[1].location = 1;
-        //attributeDescriptions[1].binding = 0;
-        //attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
-        //attributeDescriptions[1].offset = offsetof(vertex, uv);
+        // attributeDescriptions[1].location = 1;
+        // attributeDescriptions[1].binding = 0;
+        // attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+        // attributeDescriptions[1].offset = offsetof(vertex, uv);
 
-        //attributeDescriptions[1].location = 1;
-        //attributeDescriptions[1].binding = 0;
-        //attributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-        //attributeDescriptions[1].offset = offsetof(vertex, fill_color);
+        // attributeDescriptions[1].location = 1;
+        // attributeDescriptions[1].binding = 0;
+        // attributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        // attributeDescriptions[1].offset = offsetof(vertex, fill_color);
 
-        //attributeDescriptions[3].location = 3;
-        //attributeDescriptions[3].binding = 0;
-        //attributeDescriptions[3].format = VK_FORMAT_R32_SFLOAT;
-        //attributeDescriptions[3].offset = offsetof(vertex, border_radius);
+        // attributeDescriptions[3].location = 3;
+        // attributeDescriptions[3].binding = 0;
+        // attributeDescriptions[3].format = VK_FORMAT_R32_SFLOAT;
+        // attributeDescriptions[3].offset = offsetof(vertex, border_radius);
 
         return attributeDescriptions;
     }

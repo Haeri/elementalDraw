@@ -21,7 +21,7 @@ int main()
     // configure and create window
     elemd::WindowConfig winc = elemd::WindowConfig{"Platformer", screenWidth, screenHeight};
     winc.vsync = true;
-    winc.icon_file = "./res/logo.png";
+    winc.icon_file = "./res/app.png";
 
     // winc.native_pixel_size = true;
     elemd::Window* win = elemd::Window::create(winc);

@@ -1,18 +1,18 @@
 #ifndef SHARED_LIBRARY_HPP
 #define SHARED_LIBRARY_HPP
 
-#include <iostream>
-#include <functional>
 #include <fstream>
+#include <functional>
+#include <iostream>
 #ifdef _MSC_VER
-    #include <windows.h>
+#include <windows.h>
 #elif __GNUC__
-    #include <dlfcn.h>
+#include <dlfcn.h>
 #endif
 
-#include "file_watch.hpp"
-#include "elemd/window.hpp"
 #include "elemd/context.hpp"
+#include "elemd/window.hpp"
+#include "file_watch.hpp"
 
 class SharedLibrary : public IReloadableFile
 {
@@ -20,7 +20,7 @@ public:
     typedef elemd::WindowConfig (*app_initf)();
     typedef void (*reload_notifyf)();
     typedef int (*app_runf)(elemd::Window* win, elemd::Context* ctx);
-    
+
     app_initf app_init;
     reload_notifyf reload_notify;
     app_runf app_run;
@@ -35,7 +35,7 @@ public:
     bool reload();
     bool load(int iMode = 2);
     bool freeSharedLibrary();
-    
+
     std::string getName();
 
 private:

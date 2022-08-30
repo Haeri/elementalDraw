@@ -6,7 +6,7 @@
 std::atomic<bool> FileWatch::_checking = false;
 std::atomic<bool> FileWatch::_shouldRun = false;
 std::thread FileWatch::_timeThread;
-//std::thread FileWatch::_workThread;
+// std::thread FileWatch::_workThread;
 std::map<std::string, FileWatch::TimeStampedFile> FileWatch::_watchList;
 
 void FileWatch::addToWatchList(std::string filePath, IReloadableFile* file)
@@ -49,13 +49,13 @@ void FileWatch::stopCheckInterval()
         _timeThread.join();
 }
 
-
-void FileWatch::checkValidity() 
+void FileWatch::checkValidity()
 {
-    if (_checking) return;
+    if (_checking)
+        return;
 
     _checking = true;
-    
+
     for (std::map<std::string, TimeStampedFile>::iterator it = _watchList.begin();
          it != _watchList.end(); ++it)
     {

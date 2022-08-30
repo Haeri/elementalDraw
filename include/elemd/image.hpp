@@ -10,7 +10,8 @@ namespace elemd
 {
     enum ImageFiltering
     {
-        NEAREST, LINEAR
+        NEAREST,
+        LINEAR
     };
     struct ImageConfig
     {
@@ -25,14 +26,13 @@ namespace elemd
         static Image* create(int width, int height, int components, unsigned char* data,
                              ImageConfig imageConfig = {});
 
-        
         int get_width();
         int get_height();
         int get_channels();
         void set_name(std::string name);
 
         void update_data(unsigned char* data);
-        // TODO: data might not be up tp date with what is on the GPU. We need to pull down the 
+        // TODO: data might not be up tp date with what is on the GPU. We need to pull down the
         // newest data and write that to file.
         void write_to_file(std::string file_path);
 

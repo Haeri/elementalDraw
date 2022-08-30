@@ -1,10 +1,10 @@
 #include "vulkan_shared_info.hpp"
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
-#include "elemd/elemental_draw.hpp"
 #include "GLFW/glfw3.h"
+#include "elemd/elemental_draw.hpp"
 #include "vulkan_utils.hpp"
 
 namespace elemd
@@ -80,7 +80,6 @@ namespace elemd
         {
             extensions.push_back(requiredExtensions[i]);
         }
-
 
         std::vector<const char*> validationLayers = {};
 #ifndef NDEBUG
@@ -171,13 +170,10 @@ namespace elemd
 
         // --------------- Create Device Create Info ---------------
 
-        
-        
         VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
         descriptorIndexingFeatures.sType =
             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
         descriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
-        
 
         VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
         physicalDeviceFeatures.sampleRateShading = VK_TRUE;
@@ -198,9 +194,7 @@ namespace elemd
 
         // --------------- Create Device ---------------
 
-        vku::err_check(vkCreateDevice(bestPhysicalDevice, &deviceCreateInfo,
-                                      nullptr, &device));
-    
+        vku::err_check(vkCreateDevice(bestPhysicalDevice, &deviceCreateInfo, nullptr, &device));
     }
 
     void VulkanSharedInfo::load_vulkan()

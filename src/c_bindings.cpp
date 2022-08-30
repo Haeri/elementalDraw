@@ -1,6 +1,6 @@
+#include "elemd/context.hpp"
 #include "elemd/elemental_draw.hpp"
 #include "elemd/window.hpp"
-#include "elemd/context.hpp"
 
 extern "C"
 {
@@ -15,7 +15,6 @@ extern "C"
         return delete winc;
     }
 
-
     // COLOR
     ELEMD_API elemd::color* color_new(int r, int g, int b, int a)
     {
@@ -27,7 +26,6 @@ extern "C"
         return delete color;
     }
 
-
     // FONT
     ELEMD_API elemd::Font* font_new(char* file_path)
     {
@@ -38,8 +36,6 @@ extern "C"
     {
         return font->destroy();
     }
-
-
 
     // WINDOW
     ELEMD_API elemd::Window* Window_new(elemd::WindowConfig* wc)
@@ -61,20 +57,17 @@ extern "C"
     {
         win->poll_events();
     }
-    
+
     ELEMD_API void is_running(elemd::Window* win)
     {
         win->is_running();
     }
-
-
 
     // CONTEXT
     ELEMD_API void prepare(elemd::Context* ctx)
     {
         return ctx->_tmp_prepare();
     }
-    
 
     ELEMD_API void draw_frame(elemd::Context* ctx)
     {

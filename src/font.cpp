@@ -2,9 +2,9 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <vector>
-#include <math.h>
 #include <fstream>
+#include <math.h>
+#include <vector>
 
 namespace elemd
 {
@@ -56,7 +56,6 @@ namespace elemd
                 {
                     _ret += "\n" + line;
                 }
-                
             }
         }
         else
@@ -75,7 +74,6 @@ namespace elemd
         float height = 0;
 
         float scale = (float)font_size / LOADED_HEIGHT;
-        
 
         for (auto& token : text)
         {
@@ -111,7 +109,6 @@ namespace elemd
             width = x;
         }
 
-
         height = y + _line_height * scale;
 
         return elemd::vec2(width, height);
@@ -144,24 +141,24 @@ namespace elemd
         return out;
     }
 
-    void Font::load_from_file(std::string file_path) 
+    void Font::load_from_file(std::string file_path)
     {
         std::ifstream file(file_path, std::ios::binary | std::ios::ate);
         if (file)
         {
             size_t fileSize = (size_t)file.tellg();
-            unsigned char* fileBuffer = (unsigned char*)malloc(sizeof(unsigned char)*fileSize);
+            unsigned char* fileBuffer = (unsigned char*)malloc(sizeof(unsigned char) * fileSize);
             file.seekg(0);
             file.read((char*)fileBuffer, fileSize);
             file.close();
 
             _name = file_path;
-        
+
             load_from_memory(fileBuffer, fileSize);
         }
         else
         {
-            std::cerr << "WARNING: Font "<< file_path << " not found!" << std::endl;
+            std::cerr << "WARNING: Font " << file_path << " not found!" << std::endl;
         }
     }
 
@@ -312,9 +309,9 @@ namespace elemd
                 y += _line_height * scale;
                 x = 0;
 
-                return character_index+1;
+                return character_index + 1;
             }
-            
+
             float xpos = x + ch.bearing.x() * scale;
             float ypos = y + (LOADED_HEIGHT - ch.bearing.y()) * scale;
 

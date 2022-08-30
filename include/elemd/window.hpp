@@ -5,9 +5,9 @@
 #include "elemd/event.hpp"
 #include "elemd/vec2.hpp"
 
-#include <string>
 #include <cstdint>
 #include <functional>
+#include <string>
 
 //#define ELEMD_ICON "./elemd_res/elemd_icon.png"
 
@@ -91,9 +91,8 @@ namespace elemd
         void set_fullscreen(bool fullscreen);
 
         bool is_fullscreen();
-        
-        
-        void add_resize_listener(std::function<void(resize_event)>callback);
+
+        void add_resize_listener(std::function<void(resize_event)> callback);
         void add_mouse_move_listener(std::function<void(mouse_move_event)> callback);
         void add_mouse_click_listener(std::function<void(mouse_button_event)> callback);
         void add_key_listener(std::function<void(key_event)> callback);
@@ -121,9 +120,8 @@ namespace elemd
         Window() = default;
         virtual ~Window() = default;
 
-
         Context* _context = nullptr;
-        bool _vsync = true;        
+        bool _vsync = true;
     };
 
 } // namespace elemd

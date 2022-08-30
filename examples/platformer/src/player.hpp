@@ -43,7 +43,7 @@ public:
                 {
                     jump();
                 }
-            }            
+            }
         });
     }
 
@@ -54,7 +54,6 @@ private:
     bool _right_key = false;
 
     elemd::Window* _win = nullptr;
-
 };
 
 #endif // PLAYER_H

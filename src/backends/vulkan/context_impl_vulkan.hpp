@@ -3,29 +3,27 @@
 
 #include "elemd/context.hpp"
 
-#include <string>
-#include <vector>
 #include <array>
 #include <atomic>
+#include <string>
+#include <vector>
 
-#include "elemd/vec2.hpp"
+#include "../../window_impl.hpp"
 #include "elemd/color.hpp"
+#include "elemd/vec2.hpp"
+#include "image_impl_vulkan.hpp"
 #include "vertex.hpp"
 #include "vulkan_shared_info.hpp"
 #include "vulkan_utils.hpp"
-#include "../../window_impl.hpp"
-#include "image_impl_vulkan.hpp"
 
-#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536*2
+#define UNIFORM_BUFFER_ARRAY_MAX_COUNT 65536 * 2
 #define UNIFORM_RECT_BUFFER_ARRAY_MAX_SIZE UNIFORM_BUFFER_ARRAY_MAX_COUNT * sizeof(uniform_rect)
-
 
 namespace elemd
 {
     class ContextImplVulkan : public Context
     {
-    public:            
-
+    public:
         struct uniform_rect
         {
             class color color;      // 16   1
@@ -39,7 +37,7 @@ namespace elemd
             float shadow_size;      //
             float is_msdf[3];       // 16   1
         };                          // 128
-        
+
         struct draw_sequence
         {
             int start_index;
@@ -49,16 +47,15 @@ namespace elemd
         ImageImplVulkan* dummy;
         std::vector<ImageImplVulkan*> images;
 
-        //std::vector<vertex> rect_vertices = {{vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
+        // std::vector<vertex> rect_vertices = {{vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
         std::vector<uint32_t> rect_indices = {0, 1, 2, 1, 3, 2};
-        
+
         std::vector<point_vertex> rect_vertices = {
-            {vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}
-        };
+            {vec2(0)}, {vec2(1, 0)}, {vec2(0, 1)}, {vec2(1)}};
 
         std::vector<draw_sequence> draw_sequence_chain = {};
 
-        ///std::vector<uniform_rect> uniforms = {};
+        /// std::vector<uniform_rect> uniforms = {};
         std::vector<uniform_rect> storage = {};
         int last_uniform_cnt = 0;
 
@@ -89,14 +86,14 @@ namespace elemd
         VkCommandPool commandPool{};
         VkCommandBuffer* commandBuffers;
 
-        //VkBuffer vertexBuffer = VK_NULL_HANDLE;
-        //VkDeviceMemory vertexBufferDeviceMemory;
+        // VkBuffer vertexBuffer = VK_NULL_HANDLE;
+        // VkDeviceMemory vertexBufferDeviceMemory;
 
         VkBuffer indexBuffer{};
         VkDeviceMemory indexBufferDeviceMemory{};
 
-        ///VkBuffer uniformBuffer;
-        ///VkDeviceMemory uniformBufferDeviceMemory;
+        /// VkBuffer uniformBuffer;
+        /// VkDeviceMemory uniformBufferDeviceMemory;
 
         VkBuffer storageBuffer{};
         VkDeviceMemory storageBufferDeviceMemory{};
@@ -126,7 +123,7 @@ namespace elemd
         void create_command_buffers();
         void create_vertex_buffers();
         void create_index_buffers();
-        ///void create_uniform_buffer();
+        /// void create_uniform_buffer();
         void create_storage_buffer();
         void create_descriptor_pool();
         void create_descriptor_set();
@@ -135,7 +132,7 @@ namespace elemd
         void create_semaphores();
         void initialize_resources();
 
-        ///void update_uniforms();
+        /// void update_uniforms();
         void update_storage();
         void update_swapchain(uint32_t width, uint32_t height);
 

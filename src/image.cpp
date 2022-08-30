@@ -7,7 +7,7 @@ namespace elemd
 {
     unsigned char* Image::_dummy_data = new unsigned char[4]{255, 0, 255, 255};
 
-    std::map<std::string, Image*> Image::_image_index;    
+    std::map<std::string, Image*> Image::_image_index;
 
     int Image::get_width()
     {

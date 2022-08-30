@@ -1,8 +1,8 @@
 #include "shared_library.hpp"
 
 #ifndef _MSC_VER
-    #include <sys/stat.h>
-    #include <dlfcn.h>
+#include <dlfcn.h>
+#include <sys/stat.h>
 #endif
 
 SharedLibrary::SharedLibrary(std::string libraryName)
@@ -35,22 +35,25 @@ void SharedLibrary::onReload()
 
 bool SharedLibrary::reload()
 {
-    if (!freeSharedLibrary()) return false;
-    if (!load()) return false;
-    
+    if (!freeSharedLibrary())
+        return false;
+    if (!load())
+        return false;
+
     return true;
 }
 
 bool SharedLibrary::load(int iMode)
 {
-    if (!copyLibrary()) return false;
+    if (!copyLibrary())
+        return false;
 
     try
     {
 #ifdef _MSC_VER
-    _library = (void*)LoadLibrary(TEXT(_libraryCopyPath.c_str()));
+        _library = (void*)LoadLibrary(TEXT(_libraryCopyPath.c_str()));
 #elif __GNUC__
-    _library = dlopen(_libraryCopyPath.c_str(), iMode);
+        _library = dlopen(_libraryCopyPath.c_str(), iMode);
 #endif
     }
     catch (...)
@@ -58,9 +61,11 @@ bool SharedLibrary::load(int iMode)
         std::cerr << "Error: Faild to read " << _libraryName << std::endl;
     }
 
-    if (_library == nullptr) return false;
-    
-    if (!loadFunctions()) {
+    if (_library == nullptr)
+        return false;
+
+    if (!loadFunctions())
+    {
         std::cerr << "Error: Faild to load functions from " << _libraryName << std::endl;
         return false;
     }
@@ -95,35 +100,28 @@ bool SharedLibrary::freeSharedLibrary()
 
 bool SharedLibrary::copyLibrary()
 {
-    if(!fileExists(_fullLibraryPath)) {
+    if (!fileExists(_fullLibraryPath))
+    {
         std::cerr << "Error: Library (" << _fullLibraryPath << ") not found!" << std::endl;
         return false;
-    } 
+    }
     std::ifstream src(_fullLibraryPath.c_str(), std::ios::binary);
     std::ofstream dst(_libraryCopyPath.c_str(), std::ios::binary);
 
     dst << src.rdbuf();
-    if(!fileExists(_libraryCopyPath)) {
+    if (!fileExists(_libraryCopyPath))
+    {
         std::cerr << "Error: Could not copy library to " << _libraryCopyPath << "!" << std::endl;
         return false;
-    } 
+    }
 
     return true;
 }
 
-
-std::string SharedLibrary::getName(){
-    return _libraryName;    
+std::string SharedLibrary::getName()
+{
+    return _libraryName;
 }
-
-
-
-
-
-
-
-
-
 
 std::string SharedLibrary::getFileName(const std::string& s)
 {
@@ -150,8 +148,8 @@ std::string SharedLibrary::getFilePath(const std::string& s)
     return ("");
 }
 
-bool SharedLibrary::fileExists(const std::string& filename) 
+bool SharedLibrary::fileExists(const std::string& filename)
 {
-  struct stat buffer;   
-  return (stat (filename.c_str(), &buffer) == 0); 
+    struct stat buffer;
+    return (stat(filename.c_str(), &buffer) == 0);
 }

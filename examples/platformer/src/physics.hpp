@@ -16,21 +16,22 @@ namespace physics
 {
     static bool point_to_rect(const elemd::vec2& p, const rect* r)
     {
-        return (p.get_x() >= r->pos.get_x() && 
-            p.get_y() >= r->pos.get_y() && 
-            p.get_x() < r->pos.get_x() + r->size.get_x() &&
+        return (p.get_x() >= r->pos.get_x() && p.get_y() >= r->pos.get_y() &&
+                p.get_x() < r->pos.get_x() + r->size.get_x() &&
                 p.get_y() < r->pos.get_y() + r->size.get_y());
     }
 
     static bool rect_to_rect(const rect* r1, const rect* r2)
     {
-        return (r1->pos.get_x() < r2->pos.get_x() + r2->size.get_x() && r1->pos.get_x() + r1->size.get_x() > r2->pos.get_x() &&
-                r1->pos.get_y() < r2->pos.get_y() + r2->size.get_y() && r1->pos.get_y() + r1->size.get_y() > r2->pos.get_y());
+        return (r1->pos.get_x() < r2->pos.get_x() + r2->size.get_x() &&
+                r1->pos.get_x() + r1->size.get_x() > r2->pos.get_x() &&
+                r1->pos.get_y() < r2->pos.get_y() + r2->size.get_y() &&
+                r1->pos.get_y() + r1->size.get_y() > r2->pos.get_y());
     }
 
     static bool ray_to_rect(const elemd::vec2& ray_origin, const elemd::vec2& ray_dir,
-                            const rect* target,
-                   elemd::vec2& contact_point, elemd::vec2& contact_normal, float& t_hit_near)
+                            const rect* target, elemd::vec2& contact_point,
+                            elemd::vec2& contact_normal, float& t_hit_near)
     {
         contact_normal = {0, 0};
         contact_point = {0, 0};
@@ -87,6 +88,6 @@ namespace physics
         return true;
     }
 
-}
+} // namespace physics
 
 #endif // PHYSICS_HPP

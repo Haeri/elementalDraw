@@ -41,6 +41,6 @@ namespace elemd
 
     int Context::get_height()
     {
-        return _height;    
+        return _height;
     }
-}
+} // namespace elemd

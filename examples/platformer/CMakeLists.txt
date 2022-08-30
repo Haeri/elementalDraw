@@ -1,11 +1,19 @@
 set(PROJECT_NAME platformer)
 project(${PROJECT_NAME})
 
+if(WIN32) 
+    set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/res/app.rc")
+else()
+    set(APP_ICON_RESOURCE_WINDOWS "")
+endif()
+
 file(GLOB_RECURSE SOURCE_FILES
-        src/*.hpp
-        src/*.cpp
+    src/*.hpp
+    src/*.cpp
 	src/*.h
-	src/*.c)
+	src/*.c
+    ${APP_ICON_RESOURCE_WINDOWS}
+)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 if(MSVC)

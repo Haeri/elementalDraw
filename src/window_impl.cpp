@@ -1,7 +1,7 @@
 #include "window_impl.hpp"
 
-#include <iostream>
 #include "stb_image.h"
+#include <iostream>
 
 #include "elemd/context.hpp"
 
@@ -28,7 +28,6 @@ namespace elemd
     {
         return (const WindowImpl*)ptr;
     }
-
 
     /* ------------------------ FUNCTION DECLARATION ------------------------ */
 
@@ -91,14 +90,14 @@ namespace elemd
         impl->_x_offset = x; // * impl->_dpi_scale;
         impl->_y_offset = y; // * impl->_dpi_scale;
     }
-    
+
     void Window::set_fullscreen(bool fullscreen)
     {
         WindowImpl* impl = getImpl(this);
 
         if (is_fullscreen() == fullscreen)
             return;
-        
+
         if (fullscreen)
         {
             GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -139,7 +138,7 @@ namespace elemd
         WindowImpl* impl = getImpl(this);
         impl->_mouse_button_callbacks.push_back(callback);
     }
-    
+
     void Window::add_key_listener(std::function<void(key_event)> callback)
     {
         WindowImpl* impl = getImpl(this);
@@ -183,13 +182,14 @@ namespace elemd
     void Window::set_cursor(Cursor* cursor)
     {
         WindowImpl* impl = getImpl(this);
-        if (cursor == nullptr) {
+        if (cursor == nullptr)
+        {
             glfwSetCursor(impl->_glfw_window, NULL);
             return;
         }
 
         if (impl->_cursors.find(cursor) == impl->_cursors.end())
-        {         
+        {
             GLFWimage image;
             image.width = 16;
             image.height = 16;
@@ -282,7 +282,6 @@ namespace elemd
         WindowImpl* impl = getImpl(this);
         return impl->_dpi_scale;
     }
-    
 
     double Window::now()
     {
@@ -362,7 +361,6 @@ namespace elemd
         glfwWindowHint(GLFW_VISIBLE, config.visible);
         glfwWindowHint(GLFW_SCALE_TO_MONITOR, !config.native_pixel_size);
 
-
         create_window(config);
     }
 
@@ -438,15 +436,15 @@ namespace elemd
         {
             set_position(config.position_x, config.position_y);
         }
-        
+
         glfwMakeContextCurrent(_glfw_window);
-        glfwGetWindowContentScale(_glfw_window, &_dpi_scale, &_dpi_scale);  
+        glfwGetWindowContentScale(_glfw_window, &_dpi_scale, &_dpi_scale);
 
         if (config.native_pixel_size)
         {
             _dpi_scale = 1;
         }
-        
+
         _vsync = config.vsync;
         if (!_vsync)
         {
@@ -454,7 +452,7 @@ namespace elemd
         }
 
         //_x_scale = config.x_scale;
-        //_y_scale = config.y_scale;        
+        //_y_scale = config.y_scale;
     }
 
     void WindowImpl::load_icon(const WindowConfig& config)
@@ -464,8 +462,8 @@ namespace elemd
 
         GLFWimage icon[1];
         int numComponents;
-        icon[0].pixels = stbi_load(config.icon_file, &icon[0].width, &icon[0].height,
-                                   &numComponents, 4);
+        icon[0].pixels =
+            stbi_load(config.icon_file, &icon[0].width, &icon[0].height, &numComponents, 4);
 
         if (icon[0].pixels == NULL)
         {
@@ -476,14 +474,6 @@ namespace elemd
         glfwSetWindowIcon(_glfw_window, 1, icon);
         stbi_image_free(icon[0].pixels);
     }
-
-
-
-
-
-
-
-
 
     /* ------------------------ EVENTS ------------------------ */
 
@@ -502,7 +492,7 @@ namespace elemd
             var({(int)(width / winImpl->_dpi_scale), (int)(height / winImpl->_dpi_scale)});
         }
     }
-    
+
     void mouse_position_callback(GLFWwindow* window, double x, double y)
     {
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
@@ -515,7 +505,8 @@ namespace elemd
         }
         */
 #ifdef DEBUG
-        std::cout << "event: mouse_position " << "x: " << x << " y: " << y << std::endl;
+        std::cout << "event: mouse_position "
+                  << "x: " << x << " y: " << y << std::endl;
 #endif
         for (auto& var : winImpl->_mouse_move_callbacks)
         {

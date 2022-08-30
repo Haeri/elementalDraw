@@ -1,11 +1,10 @@
-﻿#include <elemd/color.hpp>
+﻿#include <algorithm>
+#include <elemd/color.hpp>
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
-#include <math.h> 
-#include <algorithm>
-#include <vector>
 #include <functional>
-
+#include <math.h>
+#include <vector>
 
 enum State
 {
@@ -19,12 +18,11 @@ struct Slide
     std::function<void(Slide*, float)> draw;
     float transition_in = 0;
     float transition_out = 0;
-    
+
     State state = IN;
     float in_progress = 0;
     float out_progress = 0;
 };
-
 
 struct MorphSlide : Slide
 {
@@ -33,7 +31,7 @@ struct MorphSlide : Slide
 
 int main(void)
 {
- 
+
     // Configure and create window
     elemd::WindowConfig winc = elemd::WindowConfig{"Presenter", 600, 500};
     winc.icon_file = "./res/logo.png";
@@ -53,9 +51,8 @@ int main(void)
     elemd::Image* whatsapp = elemd::Image::create("./res/whatsapp_screen.jpg");
     elemd::Image* teams = elemd::Image::create("./res/teams_screen.jpg");
 
-
     // Load video
-    //elemd::video* sea = elemd::video::create("./res/Sea.mp4");
+    // elemd::video* sea = elemd::video::create("./res/Sea.mp4");
 
     ctx->_tmp_register_image(img);
     ctx->_tmp_register_image(discrod);
@@ -75,7 +72,7 @@ int main(void)
                           if (s->state == IN)
                           {
                               float p = s->in_progress / s->transition_in;
-                              ctx->draw_image(30, 30 + (20 - p*20), 300, 300, img);
+                              ctx->draw_image(30, 30 + (20 - p * 20), 300, 300, img);
                           }
                           else
                           {
@@ -86,14 +83,12 @@ int main(void)
     slides.push_back({[&](Slide* s, float dt) { ctx->draw_image(0, 0, 300, 300, discrod); }, 3});
     slides.push_back({[&](Slide* s, float dt) { ctx->draw_image(0, 0, 300, 300, github); }, 3});
 
-   
     // Event
     win->add_mouse_move_listener([&](elemd::mouse_move_event event) {
 
     });
 
     win->add_key_listener([&](elemd::key_event event) {
-        
         if (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT)
         {
             if (event.key == elemd::KEY_LEFT)
@@ -114,13 +109,14 @@ int main(void)
             }
         }
 
-        if (event.action == elemd::ACTION_PRESS && event.key == elemd::KEY_P) {
+        if (event.action == elemd::ACTION_PRESS && event.key == elemd::KEY_P)
+        {
             win->set_fullscreen(!win->is_fullscreen());
         }
     });
 
     ctx->_tmp_prepare();
-//    ctx->set_clear_color(dark);
+    //    ctx->set_clear_color(dark);
 
     double last_time = win->now();
     float dt = 0;
@@ -133,7 +129,7 @@ int main(void)
         if (slides[index].state == IN && slides[index].transition_in > 0)
         {
             dt = win->now() - last_time;
-            slides[index].in_progress += dt; 
+            slides[index].in_progress += dt;
             last_time = win->now();
 
             if (slides[index].in_progress >= slides[index].transition_in)
@@ -143,11 +139,9 @@ int main(void)
             }
         }
         slides[index].draw(&slides[index], dt);
-        
-        
+
         ctx->draw_frame();
         ctx->present_frame();
-
     }
 
     // Cleanup

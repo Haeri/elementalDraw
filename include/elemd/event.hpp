@@ -174,7 +174,7 @@ namespace elemd
         KEY_MOD_CAPS_LOCK = 0x0010,
         KEY_MOD_NUM_LOCK = 0x0020,
     } keyboard_mod;
-   
+
     struct ELEMD_API resize_event
     {
         int width;
@@ -210,7 +210,7 @@ namespace elemd
         keyboard_mod mods;
         const char* key_name;
     };
-    
+
     struct ELEMD_API char_event
     {
         unsigned int unnicode;
