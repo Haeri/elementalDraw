@@ -25,6 +25,9 @@ do
 	if [ "$var" = "-static" ]; then
 		build_type="-DBUILD_SHARED_LIBS=OFF"
 	fi
+	if [ "$var" = "-ui" ]; then
+		feature_list="-DELEMD_UI=ON $feature_list"
+	fi
 	if [ "$var" = "-audio" ]; then
 		feature_list="-DELEMD_AUDIO=ON $feature_list"
 	fi

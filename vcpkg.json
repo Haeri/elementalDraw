@@ -15,6 +15,9 @@
             "dependencies": [
                 "miniaudio"
             ]
+        },
+        "ui": {
+            "description": "Enable DOM based ui creation and management"
         }
     },
     "dependencies":

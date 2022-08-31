@@ -31,7 +31,7 @@ jobs:
         restore-keys: vcpkg-win
     - name: Generate Solution
     # removing -video flag till https://github.com/microsoft/vcpkg/issues/23021 is fixed
-      run: ./scripts/generate_project_win.bat -${{ matrix.type }} -audio -s
+      run: ./scripts/generate_project_win.bat -${{ matrix.type }} -ui -audio -s
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -76,7 +76,7 @@ jobs:
         key: vcpkg-linux
         restore-keys: vcpkg-linux
     - name: Generate Solution
-      run: ./scripts/generate_project_linux.sh -${{ matrix.type }} -video -audio
+      run: ./scripts/generate_project_linux.sh -${{ matrix.type }} -ui -video -audio
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -120,7 +120,7 @@ jobs:
         key: vcpkg-mac
         restore-keys: vcpkg-mac
     - name: Generate Solution
-      run: ./scripts/generate_project_mac.sh -${{ matrix.type }} -video -audio
+      run: ./scripts/generate_project_mac.sh -${{ matrix.type }} -ui -video -audio
     - name: Debug
       if: ${{ failure() }}
       run: |

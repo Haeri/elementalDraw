@@ -34,6 +34,9 @@ for %%A in (%*) do (
 		set build_type=-DBUILD_SHARED_LIBS=OFF
 		set triplet_value=x64-windows-static
 	)
+	if "%%A" == "-ui" (
+		set "feature_list=!feature_list! -DELEMD_UI=ON"
+	)
 	if "%%A" == "-audio" (
 		set "feature_list=!feature_list! -DELEMD_AUDIO=ON"
 	)

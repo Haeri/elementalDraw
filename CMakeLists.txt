@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
 # Features
+option(ELEMD_UI "Enable DOM based ui creation and management" OFF)
+if(ELEMD_UI)
+  list(APPEND VCPKG_MANIFEST_FEATURES "ui")
+endif()
+
 option(ELEMD_AUDIO "Enable audio loading and playyback with miniaudio" OFF)
 if(ELEMD_AUDIO)
   list(APPEND VCPKG_MANIFEST_FEATURES "audio")
@@ -19,8 +24,8 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 if(APPLE)
-    #set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
-    set(ELEMD_DEFAULT_RENDERING_BACKEND "metal")
+    set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
+    #set(ELEMD_DEFAULT_RENDERING_BACKEND "metal")
 else()
     set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
 endif()
@@ -52,6 +57,13 @@ file(GLOB_RECURSE SOURCE_FILES
     src/backends/${ELEMD_RENDERING_BACKEND}/*
 )
 
+if(ELEMD_UI)
+    file(GLOB SOURCE_FILES
+        ${SOURCE_FILES}
+        include/${PROJECT_NAME}/ui/*.hpp
+        src/ui/*    
+    )
+endif()
 if(ELEMD_VIDEO)
     file(GLOB SOURCE_FILES
         ${SOURCE_FILES}
@@ -173,6 +185,16 @@ if (ELEMD_BUILD_EXAMPLES)
     set_target_properties(window-app PROPERTIES FOLDER examples)
     set_target_properties(window-app-runtime PROPERTIES FOLDER examples)
 
+    if (ELEMD_UI)
+        add_subdirectory(examples/calculator)
+        add_subdirectory(examples/elemx)
+        add_subdirectory(examples/slack)
+        add_subdirectory(examples/tasker)
+        set_target_properties(calculator PROPERTIES FOLDER examples)
+        set_target_properties(elemx PROPERTIES FOLDER examples)
+        set_target_properties(slack PROPERTIES FOLDER examples)
+        set_target_properties(tasker PROPERTIES FOLDER examples)
+    endif()
     if (ELEMD_AUDIO)
         add_subdirectory(examples/platformer)
         set_target_properties(platformer PROPERTIES FOLDER examples)        
@@ -198,6 +220,17 @@ if (ELEMD_BUILD_EXAMPLES)
         COMMENT "Copy library"
     )
 
+    if (ELEMD_UI)
+        add_custom_command(
+            TARGET ${PROJECT_NAME} POST_BUILD
+            DEPENDS calculator elemx slack tasker  
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/calculator/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/elemx/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/slack/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/tasker/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
+            COMMENT "Copy library"
+        )
+    endif()
     if (ELEMD_AUDIO)
         add_custom_command(
             TARGET ${PROJECT_NAME} POST_BUILD
