@@ -25,10 +25,10 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Cache
       uses: actions/cache@v2
-        with:
-          path: ./external/vcpkg
-          key: vcpkg-win
-          restore-keys: vcpkg-win
+      with:
+        path: ./external/vcpkg
+        key: vcpkg-win
+        restore-keys: vcpkg-win
     - name: Generate Solution
     # removing -video flag till https://github.com/microsoft/vcpkg/issues/23021 is fixed
       run: ./scripts/generate_project_win.bat -${{ matrix.type }} -audio -s
@@ -71,10 +71,10 @@ jobs:
         sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev nasm
     - name: Cache
       uses: actions/cache@v2
-        with:
-          path: ./external/vcpkg
-          key: vcpkg-linux
-          restore-keys: vcpkg-linux
+      with:
+        path: ./external/vcpkg
+        key: vcpkg-linux
+        restore-keys: vcpkg-linux
     - name: Generate Solution
       run: ./scripts/generate_project_linux.sh -${{ matrix.type }} -video -audio
     - name: Debug
@@ -115,10 +115,10 @@ jobs:
       run: brew install nasm
     - name: Cache
       uses: actions/cache@v2
-        with:
-          path: ./external/vcpkg
-          key: vcpkg-mac
-          restore-keys: vcpkg-mac
+      with:
+        path: ./external/vcpkg
+        key: vcpkg-mac
+        restore-keys: vcpkg-mac
     - name: Generate Solution
       run: ./scripts/generate_project_mac.sh -${{ matrix.type }} -video -audio
     - name: Debug
