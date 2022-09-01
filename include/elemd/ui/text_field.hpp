@@ -1,5 +1,5 @@
-#ifndef ELEM_TEXT_FIELD_H
-#define ELEM_TEXT_FIELD_H
+#ifndef ELEMD_TEXT_FIELD_H
+#define ELEMD_TEXT_FIELD_H
 
 #include <elemd/elemental_draw.hpp>
 #include <limits>
@@ -39,4 +39,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEM_TEXT_FIELD_H
+#endif // ELEMD_TEXT_FIELD_H

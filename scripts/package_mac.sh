@@ -32,6 +32,17 @@ if [ "$1" = "-static" ]; then
 	# Benchmark
 	mkdir -p samples/benchmark
 	cp ./build/examples/benchmark/Release/benchmark ./samples/benchmark
+	
+	# Calculator
+	mkdir -p samples/calculator
+	cp -R ./build/examples/calculator/res ./samples/calculator
+	cp ./build/examples/calculator/Release/calculator ./samples/calculator
+
+	# Slack
+	mkdir -p samples/slack
+	cp -R ./build/examples/slack/res ./samples/slack
+	cp ./build/examples/slack/Release/slack ./samples/slack
+	
 else
 	mkdir bin
 	cp ./build/Release/libelemd*.dylib ./bin/

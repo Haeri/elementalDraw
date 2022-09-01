@@ -1,5 +1,5 @@
-#ifndef ELEM_NODE_H
-#define ELEM_NODE_H
+#ifndef ELEMD_NODE_H
+#define ELEMD_NODE_H
 
 #include "elemd/ui/elemental_ui.hpp"
 
@@ -167,4 +167,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEM_NODE_H
+#endif // ELEMD_NODE_H

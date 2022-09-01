@@ -1,5 +1,5 @@
-#ifndef ELEM_DOCUMENT_H
-#define ELEM_DOCUMENT_H
+#ifndef ELEMD_DOCUMENT_H
+#define ELEMD_DOCUMENT_H
 
 #include <elemd/elemental_draw.hpp>
 
@@ -57,4 +57,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEM_DOCUMENT_H
+#endif // ELEMD_DOCUMENT_H

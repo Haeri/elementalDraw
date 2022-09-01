@@ -29,7 +29,15 @@ if "%1" == "-static" (
 
 	:: Benchmark
 	xcopy ".\build\examples\benchmark\Release\benchmark.exe" ".\samples\benchmark\"
+	
+    :: Calculator
+	xcopy ".\build\examples\calculator\res" ".\samples\calculator\res" /I/E
+	xcopy ".\build\examples\calculator\Release\calculator.exe" ".\samples\calculator\"
 
+	:: Slack
+	xcopy ".\build\examples\slack\res" ".\samples\slack\res" /I/E
+	xcopy ".\build\examples\slack\Release\slack.exe" ".\samples\slack\"
+	
 ) else (
 	xcopy ".\build\Release\elemd.dll" ".\bin\"
 	xcopy ".\build\Release\elemd.lib" ".\lib\"

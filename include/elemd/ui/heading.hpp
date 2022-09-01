@@ -1,5 +1,5 @@
-#ifndef ELEM_HEADING_H
-#define ELEM_HEADING_H
+#ifndef ELEMD_HEADING_H
+#define ELEMD_HEADING_H
 
 #include <elemd/elemental_draw.hpp>
 #include <limits>
@@ -33,4 +33,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEM_HEADING_H
+#endif // ELEMD_HEADING_H

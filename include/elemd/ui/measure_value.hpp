@@ -1,5 +1,5 @@
-#ifndef ELEM_MEASURE_VALUE_H
-#define ELEM_MEASURE_VALUE_H
+#ifndef ELEMD_MEASURE_VALUE_H
+#define ELEMD_MEASURE_VALUE_H
 
 #include <elemd/elemental_draw.hpp>
 
@@ -35,4 +35,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEM_MEASURE_VALUE_H
+#endif // ELEMD_MEASURE_VALUE_H

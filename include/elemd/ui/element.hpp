@@ -1,5 +1,5 @@
-#ifndef ELEM_ELEMENT_H
-#define ELEM_ELEMENT_H
+#ifndef ELEMD_ELEMENT_H
+#define ELEMD_ELEMENT_H
 
 #include <elemd/elemental_draw.hpp>
 #include <limits>
@@ -21,4 +21,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEM_ELEMENT_H
+#endif // ELEMD_ELEMENT_H

@@ -92,9 +92,9 @@ print("------------------------------- START -------------------------------")
 indexAll()
 countFiles()
 
-#print("")
+print("")
 
-#memoryCheckModule()
-#syncCheckModule()
+memoryCheckModule()
+syncCheckModule()
 
 print("------------------------------- DONE -------------------------------")
