@@ -1,10 +1,9 @@
-#ifndef ELEMD_ELEMX_PARSER_H
-#define ELEMD_ELEMX_PARSER_H
+#ifndef ELEMD_ELEMX_PARSER_HPP
+#define ELEMD_ELEMX_PARSER_HPP
 
 #include <unordered_map>
 
 #include "elemd/ui/element.hpp"
-#include "elemd/ui/elemental_ui.hpp"
 
 namespace elemd
 {
@@ -49,4 +48,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEMD_ELEMX_PARSER_H
+#endif // ELEMD_ELEMX_PARSER_HPP

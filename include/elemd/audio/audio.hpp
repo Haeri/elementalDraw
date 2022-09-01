@@ -1,10 +1,10 @@
-#ifndef ELEMD_AUDIO_H
-#define ELEMD_AUDIO_H
+#ifndef ELEMD_AUDIO_HPP
+#define ELEMD_AUDIO_HPP
 
 #include <string>
 #include <vector>
 
-#include <elemd/elemental_draw.hpp>
+#include "elemd/elemental_draw.hpp"
 
 #define CHANNELS 2 /* Must be stereo for this example. */
 #define SAMPLE_RATE 48000

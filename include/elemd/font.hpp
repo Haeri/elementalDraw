@@ -1,10 +1,11 @@
 #ifndef ELEMD_FONT_HPP
 #define ELEMD_FONT_HPP
 
-#include <elemd/elemental_draw.hpp>
-#include <elemd/image.hpp>
-#include <elemd/vec2.hpp>
 #include <map>
+
+#include "elemd/elemental_draw.hpp"
+#include "elemd/image.hpp"
+#include "elemd/vec2.hpp"
 
 #define LOADED_HEIGHT 128
 //#define NUM_GLYPHS 128

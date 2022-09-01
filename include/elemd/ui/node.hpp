@@ -1,17 +1,17 @@
-#ifndef ELEMD_NODE_H
-#define ELEMD_NODE_H
+#ifndef ELEMD_NODE_HPP
+#define ELEMD_NODE_HPP
 
-#include "elemd/ui/elemental_ui.hpp"
 
 #include <functional>
 #include <vector>
 
-#include <elemd/context.hpp>
-#include <elemd/event.hpp>
-#include <elemd/font.hpp>
-#include <elemd/vec2.hpp>
+#include "elemd/elemental_draw.hpp"
+#include "elemd/context.hpp"
+#include "elemd/event.hpp"
+#include "elemd/font.hpp"
+#include "elemd/vec2.hpp"
+#include "elemd/ui/measure_value.hpp"
 
-#include "measure_value.hpp"
 
 namespace elemd
 {
@@ -167,4 +167,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEMD_NODE_H
+#endif // ELEMD_NODE_HPP

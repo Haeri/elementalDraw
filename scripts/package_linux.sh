@@ -36,12 +36,12 @@ if [ "$1" = "-static" ]; then
 	# Calculator
 	mkdir -p samples/calculator
 	cp -R ./build/examples/calculator/res ./samples/calculator
-	cp ./build/examples/calculator/Release/calculator ./samples/calculator
+	cp ./build/examples/calculator/calculator ./samples/calculator
 
 	# Slack
 	mkdir -p samples/slack
 	cp -R ./build/examples/slack/res ./samples/slack
-	cp ./build/examples/slack/Release/slack ./samples/slack
+	cp ./build/examples/slack/slack ./samples/slack
 else
 	mkdir bin
 	cp ./build/libelemd.so* ./bin/

@@ -2,11 +2,11 @@
 #define ELEMD_CONTEXT_HPP
 
 #include <cstdint>
-#include <elemd/elemental_draw.hpp>
 
-#include "color.hpp"
-#include "font.hpp"
-#include "image.hpp"
+#include "elemd/color.hpp"
+#include "elemd/elemental_draw.hpp"
+#include "elemd/font.hpp"
+#include "elemd/image.hpp"
 
 namespace elemd
 {

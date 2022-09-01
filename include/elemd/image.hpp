@@ -1,10 +1,10 @@
 #ifndef ELEMD_IMAGE_HPP
 #define ELEMD_IMAGE_HPP
 
-#include <elemd/elemental_draw.hpp>
-
 #include <map>
 #include <string>
+
+#include "elemd/elemental_draw.hpp"
 
 namespace elemd
 {

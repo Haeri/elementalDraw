@@ -94,7 +94,7 @@ countFiles()
 
 print("")
 
-memoryCheckModule()
+#memoryCheckModule()
 syncCheckModule()
 
 print("------------------------------- DONE -------------------------------")

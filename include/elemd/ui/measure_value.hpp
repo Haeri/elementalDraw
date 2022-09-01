@@ -1,9 +1,9 @@
-#ifndef ELEMD_MEASURE_VALUE_H
-#define ELEMD_MEASURE_VALUE_H
-
-#include <elemd/elemental_draw.hpp>
+#ifndef ELEMD_MEASURE_VALUE_HPP
+#define ELEMD_MEASURE_VALUE_HPP
 
 #include <string>
+
+#include "elemd/elemental_draw.hpp"
 
 namespace elemd
 {
@@ -35,4 +35,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEMD_MEASURE_VALUE_H
+#endif // ELEMD_MEASURE_VALUE_HPP

@@ -1,9 +1,9 @@
 #ifndef ELEMD_VEC2_HPP
 #define ELEMD_VEC2_HPP
 
-#include <elemd/elemental_draw.hpp>
-
 #include <iostream>
+
+#include "elemd/elemental_draw.hpp"
 
 namespace elemd
 {

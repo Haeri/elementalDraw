@@ -1,15 +1,14 @@
-#ifndef ELEMD_HEADING_H
-#define ELEMD_HEADING_H
+#ifndef ELEMD_HEADING_HPP
+#define ELEMD_HEADING_HPP
 
-#include <elemd/elemental_draw.hpp>
 #include <limits>
 #include <vector>
 
-#include <elemd/color.hpp>
-#include <elemd/context.hpp>
-#include <elemd/vec2.hpp>
-
+#include "elemd/color.hpp"
+#include "elemd/context.hpp"
+#include "elemd/elemental_draw.hpp"
 #include "elemd/ui/node.hpp"
+#include "elemd/vec2.hpp"
 
 namespace elemd
 {
@@ -33,4 +32,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEMD_HEADING_H
+#endif // ELEMD_HEADING_HPP

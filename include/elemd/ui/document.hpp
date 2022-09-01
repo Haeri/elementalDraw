@@ -1,14 +1,13 @@
-#ifndef ELEMD_DOCUMENT_H
-#define ELEMD_DOCUMENT_H
-
-#include <elemd/elemental_draw.hpp>
+#ifndef ELEMD_DOCUMENT_HPP
+#define ELEMD_DOCUMENT_HPP
 
 #include <chrono>
 #include <vector>
 
-#include <elemd/context.hpp>
-#include <elemd/ui/element.hpp>
-#include <elemd/window.hpp>
+#include "elemd/context.hpp"
+#include "elemd/elemental_draw.hpp"
+#include "elemd/ui/element.hpp"
+#include "elemd/window.hpp"
 
 namespace elemd
 {
@@ -57,4 +56,4 @@ namespace elemd
     };
 } // namespace elemd
 
-#endif // ELEMD_DOCUMENT_H
+#endif // ELEMD_DOCUMENT_HPP

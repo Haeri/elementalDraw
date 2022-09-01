@@ -1,10 +1,10 @@
 #ifndef ELEMD_IMAGE_IMPL_VULKAN_HPP
 #define ELEMD_IMAGE_IMPL_VULKAN_HPP
 
-#include "elemd/image.hpp"
-
 #include <map>
 #include <string>
+
+#include "elemd/image.hpp"
 
 #include "glad/vulkan.h"
 

@@ -1,8 +1,6 @@
 #ifndef ELEMD_VULKAN_CONTEXT_HPP
 #define ELEMD_VULKAN_CONTEXT_HPP
 
-#include "elemd/context.hpp"
-
 #include <array>
 #include <atomic>
 #include <string>
@@ -10,6 +8,7 @@
 
 #include "../../window_impl.hpp"
 #include "elemd/color.hpp"
+#include "elemd/context.hpp"
 #include "elemd/vec2.hpp"
 #include "image_impl_vulkan.hpp"
 #include "vertex.hpp"

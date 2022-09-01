@@ -1,13 +1,13 @@
 #ifndef ELEMD_WINDOW_HPP
 #define ELEMD_WINDOW_HPP
 
-#include "elemd/elemental_draw.hpp"
-#include "elemd/event.hpp"
-#include "elemd/vec2.hpp"
-
 #include <cstdint>
 #include <functional>
 #include <string>
+
+#include "elemd/elemental_draw.hpp"
+#include "elemd/event.hpp"
+#include "elemd/vec2.hpp"
 
 //#define ELEMD_ICON "./elemd_res/elemd_icon.png"
 
