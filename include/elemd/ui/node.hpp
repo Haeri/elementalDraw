@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <vector>
+#include <limits>
 
 #include "elemd/elemental_draw.hpp"
 #include "elemd/context.hpp"

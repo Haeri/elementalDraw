@@ -76,7 +76,7 @@ jobs:
         key: vcpkg-linux
         restore-keys: vcpkg-linux
     - name: Generate Solution
-      run: ./scripts/generate_project_linux.sh -${{ matrix.type }} -ui -video -audio
+      run: ./scripts/generate_project_linux.sh -${{ matrix.type }} -ui -video -audio -release
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -85,8 +85,8 @@ jobs:
         tail -n 1000 vcpkg-manifest-install.log
     - name: Build
       run: |
-        cd ./build
-        make CFLAGS='-O2 -s -DNDEBUG' CXXFLAGS='-O2 -s -DNDEBUG'
+        cd ./build/Release
+        make
     - name: Package
       run: ./scripts/package_linux.sh -${{ matrix.type }}
     - name: Upload

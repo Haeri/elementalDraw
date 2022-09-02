@@ -18,12 +18,19 @@ else
 fi
 
 build_type=""
+build_level="Debug"
 feature_list=""
 
 for var in "$@"
 do
 	if [ "$var" = "-static" ]; then
 		build_type="-DBUILD_SHARED_LIBS=OFF"
+	fi
+	if [ "$var" = "-release" ]; then
+		build_level="Release"
+	fi
+	if [ "$var" = "-ui" ]; then
+		feature_list="-DELEMD_UI=ON $feature_list"
 	fi
 	if [ "$var" = "-audio" ]; then
 		feature_list="-DELEMD_AUDIO=ON $feature_list"
@@ -33,7 +40,7 @@ do
 	fi
 done
 
-cmake -B "build" -S . -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
+cmake -B "build/$build_level" -S . -DCMAKE_BUILD_TYPE="$build_level" -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
 err=$?
 
 if [ $err -ne 0 ]; then
