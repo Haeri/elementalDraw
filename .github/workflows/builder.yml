@@ -18,7 +18,7 @@ jobs:
        type: [static, dynamic]
    steps:
     - name: Download Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: 'true'
     - name: Setup Environment
@@ -44,7 +44,7 @@ jobs:
     - name: Package
       run: ./scripts/package_win.bat -${{ matrix.type }} -s
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: elemd_x64-windows
         path: |
@@ -62,7 +62,7 @@ jobs:
        type: [static, dynamic]
    steps:
     - name: Download Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: 'true'
     - name: Setup Environment
@@ -90,7 +90,7 @@ jobs:
     - name: Package
       run: ./scripts/package_linux.sh -${{ matrix.type }}
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: elemd_x64-linux
         path: |
@@ -108,7 +108,7 @@ jobs:
        type: [static, dynamic]
    steps:
     - name: Download Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: 'true'
     - name: Setup Environment
@@ -137,7 +137,7 @@ jobs:
     - name: Package
       run: ./scripts/package_mac.sh -${{ matrix.type }}
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: elemd_x64-macos
         path: |
