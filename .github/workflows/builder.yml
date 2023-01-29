@@ -4,6 +4,8 @@ on:
   push:
     branches:
     - master
+    - dev
+    - metal
 
 jobs:
 
@@ -16,13 +18,20 @@ jobs:
        type: [static, dynamic]
    steps:
     - name: Download Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: 'true'
     - name: Setup Environment
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Cache
+      uses: actions/cache@v3
+      with:
+        path: ./external/vcpkg
+        key: vcpkg-win
+        restore-keys: vcpkg-win
     - name: Generate Solution
-      run: ./scripts/generate_project_win.bat -${{ matrix.type }} -s
+    # removing -video flag till https://github.com/microsoft/vcpkg/issues/23021 is fixed
+      run: ./scripts/generate_project_win.bat -${{ matrix.type }} -ui -audio -s
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -35,7 +44,7 @@ jobs:
     - name: Package
       run: ./scripts/package_win.bat -${{ matrix.type }} -s
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: elemd_x64-windows
         path: |
@@ -53,15 +62,21 @@ jobs:
        type: [static, dynamic]
    steps:
     - name: Download Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: 'true'
     - name: Setup Environment
       run: |
         sudo apt update
         sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev nasm
+    - name: Cache
+      uses: actions/cache@v3
+      with:
+        path: ./external/vcpkg
+        key: vcpkg-linux
+        restore-keys: vcpkg-linux
     - name: Generate Solution
-      run: ./scripts/generate_project_linux.sh -${{ matrix.type }}
+      run: ./scripts/generate_project_linux.sh -${{ matrix.type }} -ui -video -audio -release
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -70,12 +85,12 @@ jobs:
         tail -n 1000 vcpkg-manifest-install.log
     - name: Build
       run: |
-        cd ./build
-        make CFLAGS='-O2 -s -DNDEBUG' CXXFLAGS='-O2 -s -DNDEBUG'
+        cd ./build/Release
+        make
     - name: Package
       run: ./scripts/package_linux.sh -${{ matrix.type }}
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: elemd_x64-linux
         path: |
@@ -93,13 +108,19 @@ jobs:
        type: [static, dynamic]
    steps:
     - name: Download Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: 'true'
     - name: Setup Environment
       run: brew install nasm
+    - name: Cache
+      uses: actions/cache@v3
+      with:
+        path: ./external/vcpkg
+        key: vcpkg-mac
+        restore-keys: vcpkg-mac
     - name: Generate Solution
-      run: ./scripts/generate_project_mac.sh -${{ matrix.type }}
+      run: ./scripts/generate_project_mac.sh -${{ matrix.type }} -ui -video -audio
     - name: Debug
       if: ${{ failure() }}
       run: |
@@ -116,7 +137,7 @@ jobs:
     - name: Package
       run: ./scripts/package_mac.sh -${{ matrix.type }}
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: elemd_x64-macos
         path: |

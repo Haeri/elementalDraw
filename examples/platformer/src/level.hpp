@@ -2,8 +2,8 @@
 #define LEVEL_HPP
 
 #include <elemd/vec2.hpp>
-#include <string>
 #include <map>
+#include <string>
 
 class Player;
 
@@ -15,8 +15,8 @@ struct Block
     elemd::vec2 uv;
 };
 
-
-class Level {
+class Level
+{
 public:
     static std::map<unsigned int, Block> BlockDb;
 

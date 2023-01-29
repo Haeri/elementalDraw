@@ -1,17 +1,17 @@
 #ifndef ENTITY_HPP
 #define ENTITY_HPP
 
-#include <elemd/vec2.hpp>
-#include <elemd/image.hpp>
 #include <elemd/context.hpp>
+#include <elemd/image.hpp>
+#include <elemd/vec2.hpp>
 
-#include "physics.hpp"
 #include "level.hpp"
+#include "physics.hpp"
 
 #define SPRITE_SCALAT_POT 1
 
-
-class Entity {
+class Entity
+{
 public:
     const int MAX_JMP = 2;
 
@@ -24,7 +24,7 @@ public:
     void move(bool left, double dt);
     void jump();
 
-private :
+private:
     void levelCollision();
 
     Level* _level = nullptr;
@@ -36,7 +36,7 @@ private :
     elemd::vec2 _pos = elemd::vec2::ZERO;
     elemd::vec2 _vel = elemd::vec2::ZERO;
     elemd::Image* _sprite = nullptr;
-   
+
     elemd::Context* _ctx = nullptr;
 
     int _jumpcnt = 0;

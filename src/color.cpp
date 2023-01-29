@@ -1,8 +1,8 @@
 #include "elemd/color.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
-#include <algorithm>
 
 #ifdef _MSC_VER
 #define sscanf_cross sscanf_s
@@ -31,8 +31,8 @@ namespace elemd
     color::color(int hex)
     {
         _r = ((hex >> 16) & 0xFF) / 255.0f;
-        _g = ((hex >>  8) & 0xFF) / 255.0f;
-        _b = ((hex      ) & 0xFF) / 255.0f;
+        _g = ((hex >> 8) & 0xFF) / 255.0f;
+        _b = ((hex)&0xFF) / 255.0f;
         _a = 1.0f;
     }
 
@@ -58,7 +58,7 @@ namespace elemd
         {
             sscanf_cross(hex.c_str(), "#%02x%02x%02x%02x", &r, &g, &b, &a);
         }
-        else 
+        else
         {
             std::cerr << "Warning: Malformed hex color \"" << hex
                       << "\". Please use format #RRGGBB or #RRGGBBAA.\n";
@@ -113,7 +113,8 @@ namespace elemd
     std::string color::hex()
     {
         std::stringstream ss;
-        if (_a == 1.0f) {
+        if (_a == 1.0f)
+        {
             ss << "#" << std::hex << (r() << 16 | g() << 8 | b());
         }
         else
@@ -126,7 +127,8 @@ namespace elemd
 
     std::string color::rgb()
     {
-        return "rgb(" + std::to_string(r()) + ", " + std::to_string(g()) + ", " + std::to_string(b()) + ")";
+        return "rgb(" + std::to_string(r()) + ", " + std::to_string(g()) + ", " +
+               std::to_string(b()) + ")";
     }
 
     std::string color::rgba()

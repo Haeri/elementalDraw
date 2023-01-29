@@ -1,5 +1,5 @@
-#include <elemd/window.hpp>
 #include <elemd/context.hpp>
+#include <elemd/window.hpp>
 
 #include "shared_library.hpp"
 
@@ -16,25 +16,24 @@ int main(void)
 #endif
 
 #ifdef _MSC_VER
-    #ifdef NDEBUG
-        std::string bin_folder = "Release/";
-    #else
-        std::string bin_folder = "Debug/";
-    #endif
+#ifdef NDEBUG
+    std::string bin_folder = "Release/";
+#else
+    std::string bin_folder = "Debug/";
+#endif
 #else
     std::string bin_folder = "";
 #endif
 
+    SharedLibrary app("../window_app/" + bin_folder + "window-app");
+    // SharedLibrary app("../brick_breaker/" + bin_folder +  "brick_breaker");
 
-    SharedLibrary app("../window_app/" + bin_folder +  "window-app");
-    //SharedLibrary app("../brick_breaker/" + bin_folder +  "brick_breaker");
-    
     if (!app.load())
     {
         std::cerr << "Error: Could not load " << app.getName() << std::endl;
         return 1;
     }
-    
+
     FileWatch::startCheckInterval();
 
     elemd::WindowConfig winc = app.app_init();
@@ -64,9 +63,8 @@ int main(void)
         }
 
         win->reset_listener();
-
     }
-    
+
     FileWatch::stopCheckInterval();
     return 0;
 }

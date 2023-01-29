@@ -1,0 +1,11 @@
+elem.wrapper, troll#1{
+	h1{"My User Interface"}
+	
+	elem.button_send{
+		p{"Send"}
+	}
+	
+	elem.button_clear{
+		p{"Clear"}
+	}
+}

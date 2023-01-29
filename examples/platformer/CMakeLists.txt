@@ -1,13 +1,25 @@
 set(PROJECT_NAME platformer)
 project(${PROJECT_NAME})
 
+if(WIN32) 
+    set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/res/app.rc")
+else()
+    set(APP_ICON_RESOURCE_WINDOWS "")
+endif()
+
 file(GLOB_RECURSE SOURCE_FILES
-        src/*.hpp
-        src/*.cpp
+    src/*.hpp
+    src/*.cpp
 	src/*.h
-	src/*.c)
+	src/*.c
+    ${APP_ICON_RESOURCE_WINDOWS}
+)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+if(MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+    set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+endif()
 
 # Make res folder available inside the cmake build
 add_custom_command(
@@ -16,9 +28,4 @@ add_custom_command(
     COMMENT "Copying resource files"
 )
 
-# miniaudio needs to link stuff on linux
-if(UNIX AND NOT APPLE)
-    target_link_libraries(${PROJECT_NAME} PRIVATE elemd pthread m dl)
-else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE elemd)
-endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE elemd)

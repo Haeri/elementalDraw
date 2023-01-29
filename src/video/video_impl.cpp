@@ -48,7 +48,7 @@ namespace elemd
         for (unsigned int i = 0; i < format_context->nb_streams; ++i)
         {
             AVCodecParameters* local_codec_parameters = format_context->streams[i]->codecpar;
-            AVCodec* local_codec = avcodec_find_decoder(local_codec_parameters->codec_id);
+            const AVCodec* local_codec = avcodec_find_decoder(local_codec_parameters->codec_id);
 
             if (local_codec == nullptr)
             {

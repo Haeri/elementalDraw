@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 
 :: Store caller path
 set old_path=%cd%
@@ -25,16 +26,35 @@ if not exist "build/" (
 
 set build_type=
 set triplet_value=x64-windows
-if "%1" == "-static" (
-	set build_type=-DBUILD_SHARED_LIBS=OFF
-	set triplet_value=x64-windows-static
+set feature_list=
+set silent=
+
+for %%A in (%*) do (
+	if "%%A" == "-static" (
+		set build_type=-DBUILD_SHARED_LIBS=OFF
+		set triplet_value=x64-windows-static
+	)
+	if "%%A" == "-ui" (
+		set "feature_list=!feature_list! -DELEMD_UI=ON"
+	)
+	if "%%A" == "-audio" (
+		set "feature_list=!feature_list! -DELEMD_AUDIO=ON"
+	)
+	if "%%A" == "-video" (
+		set "feature_list=!feature_list! -DELEMD_VIDEO=ON"
+	)
+
+	if "%%A" == "-s" (
+		set "silent=true"
+	)
 )
 
 cmake -B "build" -S . ^
 	-DVCPKG_TARGET_TRIPLET="%triplet_value%" ^
 	-DVCPKG_OVERLAY_PORTS="%root_path%\external\custom-ports" ^
-	-DCMAKE_TOOLCHAIN_FILE="%root_path%\external\vcpkg\scripts\buildsystems\vcpkg.cmake" %build_type%
-::	-DVCPKG_MANIFEST_FEATURES="video"
+	-DCMAKE_TOOLCHAIN_FILE="%root_path%\external\vcpkg\scripts\buildsystems\vcpkg.cmake" ^
+	%build_type% ^
+	%feature_list% 	
 set /a "err=%err%+%errorlevel%"
 
 
@@ -43,5 +63,5 @@ set /a "err=%err%+%errorlevel%"
 ::-----------------------
 :: Restore to caller path
 cd "%old_path%"
-if not "%1" == "-s" if not "%2" == "-s" pause
+if not "%silent%" == "true" pause
 exit /b %err%

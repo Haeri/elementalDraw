@@ -1,7 +1,7 @@
 #include <elemd/color.hpp>
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
-#include <math.h> 
+#include <math.h>
 #include <thread>
 #include <vector>
 
@@ -44,14 +44,13 @@ int main(void)
     ctx->set_clear_color(elemd::color(20, 20, 20));
 
     std::cout << "-------------- STARTING BENCHMARK --------------\n";
-    
+
     std::cout << "ELEMD:   " << ELEMD_VERSION << "\n";
     std::cout << "BACKEND: " << ELEMD_BACKEND << "\n";
     std::cout << "WIDTH:   " << win->get_width() << "\n";
     std::cout << "HEIGHT:  " << win->get_height() << "\n";
 
     stats.reserve(END_GENERATION);
-
 
     for (int i = 0; i < GRID_WIDTH * GRID_HEIGHT; i++)
     {
@@ -61,8 +60,6 @@ int main(void)
             ++population;
         }
     }
-
-    
 
     // Events
     win->add_key_listener([&](elemd::key_event event) {
@@ -76,22 +73,22 @@ int main(void)
         }
     });
 
-//    ctx->set_font_size(9);
+    //    ctx->set_font_size(9);
     double last_time = 0;
-    
+
     // Main loop
     while (win->is_running() && generation <= END_GENERATION)
-    {                       
+    {
         win->poll_events();
-        
+
         // Tick
         if (playing)
         {
 
-            //if (win->now() - last_time < 0.02f)
+            // if (win->now() - last_time < 0.02f)
             //    continue;
-        
-            //last_time = win->now();            
+
+            // last_time = win->now();
             population = 0;
             if (flip)
             {
@@ -157,7 +154,6 @@ int main(void)
 
             ++generation;
 
-            
             stats.push_back(win->now() - last_time);
         }
 
@@ -166,7 +162,6 @@ int main(void)
         {
             int x = i % GRID_WIDTH;
             int y = i / GRID_WIDTH;
-
 
             if (current_grid[i])
             {
@@ -184,30 +179,29 @@ int main(void)
                 {
                     ctx->set_fill_color(elemd::color(220, 220, 220));
                 }
-                //ctx->fill_circle(x * CELL_SIZE + rad, y * CELL_SIZE + rad, rad);
-                ctx->fill_rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1);
+                // ctx->fill_circle(x * CELL_SIZE + rad, y * CELL_SIZE + rad, rad);
+                ctx->fill_rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
             }
-         
+
             /*
             ctx->draw_text(x * CELL_SIZE, y * CELL_SIZE,
                            std::to_string(i) + " (" + std::to_string(x) + ", " +
             std::to_string(y) + ")");
-              */             
+              */
         }
         /*
         ctx->set_font_size(30);
         ctx->set_fill_color(elemd::color("#1fc600"));
         ctx->draw_text(2, 20,
                         "// generation: " + std::to_string(generation) +
-                        " | population: " + std::to_string(population) + 
-                        " | delta: " + std::to_string((int)((win->now() - last_time) * 1000)) + "ms");
-          */              
+                        " | population: " + std::to_string(population) +
+                        " | delta: " + std::to_string((int)((win->now() - last_time) * 1000)) +
+        "ms");
+          */
         last_time = win->now();
 
         ctx->draw_frame();
         ctx->present_frame();
-
-
     }
 
     int time = (int)((win->now() - starting_time) * 1000);
@@ -218,9 +212,9 @@ int main(void)
     std::cout << "AVERAGE MS:       " << (time / (float)generation) << "\n";
     std::cout << "-------------- ENDING BENCHMARK --------------\n";
 
-    for (double &i : stats)
+    for (double& i : stats)
     {
-        std::cout << i*1000 << std::endl;
+        std::cout << i * 1000 << std::endl;
     }
 
     // Cleanup

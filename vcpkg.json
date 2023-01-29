@@ -1,24 +1,37 @@
 {
-  "name": "elemd",
-  "version-string": "0.1.2",
-  "homepage": "https://github.com/Haeri/ElementalDraw",
-  "description": "Portable C++ canvas library with a Vulkan backend",
-  "features": {
-    "video": {
-      "description": "Enable video loading and playyback with ffmpeg",
-      "dependencies": [
-        "ffmpeg"
-      ]
-    }
-  },
-  "dependencies": 
-  [  	 
-  	"glslang", 
-  	"stb",
-    "freetype",    
-    {
-      "name": "glfw3",
-      "platform": "!android"
-    }
-  ]
+    "name": "elemd",
+    "version-string": "0.2.0",
+    "homepage": "https://github.com/Haeri/ElementalDraw",
+    "description": "Portable C++ canvas library with a Vulkan backend",
+    "features": {
+        "video": {
+            "description": "Enable video loading and playyback with ffmpeg",
+            "dependencies": [
+                "ffmpeg"
+            ]
+        },
+        "audio": {
+            "description": "Enable audio loading and playyback with miniaudio",
+            "dependencies": [
+                "miniaudio"
+            ]
+        },
+        "ui": {
+            "description": "Enable DOM based ui creation and management"
+        }
+    },
+    "dependencies":
+    [
+        "glslang",
+        "stb",
+        "freetype",
+        {
+            "name": "glfw3",
+            "platform": "!android"
+        },
+        {
+            "name": "metal-cpp",
+            "platform": "osx"
+        }
+    ]
 }

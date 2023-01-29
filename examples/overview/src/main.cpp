@@ -1,8 +1,8 @@
-﻿#include <elemd/color.hpp>
+﻿#include <algorithm>
+#include <elemd/color.hpp>
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
-#include <math.h> 
-#include <algorithm>
+#include <math.h>
 
 int main(void)
 {
@@ -14,11 +14,10 @@ int main(void)
     elemd::color white = elemd::color("#ecf0f1");
     elemd::color dark = elemd::color("#262729");
 
-
     // Configure and create window
     elemd::WindowConfig winc = elemd::WindowConfig{"Overview", width, 550};
     winc.icon_file = "./res/logo.png";
-    //winc.transparent = true;
+    // winc.transparent = true;
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
 
@@ -30,16 +29,14 @@ int main(void)
     elemd::Image* anim = elemd::Image::create("./res/anim.png");
     ctx->_tmp_register_image(anim);
 
-
     int gradient_index = 0;
     int gradient_width = 200;
     int gradient_height = 100;
-    unsigned char* gradient_data = new unsigned char[gradient_height * gradient_width *4];
-    
+    unsigned char* gradient_data = new unsigned char[gradient_height * gradient_width * 4];
+
     elemd::Image* gradient =
         elemd::Image::create(gradient_width, gradient_height, 4, gradient_data);
     ctx->_tmp_register_image(gradient);
-
 
     // Load fonts
     elemd::Font* monserat_black = elemd::Font::create("./res/font/Montserrat-Black.ttf");
@@ -47,12 +44,9 @@ int main(void)
 
     elemd::Font* monserat_light = elemd::Font::create("./res/font/Montserrat-Light.ttf");
     ctx->_tmp_register_font(monserat_light);
-    
-    
-    
+
     elemd::Font* icon_font = elemd::Font::create("./res/font/feather.ttf");
     ctx->_tmp_register_font(icon_font);
-
 
     std::u32string icons = U"";
     int icon_i = 0;
@@ -73,14 +67,11 @@ int main(void)
         }
     }
 
-
-    
-
     int x_frames = 4;
     int y_frames = 8;
     int max_frames = 25;
 
-    float anim_x = 0;    
+    float anim_x = 0;
     float anim_y = 0;
     float anim_w = anim->get_width() / x_frames;
     float anim_h = anim->get_height() / y_frames;
@@ -101,9 +92,7 @@ int main(void)
 
     // Event
     std::string text = "I see this as an absolute win!";
-    win->add_char_listener([&](elemd::char_event event) { 
-        text += event.utf8;
-    });
+    win->add_char_listener([&](elemd::char_event event) { text += event.utf8; });
 
     win->add_scroll_listener([&](elemd::scroll_event event) {
         if (is_ctrl)
@@ -129,12 +118,12 @@ int main(void)
         mouse_x = event.x;
         mouse_y = event.y;
 
-        //win->set_offset(-mouse_x, -mouse_y);
+        // win->set_offset(-mouse_x, -mouse_y);
     });
 
     win->add_key_listener([&](elemd::key_event event) {
         is_ctrl = (event.mods == elemd::KEY_MOD_CONTROL);
-        
+
         if (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT)
         {
             if (event.key == elemd::KEY_LEFT)
@@ -147,11 +136,11 @@ int main(void)
             }
             if (event.key == elemd::KEY_UP)
             {
-                win->set_offset(win->get_offset().get_x(), win->get_offset().get_y()-1);
+                win->set_offset(win->get_offset().get_x(), win->get_offset().get_y() - 1);
             }
             if (event.key == elemd::KEY_DOWN)
             {
-                win->set_offset(win->get_offset().get_x() , win->get_offset().get_y()+1);
+                win->set_offset(win->get_offset().get_x(), win->get_offset().get_y() + 1);
             }
         }
     });
@@ -160,7 +149,6 @@ int main(void)
 
     ctx->_tmp_prepare();
     ctx->set_clear_color(dark);
-
 
     // Main renderloop
     while (win->is_running())
@@ -179,7 +167,7 @@ int main(void)
             offset += i;
         }
         */
-        
+
         // Text
         ctx->set_font(monserat_black);
         ctx->set_font_size(18);
@@ -285,7 +273,6 @@ int main(void)
             ctx->set_fill_color(blue);
             ctx->draw_rounded_rect_shadow(20 + i * (30 + 10), 480, 30, 30, 10, i * 6);
         }
-        
 
         ctx->draw_image(30, 550, 100, 50, gradient);
 
@@ -298,13 +285,11 @@ int main(void)
             gradient_index += 4;
             gradient->update_data(gradient_data);
             ctx->_tmp_update_image(gradient);
-        }        
-
+        }
 
         ctx->draw_frame();
         ctx->present_frame();
     }
-
 
     delete[] gradient_data;
 

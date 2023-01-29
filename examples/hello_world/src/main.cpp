@@ -12,7 +12,6 @@ int main(void)
     elemd::color green = elemd::color("#a2bf8a");
     elemd::color blue = elemd::color("#80a0c2");
 
-  
     // configure and create window
     elemd::WindowConfig winc = elemd::WindowConfig{"Hello World", 310, 240};
     elemd::Window* win = elemd::Window::create(winc);
@@ -26,7 +25,6 @@ int main(void)
     elemd::Font* monserat = elemd::Font::create("./res/font/Montserrat-Light.ttf");
     ctx->_tmp_register_font(monserat);
 
-
     ctx->_tmp_prepare();
     ctx->set_clear_color(light);
 
@@ -39,8 +37,8 @@ int main(void)
         ctx->set_font(monserat);
         ctx->set_fill_color(dark);
         ctx->set_font_size(30);
-        ctx->draw_text(55, 60, "elemental UI");        
-        
+        ctx->draw_text(55, 60, "elemental UI");
+
         // circle
         ctx->set_fill_color(red);
         ctx->fill_circle(80, 135, 15);
@@ -52,7 +50,7 @@ int main(void)
 
         // rounded image
         ctx->draw_rounded_image(200, 120, 30, 30, bg, 5);
- 
+
         ctx->draw_frame();
         ctx->present_frame();
     }

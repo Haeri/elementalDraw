@@ -1,16 +1,16 @@
-#include <iostream>
-#include <vector>
-#include <array>
-#include <math.h> 
 #include <algorithm>
-#include <thread>
+#include <array>
 #include <chrono>
+#include <iostream>
+#include <math.h>
+#include <thread>
+#include <vector>
 
-#include <elemd/window.hpp>
-#include <elemd/context.hpp>
 #include <elemd/color.hpp>
+#include <elemd/context.hpp>
 #include <elemd/image.hpp>
 #include <elemd/vec2.hpp>
+#include <elemd/window.hpp>
 
 #include "instrumentor.hpp"
 
@@ -38,7 +38,6 @@ elemd::color bg_color("#212121");
 elemd::color paddle_color("#03A9F4");
 elemd::color ball_color("#D32F2F");
 
-
 elemd::Window* _win;
 elemd::Context* _ctx;
 
@@ -51,9 +50,9 @@ enum brick_types
     DIAMOND_BRICK = 3
 };
 
-enum power_up_type 
+enum power_up_type
 {
-    EXTTRA_LIFE = 0 
+    EXTTRA_LIFE = 0
 };
 
 struct brick
@@ -100,7 +99,6 @@ std::vector<std::vector<int>> levels;
 std::vector<brick> bricks;
 std::vector<power_up> power_pus;
 
-
 void loadLevel();
 
 struct rect
@@ -130,10 +128,8 @@ void ball2rect(elemd::vec2 rect_pos, float rect_widtt, float rect_height)
 
 bool rect2rect(rect a, rect b)
 {
-    if ((a.pos.x() < b.pos.x() + b.width) && 
-        (a.pos.x() + a.width > b.pos.x()) &&
-        (a.pos.y() < b.pos.y() + b.height) &&
-        (a.pos.y() + a.height> b.pos.y()))
+    if ((a.pos.x() < b.pos.x() + b.width) && (a.pos.x() + a.width > b.pos.x()) &&
+        (a.pos.y() < b.pos.y() + b.height) && (a.pos.y() + a.height > b.pos.y()))
     {
         return true;
     }
@@ -164,7 +160,8 @@ void brickToBall()
             {
                 if (b.type == DIAMOND_BRICK)
                 {
-                    power_pus.push_back({EXTTRA_LIFE, b.pos + (brick_width-20)/2.0f, elemd::color(200, 20, 20)});
+                    power_pus.push_back({EXTTRA_LIFE, b.pos + (brick_width - 20) / 2.0f,
+                                         elemd::color(200, 20, 20)});
                 }
                 bricks.erase(bricks.begin() + i);
 
@@ -179,7 +176,6 @@ void brickToBall()
         }
         ++i;
     }
-
 }
 
 void paddleToBall()
@@ -255,7 +251,7 @@ void loadLevel()
 
 int app_run(elemd::Window* win, elemd::Context* ctx)
 {
-    Instrumentor::Get().BeginSession("Session Name");  
+    Instrumentor::Get().BeginSession("Session Name");
 
     _win = win;
     _ctx = ctx;
@@ -266,7 +262,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
     ctx->set_font(urbanist);
 
     ctx->set_clear_color(bg_color);
-    //ctx->set_clear_color(elemd::color(0, 0, 0, 0));
+    // ctx->set_clear_color(elemd::color(0, 0, 0, 0));
 
     win->add_key_listener([&](elemd::key_event event) {
         int start_vel = 0;
@@ -314,8 +310,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
         }
     });
 
-    win->add_scroll_listener([&](elemd::scroll_event event) 
-    { 
+    win->add_scroll_listener([&](elemd::scroll_event event) {
         elemd::vec2 scale = win->get_scale();
         float deltax = std::clamp(scale.x() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
         float deltay = std::clamp(scale.y() + (float)event.yoffset / 6.0f, initial_scale, 10.0f);
@@ -355,8 +350,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
             win->poll_events();
             poll_accumulator = dmod(poll_accumulator, target_poll_ms);
         }
-            
- 
+
         if (render_accumulator >= target_render_ms)
         {
             // Bricks
@@ -365,8 +359,9 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
             {
                 ctx->set_fill_color(elemd::color(0, 0, 0, 120));
                 float ss = 5;
-                ctx->draw_rounded_rect_shadow(b.pos.x() - ss +4, b.pos.y() - ss+4, brick_width + ss * 2,
-                                              brick_height + ss * 2, 2, ss * ss);
+                ctx->draw_rounded_rect_shadow(b.pos.x() - ss + 4, b.pos.y() - ss + 4,
+                                              brick_width + ss * 2, brick_height + ss * 2, 2,
+                                              ss * ss);
             }
             for (brick& b : bricks)
             {
@@ -399,7 +394,7 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
                     power_pus[i].pos + elemd::vec2(0, 80) * (float)render_accumulator;
 
                 if (rect2rect(rect{paddle_pos, paddle_width, paddle_height},
-                                rect{power_pus[i].pos, 20, 10}))
+                              rect{power_pus[i].pos, 20, 10}))
                 {
                     switch (power_pus[i].type)
                     {
@@ -430,7 +425,6 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
             {
                 paddle_velocity.x() += 1 * paddle_speed * (float)poll_accumulator;
             }
-
 
             ball_pos = ball_pos + ball_velocity;
             if (ball_pos.get_x() > WIDTH - ball_radius)
@@ -474,7 +468,6 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
                 ctx->fill_circle((float)(WIDTH - 5 - (i * 8)), (float)(HEIGHT - 5), 3);
             }
 
-
             // Draw Text
             if (!start_game)
             {
@@ -494,22 +487,19 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
             ++frames;
             render_accumulator = dmod(render_accumulator, target_render_ms);
         }
-            
 
         double work_time = elemd::Window::now() - current_time;
         double remainpoll = target_poll_ms - (poll_accumulator + work_time);
         double remainrender = target_render_ms - (render_accumulator + work_time);
         double sleep = std::min(remainpoll, remainrender);
 
-
         if (sleep > 0)
         {
             InstrumentationTimer timer("Sleep");
             // Sleep is not accurate
-            //std::this_thread::sleep_for(std::chrono::duration<double, std::ratio<1>>(sleep));
+            // std::this_thread::sleep_for(std::chrono::duration<double, std::ratio<1>>(sleep));
         }
     }
-
 
     if (reload)
     {
@@ -518,7 +508,6 @@ int app_run(elemd::Window* win, elemd::Context* ctx)
 
     urbanist->destroy();
     win->destroy();
-
 
     Instrumentor::Get().EndSession();
     return 0;
@@ -537,8 +526,8 @@ int main()
                       2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0});
 
     elemd::WindowConfig wc{TITLE.c_str(), WIDTH, HEIGHT};
-    //wc.transparent = true;
-    //wc.decorated = false;
+    // wc.transparent = true;
+    // wc.decorated = false;
     wc.resizeable = false;
     wc.vsync = true;
     _win = elemd::Window::create(wc);

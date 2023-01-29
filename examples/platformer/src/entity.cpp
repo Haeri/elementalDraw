@@ -1,7 +1,7 @@
 #include "entity.hpp"
 
-#include <elemd/window.hpp>
 #include <cmath>
+#include <elemd/window.hpp>
 
 Entity::Entity(elemd::Context* ctx, elemd::Image* img)
 {
@@ -17,12 +17,11 @@ int sign(float x)
     return (x < 0) ? -1 : (x > 0);
 }
 
-
 void Entity::simulate(double dt)
 {
     // Accumulate Vertical velocuty
     _vel.y() = _vel.y() + _gravity * _mass * dt;
- 
+
     // Apply velocity
     _pos = _pos + _vel * dt;
 
@@ -44,10 +43,10 @@ void Entity::simulate(double dt)
 
 void Entity::render(elemd::vec2 cam, double dt)
 {
-    float absVel = std::abs(_vel.x());    
-    //int t = (int)(elemd::Window::now() * 100);
+    float absVel = std::abs(_vel.x());
+    // int t = (int)(elemd::Window::now() * 100);
     int speedMod = (int)(10 - (absVel / 260.0f) * 8);
-    //bool tik = t % 2 == 0;
+    // bool tik = t % 2 == 0;
 
     _accum += dt * 10 * (absVel / 260.0f);
     if (_accum > 1)
@@ -56,49 +55,46 @@ void Entity::render(elemd::vec2 cam, double dt)
         _accum = 0;
     }
 
-    //std::cout << _accum<< "\n";
+    // std::cout << _accum<< "\n";
 
     if (_lookDir)
     {
         if (!_moving || _tikTok)
         {
             _ctx->draw_image(_pos.get_x() - cam.get_x(), _pos.get_y() - cam.get_y(),
-                            _width * SPRITE_SCALAT_POT,
-                            _height * SPRITE_SCALAT_POT, _sprite, 0, 0,
-                            24, 24);
+                             _width * SPRITE_SCALAT_POT, _height * SPRITE_SCALAT_POT, _sprite, 0, 0,
+                             24, 24);
         }
         else
         {
             _ctx->draw_image(_pos.get_x() - cam.get_x(), _pos.get_y() - cam.get_y(),
-                            _width * SPRITE_SCALAT_POT,
-                            _height * SPRITE_SCALAT_POT, _sprite, 24, 0,
-                            24, 24);
+                             _width * SPRITE_SCALAT_POT, _height * SPRITE_SCALAT_POT, _sprite, 24,
+                             0, 24, 24);
         }
     }
     else
     {
         if (!_moving || _tikTok)
         {
-         
-        _ctx->draw_image(_pos.get_x() - cam.get_x(), _pos.get_y() - cam.get_y(),
-                            _width * SPRITE_SCALAT_POT,
-                            _height * SPRITE_SCALAT_POT, _sprite, 24, 0,
-                            -24, 24);
+
+            _ctx->draw_image(_pos.get_x() - cam.get_x(), _pos.get_y() - cam.get_y(),
+                             _width * SPRITE_SCALAT_POT, _height * SPRITE_SCALAT_POT, _sprite, 24,
+                             0, -24, 24);
         }
         else
         {
             _ctx->draw_image(_pos.get_x() - cam.get_x(), _pos.get_y() - cam.get_y(),
-                            _width * SPRITE_SCALAT_POT,
-                            _height * SPRITE_SCALAT_POT, _sprite, 48, 0,
-                            -24, 24);
+                             _width * SPRITE_SCALAT_POT, _height * SPRITE_SCALAT_POT, _sprite, 48,
+                             0, -24, 24);
         }
     }
 
     // Text
     // ctx->set_font(monserat);
-    //ctx->set_font_size(12);
-    //ctx->set_fill_color({0, 255, 0, 255});
-    //ctx->draw_text(_pos.get_x(), _pos.get_y() - 30, "Pos:" + _pos.to_string(1) + "\nVel: " + _vel.to_string(1));
+    // ctx->set_font_size(12);
+    // ctx->set_fill_color({0, 255, 0, 255});
+    // ctx->draw_text(_pos.get_x(), _pos.get_y() - 30, "Pos:" + _pos.to_string(1) + "\nVel: " +
+    // _vel.to_string(1));
 
     _moving = false;
 }
@@ -193,7 +189,8 @@ void Entity::levelCollision()
 
     if (_collideTop && _vel.y() < 0)
     {
-        _pos.y() = (int)(tm.y() / _level->getTileSize()) * _level->getTileSize() + _level->getTileSize();
+        _pos.y() =
+            (int)(tm.y() / _level->getTileSize()) * _level->getTileSize() + _level->getTileSize();
         _vel.y() = 0;
     }
 
@@ -243,7 +240,7 @@ void Entity::move(bool left, double dt)
 {
     _moving = true;
     float factor = _isGrounded ? 1.0f : _airAuthorityFactor;
-    
+
     _lookDir = left;
     _vel.x() = _vel.x() + (left ? -_speed : _speed) * factor * dt;
 }

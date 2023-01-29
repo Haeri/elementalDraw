@@ -6,27 +6,41 @@ cd $(dirname "$0")
 cd ..
 root_path=$(pwd)
 
-if [ ! -d $root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" ]; then
+build_type=""
+build_level="Debug"
+feature_list=""
+
+if [ ! -d $root_path"/external/vcpkg/scripts/buildsystems/" ]; then
 	echo "INFO: You forgot to download the submodules. I'll fix that for you."
 	git submodule update --init
 fi
 
+for var in "$@"
+do
+	if [ "$var" = "-static" ]; then
+		build_type="-DBUILD_SHARED_LIBS=OFF"
+	fi
+	if [ "$var" = "-release" ]; then
+		build_level="Release"
+	fi
+	if [ "$var" = "-ui" ]; then
+		feature_list="-DELEMD_UI=ON $feature_list"
+	fi
+	if [ "$var" = "-audio" ]; then
+		feature_list="-DELEMD_AUDIO=ON $feature_list"
+	fi
+	if [ "$var" = "-video" ]; then
+		feature_list="-DELEMD_VIDEO=ON $feature_list"
+	fi
+done
+
 if [ ! -d "build/" ]; then
 	echo "INFO: First time setup will take longer as the dependencies need to be downloaded and compiled."
 else
-	rm -rf build
+	rm -rf "build/$build_level"
 fi
 
-mkdir "build"
-cd build
-
-build_type=""
-
-if [ "$1" = "-static" ]; then
-	build_type="-DBUILD_SHARED_LIBS=OFF"
-fi
-
-cmake .. -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type
+cmake -B "build/$build_level" -S . -DCMAKE_BUILD_TYPE="$build_level" -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
 err=$?
 
 if [ $err -ne 0 ]; then

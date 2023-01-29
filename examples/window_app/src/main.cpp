@@ -1,18 +1,18 @@
 #ifdef _MSC_VER
-    #define EXPORT_API __declspec(dllexport)
+#define EXPORT_API __declspec(dllexport)
 #else
-    #define EXPORT_API __attribute__((visibility("default")))
+#define EXPORT_API __attribute__((visibility("default")))
 #endif
 
-#include <iostream>
-#include <array>
 #include <algorithm>
+#include <array>
+#include <iostream>
 
-#include <elemd/window.hpp>
-#include <elemd/context.hpp>
 #include <elemd/color.hpp>
-#include <elemd/image.hpp>
+#include <elemd/context.hpp>
 #include <elemd/font.hpp>
+#include <elemd/image.hpp>
+#include <elemd/window.hpp>
 
 // Constants
 const int TARGET_RENDER_FREQUENCY = 60;
@@ -53,7 +53,7 @@ std::array<elemd::color, 10> cool = {elemd::color("#54478c"), elemd::color("#2c6
 extern "C"
 {
     EXPORT_API elemd::WindowConfig app_init()
-    { 
+    {
         return elemd::WindowConfig{"Window App", WIDTH, HEIGHT};
     }
 
@@ -85,8 +85,9 @@ extern "C"
             win->set_scale(deltax, deltay);
         });
 
-        win->add_mouse_click_listener([&](elemd::mouse_button_event event) { 
-            if (event.button == elemd::MOUSE_BUTTON_LEFT && (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT))
+        win->add_mouse_click_listener([&](elemd::mouse_button_event event) {
+            if (event.button == elemd::MOUSE_BUTTON_LEFT &&
+                (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT))
             {
                 mouse_click = true;
             }
@@ -96,7 +97,7 @@ extern "C"
             }
         });
 
-         win->add_mouse_move_listener([&](elemd::mouse_move_event event) {            
+        win->add_mouse_move_listener([&](elemd::mouse_move_event event) {
             mouse_x = event.x;
             mouse_y = event.y;
         });
@@ -108,7 +109,7 @@ extern "C"
         ctx->_tmp_register_image(img);
         ctx->_tmp_register_image(logo);
         ctx->_tmp_register_image(grid);
-        
+
         elemd::Font* urbanist = elemd::Font::create("./res/font/Urbanist-Regular.ttf");
         ctx->_tmp_register_font(urbanist);
         ctx->set_font(urbanist);
@@ -144,7 +145,7 @@ extern "C"
             }
 
             if (render_accumulator >= target_render_ms)
-            { 
+            {
 
                 /*
                 // Title Bar
@@ -193,7 +194,8 @@ extern "C"
                     for (float j = 0; j < grid_y; j++)
                     {
                         ctx->set_fill_color(cool[rand() % cool.size()]);
-                        ctx->fill_rounded_rect(10 + i * 20, 320 + j * 20 + top_offset, 19, 19, 19/2.0f);
+                        ctx->fill_rounded_rect(10 + i * 20, 320 + j * 20 + top_offset, 19, 19,
+                19/2.0f);
                     }
                 }
 
@@ -212,7 +214,7 @@ extern "C"
 
                 ctx->set_fill_color(elemd::color(1.0f, 0.0f, 0.f));
                 ctx->fill_circle(pong, 270 + top_offset, ball_radius);
-                
+
 
                 if (mouse_click)
                 {
@@ -227,7 +229,6 @@ extern "C"
 
                 */
 
-
                 // Image
 
                 /*
@@ -236,7 +237,7 @@ extern "C"
 
                 ctx->draw_image(0, 410, 50, 50, logo);
                 ctx->draw_image(0, 475, 100, 100, grid);
-                
+
                 for (int y = 0; y < 10; ++y)
                 {
                     for (int x = 0; x < 10; ++x)
@@ -248,7 +249,6 @@ extern "C"
                 ctx->set_fill_color(c1);
                 ctx->set_font_size(30);
                 ctx->draw_text(10, 10, "Hello There!");
-
 
                 ctx->draw_image(130, 130, 100, 100, grid);
 

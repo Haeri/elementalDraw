@@ -1,8 +1,8 @@
 #ifndef ELEMD_WINDOW_IMPL_HPP
 #define ELEMD_WINDOW_IMPL_HPP
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "elemd/window.hpp"
 
@@ -37,13 +37,12 @@ namespace elemd
         std::vector<std::function<void(char_event)>> _char_callbacks;
         std::vector<std::function<void(scroll_event)>> _scroll_callbacks;
 
-        std::unordered_map<Cursor* , GLFWcursor*> _cursors;
+        std::unordered_map<Cursor*, GLFWcursor*> _cursors;
         std::unordered_map<CURSOR_TYPE, GLFWcursor*> _default_cursors;
 
         GLFWwindow* getGLFWWindow();
         void create_window(const WindowConfig& config);
         void load_icon(const WindowConfig& config);
-
     };
 
 } // namespace elemd

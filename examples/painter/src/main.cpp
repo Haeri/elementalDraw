@@ -1,10 +1,10 @@
-#include <thread>
-#include <chrono>
-#include <vector>
 #include <algorithm>
+#include <chrono>
+#include <thread>
+#include <vector>
 
-#include <elemd/window.hpp>
 #include <elemd/context.hpp>
+#include <elemd/window.hpp>
 
 const int TARGET_POLL_FREQUENCY = 60;
 
@@ -30,7 +30,6 @@ std::vector<unsigned char> im_data;
 std::vector<brush_paint> points;
 std::vector<brush_paint> color_paints;
 
-
 void draw(elemd::Context* ctx, elemd::Image* brush)
 {
     for (auto& point : points)
@@ -41,23 +40,20 @@ void draw(elemd::Context* ctx, elemd::Image* brush)
 
     ctx->set_fill_color(brush_color);
     ctx->draw_image((float)mouse_x - brush_size / 2.0f, (float)mouse_y - brush_size / 2.0f,
-                    brush_size,
-                    brush_size, brush, true);
+                    brush_size, brush_size, brush, true);
 
     if (mouse_click)
     {
-        points.push_back(
-            {{(float)mouse_x - brush_size / 2.0f, (float)mouse_y - brush_size / 2.0f},
-             brush_color,
-             brush_size});
+        points.push_back({{(float)mouse_x - brush_size / 2.0f, (float)mouse_y - brush_size / 2.0f},
+                          brush_color,
+                          brush_size});
     }
 
-     for (auto& point : color_paints)
+    for (auto& point : color_paints)
     {
         ctx->set_fill_color(point.color);
         ctx->fill_circle(point.pos.x(), point.pos.y(), point.size);
     }
-
 
     ctx->draw_frame();
     ctx->present_frame();
@@ -72,10 +68,9 @@ int main(void)
 #endif
 
     elemd::WindowConfig winc = elemd::WindowConfig{"Painting App", WIDTH, HEIGHT};
-    //winc.transparent = true;
+    // winc.transparent = true;
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
-
 
     elemd::Image* brush = elemd::Image::create("./res/brush.png");
     ctx->_tmp_register_image(brush);
@@ -87,15 +82,15 @@ int main(void)
             mouse_click = true;
             elemd::vec2 p = elemd::vec2((float)event.x, (float)event.y);
 
-             for (auto& point : color_paints)
+            for (auto& point : color_paints)
             {
-                 if (p.distance(point.pos) < 10)
-                 {
-                     mouse_click = false;
-                     brush_color = point.color;
-                     std::cout << "color " << brush_color.rgb() << std::endl;
-                     break;
-                 }
+                if (p.distance(point.pos) < 10)
+                {
+                    mouse_click = false;
+                    brush_color = point.color;
+                    std::cout << "color " << brush_color.rgb() << std::endl;
+                    break;
+                }
             }
         }
         else
@@ -118,34 +113,25 @@ int main(void)
 
         draw(ctx, brush);
     });
-     
+
     ctx->_tmp_prepare();
     ctx->set_clear_color({255, 255, 255, 255});
 
-
     elemd::color color_palette[] = {
-        elemd::color("#00b894"),
-        elemd::color("#00cec9"),
-        elemd::color("#0984e3"),
-        elemd::color("#6c5ce7"),
-        elemd::color("#b2bec3"),
-        elemd::color("#fdcb6e"),
-        elemd::color("#e17055"),
-        elemd::color("#d63031"),
-        elemd::color("#e84393"),
+        elemd::color("#00b894"), elemd::color("#00cec9"), elemd::color("#0984e3"),
+        elemd::color("#6c5ce7"), elemd::color("#b2bec3"), elemd::color("#fdcb6e"),
+        elemd::color("#e17055"), elemd::color("#d63031"), elemd::color("#e84393"),
         elemd::color("#2d3436"),
     };
-
 
     for (int i = 0; i < 10; i++)
     {
         color_paints.push_back({{20 + 25 * i, 20}, color_palette[i], 10});
     }
 
-
     while (win->is_running())
     {
-        //win->poll_events();
+        // win->poll_events();
         win->wait_events();
 
         /*
@@ -162,15 +148,13 @@ int main(void)
         ctx->fill_rect(0, 0, 100, 200);
         */
 
-        //ctx->draw_frame();
-        
-        //std::this_thread::sleep_for(std::chrono::duration<float, std::ratio<1>>(target_poll_ms));
-    }
+        // ctx->draw_frame();
 
+        // std::this_thread::sleep_for(std::chrono::duration<float, std::ratio<1>>(target_poll_ms));
+    }
 
     brush->destroy();
     win->destroy();
-
 
     return 0;
 }

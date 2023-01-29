@@ -1,9 +1,8 @@
 #include <elemd/color.hpp>
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
-#include <math.h> 
+#include <math.h>
 #include <thread>
-
 
 const int GRID_WIDTH = 700;
 const int GRID_HEIGHT = 450;
@@ -32,7 +31,7 @@ void draw()
         {
             grid1[index] = 2;
             grid2[index] = 2;
-            
+
             ++population;
         }
     }
@@ -46,18 +45,15 @@ int main(void)
     _CrtSetDbgFlag(flag);
 #endif
 
-
     // Configure and create window
     elemd::WindowConfig winc =
         elemd::WindowConfig{"Game Of Life", GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE};
-    //winc.transparent = true;
+    // winc.transparent = true;
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
 
     ctx->_tmp_prepare();
     ctx->set_clear_color(elemd::color(30, 30, 30));
-
-
 
     for (int i = 0; i < GRID_WIDTH * GRID_HEIGHT; i++)
     {
@@ -68,12 +64,9 @@ int main(void)
         }
     }
 
-    
-
     // Events
-    win->add_mouse_click_listener(
-        [&](elemd::mouse_button_event event) { 
-           if (event.button == elemd::MOUSE_BUTTON_LEFT &&
+    win->add_mouse_click_listener([&](elemd::mouse_button_event event) {
+        if (event.button == elemd::MOUSE_BUTTON_LEFT &&
             (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT))
         {
             mouse_click = true;
@@ -100,21 +93,20 @@ int main(void)
 
     ctx->set_font_size(9);
     double last_time = 0;
-    
+
     // Main loop
     while (win->is_running())
     {
         win->poll_events();
-                
-        
+
         // Tick
         if (playing)
         {
 
-            //if (win->now() - last_time < 0.02f)
+            // if (win->now() - last_time < 0.02f)
             //    continue;
-        
-            //last_time = win->now();
+
+            // last_time = win->now();
             population = 0;
             if (flip)
             {
@@ -187,7 +179,6 @@ int main(void)
             int x = i % GRID_WIDTH;
             int y = i / GRID_WIDTH;
 
-
             if (current_grid[i])
             {
                 int rad = (CELL_SIZE / 2.0f) - 1;
@@ -204,23 +195,23 @@ int main(void)
                 {
                     ctx->set_fill_color(elemd::color(220, 220, 220));
                 }
-                //ctx->fill_circle(x * CELL_SIZE + rad, y * CELL_SIZE + rad, rad);
-                ctx->fill_rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1);
+                // ctx->fill_circle(x * CELL_SIZE + rad, y * CELL_SIZE + rad, rad);
+                ctx->fill_rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
             }
-         
+
             /*
             ctx->draw_text(x * CELL_SIZE, y * CELL_SIZE,
                            std::to_string(i) + " (" + std::to_string(x) + ", " +
             std::to_string(y) + ")");
-              */             
+              */
         }
 
         ctx->set_font_size(10);
         ctx->set_fill_color(elemd::color("#1fc600"));
         ctx->draw_text(2, 1,
-                        "// generation: " + std::to_string(generation) +
-                        " | population: " + std::to_string(population) + 
-                        " | delta: " + std::to_string((int)((win->now() - last_time) * 1000)) + "ms");
+                       "// generation: " + std::to_string(generation) +
+                           " | population: " + std::to_string(population) + " | delta: " +
+                           std::to_string((int)((win->now() - last_time) * 1000)) + "ms");
 
         last_time = win->now();
 

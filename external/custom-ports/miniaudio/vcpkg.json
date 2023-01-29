@@ -1,0 +1,6 @@
+{
+  "name": "miniaudio",
+  "version-string": "0.11.9",
+  "description": "Single file audio playback and capture library written in C.",
+  "homepage": "https://miniaud.io/"
+}
