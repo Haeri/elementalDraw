@@ -3,8 +3,8 @@
 
 #define ELEMD_LIBRARY_NAME "Elemental Draw"
 #define ELEMD_VERSION_MAJOR 0
-#define ELEMD_VERSION_MINOR 1
-#define ELEMD_VERSION_PATCH 2
+#define ELEMD_VERSION_MINOR 2
+#define ELEMD_VERSION_PATCH 0
 
 #define TO_STR2(x) #x
 #define TO_STR(x) TO_STR2(x)

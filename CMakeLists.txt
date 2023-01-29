@@ -102,7 +102,7 @@ endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
     SOVERSION 0
-    VERSION 0.1.3
+    VERSION 0.2.0
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC 

@@ -1,4 +1,4 @@
-# Elemental Draw
+# <img height="30" src="./data/elemd_icon.png"> elemental Draw
 
 ![build](https://github.com/Haeri/ElementalDraw/workflows/C++%20Builder/badge.svg)
 ![Version](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/Haeri/ElementalDraw/master/vcpkg.json&label=version&query=$['version-string']&color=blue)
@@ -37,6 +37,15 @@ cd ElementalDraw
 brew install nasm
 ./scripts/generate_project_mac.sh
 ```
+
+## Feature extensions
+
+elemental Draw supports additional features that can be enabled when generating the project file by adding additional flags to the command: `./scripts/generate_project_win.bat -ui -audio`
+
+- *static* - Generates static libraries so no dynamic linking will be requried.
+- *ui* - Provides additional functionality for creating ui elements, layouts and styling. 
+- *audio* - Provides additional functionality for reading and playing back audio files.
+- *video* - Provides additional functionality for reading and decoding video files. (slow build time)
 
 ## Dependencies
 Dependencies will be automatically managed through vcpkg if this repo is cloned with the `--recursive` flag.
