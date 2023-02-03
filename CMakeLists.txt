@@ -165,128 +165,32 @@ endif()
 # ---------------- EXAMPLES ---------------------#
 
 if (ELEMD_BUILD_EXAMPLES)
-    add_subdirectory(examples/benchmark)
-    add_subdirectory(examples/brick_breaker)
-    add_subdirectory(examples/game_of_life)
-    add_subdirectory(examples/hello_world)
-    add_subdirectory(examples/overview)
-    add_subdirectory(examples/painter)    
-    add_subdirectory(examples/presenter)
-    add_subdirectory(examples/window_app)
-    add_subdirectory(examples/window_app_runtime)
-
-    set_target_properties(benchmark PROPERTIES FOLDER examples)
-    set_target_properties(brick-breaker PROPERTIES FOLDER examples)
-    set_target_properties(game-of-life PROPERTIES FOLDER examples)
-    set_target_properties(hello-world PROPERTIES FOLDER examples)
-    set_target_properties(overview PROPERTIES FOLDER examples)
-    set_target_properties(painter PROPERTIES FOLDER examples)
-    set_target_properties(presenter PROPERTIES FOLDER examples)
-    set_target_properties(window-app PROPERTIES FOLDER examples)
-    set_target_properties(window-app-runtime PROPERTIES FOLDER examples)
-
     if (ELEMD_UI)
-        add_subdirectory(examples/calculator)
-        add_subdirectory(examples/elemx)
-        add_subdirectory(examples/slack)
-        add_subdirectory(examples/tasker)
-        set_target_properties(calculator PROPERTIES FOLDER examples)
-        set_target_properties(elemx PROPERTIES FOLDER examples)
-        set_target_properties(slack PROPERTIES FOLDER examples)
-        set_target_properties(tasker PROPERTIES FOLDER examples)
     endif()
     if (ELEMD_AUDIO)
-        add_subdirectory(examples/platformer)
-        set_target_properties(platformer PROPERTIES FOLDER examples)        
+        add_subdirectory(examples/roots_of_darknes)
+        set_target_properties(roots_of_darknes PROPERTIES FOLDER examples)        
     endif()
     if (ELEMD_VIDEO)
-        add_subdirectory(examples/video)
-        set_target_properties(video PROPERTIES FOLDER examples)
     endif()
 
 
   if (BUILD_SHARED_LIBS)
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        DEPENDS benchmark brick-breaker game-of-life hello-world overview painter presenter window-app-runtime  
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/benchmark/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/brick_breaker/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/game_of_life/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/hello_world/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/overview/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}> 
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/painter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>        
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/presenter/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}> 
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/window_app_runtime/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
-        COMMENT "Copy library"
-    )
-
+   
     if (ELEMD_UI)
-        add_custom_command(
-            TARGET ${PROJECT_NAME} POST_BUILD
-            DEPENDS calculator elemx slack tasker  
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/calculator/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/elemx/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/slack/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/tasker/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
-            COMMENT "Copy library"
-        )
+        
     endif()
     if (ELEMD_AUDIO)
         add_custom_command(
             TARGET ${PROJECT_NAME} POST_BUILD
-            DEPENDS platformer  
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/platformer/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
+            DEPENDS roots_of_darknes 
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/roots_of_darknes/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
             COMMENT "Copy library"
         )
     endif()
     if (ELEMD_VIDEO)
-        add_custom_command(
-            TARGET ${PROJECT_NAME} POST_BUILD
-            DEPENDS video  
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/video/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>
-            COMMENT "Copy library"
-        )
+        
     endif()
 
   endif()
 endif()
-
-
-
-# ---------------- EXPORT ---------------------#
-
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-
-configure_package_config_file(
-  cmake/config.cmake.in
-  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-  INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
-)
-
-install(
-  TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME}Target
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-
-install(
-  EXPORT ${PROJECT_NAME}Target
-  FILE  ${PROJECT_NAME}Target.cmake
-  NAMESPACE ${PROJECT_NAME}::
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
-)
-
-install(
-  DIRECTORY include/
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
-
-install(
-  FILES
-  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
-)

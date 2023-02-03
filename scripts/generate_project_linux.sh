@@ -40,7 +40,7 @@ else
 	rm -rf "build/$build_level"
 fi
 
-cmake -B "build/$build_level" -S . -DCMAKE_BUILD_TYPE="$build_level" -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
+cmake -B "build/$build_level" -S . -DCMAKE_BUILD_TYPE="$build_level" -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
 err=$?
 
 if [ $err -ne 0 ]; then

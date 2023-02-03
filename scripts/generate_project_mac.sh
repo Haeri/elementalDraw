@@ -36,7 +36,7 @@ else
 	rm -rf build
 fi
 
-cmake -B "build" -S . -G Xcode -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports"  -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
+cmake -B "build" -S . -G Xcode -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports"  -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
 err=$?
 
 if [ $err -ne 0 ]; then
