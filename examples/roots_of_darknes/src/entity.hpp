@@ -8,8 +8,6 @@
 #include "level.hpp"
 #include "physics.hpp"
 
-#define SPRITE_SCALAT_POT 1
-
 class Entity
 {
 public:

@@ -15,8 +15,8 @@ int main()
     //audio.playSound("./res/music.mp3");
     audio.registerSound("./res/audio/jump.wav", "jump");
 
-    const int screenWidth = 18 * 40;
-    const int screenHeight = 18 * 30;
+    const int screenWidth = MAP_TILE_SIZE * 40;
+    const int screenHeight = MAP_TILE_SIZE * 30;
 
     // configure and create window
     elemd::WindowConfig winc = elemd::WindowConfig{"Roots of Darknes", screenWidth, screenHeight};
@@ -33,7 +33,7 @@ int main()
     ctx->_tmp_register_font(silkscreen);
 
     // load image
-    elemd::Image* mapTileMap = elemd::Image::create("./res/tiles_packed.png", imgc);
+    elemd::Image* mapTileMap = elemd::Image::create("./res/tilemap_packed.png", imgc);
     ctx->_tmp_register_image(mapTileMap);
 
     elemd::Image* characterTileMap = elemd::Image::create("./res/characters_packed.png", imgc);
@@ -46,7 +46,7 @@ int main()
 
     Player* player = new Player(win, characterTileMap, {90, 100});
 
-    Level level = Level(18);
+    Level level = Level();
     level.loadLevelFile("./res/levels/level_0.level", player);
 
     win->add_key_listener([&](elemd::key_event event) {
