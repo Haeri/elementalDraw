@@ -11,11 +11,11 @@ std::map<unsigned int, Block> Level::BlockDb = {
     {',', {',', false, true, {1 * MAP_TILE_SIZE, 0}}},                // Grass 2
     {':', {':', false, true, {2 * MAP_TILE_SIZE, 0}}},                // Flowers 2
 
-    {'}', {'}', false, true, {2 * MAP_TILE_SIZE, 9 * MAP_TILE_SIZE}}}, // Wall Right
-    {'{', {'{', false, true, {0 * MAP_TILE_SIZE, 9 * MAP_TILE_SIZE}}}, // Wall left
+    {'}', {'}', true, true, {2 * MAP_TILE_SIZE, 9 * MAP_TILE_SIZE}}}, // Wall Right
+    {'{', {'{', true, true, {0 * MAP_TILE_SIZE, 9 * MAP_TILE_SIZE}}}, // Wall left
 
-    {'$', {'$', false, false, {0, 0}}}, // Spawn
-    {'o', {'o', false, false, {0, 0}}}, // OutofBounds
+    {'$', {'$', true, false, {0, 0}}}, // Spawn
+    {'o', {'o', true, false, {0, 0}}}, // OutofBounds
     {'#', {'#', true, true, {6 * MAP_TILE_SIZE, 10 * MAP_TILE_SIZE}}} // Wall
 };
 
@@ -34,6 +34,10 @@ Block Level::getAt(int x, int y)
 
     unsigned char id = _data[y * _cols + x];
     return BlockDb[id];
+}
+
+bool Level::getCollideAtWorld(float x, float y) {
+    return getAt(std::floor(x/MAP_TILE_SIZE), std::floor(y/MAP_TILE_SIZE)).collide;
 }
 
 int Level::getTileSize()

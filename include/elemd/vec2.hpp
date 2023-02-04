@@ -59,7 +59,9 @@ namespace elemd
     inline vec2 vec2::normalize() const
     {
         vec2 ret = *this;
-        return ret / ret.length();
+        
+        if(ret.length() == 0) return 0;
+        else return ret / ret.length();
     }
 
     inline bool vec2::operator==(const vec2& other) const

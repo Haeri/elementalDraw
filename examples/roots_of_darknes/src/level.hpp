@@ -26,6 +26,7 @@ public:
     
     ~Level();
     Block getAt(int x, int y);
+    bool getCollideAtWorld(float x, float y);
     int getTileSize();
     int getTextureSize();
     int getRows();

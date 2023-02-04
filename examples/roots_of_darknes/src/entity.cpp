@@ -36,7 +36,7 @@ elemd::vec2 Entity::getPosition()
 
 void Entity::move(float horizontal, float vertical, double dt)
 {
-    //_rect->pos.x() += horizontal * dt * 100;
+    // _rect->pos.x() += horizontal * dt * 100;
     // _rect->pos.y() += vertical * dt * 100;
 }
 

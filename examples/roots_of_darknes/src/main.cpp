@@ -57,10 +57,12 @@ int main()
             level.loadLevelFile("./res/levels/level_0.level", player);
         }
 
+        /*
         if (event.key == elemd::KEY_UP)
         {
             audio.playSound("./res/audio/jump.wav");
         }
+        */
     });
 
     double target_frame_time = 1.0f / 120.0f;
