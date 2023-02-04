@@ -169,7 +169,7 @@ if (ELEMD_BUILD_EXAMPLES)
     endif()
     if (ELEMD_AUDIO)
         add_subdirectory(examples/roots_of_darknes)
-        set_target_properties(roots_of_darknes PROPERTIES FOLDER examples)        
+        set_target_properties(roots-of-darknes PROPERTIES FOLDER examples)        
     endif()
     if (ELEMD_VIDEO)
     endif()
@@ -183,7 +183,7 @@ if (ELEMD_BUILD_EXAMPLES)
     if (ELEMD_AUDIO)
         add_custom_command(
             TARGET ${PROJECT_NAME} POST_BUILD
-            DEPENDS roots_of_darknes 
+            DEPENDS roots-of-darknes 
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/roots_of_darknes/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
             COMMENT "Copy library"
         )

@@ -1,4 +1,4 @@
-set(PROJECT_NAME roots_of_darknes)
+set(PROJECT_NAME roots-of-darknes)
 project(${PROJECT_NAME})
 
 if(WIN32) 
