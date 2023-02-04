@@ -13,7 +13,7 @@ if [ "$1" = "-static" ]; then
 	# Roots of Darknes
 	mkdir -p samples/roots_of_darknes
 	cp -R ./build/Release/examples/roots_of_darknes/res ./samples/roots_of_darknes
-	cp ./build/Release/examples/roots_of_darknes/Release/roots-of-darknes ./samples/roots_of_darknes
+	cp ./build/Release/examples/roots_of_darknes/roots-of-darknes ./samples/roots_of_darknes
 	
 else
 	mkdir bin
