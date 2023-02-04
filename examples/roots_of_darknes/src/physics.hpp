@@ -14,6 +14,14 @@ struct rect
 
 namespace physics
 {
+    static bool aabb(const rect& a, const rect& b)
+    {
+        return (a.pos.get_x() < b.pos.get_x() + b.size.get_x() &&
+                a.pos.get_x() + a.size.get_x() > b.pos.get_x() &&
+                a.pos.get_y() < b.pos.get_y() + b.size.get_y() &&
+                a.pos.get_y() + a.size.get_y() > b.pos.get_y());        
+    }
+
     static bool point_to_rect(const elemd::vec2& p, const rect* r)
     {
         return (p.get_x() >= r->pos.get_x() && p.get_y() >= r->pos.get_y() &&

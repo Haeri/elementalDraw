@@ -8,8 +8,8 @@
 class Player : public Entity
 {
 public:
-    Player(elemd::Window* window, elemd::Image* img)
-        : Entity(window->get_context(), img), _win(window)
+    Player(elemd::Window* window, elemd::Image* img, elemd::vec2 spawn)
+        : Entity(window->get_context(), img, spawn), _win(window)
     {
         window->add_key_listener([&](elemd::key_event event) {
             int start_vel = 0;
@@ -41,7 +41,7 @@ public:
             {
                 if (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT)
                 {
-                    _vertical_input = 1;
+                    _vertical_input = -1;
                 }
                 else if (event.action == elemd::ACTION_RELEASE)
                 {
@@ -52,7 +52,7 @@ public:
             {
                 if (event.action == elemd::ACTION_PRESS || event.action == elemd::ACTION_REPEAT)
                 {
-                    _vertical_input = -1;
+                    _vertical_input = 1;
                 }
                 else if (event.action == elemd::ACTION_RELEASE)
                 {
@@ -64,7 +64,7 @@ public:
             {
                 if (event.action == elemd::ACTION_PRESS)
                 {
-                    jump();
+                    attack();
                 }
             }
         });

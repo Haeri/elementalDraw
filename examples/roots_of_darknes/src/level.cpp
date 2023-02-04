@@ -88,7 +88,7 @@ void Level::loadLevelFile(std::string filePath, Player* p)
 
                 if (*token == '$')
                 {
-                    p->setLevelSpawn(this, {x * _tileSize, y * _tileSize});
+                    //p->setLevelSpawn(this, {x * _tileSize, y * _tileSize});
                     spawned = true;
                 }
 
@@ -101,7 +101,7 @@ void Level::loadLevelFile(std::string filePath, Player* p)
 
         if (!spawned)
         {
-            p->setLevelSpawn(this, {30, 30});
+            //p->setLevelSpawn(this, {30, 30});
         }
     }
 }

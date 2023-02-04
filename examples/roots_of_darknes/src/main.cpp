@@ -12,11 +12,11 @@ int main()
 {
     elemd::Audio audio;
     audio.registerSound("./res/music.mp3", "music");
-    audio.playSound("./res/music.mp3");
+    //audio.playSound("./res/music.mp3");
     audio.registerSound("./res/audio/jump.wav", "jump");
 
-    const int screenWidth = 18 * 16;
-    const int screenHeight = 18 * 12;
+    const int screenWidth = 18 * 40;
+    const int screenHeight = 18 * 30;
 
     // configure and create window
     elemd::WindowConfig winc = elemd::WindowConfig{"Roots of Darknes", screenWidth, screenHeight};
@@ -44,7 +44,7 @@ int main()
     ctx->set_font(silkscreen);
     ctx->set_clear_color({223, 246, 245, 255});
 
-    Player* player = new Player(win, characterTileMap);
+    Player* player = new Player(win, characterTileMap, {90, 100});
 
     Level level = Level(18);
     level.loadLevelFile("./res/levels/level_0.level", player);
@@ -150,6 +150,10 @@ int main()
         int dth = (int)(delta_time * 1000) * 100.0f;
         int dtfr = (int)(delta_time * 100000) - dth;
         ctx->draw_text(2, 2, "DT: " + std::to_string(dth / 100) + "." + std::to_string(dtfr));
+
+        ctx->draw_text(2, 20,
+                       "X: " + std::to_string(player->getPosition().get_x()) +
+                           " Y:" + std::to_string(player->getPosition().get_y()));
 
         ctx->draw_frame();
 
