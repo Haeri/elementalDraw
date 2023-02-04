@@ -825,7 +825,11 @@ namespace elemd
 
     void ContextImplOpengl::configure_surface()
     {
-        glViewport(0, 0, _width, _height);
+        int width, height;
+        glfwGetFramebufferSize(_window->getGLFWWindow(), &width, &height);
+        glViewport(0, 0, width, height);
+
+        //glViewport(0, 0, _width, _height);
         glEnable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);

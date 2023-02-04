@@ -7,8 +7,13 @@
 #include "player.hpp"
 
 std::map<unsigned int, Block> Level::BlockDb = {
-    {'.', {'.', false, true, {0, 0}}}, // Grass
-    {',', {',', false, true, {1 * MAP_TILE_SIZE, 0}}}, // Grass 2
+    {'.', {'.', false, true, {0, 0}}},                                // Grass
+    {',', {',', false, true, {1 * MAP_TILE_SIZE, 0}}},                // Grass 2
+    {':', {':', false, true, {2 * MAP_TILE_SIZE, 0}}},                // Flowers 2
+
+    {'}', {'}', false, true, {2 * MAP_TILE_SIZE, 9 * MAP_TILE_SIZE}}}, // Wall Right
+    {'{', {'{', false, true, {0 * MAP_TILE_SIZE, 9 * MAP_TILE_SIZE}}}, // Wall left
+
     {'$', {'$', false, false, {0, 0}}}, // Spawn
     {'o', {'o', false, false, {0, 0}}}, // OutofBounds
     {'#', {'#', true, true, {6 * MAP_TILE_SIZE, 10 * MAP_TILE_SIZE}}} // Wall

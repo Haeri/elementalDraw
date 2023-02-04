@@ -23,7 +23,7 @@ int main()
     winc.vsync = true;
     winc.icon_file = "./res/app.png";
 
-    // winc.native_pixel_size = true;
+    //winc.native_pixel_size = true;
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
 
