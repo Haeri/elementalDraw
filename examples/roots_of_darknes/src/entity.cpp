@@ -13,6 +13,7 @@ Entity::Entity(elemd::Context* ctx, elemd::Image* img, elemd::vec2 spawn)
     _rect->pos.y() = spawn.get_y();
     _rect->size.x() = 24;
     _rect->size.y() = 24;
+    
 }
 
 void Entity::simulate(double dt)
@@ -35,8 +36,8 @@ elemd::vec2 Entity::getPosition()
 
 void Entity::move(float horizontal, float vertical, double dt)
 {
-    _rect->pos.x() += horizontal * dt * 100;
-    _rect->pos.y() += vertical * dt * 100;
+    //_rect->pos.x() += horizontal * dt * 100;
+    // _rect->pos.y() += vertical * dt * 100;
 }
 
 void Entity::attack()

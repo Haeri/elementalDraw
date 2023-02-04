@@ -8,9 +8,12 @@
 class Player : public Entity
 {
 public:
-    Player(elemd::Window* window, elemd::Image* img, elemd::vec2 spawn)
+    Player(elemd::Window* window, elemd::Image* img, elemd::vec2 spawn, Level* level)
         : Entity(window->get_context(), img, spawn), _win(window)
     {
+        
+        _level = level;
+        
         window->add_key_listener([&](elemd::key_event event) {
             int start_vel = 0;
 
@@ -75,6 +78,7 @@ public:
 private:
     int _horizontal_input = 0;
     int _vertical_input = 0;
+    Level* _level = nullptr;
 
     elemd::Window* _win = nullptr;
 };

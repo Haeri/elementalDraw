@@ -1,4 +1,4 @@
-﻿#include <elemd/audio/audio.hpp>
+#include <elemd/audio/audio.hpp>
 #include <elemd/color.hpp>
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
@@ -20,7 +20,8 @@ int main()
 
     // configure and create window
     elemd::WindowConfig winc = elemd::WindowConfig{"Roots of Darknes", screenWidth, screenHeight};
-    winc.vsync = true;
+    winc.native_pixel_size = true;
+    winc.vsync = false;
     winc.icon_file = "./res/app.png";
 
     //winc.native_pixel_size = true;
@@ -42,11 +43,12 @@ int main()
     ctx->_tmp_prepare();
 
     ctx->set_font(silkscreen);
-    ctx->set_clear_color({223, 246, 245, 255});
+    ctx->set_clear_color({0, 0, 0, 255});
 
-    Player* player = new Player(win, characterTileMap, {90, 100});
 
     Level level = Level();
+    
+    Player* player = new Player(win, characterTileMap, {90, 100}, &level);
     level.loadLevelFile("./res/levels/level_0.level", player);
 
     win->add_key_listener([&](elemd::key_event event) {

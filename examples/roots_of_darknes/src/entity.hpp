@@ -22,11 +22,10 @@ public:
     void move(float horizontal, float vertical, double dt);
     void attack();
 
-private:
+protected:
     void levelCollision();
 
     elemd::Context* _ctx = nullptr;
-    Level* _level = nullptr;
 
     rect* _rect = nullptr;
     elemd::Image* _sprite = nullptr;
