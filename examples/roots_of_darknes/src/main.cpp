@@ -8,19 +8,142 @@
 
 #include <iostream>
 
+#include <json/json.h>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <sstream>
+
 int main()
 {
+    struct TileData
+    {
+        unsigned char tileSymbol;
+        unsigned char tilesetIdx;
+        int x;
+        int y;
+    };
+
+    std::ifstream ifs("./res/levels/level_0.json");
+    Json::Reader reader;
+    Json::Value obj;
+    bool ok = reader.parse(ifs, obj); // reader can also read strings
+    const Json::Value& tiles = obj["tileSets"]["2"]["tileData"];
+
+    std::vector<TileData> tileMap;
+
+    std::vector<std::string> keys = tiles.getMemberNames();
+
+    for (int i = 0; i < keys.size(); ++i)
+    {
+        const std::string& key = keys[i];
+
+        TileData td {};
+        td.tileSymbol = tiles[key]["tileSymbol"].asCString()[0];
+        td.x = tiles[key]["x"].asInt();
+        td.y = tiles[key]["y"].asInt();
+
+        tileMap.push_back(td);
+
+        //std::cout << key << " - " << td.tileSymbol << " x:" << td.x << " y:" << td.y << std::endl;
+    }
+
+
+     struct MapTile
+    {
+        unsigned char tileSymbol;
+        int offsetX;
+        int offsetY;
+        int row;
+        int col;
+    };
+
+    std::vector<MapTile> bgLayer;
+    const Json::Value& backgroundTiles = obj["maps"]["Map_1"]["layers"][0]["tiles"];
+    
+    std::vector<std::string> bgKeys = backgroundTiles.getMemberNames();
+    
+    for (int i = 0; i < bgKeys.size(); ++i)
+    {
+        const std::string& key = bgKeys[i];
+
+
+        std::string segment;
+        std::vector<std::string> seglist;
+        std::stringstream test(key);
+
+        while (std::getline(test, segment, '-'))
+        {
+            seglist.push_back(segment);
+        }
+
+        MapTile td{};
+        td.tileSymbol = backgroundTiles[key]["tileSymbol"].asCString()[0];
+        td.offsetX = backgroundTiles[key]["x"].asInt();
+        td.offsetY = backgroundTiles[key]["y"].asInt();
+        td.row = stoi(seglist[0]);
+        td.col = stoi(seglist[1]);
+
+        bgLayer.push_back(td);
+
+        //std::cout << key << " - " << td.tileSymbol << " x:" << td.offsetX << " y:" << td.offsetY << std::endl;
+    }
+
+
+
+
+
+
+
+    std::vector<MapTile> collisionLayer;
+    const Json::Value& collisionTiles = obj["maps"]["Map_1"]["layers"][1]["tiles"];
+
+    bgKeys = collisionTiles.getMemberNames();
+
+    for (int i = 0; i < bgKeys.size(); ++i)
+    {
+        const std::string& key = bgKeys[i];
+
+        std::string segment;
+        std::vector<std::string> seglist;
+        std::stringstream test(key);
+
+        while (std::getline(test, segment, '-'))
+        {
+            seglist.push_back(segment);
+        }
+
+        MapTile td{};
+        td.tileSymbol = collisionTiles[key]["tileSymbol"].asCString()[0];
+        td.offsetX = collisionTiles[key]["x"].asInt();
+        td.offsetY = collisionTiles[key]["y"].asInt();
+        td.row = stoi(seglist[0]);
+        td.col = stoi(seglist[1]);
+
+        collisionLayer.push_back(td);
+
+        std::cout << key << " - " << td.tileSymbol << " x:" << td.offsetX << " y:" << td.offsetY
+                  << std::endl;
+    }
+
+   
+    
+
     elemd::Audio audio;
     audio.registerSound("./res/music.mp3", "music");
     //audio.playSound("./res/music.mp3");
     audio.registerSound("./res/audio/jump.wav", "jump");
 
-    const int screenWidth = MAP_TILE_SIZE * 40;
-    const int screenHeight = MAP_TILE_SIZE * 30;
+    const int screenWidth = MAP_TILE_SIZE * 30;
+    const int screenHeight = MAP_TILE_SIZE * 20;
 
     // configure and create window
     elemd::WindowConfig winc = elemd::WindowConfig{"Roots of Darknes", screenWidth, screenHeight};
+    
+#ifdef __APPLE__
     winc.native_pixel_size = true;
+#endif
+
     winc.vsync = false;
     winc.icon_file = "./res/app.png";
 
@@ -130,6 +253,8 @@ int main()
             cam.x() = padding_right;
         }
 
+
+        /*
         for (int y = 0; y < level.getRows(); ++y)
         {
             for (int x = 0; x < level.getCols(); ++x)
@@ -145,8 +270,35 @@ int main()
                                 level.getTextureSize(), level.getTextureSize());
             }
         }
+        */
+
+        
+        for (int i = 0; i < bgLayer.size(); ++i)
+        {
+
+                ctx->draw_image(bgLayer[i].row * level.getTileSize() - cam.get_x(),
+                            bgLayer[i].col * level.getTileSize() - cam.get_y(), level.getTileSize(),
+                            level.getTileSize(), mapTileMap,
+                            bgLayer[i].offsetX * level.getTileSize(),
+                            bgLayer[i].offsetY * level.getTileSize(),
+                                level.getTextureSize(), level.getTextureSize());
+        }        
 
         player->render(cam, delta_time);
+
+
+                for (int i = 0; i < collisionLayer.size(); ++i)
+        {
+
+                ctx->draw_image(collisionLayer[i].row * level.getTileSize() - cam.get_x(),
+                                collisionLayer[i].col * level.getTileSize() - cam.get_y(),
+                                level.getTileSize(), level.getTileSize(), mapTileMap,
+                                collisionLayer[i].offsetX * level.getTileSize(),
+                                collisionLayer[i].offsetY * level.getTileSize(),
+                                level.getTextureSize(),
+                                level.getTextureSize());
+        }
+
 
         // Draw Info
         ctx->set_font_size(18);

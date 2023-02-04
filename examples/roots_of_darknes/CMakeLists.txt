@@ -15,6 +15,8 @@ file(GLOB_RECURSE SOURCE_FILES
     ${APP_ICON_RESOURCE_WINDOWS}
 )
 
+find_package(jsoncpp CONFIG REQUIRED)
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 if(MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
@@ -28,4 +30,4 @@ add_custom_command(
     COMMENT "Copying resource files"
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE elemd)
+target_link_libraries(${PROJECT_NAME} PRIVATE elemd JsonCpp::JsonCpp)
