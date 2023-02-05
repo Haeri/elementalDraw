@@ -2,6 +2,8 @@
 #include <elemd/color.hpp>
 #include <elemd/context.hpp>
 #include <elemd/window.hpp>
+#include <elemd/ui/document.hpp>
+#include <elemd/ui/heading.hpp>
 
 #include "level.hpp"
 #include "player.hpp"
@@ -122,8 +124,8 @@ int main()
 
         collisionLayer.push_back(td);
 
-        std::cout << key << " - " << td.tileSymbol << " x:" << td.offsetX << " y:" << td.offsetY
-                  << std::endl;
+        //std::cout << key << " - " << td.tileSymbol << " x:" << td.offsetX << " y:" << td.offsetY
+         //         << std::endl;
     }
 
    
@@ -150,6 +152,8 @@ int main()
     //winc.native_pixel_size = true;
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
+    
+
 
     elemd::ImageConfig imgc = {false, elemd::NEAREST};
 
@@ -163,10 +167,38 @@ int main()
     elemd::Image* characterTileMap = elemd::Image::create("./res/characters_packed.png", imgc);
     ctx->_tmp_register_image(characterTileMap);
 
-    ctx->_tmp_prepare();
+    //ctx->_tmp_prepare();
 
     ctx->set_font(silkscreen);
     ctx->set_clear_color({0, 0, 0, 255});
+
+
+
+    elemd::Document doc(win, ctx);
+
+    elemd::Element body;
+    body.id = "body";
+    body.style.background_color = elemd::color("#1d1d1d");
+    body.style.border_radius[0] = 5;
+    body.style.border_radius[1] = 5;
+    body.style.border_radius[2] = 5;
+    body.style.border_radius[3] = 5;
+    //body.style.height.set_percent(30);
+
+    elemd::Heading solution;
+    solution.set_text("Roots of Darknes");
+    solution.style.color = elemd::color(255, 255, 255);
+    solution.style.font_family = silkscreen;
+    solution.style.font_size = 30;
+    solution.style.padding[0] = 4;
+    solution.style.padding[1] = 4;
+    solution.style.padding[2] = 4;
+    solution.style.padding[3] = 4;
+    body.add_child(&solution);
+
+
+    doc.add_child(&body);
+    doc._tmp_prepare();
 
 
     Level level = Level();
@@ -219,7 +251,7 @@ int main()
         };
 
         swap_start = elemd::Window::now();
-        ctx->present_frame();
+        
         swaptime = elemd::Window::now() - swap_start;
         ++frame_count;
 
@@ -285,9 +317,8 @@ int main()
         }        
 
         player->render(cam, delta_time);
-
-
-                for (int i = 0; i < collisionLayer.size(); ++i)
+                
+        for (int i = 0; i < collisionLayer.size(); ++i)
         {
 
                 ctx->draw_image(collisionLayer[i].row * level.getTileSize() - cam.get_x(),
@@ -301,8 +332,11 @@ int main()
 
 
         // Draw Info
+        ctx->set_fill_color({0, 0, 0, 160});
+        ctx->fill_rect(1, 4, 90, 20);
+
         ctx->set_font_size(18);
-        ctx->set_fill_color({30, 30, 30, 255});
+        ctx->set_fill_color({230, 230, 230, 255});
         int dth = (int)(delta_time * 1000) * 100.0f;
         int dtfr = (int)(delta_time * 100000) - dth;
         ctx->draw_text(2, 2, "DT: " + std::to_string(dth / 100) + "." + std::to_string(dtfr));
@@ -311,7 +345,10 @@ int main()
                        "X: " + std::to_string(player->getPosition().get_x()) +
                            " Y:" + std::to_string(player->getPosition().get_y()));
 
-        ctx->draw_frame();
+        
+        doc.paint(delta_time);
+        //ctx->draw_frame();
+        //ctx->present_frame();
 
         emty_cycles = 0;
     }
@@ -322,7 +359,7 @@ int main()
     silkscreen->destroy();
     mapTileMap->destroy();
     characterTileMap->destroy();
-    win->destroy();
+    //win->destroy();
 
     return 0;
 }

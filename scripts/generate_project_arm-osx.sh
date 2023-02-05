@@ -6,7 +6,8 @@ cd $(dirname "$0")
 cd ..
 root_path=$(pwd)
 
-build_type=""
+triplet_value="arm64-osx-dynamic"
+lib_linkage=""
 feature_list=""
 
 if [ ! -d $root_path"/external/vcpkg/scripts/buildsystems/" ]; then
@@ -17,7 +18,8 @@ fi
 for var in "$@"
 do
 	if [ "$var" = "-static" ]; then
-		build_type="-DBUILD_SHARED_LIBS=OFF"
+		triplet_value="arm64-osx"
+		lib_linkage="-DBUILD_SHARED_LIBS=OFF"
 	fi
 	if [ "$var" = "-ui" ]; then
 		feature_list="-DELEMD_UI=ON $feature_list"
@@ -36,7 +38,12 @@ else
 	rm -rf build
 fi
 
-cmake -B "build" -S . -G Xcode -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports"  -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
+cmake -B "build" -S . -G Xcode \
+	-DVCPKG_TARGET_TRIPLET=$triplet_value \
+	-DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" \
+	-DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+	$lib_linkage \
+	$feature_list
 err=$?
 
 if [ $err -ne 0 ]; then

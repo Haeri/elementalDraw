@@ -17,11 +17,15 @@ namespace elemd
         float delta_time;
 
         Document(elemd::Window* window);
+        Document(elemd::Window* window, elemd::Context* context);
         ~Document();
 
         void add_child(Node* child);
         Node* get_root();
         void main_loop();
+        
+        void paint(double dt);
+        void paint();
 
         void request_high_frequency();
 
@@ -32,6 +36,10 @@ namespace elemd
         int get_height();
 
         elemd::Window* get_window();
+
+        void _tmp_prepare();
+
+       
 
     private:
         int _width = 0;
@@ -50,9 +58,7 @@ namespace elemd
         Node* _focused_node = nullptr;
 
         std::vector<elemd::Font*> _fonts;
-        std::vector<elemd::Image*> _images;
-
-        void paint();
+        std::vector<elemd::Image*> _images;        
     };
 } // namespace elemd
 

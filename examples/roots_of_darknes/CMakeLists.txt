@@ -23,11 +23,18 @@ if(MSVC)
     set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 endif()
 
+
+
 # Make res folder available inside the cmake build
+set(RESOURCE_TARGET "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+
+# VS has a working directory one level obove all the others so we are changing it here
+set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${RESOURCE_TARGET}")
+
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/res
-    COMMENT "Copying resource files"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/res ${RESOURCE_TARGET}/res
+    COMMENT "Copying resource files into ${RESOURCE_TARGET}/res"
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE elemd JsonCpp::JsonCpp)

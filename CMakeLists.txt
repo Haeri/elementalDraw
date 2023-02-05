@@ -103,7 +103,7 @@ endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
     SOVERSION 0
-    VERSION 0.2.0
+    VERSION 0.2.1
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
@@ -111,11 +111,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-message("VCPKG_MANIFEST_FEATURES: ${VCPKG_MANIFEST_FEATURES}")
-message("ELEMD_RENDERING_BACKEND: ${ELEMD_RENDERING_BACKEND_UPPER}")
-message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
-message("DYNAMIC_RUNTIME_LIBRARY: ${DYNAMIC_RUNTIME_LIBRARY}")
-message("CMAKE_MSVC_RUNTIME_LIBRARY: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
+
 
 # ---------------- DEPENDENCIES ---------------------#
 
@@ -163,25 +159,14 @@ if (ELEMD_AUDIO)
     endif()
 endif()
 
+
 # ---------------- EXAMPLES ---------------------#
 
 if (ELEMD_BUILD_EXAMPLES)
-    if (ELEMD_UI)
-    endif()
-    if (ELEMD_AUDIO)
-        add_subdirectory(examples/roots_of_darknes)
-        set_target_properties(roots-of-darknes PROPERTIES FOLDER examples)        
-    endif()
-    if (ELEMD_VIDEO)
-    endif()
-
-
-  if (BUILD_SHARED_LIBS)
-   
-    if (ELEMD_UI)
-        
-    endif()
-    if (ELEMD_AUDIO)
+    add_subdirectory(examples/roots_of_darknes)
+    set_target_properties(roots-of-darknes PROPERTIES FOLDER examples)        
+    
+    if (BUILD_SHARED_LIBS)
         add_custom_command(
             TARGET ${PROJECT_NAME} POST_BUILD
             DEPENDS roots-of-darknes 
@@ -189,9 +174,44 @@ if (ELEMD_BUILD_EXAMPLES)
             COMMENT "Copy library"
         )
     endif()
-    if (ELEMD_VIDEO)
-        
-    endif()
-
-  endif()
 endif()
+
+
+
+# ---------------- EXPORT ---------------------#
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+  cmake/config.cmake.in
+  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+)
+
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Target
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+
+install(
+  EXPORT ${PROJECT_NAME}Target
+  FILE  ${PROJECT_NAME}Target.cmake
+  NAMESPACE ${PROJECT_NAME}::
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY include/
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+  FILES
+  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+)

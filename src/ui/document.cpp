@@ -4,7 +4,12 @@
 
 namespace elemd
 {
-    Document::Document(elemd::Window* window)
+
+    Document::Document(elemd::Window* window) : Document(window, window->create_context())
+    {
+    }
+
+    Document::Document(elemd::Window* window, elemd::Context* context)
     {
         _root = new Element();
         _root->set_document(this);
@@ -13,7 +18,7 @@ namespace elemd
         _height = window->get_height() / window->get_dpi_scale();
 
         _window = window;
-        _context = _window->create_context();
+        _context = context;
 
         _window->add_resize_listener([&](elemd::resize_event event) {
             _width = event.width / _window->get_scale().get_x();
@@ -111,16 +116,7 @@ namespace elemd
 
     void Document::main_loop()
     {
-        for (auto& font : _fonts)
-        {
-            _context->_tmp_register_font(font);
-        }
-        for (auto& image : _images)
-        {
-            _context->_tmp_register_image(image);
-        }
-
-        _context->_tmp_prepare();
+        _tmp_prepare();
 
         using ms = std::chrono::duration<double, std::milli>;
         std::chrono::steady_clock::time_point last_time = std::chrono::steady_clock::now();
@@ -181,6 +177,26 @@ namespace elemd
     elemd::Window* Document::get_window()
     {
         return _window;
+    }
+
+    void Document::_tmp_prepare()
+    {
+        for (auto& font : _fonts)
+        {
+            _context->_tmp_register_font(font);
+        }
+        for (auto& image : _images)
+        {
+            _context->_tmp_register_image(image);
+        }
+
+        _context->_tmp_prepare();
+    }
+
+    void Document::paint(double dt)
+    {
+        delta_time = dt;
+        paint();
     }
 
     void Document::paint()

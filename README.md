@@ -1,8 +1,8 @@
 # <img height="30" src="./data/elemd_icon.png"> elemental Draw
 
-![build](https://github.com/Haeri/ElementalDraw/workflows/C++%20Builder/badge.svg)
-![Version](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/Haeri/ElementalDraw/master/vcpkg.json&label=version&query=$['version-string']&color=blue)
-[![License](https://img.shields.io/github/license/Haeri/ElementalDraw.svg)](https://github.com/Haeri/ElementalDraw/blob/master/LICENSE)
+![build](https://github.com/Haeri/elementalDraw/workflows/C++%20Builder/badge.svg)
+![Version](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/Haeri/elementalDraw/master/vcpkg.json&label=version&query=$['version-string']&color=blue)
+[![License](https://img.shields.io/github/license/Haeri/elementalDraw.svg)](https://github.com/Haeri/elementalDraw/blob/master/LICENSE)
 
 Portable C++ canvas library with a Vulkan (Windows, Linux) and OpenGL (MacOS) backend.
 
@@ -15,15 +15,15 @@ Portable C++ canvas library with a Vulkan (Windows, Linux) and OpenGL (MacOS) ba
 ### <img height="14" src="https://cdn-icons-png.flaticon.com/512/220/220215.png"> Windows
 
 ```cmd
-git clone https://github.com/Haeri/ElementalDraw.git  --recursive
-cd ElementalDraw
+git clone https://github.com/Haeri/elementalDraw.git  --recursive
+cd elementalDraw
 ./scripts/generate_project_win.bat
 ```
 ### <img height="18" src="https://cdn-icons-png.flaticon.com/512/226/226772.png"> Linux
 
 ```bash
-git clone https://github.com/Haeri/ElementalDraw.git  --recursive
-cd ElementalDraw
+git clone https://github.com/Haeri/elementalDraw.git  --recursive
+cd elementalDraw
 sudo apt update
 sudo apt install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev cmake curl unzip tar nasm
 ./scripts/generate_project_linux.sh
@@ -32,8 +32,8 @@ sudo apt install -y libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev cma
 ### <img height="18" src="https://cdn-icons-png.flaticon.com/512/179/179309.png"> macOS
 
 ```bash
-git clone https://github.com/Haeri/ElementalDraw.git  --recursive
-cd ElementalDraw
+git clone https://github.com/Haeri/elementalDraw.git  --recursive
+cd elementalDraw
 brew install nasm
 ./scripts/generate_project_mac.sh
 ```
