@@ -13,7 +13,7 @@ if "%1" == "-static" (
 	xcopy ".\build\Release\elemd.lib" ".\lib\elemd-static.lib*"
 
 	:: Roots of Darknes
-	xcopy ".\build\examples\roots_of_darknes\res" ".\samples\roots_of_darknes\res" /I/E
+	xcopy ".\examples\roots_of_darknes\res" ".\samples\roots_of_darknes\res" /I/E
 	xcopy ".\build\examples\roots_of_darknes\Release\roots-of-darknes.exe" ".\samples\roots_of_darknes\"
 	
 ) else (
