@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-#include <json/json.h>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -18,119 +17,6 @@
 
 int main()
 {
-    struct TileData
-    {
-        unsigned char tileSymbol;
-        unsigned char tilesetIdx;
-        int x;
-        int y;
-    };
-
-    std::ifstream ifs("./res/levels/level_0.json");
-    Json::Reader reader;
-    Json::Value obj;
-    bool ok = reader.parse(ifs, obj); // reader can also read strings
-    const Json::Value& tiles = obj["tileSets"]["2"]["tileData"];
-
-    std::vector<TileData> tileMap;
-
-    std::vector<std::string> keys = tiles.getMemberNames();
-
-    for (int i = 0; i < keys.size(); ++i)
-    {
-        const std::string& key = keys[i];
-
-        TileData td {};
-        td.tileSymbol = tiles[key]["tileSymbol"].asCString()[0];
-        td.x = tiles[key]["x"].asInt();
-        td.y = tiles[key]["y"].asInt();
-
-        tileMap.push_back(td);
-
-        //std::cout << key << " - " << td.tileSymbol << " x:" << td.x << " y:" << td.y << std::endl;
-    }
-
-
-     struct MapTile
-    {
-        unsigned char tileSymbol;
-        int offsetX;
-        int offsetY;
-        int row;
-        int col;
-    };
-
-    std::vector<MapTile> bgLayer;
-    const Json::Value& backgroundTiles = obj["maps"]["Map_1"]["layers"][0]["tiles"];
-    
-    std::vector<std::string> bgKeys = backgroundTiles.getMemberNames();
-    
-    for (int i = 0; i < bgKeys.size(); ++i)
-    {
-        const std::string& key = bgKeys[i];
-
-
-        std::string segment;
-        std::vector<std::string> seglist;
-        std::stringstream test(key);
-
-        while (std::getline(test, segment, '-'))
-        {
-            seglist.push_back(segment);
-        }
-
-        MapTile td{};
-        td.tileSymbol = backgroundTiles[key]["tileSymbol"].asCString()[0];
-        td.offsetX = backgroundTiles[key]["x"].asInt();
-        td.offsetY = backgroundTiles[key]["y"].asInt();
-        td.row = stoi(seglist[0]);
-        td.col = stoi(seglist[1]);
-
-        bgLayer.push_back(td);
-
-        //std::cout << key << " - " << td.tileSymbol << " x:" << td.offsetX << " y:" << td.offsetY << std::endl;
-    }
-
-
-
-
-
-
-
-    std::vector<MapTile> collisionLayer;
-    const Json::Value& collisionTiles = obj["maps"]["Map_1"]["layers"][1]["tiles"];
-
-    bgKeys = collisionTiles.getMemberNames();
-
-    for (int i = 0; i < bgKeys.size(); ++i)
-    {
-        const std::string& key = bgKeys[i];
-
-        std::string segment;
-        std::vector<std::string> seglist;
-        std::stringstream test(key);
-
-        while (std::getline(test, segment, '-'))
-        {
-            seglist.push_back(segment);
-        }
-
-        MapTile td{};
-        td.tileSymbol = collisionTiles[key]["tileSymbol"].asCString()[0];
-        td.offsetX = collisionTiles[key]["x"].asInt();
-        td.offsetY = collisionTiles[key]["y"].asInt();
-        td.row = stoi(seglist[0]);
-        td.col = stoi(seglist[1]);
-
-        collisionLayer.push_back(td);
-
-        //std::cout << key << " - " << td.tileSymbol << " x:" << td.offsetX << " y:" << td.offsetY
-         //         << std::endl;
-    }
-
-   
-    
-
     elemd::Audio audio;
     audio.registerSound("./res/music.mp3", "music");
     //audio.playSound("./res/music.mp3");
@@ -149,7 +35,6 @@ int main()
     winc.vsync = false;
     winc.icon_file = "./res/app.png";
 
-    //winc.native_pixel_size = true;
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
     
@@ -183,17 +68,18 @@ int main()
     body.style.border_radius[1] = 5;
     body.style.border_radius[2] = 5;
     body.style.border_radius[3] = 5;
+    body.style.padding[0] = 0;
+    body.style.padding[1] = 6;
+    body.style.padding[2] = 6;
+    body.style.padding[3] = 6;
+    body.style.margin[0] = screenHeight - (6 + 20);
     //body.style.height.set_percent(30);
 
     elemd::Heading solution;
     solution.set_text("Roots of Darknes");
     solution.style.color = elemd::color(255, 255, 255);
     solution.style.font_family = silkscreen;
-    solution.style.font_size = 30;
-    solution.style.padding[0] = 4;
-    solution.style.padding[1] = 4;
-    solution.style.padding[2] = 4;
-    solution.style.padding[3] = 4;
+    solution.style.font_size = 20;
     body.add_child(&solution);
 
 
@@ -204,7 +90,7 @@ int main()
     Level level = Level();
     
     Player* player = new Player(win, characterTileMap, {90, 100}, &level);
-    level.loadLevelFile("./res/levels/level_0.level", player);
+    level.loadLevelFile("./res/levels/level_0.json", player);
 
     win->add_key_listener([&](elemd::key_event event) {
         if (event.key == elemd::KEY_R && event.mods == elemd::KEY_MOD_CONTROL)
@@ -228,9 +114,6 @@ int main()
 
     int emty_cycles = 0;
 
-    double swap_start = 0;
-    double swaptime = 0;
-
     float cameraPadding = 7;
 
     long long frame_count = -1;
@@ -243,16 +126,13 @@ int main()
     while (win->is_running())
     {
 
-        next_timestamp = frame_start + (target_frame_time - swaptime);
+        next_timestamp = frame_start + target_frame_time;
 
         while (elemd::Window::now() < next_timestamp)
         {
             ++emty_cycles;
         };
 
-        swap_start = elemd::Window::now();
-        
-        swaptime = elemd::Window::now() - swap_start;
         ++frame_count;
 
         // ----------------------- FRAME BORDER -----------------------
@@ -285,47 +165,28 @@ int main()
             cam.x() = padding_right;
         }
 
-
-        /*
-        for (int y = 0; y < level.getRows(); ++y)
-        {
-            for (int x = 0; x < level.getCols(); ++x)
-            {
-                Block b = level.getAt(x, y);
-
-                if (!b.render)
-                    continue;
-
-                ctx->draw_image(x * level.getTileSize() - cam.get_x(),
-                                y * level.getTileSize() - cam.get_y(), level.getTileSize(),
-                                level.getTileSize(), mapTileMap, b.uv.x(), b.uv.y(),
-                                level.getTextureSize(), level.getTextureSize());
-            }
-        }
-        */
-
         
-        for (int i = 0; i < bgLayer.size(); ++i)
+        for (int i = 0; i < level.backgroundLayer.size(); ++i)
         {
 
-                ctx->draw_image(bgLayer[i].row * level.getTileSize() - cam.get_x(),
-                            bgLayer[i].col * level.getTileSize() - cam.get_y(), level.getTileSize(),
+                ctx->draw_image(level.backgroundLayer[i].row * level.getTileSize() - cam.get_x(),
+                            level.backgroundLayer[i].col * level.getTileSize() - cam.get_y(), level.getTileSize(),
                             level.getTileSize(), mapTileMap,
-                            bgLayer[i].offsetX * level.getTileSize(),
-                            bgLayer[i].offsetY * level.getTileSize(),
+                            level.backgroundLayer[i].offsetX * level.getTileSize(),
+                            level.backgroundLayer[i].offsetY * level.getTileSize(),
                                 level.getTextureSize(), level.getTextureSize());
         }        
 
         player->render(cam, delta_time);
                 
-        for (int i = 0; i < collisionLayer.size(); ++i)
+        for (int i = 0; i < level.collisionLayer.size(); ++i)
         {
 
-                ctx->draw_image(collisionLayer[i].row * level.getTileSize() - cam.get_x(),
-                                collisionLayer[i].col * level.getTileSize() - cam.get_y(),
+                ctx->draw_image(level.collisionLayer[i].row * level.getTileSize() - cam.get_x(),
+                                level.collisionLayer[i].col * level.getTileSize() - cam.get_y(),
                                 level.getTileSize(), level.getTileSize(), mapTileMap,
-                                collisionLayer[i].offsetX * level.getTileSize(),
-                                collisionLayer[i].offsetY * level.getTileSize(),
+                                level.collisionLayer[i].offsetX * level.getTileSize(),
+                                level.collisionLayer[i].offsetY * level.getTileSize(),
                                 level.getTextureSize(),
                                 level.getTextureSize());
         }

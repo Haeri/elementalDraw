@@ -4,40 +4,22 @@
 #include <iostream>
 #include <string.h>
 
+#include <json/json.h>
+
+
 #include "player.hpp"
 
-std::map<unsigned int, Block> Level::BlockDb = {
-    {'.', {'.', false, true, {0, 0}}},                                // Grass
-    {',', {',', false, true, {1 * MAP_TILE_SIZE, 0}}},                // Grass 2
-    {':', {':', false, true, {2 * MAP_TILE_SIZE, 0}}},                // Flowers 2
 
-    {'}', {'}', true, true, {2 * MAP_TILE_SIZE, 9 * MAP_TILE_SIZE}}}, // Wall Right
-    {'{', {'{', true, true, {0 * MAP_TILE_SIZE, 9 * MAP_TILE_SIZE}}}, // Wall left
-
-    {'$', {'$', true, false, {0, 0}}}, // Spawn
-    {'o', {'o', true, false, {0, 0}}}, // OutofBounds
-    {'#', {'#', true, true, {6 * MAP_TILE_SIZE, 10 * MAP_TILE_SIZE}}} // Wall
-};
-
-Level::~Level()
+bool Level::getCollideAtWorld(float x, float y) 
 {
-    delete[] _data;
-}
-
-Block Level::getAt(int x, int y)
-{
-    // std::cout << "At " << y * _cols + x << "\n";
-    if (x < 0 || y < 0 || x >= _cols || y >= _rows)
+    int _x = std::floor(x / MAP_TILE_SIZE);
+    int _y = std::floor(y / MAP_TILE_SIZE);
+    int key = _y * _cols + _x;
+    if (_x < 0 || _y < 0 || _x >= _cols || _y >= _rows)
     {
-        return BlockDb['o'];
+        return true;
     }
-
-    unsigned char id = _data[y * _cols + x];
-    return BlockDb[id];
-}
-
-bool Level::getCollideAtWorld(float x, float y) {
-    return getAt(std::floor(x/MAP_TILE_SIZE), std::floor(y/MAP_TILE_SIZE)).collide;
+    return (std::binary_search(collisionIndex.begin(), collisionIndex.end(), key));
 }
 
 int Level::getTileSize()
@@ -60,58 +42,116 @@ int Level::getCols()
     return _cols;
 }
 
-const unsigned char* Level::getData()
-{
-    return _data;
-}
-
 void Level::loadLevelFile(std::string filePath, Player* p)
 {
-    std::string line;
     std::ifstream levelFile(filePath);
-    bool spawned = false;
-    if (levelFile.is_open())
+    if (!levelFile.is_open())
     {
-        // rows
-        std::getline(levelFile, line);
-        _rows = std::stoi(line);
-
-        // cols
-        std::getline(levelFile, line);
-        _cols = std::stoi(line);
-
-        // data
-        _data = new unsigned char[_rows * _cols];
-
-        for (int y = 0; y < _rows; ++y)
-        {
-            std::getline(levelFile, line);
-
-            char* token = strtok(line.data(), " ");
-            _data[y * _cols] = *token;
-            std::cout << token << /*"(" << (y * _cols) << ")" <<*/ " ";
-
-            for (int x = 1; x < _cols; ++x)
-            {
-                token = strtok(NULL, " ");
-                _data[y * _cols + x] = *token;
-
-                if (*token == '$')
-                {
-                    //p->setLevelSpawn(this, {x * _tileSize, y * _tileSize});
-                    spawned = true;
-                }
-
-                std::cout << token << /*"(" << (y * _cols + x) << ")" <<*/ " ";
-            }
-            std::cout << std::endl;
-        }
-
-        levelFile.close();
-
-        if (!spawned)
-        {
-            //p->setLevelSpawn(this, {30, 30});
-        }
+        std::cerr << "Error: Could not find map file!" << std::endl;
+        return;
     }
+
+    Json::Reader reader;
+    Json::Value obj;
+
+    if (!reader.parse(levelFile, obj)) // reader can also read strings
+    {
+        std::cerr << "Error: Could not parse map file!" << std::endl;
+        return;
+    }
+
+    /*
+     
+    struct TileData
+    {
+        unsigned char tileSymbol;
+        unsigned char tilesetIdx;
+        int x;
+        int y;
+    };
+    bool ok = reader.parse(levelFile, obj); // reader can also read strings
+    const Json::Value& tiles = obj["tileSets"]["2"]["tileData"];
+
+    std::vector<TileData> tileMap;
+
+    std::vector<std::string> keys = tiles.getMemberNames();
+
+    for (int i = 0; i < keys.size(); ++i)
+    {
+        const std::string& key = keys[i];
+
+        TileData td{};
+        td.tileSymbol = tiles[key]["tileSymbol"].asCString()[0];
+        td.x = tiles[key]["x"].asInt();
+        td.y = tiles[key]["y"].asInt();
+
+        tileMap.push_back(td);
+
+        // std::cout << key << " - " << td.tileSymbol << " x:" << td.x << " y:" << td.y <<
+        // std::endl;
+    }
+    */
+    
+
+    _rows = obj["maps"]["Map_1"]["mapHeight"].asInt();
+    _cols = obj["maps"]["Map_1"]["mapWidth"].asInt();
+    
+    const Json::Value& backgroundTiles = obj["maps"]["Map_1"]["layers"][0]["tiles"];
+
+    std::vector<std::string> bgKeys = backgroundTiles.getMemberNames();
+
+    for (int i = 0; i < bgKeys.size(); ++i)
+    {
+        const std::string& key = bgKeys[i];
+
+        std::string segment;
+        std::vector<std::string> seglist;
+        std::stringstream test(key);
+
+        while (std::getline(test, segment, '-'))
+        {
+            seglist.push_back(segment);
+        }
+
+        MapTile td{};
+        td.tileSymbol = backgroundTiles[key]["tileSymbol"].asCString()[0];
+        td.offsetX = backgroundTiles[key]["x"].asInt();
+        td.offsetY = backgroundTiles[key]["y"].asInt();
+        td.row = stoi(seglist[0]);
+        td.col = stoi(seglist[1]);
+
+        backgroundLayer.push_back(td);
+    }
+
+    
+    const Json::Value& collisionTiles = obj["maps"]["Map_1"]["layers"][1]["tiles"];
+
+    bgKeys = collisionTiles.getMemberNames();
+
+    for (int i = 0; i < bgKeys.size(); ++i)
+    {
+        const std::string& key = bgKeys[i];
+
+        std::string segment;
+        std::vector<std::string> seglist;
+        std::stringstream test(key);
+
+        while (std::getline(test, segment, '-'))
+        {
+            seglist.push_back(segment);
+        }
+
+        MapTile td{};
+        td.tileSymbol = collisionTiles[key]["tileSymbol"].asCString()[0];
+        td.offsetX = collisionTiles[key]["x"].asInt();
+        td.offsetY = collisionTiles[key]["y"].asInt();
+        td.row = stoi(seglist[0]);
+        td.col = stoi(seglist[1]);
+
+        collisionLayer.push_back(td);
+        collisionIndex.push_back(td.col * _cols + td.row);
+    }
+    std::sort(collisionIndex.begin(), collisionIndex.end());
+
+    levelFile.close();
 }
