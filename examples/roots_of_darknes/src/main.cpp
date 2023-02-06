@@ -1,9 +1,9 @@
 #include <elemd/audio/audio.hpp>
 #include <elemd/color.hpp>
 #include <elemd/context.hpp>
-#include <elemd/window.hpp>
 #include <elemd/ui/document.hpp>
 #include <elemd/ui/heading.hpp>
+#include <elemd/window.hpp>
 
 #include "level.hpp"
 #include "player.hpp"
@@ -11,15 +11,15 @@
 #include <iostream>
 
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
 
 int main()
 {
     elemd::Audio audio;
     audio.registerSound("./res/music.mp3", "music");
-    //audio.playSound("./res/music.mp3");
+    // audio.playSound("./res/music.mp3");
     audio.registerSound("./res/audio/jump.wav", "jump");
 
     const int screenWidth = MAP_TILE_SIZE * 30;
@@ -27,7 +27,7 @@ int main()
 
     // configure and create window
     elemd::WindowConfig winc = elemd::WindowConfig{"Roots of Darknes", screenWidth, screenHeight};
-    
+
 #ifdef __APPLE__
     winc.native_pixel_size = true;
 #endif
@@ -37,8 +37,6 @@ int main()
 
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
-    
-
 
     elemd::ImageConfig imgc = {false, elemd::NEAREST};
 
@@ -52,12 +50,10 @@ int main()
     elemd::Image* characterTileMap = elemd::Image::create("./res/characters_packed.png", imgc);
     ctx->_tmp_register_image(characterTileMap);
 
-    //ctx->_tmp_prepare();
+    // ctx->_tmp_prepare();
 
     ctx->set_font(silkscreen);
     ctx->set_clear_color({0, 0, 0, 255});
-
-
 
     elemd::Document doc(win, ctx);
 
@@ -73,7 +69,7 @@ int main()
     body.style.padding[2] = 6;
     body.style.padding[3] = 6;
     body.style.margin[0] = screenHeight - (6 + 20);
-    //body.style.height.set_percent(30);
+    // body.style.height.set_percent(30);
 
     elemd::Heading solution;
     solution.set_text("Roots of Darknes");
@@ -82,13 +78,11 @@ int main()
     solution.style.font_size = 20;
     body.add_child(&solution);
 
-
     doc.add_child(&body);
     doc._tmp_prepare();
 
+    Level level = Level(ctx, mapTileMap);
 
-    Level level = Level();
-    
     Player* player = new Player(win, characterTileMap, {90, 100}, &level);
     level.loadLevelFile("./res/levels/level_0.json", player);
 
@@ -165,32 +159,9 @@ int main()
             cam.x() = padding_right;
         }
 
-        
-        for (int i = 0; i < level.backgroundLayer.size(); ++i)
-        {
-
-                ctx->draw_image(level.backgroundLayer[i].row * level.getTileSize() - cam.get_x(),
-                            level.backgroundLayer[i].col * level.getTileSize() - cam.get_y(), level.getTileSize(),
-                            level.getTileSize(), mapTileMap,
-                            level.backgroundLayer[i].offsetX * level.getTileSize(),
-                            level.backgroundLayer[i].offsetY * level.getTileSize(),
-                                level.getTextureSize(), level.getTextureSize());
-        }        
+        level.render(cam);
 
         player->render(cam, delta_time);
-                
-        for (int i = 0; i < level.collisionLayer.size(); ++i)
-        {
-
-                ctx->draw_image(level.collisionLayer[i].row * level.getTileSize() - cam.get_x(),
-                                level.collisionLayer[i].col * level.getTileSize() - cam.get_y(),
-                                level.getTileSize(), level.getTileSize(), mapTileMap,
-                                level.collisionLayer[i].offsetX * level.getTileSize(),
-                                level.collisionLayer[i].offsetY * level.getTileSize(),
-                                level.getTextureSize(),
-                                level.getTextureSize());
-        }
-
 
         // Draw Info
         ctx->set_fill_color({0, 0, 0, 160});
@@ -206,10 +177,9 @@ int main()
                        "X: " + std::to_string(player->getPosition().get_x()) +
                            " Y:" + std::to_string(player->getPosition().get_y()));
 
-        
         doc.paint(delta_time);
-        //ctx->draw_frame();
-        //ctx->present_frame();
+        // ctx->draw_frame();
+        // ctx->present_frame();
 
         emty_cycles = 0;
     }
@@ -220,7 +190,7 @@ int main()
     silkscreen->destroy();
     mapTileMap->destroy();
     characterTileMap->destroy();
-    //win->destroy();
+    // win->destroy();
 
     return 0;
 }

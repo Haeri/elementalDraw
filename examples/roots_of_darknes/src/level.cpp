@@ -4,8 +4,6 @@
 #include <iostream>
 #include <string.h>
 
-#include <json/json.h>
-
 
 #include "player.hpp"
 
@@ -93,65 +91,79 @@ void Level::loadLevelFile(std::string filePath, Player* p)
     */
     
 
-    _rows = obj["maps"]["Map_1"]["mapHeight"].asInt();
-    _cols = obj["maps"]["Map_1"]["mapWidth"].asInt();
+    _rows = obj["maps"]["level"]["mapHeight"].asInt();
+    _cols = obj["maps"]["level"]["mapWidth"].asInt();
+   
     
-    const Json::Value& backgroundTiles = obj["maps"]["Map_1"]["layers"][0]["tiles"];
+    const Json::Value& layers = obj["maps"]["level"]["layers"];
 
-    std::vector<std::string> bgKeys = backgroundTiles.getMemberNames();
-
-    for (int i = 0; i < bgKeys.size(); ++i)
-    {
-        const std::string& key = bgKeys[i];
-
-        std::string segment;
-        std::vector<std::string> seglist;
-        std::stringstream test(key);
-
-        while (std::getline(test, segment, '-'))
-        {
-            seglist.push_back(segment);
-        }
-
-        MapTile td{};
-        td.tileSymbol = backgroundTiles[key]["tileSymbol"].asCString()[0];
-        td.offsetX = backgroundTiles[key]["x"].asInt();
-        td.offsetY = backgroundTiles[key]["y"].asInt();
-        td.row = stoi(seglist[0]);
-        td.col = stoi(seglist[1]);
-
-        backgroundLayer.push_back(td);
-    }
-
+    parseLayer(layers, 0, backgroundLayer);
+    parseLayer(layers, 1, folliageLayer);
+    parseLayer(layers, 2, collisionLayer);
+    parseLayer(layers, 3, itemLayer);
     
-    const Json::Value& collisionTiles = obj["maps"]["Map_1"]["layers"][1]["tiles"];
-
-    bgKeys = collisionTiles.getMemberNames();
-
-    for (int i = 0; i < bgKeys.size(); ++i)
-    {
-        const std::string& key = bgKeys[i];
-
-        std::string segment;
-        std::vector<std::string> seglist;
-        std::stringstream test(key);
-
-        while (std::getline(test, segment, '-'))
-        {
-            seglist.push_back(segment);
-        }
-
-        MapTile td{};
-        td.tileSymbol = collisionTiles[key]["tileSymbol"].asCString()[0];
-        td.offsetX = collisionTiles[key]["x"].asInt();
-        td.offsetY = collisionTiles[key]["y"].asInt();
-        td.row = stoi(seglist[0]);
-        td.col = stoi(seglist[1]);
-
-        collisionLayer.push_back(td);
-        collisionIndex.push_back(td.col * _cols + td.row);
-    }
-    std::sort(collisionIndex.begin(), collisionIndex.end());
-
     levelFile.close();
+}
+
+void Level::parseLayer(const Json::Value& obj, int index, std::vector<MapTile>& layer)
+{
+    const Json::Value& tiles = obj[index]["tiles"];
+    bool isCollision = obj[index]["name"].asString() == "collision";
+
+    std::vector<std::string> indexList = tiles.getMemberNames();
+
+    for (int i = 0; i < indexList.size(); ++i)
+    {
+        const std::string& key = indexList[i];
+
+        std::string segment;
+        std::vector<std::string> seglist;
+        std::stringstream test(key);
+
+        while (std::getline(test, segment, '-'))
+        {
+            seglist.push_back(segment);
+        }
+
+        MapTile td{};
+        td.tileSymbol = tiles[key]["tileSymbol"].asCString()[0];
+        td.offsetX = tiles[key]["x"].asInt();
+        td.offsetY = tiles[key]["y"].asInt();
+        td.row = stoi(seglist[0]);
+        td.col = stoi(seglist[1]);
+
+        layer.push_back(td);
+
+        if (isCollision)
+        {
+            collisionIndex.push_back(td.col * _cols + td.row);
+        }
+    }
+    if (isCollision)
+    {
+        std::sort(collisionIndex.begin(), collisionIndex.end());
+    }
+    
+}
+
+void Level::render(const elemd::vec2& cam) 
+{
+    renderLayer(cam, backgroundLayer);
+    renderLayer(cam, folliageLayer);
+    renderLayer(cam, collisionLayer);
+    renderLayer(cam, itemLayer);
+}
+
+void Level::renderLayer(const elemd::vec2& cam, const std::vector<MapTile>& layer)
+{
+    for (int i = 0; i < layer.size(); ++i)
+    {
+
+        _ctx->draw_image(layer[i].row * getTileSize() - cam.get_x(),
+                        layer[i].col * getTileSize() - cam.get_y(),
+                        getTileSize(), getTileSize(), _tileMap,
+                        layer[i].offsetX * getTileSize(),
+                        layer[i].offsetY * getTileSize(),
+                        getTextureSize(), getTextureSize());
+    }
 }
