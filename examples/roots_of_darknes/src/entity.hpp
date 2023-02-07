@@ -6,7 +6,6 @@
 #include <elemd/vec2.hpp>
 
 #include "level.hpp"
-#include "physics.hpp"
 
 class Entity
 {
@@ -18,18 +17,14 @@ public:
 
     elemd::vec2 getPosition();
 
-    
     void move(float horizontal, float vertical, double dt);
     void attack();
 
 protected:
-    void levelCollision();
-
     elemd::Context* _ctx = nullptr;
 
     rect* _rect = nullptr;
     elemd::Image* _sprite = nullptr;
-
 };
 
 #endif // ENTITY_HPP

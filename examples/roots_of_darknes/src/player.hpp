@@ -8,7 +8,9 @@
 class Player : public Entity
 {
 public:
-    const float PLAYER_SPEED = 1.2;
+    const float PLAYER_SPEED = 1700.0f;
+    const float PLAYER_FRICTION = 12.0f;
+
     bool _isLeftPresed = false;
     bool _isRightPresed = false;
     bool _isUpPresed = false;
@@ -17,9 +19,9 @@ public:
     Player(elemd::Window* window, elemd::Image* img, elemd::vec2 spawn, Level* level)
         : Entity(window->get_context(), img, spawn), _win(window)
     {
-        
+
         _level = level;
-        
+
         window->add_key_listener([&](elemd::key_event event) {
             int start_vel = 0;
 
@@ -88,7 +90,7 @@ public:
              */
         });
     }
-    
+
     void doInput(double dt);
 
 private:

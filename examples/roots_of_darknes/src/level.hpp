@@ -1,13 +1,15 @@
 #ifndef LEVEL_HPP
 #define LEVEL_HPP
 
-#include <elemd/vec2.hpp>
-#include <elemd/image.hpp>
 #include <elemd/context.hpp>
+#include <elemd/image.hpp>
+#include <elemd/vec2.hpp>
 #include <map>
 #include <vector>
 
 #include <json/json.h>
+
+#include "physics.hpp"
 
 #define MAP_TILE_SIZE 16
 #define SPRITE_SCALAT_POT 1
@@ -32,9 +34,10 @@ public:
     std::vector<MapTile> itemLayer;
 
     std::vector<int> collisionIndex;
+    std::vector<rect> collisionRects;
 
     Level(elemd::Context* ctx, elemd::Image* mapTileMap) : _ctx(ctx), _tileMap(mapTileMap)
-    {    
+    {
     }
 
     bool getCollideAtWorld(float x, float y);

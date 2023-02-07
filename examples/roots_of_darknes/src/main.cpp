@@ -9,11 +9,7 @@
 #include "player.hpp"
 
 #include <iostream>
-
-#include <fstream>
-#include <sstream>
 #include <string>
-#include <vector>
 
 int main()
 {
@@ -34,6 +30,8 @@ int main()
 
     winc.vsync = false;
     winc.icon_file = "./res/app.png";
+    winc.x_scale = 2;
+    winc.y_scale = 2;
 
     elemd::Window* win = elemd::Window::create(winc);
     elemd::Context* ctx = win->create_context();
@@ -107,12 +105,11 @@ int main()
     double next_timestamp = 0;
 
     int emty_cycles = 0;
-
-    float cameraPadding = 7;
-
     long long frame_count = -1;
 
+    float cameraPadding = 7;
     elemd::vec2 cam = {0, 0};
+
 
     ctx->draw_frame();
 
@@ -172,10 +169,6 @@ int main()
         int dth = (int)(delta_time * 1000) * 100.0f;
         int dtfr = (int)(delta_time * 100000) - dth;
         ctx->draw_text(2, 2, "DT: " + std::to_string(dth / 100) + "." + std::to_string(dtfr));
-
-        ctx->draw_text(2, 20,
-                       "X: " + std::to_string(player->getPosition().get_x()) +
-                           " Y:" + std::to_string(player->getPosition().get_y()));
 
         doc.paint(delta_time);
         // ctx->draw_frame();

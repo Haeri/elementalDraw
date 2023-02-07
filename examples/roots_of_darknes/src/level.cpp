@@ -1,14 +1,12 @@
 #include "level.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <string.h>
-
 
 #include "player.hpp"
 
-
-bool Level::getCollideAtWorld(float x, float y) 
+bool Level::getCollideAtWorld(float x, float y)
 {
     int _x = std::floor(x / MAP_TILE_SIZE);
     int _y = std::floor(y / MAP_TILE_SIZE);
@@ -59,7 +57,7 @@ void Level::loadLevelFile(std::string filePath, Player* p)
     }
 
     /*
-     
+
     struct TileData
     {
         unsigned char tileSymbol;
@@ -89,19 +87,17 @@ void Level::loadLevelFile(std::string filePath, Player* p)
         // std::endl;
     }
     */
-    
 
     _rows = obj["maps"]["level"]["mapHeight"].asInt();
     _cols = obj["maps"]["level"]["mapWidth"].asInt();
-   
-    
+
     const Json::Value& layers = obj["maps"]["level"]["layers"];
 
     parseLayer(layers, 0, backgroundLayer);
     parseLayer(layers, 1, folliageLayer);
     parseLayer(layers, 2, collisionLayer);
     parseLayer(layers, 3, itemLayer);
-    
+
     levelFile.close();
 }
 
@@ -137,16 +133,20 @@ void Level::parseLayer(const Json::Value& obj, int index, std::vector<MapTile>& 
         if (isCollision)
         {
             collisionIndex.push_back(td.col * _cols + td.row);
+
+            rect r{};
+            r.pos = {td.row * MAP_TILE_SIZE, td.col * MAP_TILE_SIZE};
+            r.size = {MAP_TILE_SIZE, MAP_TILE_SIZE};
+            collisionRects.push_back(r);
         }
     }
     if (isCollision)
     {
         std::sort(collisionIndex.begin(), collisionIndex.end());
     }
-    
 }
 
-void Level::render(const elemd::vec2& cam) 
+void Level::render(const elemd::vec2& cam)
 {
     renderLayer(cam, backgroundLayer);
     renderLayer(cam, folliageLayer);
@@ -160,10 +160,8 @@ void Level::renderLayer(const elemd::vec2& cam, const std::vector<MapTile>& laye
     {
 
         _ctx->draw_image(layer[i].row * getTileSize() - cam.get_x(),
-                        layer[i].col * getTileSize() - cam.get_y(),
-                        getTileSize(), getTileSize(), _tileMap,
-                        layer[i].offsetX * getTileSize(),
-                        layer[i].offsetY * getTileSize(),
-                        getTextureSize(), getTextureSize());
+                         layer[i].col * getTileSize() - cam.get_y(), getTileSize(), getTileSize(),
+                         _tileMap, layer[i].offsetX * getTileSize(),
+                         layer[i].offsetY * getTileSize(), getTextureSize(), getTextureSize());
     }
 }
