@@ -1,0 +1,46 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "level_0.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "kenneys.tsx": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 3
+        },
+        "level_0.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 221.99999999999997,
+                "y": 131.33333333333334
+            }
+        }
+    },
+    "last.exportedFilePath": "C:/Users/Luka/Documents/GitHub/ElementalDraw/examples/roots_of_darknes/res/levels",
+    "last.imagePath": "C:/Users/Luka/Documents/GitHub/ElementalDraw/examples/roots_of_darknes/res",
+    "map.height": 50,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 50,
+    "openFiles": [
+        "kenneys.tsx",
+        "level_0.tmx"
+    ],
+    "project": "rod.tiled-project",
+    "recentFiles": [
+        "kenneys.tsx",
+        "level_0.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

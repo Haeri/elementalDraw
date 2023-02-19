@@ -88,10 +88,10 @@ void Level::loadLevelFile(std::string filePath, Player* p)
     }
     */
 
-    _rows = obj["maps"]["level"]["mapHeight"].asInt();
-    _cols = obj["maps"]["level"]["mapWidth"].asInt();
+    _rows = obj["height"].asInt();
+    _cols = obj["width"].asInt();
 
-    const Json::Value& layers = obj["maps"]["level"]["layers"];
+    const Json::Value& layers = obj["layers"];
 
     parseLayer(layers, 0, backgroundLayer);
     parseLayer(layers, 1, folliageLayer);
@@ -103,39 +103,35 @@ void Level::loadLevelFile(std::string filePath, Player* p)
 
 void Level::parseLayer(const Json::Value& obj, int index, std::vector<MapTile>& layer)
 {
-    const Json::Value& tiles = obj[index]["tiles"];
-    bool isCollision = obj[index]["name"].asString() == "collision";
+    const Json::Value& tiles = obj[index]["data"];
+    bool isCollision = obj[index]["name"].asString() == "Collision";
 
-    std::vector<std::string> indexList = tiles.getMemberNames();
+    //std::vector<std::string> indexList = tiles.getMemberNames();
 
-    for (int i = 0; i < indexList.size(); ++i)
+    for (int i = 0; i < tiles.size(); ++i)
     {
-        const std::string& key = indexList[i];
+        
+        int index = tiles[i].asInt();
 
-        std::string segment;
-        std::vector<std::string> seglist;
-        std::stringstream test(key);
+        if (index == 0)
+            continue;
 
-        while (std::getline(test, segment, '-'))
-        {
-            seglist.push_back(segment);
-        }
+        --index;
 
         MapTile td{};
-        td.tileSymbol = tiles[key]["tileSymbol"].asCString()[0];
-        td.offsetX = tiles[key]["x"].asInt();
-        td.offsetY = tiles[key]["y"].asInt();
-        td.row = stoi(seglist[0]);
-        td.col = stoi(seglist[1]);
+        td.offsetY = index / 12;
+        td.offsetX = index % 12;
+        td.row = i / _cols;
+        td.col = i % _cols;
 
         layer.push_back(td);
 
         if (isCollision)
         {
-            collisionIndex.push_back(td.col * _cols + td.row);
+            collisionIndex.push_back(i);
 
             rect r{};
-            r.pos = {td.row * MAP_TILE_SIZE, td.col * MAP_TILE_SIZE};
+            r.pos = {td.col * MAP_TILE_SIZE, td.row * MAP_TILE_SIZE};
             r.size = {MAP_TILE_SIZE, MAP_TILE_SIZE};
             collisionRects.push_back(r);
         }
@@ -159,8 +155,8 @@ void Level::renderLayer(const elemd::vec2& cam, const std::vector<MapTile>& laye
     for (int i = 0; i < layer.size(); ++i)
     {
 
-        _ctx->draw_image(layer[i].row * getTileSize() - cam.get_x(),
-                         layer[i].col * getTileSize() - cam.get_y(), getTileSize(), getTileSize(),
+        _ctx->draw_image(layer[i].col * getTileSize() - cam.get_x(),
+                         layer[i].row * getTileSize() - cam.get_y(), getTileSize(), getTileSize(),
                          _tileMap, layer[i].offsetX * getTileSize(),
                          layer[i].offsetY * getTileSize(), getTextureSize(), getTextureSize());
     }

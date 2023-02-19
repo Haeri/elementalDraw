@@ -145,6 +145,10 @@ int main()
             player->getPosition().get_x() - screenWidth / 2 - screenWidth / cameraPadding;
         float padding_right =
             player->getPosition().get_x() + 24 - screenWidth / 2 + screenWidth / cameraPadding;
+        float padding_top =
+            player->getPosition().get_y() - screenHeight / 2 - screenHeight / cameraPadding;
+        float padding_bottom =
+            player->getPosition().get_y() + 24 - screenHeight / 2 + screenHeight / cameraPadding;
 
         if (cam.x() < padding_left &&
             cam.x() <= level.getCols() * level.getTileSize() - screenWidth)
@@ -155,6 +159,16 @@ int main()
         {
             cam.x() = padding_right;
         }
+        else if (cam.y() < padding_top &&
+                 cam.y() <= level.getRows() * level.getTileSize() - screenHeight)
+        {
+            cam.y() = padding_top;
+        }
+        else if (cam.y() > padding_bottom && cam.y() > 0)
+        {
+            cam.y() = padding_bottom;
+        }
+        
 
         level.render(cam);
 
