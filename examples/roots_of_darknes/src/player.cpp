@@ -1,6 +1,7 @@
 #include "player.hpp"
 
 #include <algorithm>
+#include <limits>
 
 void Player::doInput(double dt)
 {
@@ -54,7 +55,7 @@ void Player::doInput(double dt)
 
     // Sort collisions in order of distance
     elemd::vec2 cp, cn;
-    float t = 0, min_t = INFINITY;
+    float t = 0, min_t = std::numeric_limits<double>::infinity();
     std::vector<std::pair<int, float>> z;
 
     // Work out collision point, add it to vector along with rect ID
