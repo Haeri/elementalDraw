@@ -101,7 +101,7 @@ jobs:
       with:
         submodules: 'true'
     - name: Setup Environment
-      run: brew install nasm
+      run: brew install nasm pkg-config
     - name: Cache
       uses: actions/cache@v3
       with:

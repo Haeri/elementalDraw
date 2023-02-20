@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+ <editorsettings>
+  <export target="../levels/level_01.json" format="json"/>
+ </editorsettings>
  <tileset firstgid="1" source="kenneys.tsx"/>
  <layer id="1" name="Background" width="50" height="50">
   <data encoding="csv">
@@ -55,7 +58,7 @@
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
 </data>
  </layer>
- <layer id="3" name="Bacground_Decoration" width="50" height="50">
+ <layer id="3" name="Bacground_Decoration" width="50" height="50" visible="0">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,30,0,0,0,0,30,0,0,0,30,0,0,0,0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -109,7 +112,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="2" name="Collision" width="50" height="50">
+ <layer id="2" name="Collision" width="50" height="50" visible="0">
   <data encoding="csv">
 20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,21,29,0,0,0,0,0,0,0,0,0,0,0,0,97,98,98,98,98,98,98,98,98,99,0,0,0,0,0,0,0,0,0,0,
 20,20,20,20,20,20,20,20,20,20,20,20,20,20,33,32,0,0,0,29,6,0,0,0,0,0,0,0,0,0,121,122,122,122,122,122,122,122,122,123,0,0,0,0,0,0,0,0,0,0,
@@ -163,5 +166,5 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="5" name="Item"/>
+ <objectgroup id="5" name="Item" visible="0"/>
 </map>
