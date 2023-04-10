@@ -12,8 +12,6 @@ cd ..
 if "%1" == "-static" (
 	xcopy ".\build\Release\elemd.lib" ".\lib\elemd-static.lib*"
 
-	:: ------ Package Examples ------
-
 	:: Hello World
 	xcopy ".\build\examples\hello_world\res" ".\samples\hello_world\res" /I/E
 	xcopy ".\build\examples\hello_world\Release\hello-world.exe" ".\samples\hello_world\"

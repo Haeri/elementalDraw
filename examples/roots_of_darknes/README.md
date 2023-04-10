@@ -1,4 +1,4 @@
-# Platformer
+# Roots Of Darknes
 
 A simple platformer game.
 
@@ -8,8 +8,7 @@ A simple platformer game.
 |--|--|
 | `←` | move left |
 | `→` | move right |
-| `↑` | jump |
 
 ## Screenshots
 
-![](./doc/capture.gif "Platforemer")
+![](./doc/capture.png "Roots Of Darknes")
