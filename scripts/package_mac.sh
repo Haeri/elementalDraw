@@ -45,7 +45,7 @@ if [ "$1" = "-static" ]; then
 	
 else
 	mkdir bin
-	cp -R ./build/Release ./bin
+	cp ./build/Release/libelemd*.dylib ./bin/
 fi
 
 err=$?

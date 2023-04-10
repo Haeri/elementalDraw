@@ -14,6 +14,9 @@
 #endif
 
 #include <GLFW/glfw3.h>
+//#define GLFW_EXPOSE_NATIVE_WIN32
+//#include <GLFW/glfw3native.h>
+
 
 namespace elemd
 {
@@ -429,6 +432,17 @@ namespace elemd
             exit(EXIT_FAILURE);
         }
         ++_windowCount;
+
+
+        /*
+        * TODO: If I feel fancy at some point, I could try to figure out how to remove the title bar 
+        * in other systems as well
+        * 
+        // Set the window style to not include a titlebar
+        HWND hwnd = glfwGetWin32Window(_glfw_window);
+        SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_CAPTION);
+        * 
+        */
 
         load_icon(config);
 
