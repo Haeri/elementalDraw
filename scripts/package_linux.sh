@@ -44,7 +44,7 @@ if [ "$1" = "-static" ]; then
 	cp ./build/Release/examples/slack/slack ./samples/slack
 else
 	mkdir bin
-	cp ./build/Release/libelemd.so* ./bin/
+	cp -R ./build/Release ./bin
 fi
 
 err=$?

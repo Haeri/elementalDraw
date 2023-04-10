@@ -7,23 +7,23 @@ class Project
 {
 public:
     std::string name;
-    std::vector<std::string> incompleteTasks;
-    std::vector<std::string> completedTasks;
+    std::vector<std::u32string> incompleteTasks;
+    std::vector<std::u32string> completedTasks;
 
-    void addTask(std::string text)
+    void addTask(std::u32string text)
     {
         incompleteTasks.push_back(text);
     }
 
     void completeTask(int index)
     {
-        std::string t = incompleteTasks[index];
+        std::u32string t = incompleteTasks[index];
         incompleteTasks.erase(incompleteTasks.begin() + index);
         completedTasks.push_back(t);
     }
 };
 
-void render_task(std::string task, elemd::Node* project_list, int index, elemd::Font* font)
+void render_task(std::u32string task, elemd::Node* project_list, int index, elemd::Font* font)
 {
     elemd::Node::Style task_wrapper;
     //  task_wrapper.background_color = elemd::color(90, 90, 90);
@@ -84,16 +84,16 @@ int main(void)
 
     Project p1;
     p1.name = "ToDos For University";
-    p1.addTask("I have to fix my thesis");
-    p1.addTask("Clean the room. Its dirty!");
-    p1.addTask("Research unlimited energy");
-    p1.addTask("World dominance.");
+    p1.addTask(U"I have to fix my thesis");
+    p1.addTask(U"Clean the room. Its dirty!");
+    p1.addTask(U"Research unlimited energy");
+    p1.addTask(U"World dominance.");
     projects.push_back(p1);
 
     Project p2;
     p2.name = "Personal Tasks";
-    p2.addTask("I have to fix my thesis");
-    p2.addTask("I have to fix my thesis2");
+    p2.addTask(U"I have to fix my thesis");
+    p2.addTask(U"I have to fix my thesis2");
     projects.push_back(p2);
 
     elemd::WindowConfig winc = elemd::WindowConfig{"Tasker", WIDTH, HEIGHT};

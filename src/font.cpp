@@ -8,7 +8,7 @@
 
 namespace elemd
 {
-    std::map<unsigned int, character>& Font::get_characters()
+    std::map<char32_t, character>& Font::get_characters()
     {
         return _characters;
     }
@@ -28,9 +28,14 @@ namespace elemd
         return _texture_atlas;
     }
 
-    std::string Font::fit_substring(std::string text, int width, int font_size)
+    bool Font::is_color_font()
     {
-        std::string _ret = "";
+        return _is_color_font;
+    }
+
+    std::u32string Font::fit_substring(std::u32string text, int width, int font_size)
+    {
+        std::u32string _ret = U"";
         int index = fit_one_substring(text, width, font_size);
 
         if (index < text.size())
@@ -43,7 +48,7 @@ namespace elemd
             {
                 start = index;
                 index += fit_one_substring(text.substr(index), width, font_size);
-                std::string line = text.substr(start, index - start);
+                std::u32string line = text.substr(start, index - start);
                 if (line[0] == ' ')
                 {
                     line = line.substr(1, line.size() - 1);
@@ -54,7 +59,7 @@ namespace elemd
                 }
                 else
                 {
-                    _ret += "\n" + line;
+                    _ret += U"\n" + line;
                 }
             }
         }
@@ -66,7 +71,7 @@ namespace elemd
         return _ret;
     }
 
-    vec2 Font::measure_dimensions(std::string text, int font_size)
+    vec2 Font::measure_dimensions(std::u32string text, int font_size)
     {
         float x = 0;
         float y = 0;
@@ -152,7 +157,7 @@ namespace elemd
             file.read((char*)fileBuffer, fileSize);
             file.close();
 
-            _name = file_path;
+            //_name = file_path;
 
             load_from_memory(fileBuffer, fileSize);
         }
@@ -187,6 +192,9 @@ namespace elemd
             exit(1);
         }
 
+        _name = FT_Get_Postscript_Name(face);
+
+
         FT_Set_Pixel_Sizes(face, 0, LOADED_HEIGHT);
         _line_height = (float)(face->size->metrics.height >> 6);
 
@@ -211,14 +219,23 @@ namespace elemd
 
         charcode = FT_Get_First_Char(face, &gindex);
 
-        FT_Int32 flags = FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT;
+        FT_Int32 flags = FT_LOAD_RENDER;
         if (FT_HAS_COLOR(face))
+        {
+            _is_color_font = true;
             flags |= FT_LOAD_COLOR;
-
+        }
+        else
+        {
+            // TODO: This is slow. Maybe have it load after we do the normal load
+            //flags |= FT_LOAD_TARGET_(FT_RENDER_MODE_SDF);
+        }
+        
         while (gindex != 0)
+        //for (unsigned char gindex = 0; c < 128; c++)
         {
 
-            FT_Load_Char(face, charcode, flags);
+            ft_error = FT_Load_Char(face, charcode, flags);                
             FT_Bitmap* bmp = &face->glyph->bitmap;
 
             if (pen_x + bmp->width + padding >= tex_width)
@@ -268,9 +285,11 @@ namespace elemd
             character character = {
                 vec2((float)(face->glyph->bitmap.width), (float)(bmp->rows)),
                 vec2((float)(face->glyph->bitmap_left), (float)(face->glyph->bitmap_top)),
-                vec2((float)(pen_x), (float)(pen_y)), (int)(face->glyph->advance.x >> 6)};
+                vec2((float)(pen_x), (float)(pen_y)), (int)(face->glyph->advance.x >> 6),
+                (bmp->pixel_mode >= FT_PIXEL_MODE_LCD)
+            };
 
-            _characters[charcode] = character;
+            _characters[static_cast<char32_t>(charcode)] = character;
 
             if (bmp->width != 0 && bmp->rows != 0)
             {
@@ -281,13 +300,13 @@ namespace elemd
             charcode = FT_Get_Next_Char(face, charcode, &gindex);
         }
 
+        _texture_atlas = Image::create(tex_width, tex_height, 4, pixels);
+            
         FT_Done_Face(face);
         FT_Done_FreeType(ft_library);
-
-        _texture_atlas = Image::create(tex_width, tex_height, 4, pixels);
     }
 
-    int Font::fit_one_substring(std::string text, int width, int font_size)
+    int Font::fit_one_substring(std::u32string text, int width, int font_size)
     {
         int character_index = 0;
         int last_word_index = 0;

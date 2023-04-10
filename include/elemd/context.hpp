@@ -87,6 +87,7 @@ namespace elemd
         int get_width();
         int get_height();
         void resize_context(int width, int height);
+        Font* get_default_font();
 
         void _tmp_register_image(Image* image);
         void _tmp_register_font(Font* font);

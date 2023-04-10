@@ -39,8 +39,7 @@ if "%1" == "-static" (
 	xcopy ".\build\examples\slack\Release\slack.exe" ".\samples\slack\"
 	
 ) else (
-	xcopy ".\build\Release\elemd.dll" ".\bin\"
-	xcopy ".\build\Release\elemd.lib" ".\lib\"
+	xcopy ".\build\Release" ".\bin" /I/E	
 )
 
 set /a "err=%err%+%errorlevel%"

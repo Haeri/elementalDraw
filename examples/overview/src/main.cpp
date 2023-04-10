@@ -48,6 +48,8 @@ int main(void)
     elemd::Font* icon_font = elemd::Font::create("./res/font/feather.ttf");
     ctx->_tmp_register_font(icon_font);
 
+    
+
     std::u32string icons = U"";
     int icon_i = 0;
     for (const auto& c : icon_font->get_characters())
@@ -91,8 +93,8 @@ int main(void)
     float scroll_y = 0;
 
     // Event
-    std::string text = "I see this as an absolute win!";
-    win->add_char_listener([&](elemd::char_event event) { text += event.utf8; });
+    std::u32string text = U"I see this as an absolute win!";
+    win->add_char_listener([&](elemd::char_event event) { text += static_cast<char32_t>(event.unnicode); });
 
     win->add_scroll_listener([&](elemd::scroll_event event) {
         if (is_ctrl)
@@ -175,7 +177,7 @@ int main(void)
 
         ctx->set_font(monserat_light);
         ctx->set_font_size(12);
-        std::string formated = monserat_light->fit_substring(text, width - 2 * 20, 12);
+        std::u32string formated = monserat_light->fit_substring(text, width - 2 * 20, 12);
         ctx->draw_text(20, 45, formated);
 
         ctx->set_font(icon_font);

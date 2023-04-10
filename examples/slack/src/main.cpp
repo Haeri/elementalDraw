@@ -1,4 +1,4 @@
-#include <elemd/ui/document.hpp>
+﻿#include <elemd/ui/document.hpp>
 #include <elemd/ui/element.hpp>
 #include <elemd/ui/heading.hpp>
 
@@ -397,12 +397,12 @@ int main(void)
     body.add_child(&body_content);
 
     add_item(&body_content, "Jim Carpenter", p1,
-             "What did the janitor say when he jumped out of the closet? - Supplies!");
+             "What did the janitor say when he jumped out of the closet? - Supplies! 😂");
     add_item(&body_content, "Ella Bridger", p2,
              "Two kids were beating up a kid in an ally, so I stepped into help. He didn't stand a "
              "chance against the three of us.");
     add_item(&body_content, "Elizabeth Lee", p3,
-             "What did the ocean say to the beach? - Nothing, it just waved");
+             "What did the ocean say to the beach? - Nothing, it just waved 🤣🤣");
     add_item(&body_content, "Jim Carpenter", p1,
              "Why do seagulls fly over the ocean? - Because if they flew over the bay, we'd call "
              "them bagels. This one is great! Sed porttitor lectus nibh. Vivamus suscipit tortor "
@@ -413,7 +413,7 @@ int main(void)
     add_item(&body_content, "Elizabeth Lee", p3,
              "If a child refuses to sleep during nap time, are they guilty of resisting a rest?");
     add_item(&body_content, "Ella Bridger", p2,
-             "What did Baby Corn say to Mama Corn? - Where's Pop Corn?");
+             "What did Baby Corn say to Mama Corn? - Where's Pop Corn? 🤔");
     add_item(
         &body_content, "Ella Bridger", p2,
         "What's the best thing about Switzerland? - I don't know, but the flag is a big plus.");

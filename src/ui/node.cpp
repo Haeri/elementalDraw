@@ -239,7 +239,7 @@ namespace elemd
         return nullptr;
     }
 
-    elemd::vec2 Node::get_minimum_dimensions(float available_width, float available_height)
+    elemd::vec2 Node::get_minimum_dimensions(elemd::Context* ctx, float available_width, float available_height)
     {
         elemd::vec2 child_pos = _position + elemd::vec2(style.margin[3] + style.padding[3],
                                                         style.margin[0] + style.padding[0]);
@@ -256,7 +256,7 @@ namespace elemd
 
             // child_pos.y() += height_offset;
 
-            float child_height = el->layout(child_pos + elemd::vec2(width_accum, calc_height),
+            float child_height = el->layout(ctx, child_pos + elemd::vec2(width_accum, calc_height),
                                             available_width, available_height);
 
             width_accum += el->get_width();
@@ -285,7 +285,7 @@ namespace elemd
         return elemd::vec2(calc_width, calc_height);
     }
 
-    float Node::layout(elemd::vec2 position, float width, float height)
+    float Node::layout(elemd::Context* ctx, elemd::vec2 position, float width, float height)
     {
         _position = position;
 
@@ -327,7 +327,7 @@ namespace elemd
 
         // Handle minimum dimensions
 
-        _min_dims = get_minimum_dimensions(available_core_width, available_core_height);
+        _min_dims = get_minimum_dimensions(ctx, available_core_width, available_core_height);
         _scrollable_x = _min_dims.get_x() > available_core_width;
         _scrollable_y = _min_dims.get_y() > available_core_height;
 
@@ -384,7 +384,7 @@ namespace elemd
     void Node::debug_paint(elemd::Context* ctx)
     {
         // DEBUG
-        if (false)
+        if (_document->show_debug)
         {
             // if (_state != INITIAL) {
             // Margin
@@ -407,6 +407,7 @@ namespace elemd
                            _height - (style.margin[0] + style.margin[2]) -
                                (style.padding[0] + style.padding[2]));
 
+            ctx->set_font(nullptr);
             ctx->set_fill_color(elemd::color(160, 160, 160));
             ctx->set_font_size(10);
             ctx->draw_text(_position.get_x() + 2.0f, _position.get_y(),

@@ -28,6 +28,7 @@ if(APPLE)
     #set(ELEMD_DEFAULT_RENDERING_BACKEND "metal")
 else()
     set(ELEMD_DEFAULT_RENDERING_BACKEND "vulkan")
+    #set(ELEMD_DEFAULT_RENDERING_BACKEND "opengl")
 endif()
 
 # Options

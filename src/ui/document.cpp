@@ -4,6 +4,9 @@
 
 namespace elemd
 {
+    using ms = std::chrono::duration<double, std::milli>;
+
+
     Document::Document(elemd::Window* window)
     {
         _root = new Element();
@@ -65,7 +68,12 @@ namespace elemd
             }
         });
 
-        _window->add_key_listener([&](elemd::key_event event) {
+        _window->add_key_listener([&](elemd::key_event event) {            
+            if (event.key == KEY_I && event.action == ACTION_PRESS && event.mods == (KEY_MOD_SHIFT | KEY_MOD_CONTROL))
+            {
+                show_debug = !show_debug;
+            }
+
             if (_focused_node != nullptr)
             {
                 _focused_node->emit_key_event(event);
@@ -122,12 +130,12 @@ namespace elemd
 
         _context->_tmp_prepare();
 
-        using ms = std::chrono::duration<double, std::milli>;
+        std::chrono::steady_clock::time_point current_time;
         std::chrono::steady_clock::time_point last_time = std::chrono::steady_clock::now();
 
         while (_window->is_running())
         {
-            std::chrono::steady_clock::time_point current_time = std::chrono::steady_clock::now();
+            current_time = std::chrono::steady_clock::now();   
             delta_time = std::chrono::duration_cast<ms>(current_time - last_time).count() / 1000.0f;
             last_time = current_time;
 
@@ -139,6 +147,7 @@ namespace elemd
             else
             {
                 _window->wait_events();
+                // helps smooth out the high dt after a interaction pause
                 last_time = std::chrono::steady_clock::now();
             }
 
@@ -185,8 +194,28 @@ namespace elemd
 
     void Document::paint()
     {
-        _document_height = _root->layout(elemd::vec2(0, 0), _width, _height);
+        _document_height = _root->layout(_context, elemd::vec2(0, 0), _width, _height);
         _root->paint(_context);
+
+        // Draw perf info
+        if (show_debug)
+        {
+            // We do our own dt calculation since the document delta_time fakes the dt when there is inactivty
+            static std::chrono::steady_clock::time_point last_time = std::chrono::steady_clock::now();
+            std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+            float dt = std::chrono::duration_cast<ms>(now - last_time).count() / 1000.0f;
+            last_time = now;
+
+            _context->set_font(nullptr);
+            _context->set_font_size(10);
+            _context->set_fill_color({30, 30, 30, 255});
+            std::string info =
+                "dt: " + std::to_string((int)(dt * 1000)) +
+                "ms // highfq: " + std::to_string(_highFrequencyNext);
+            _context->draw_text(5, _height - 13, info);
+            _context->set_fill_color({230, 230, 230, 255});
+            _context->draw_text(4, _height - 14, info);
+        }
 
         _context->draw_frame();
         _context->present_frame();
