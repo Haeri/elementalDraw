@@ -14,6 +14,9 @@
 #endif
 
 #include <GLFW/glfw3.h>
+//#define GLFW_EXPOSE_NATIVE_WIN32
+//#include <GLFW/glfw3native.h>
+
 
 namespace elemd
 {
@@ -35,7 +38,7 @@ namespace elemd
     void mouse_position_callback(GLFWwindow* window, double x, double y);
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
     void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    void char_callback(GLFWwindow* window, unsigned int key_code);
+    void char_callback(GLFWwindow* window, unsigned int codepoint);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
     /* ------------------------ PUBLIC IMPLEMENTATION ------------------------ */
@@ -430,6 +433,17 @@ namespace elemd
         }
         ++_windowCount;
 
+
+        /*
+        * TODO: If I feel fancy at some point, I could try to figure out how to remove the title bar 
+        * in other systems as well
+        * 
+        // Set the window style to not include a titlebar
+        HWND hwnd = glfwGetWin32Window(_glfw_window);
+        SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_CAPTION);
+        * 
+        */
+
         load_icon(config);
 
         if (config.position_x != -1 && config.position_y != -1)
@@ -561,27 +575,27 @@ namespace elemd
                   << "key: " << key << " scancode: " << scancode << " action: " << action
                   << " mods: " << mods << " key name: " << key_name << std::endl;
 #endif
-
+            
         for (auto& var : winImpl->_key_callbacks)
         {
             var({(keyboard_key)key, scancode, (input_action)action, (keyboard_mod)mods, key_code});
         }
     }
 
-    void char_callback(GLFWwindow* window, unsigned int key_code)
+    void char_callback(GLFWwindow* window, unsigned int codepoint)
     {
         WindowImpl* winImpl = (WindowImpl*)glfwGetWindowUserPointer(window);
 
-        std::string utf8 = Font::UnicodeToUTF8(key_code);
+        std::string utf8 = Font::UnicodeToUTF8(codepoint);             
 
 #ifdef DEBUG
         std::cout << "event: char "
-                  << "char: " << key_code << std::endl;
+                  << "char: " << codepoint << std::endl;
 #endif
 
         for (auto& var : winImpl->_char_callbacks)
         {
-            var({key_code, utf8.c_str()});
+            var({codepoint, utf8.c_str()});
         }
     }
 

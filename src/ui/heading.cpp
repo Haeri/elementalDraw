@@ -1,5 +1,8 @@
 #include "elemd/ui/heading.hpp"
 
+#include <codecvt> // for std::codecvt_utf8
+#include <locale>  // for std::wstring_convert
+
 namespace elemd
 {
     Heading::Heading()
@@ -27,10 +30,11 @@ namespace elemd
         return _height;
     }*/
 
-    elemd::vec2 Heading::get_minimum_dimensions(float width, float height)
+    elemd::vec2 Heading::get_minimum_dimensions(elemd::Context* ctx, float width, float height)
     {
-        _formated_content = style.font_family->fit_substring(get_text(), width, style.font_size);
-        return style.font_family->measure_dimensions(_formated_content, style.font_size);
+        Font* font = style.font_family != nullptr ? style.font_family : ctx->get_default_font();
+        _formated_content = font->fit_substring(get_text(), width, style.font_size);
+        return font->measure_dimensions(_formated_content, style.font_size);
     }
 
     void Heading::paint(elemd::Context* ctx)
@@ -45,8 +49,9 @@ namespace elemd
                 _height - (style.margin[0] + style.margin[2]), style.border_radius[0],
                 style.border_radius[1], style.border_radius[2], style.border_radius[3]);
         }
-
-        ctx->set_font(style.font_family);
+        
+        Font* font = style.font_family != nullptr ? style.font_family : ctx->get_default_font();
+        ctx->set_font(font);
         ctx->set_font_size(style.font_size);
         ctx->set_fill_color(style.color);
         ctx->draw_text(_position.get_x() + style.margin[3] + style.padding[3],
@@ -58,10 +63,17 @@ namespace elemd
 
     void Heading::set_text(std::string text)
     {
+        std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv_utf8_utf32;
+
+        set_text(conv_utf8_utf32.from_bytes(text));
+    }
+
+    void Heading::set_text(std::u32string text)
+    {
         _content = text;
     }
 
-    std::string Heading::get_text()
+    std::u32string Heading::get_text()
     {
         return _content;
     }

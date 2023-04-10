@@ -15,6 +15,7 @@ namespace elemd
     {
     public:
         float delta_time;
+        bool show_debug = false;
 
         Document(elemd::Window* window);
         Document(elemd::Window* window, elemd::Context* context);

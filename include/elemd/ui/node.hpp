@@ -131,8 +131,8 @@ namespace elemd
         virtual void emit_char_event(elemd::char_event event);
 
         virtual Node* bounds_check(elemd::vec2 pos);
-        virtual elemd::vec2 get_minimum_dimensions(float width, float height);
-        virtual float layout(elemd::vec2 position, float width, float height);
+        virtual elemd::vec2 get_minimum_dimensions(elemd::Context* ctx, float width, float height);
+        virtual float layout(elemd::Context* ctx, elemd::vec2 position, float width, float height);
         virtual void offset(float x, float y);
         virtual void paint(elemd::Context* ctx) = 0;
         virtual void debug_paint(elemd::Context* ctx);

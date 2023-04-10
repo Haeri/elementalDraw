@@ -17,8 +17,7 @@ if "%1" == "-static" (
 	xcopy ".\build\examples\roots_of_darknes\Release\roots-of-darknes.exe" ".\samples\roots_of_darknes\"
 	
 ) else (
-	xcopy ".\build\Release\elemd.dll" ".\bin\"
-	xcopy ".\build\Release\elemd.lib" ".\lib\"
+	xcopy ".\build\Release" ".\bin" /I/E	
 )
 
 set /a "err=%err%+%errorlevel%"
