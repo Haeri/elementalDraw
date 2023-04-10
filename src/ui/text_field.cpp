@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <math.h>
+#include <codecvt> // for std::codecvt_utf8
+#include <locale>  // for std::wstring_convert
 
 #include <elemd/ui/document.hpp>
 
@@ -45,7 +47,7 @@ namespace elemd
                 }
                 break;
             case elemd::keyboard_key::KEY_ENTER:
-                _content.insert(_cursor_pos, "\n");
+                _content.insert(_cursor_pos, U"\n");
                 ++_cursor_pos;
                 break;
             }
@@ -55,8 +57,8 @@ namespace elemd
     void TextField::emit_char_event(elemd::char_event event)
     {
         Node::emit_char_event(event);
-
-        _content.insert(_cursor_pos, event.utf8);
+        //std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv_utf8_utf32;
+        _content.insert(_cursor_pos, {static_cast<char32_t>(event.unnicode)});
         ++_cursor_pos;
     }
 
@@ -91,10 +93,11 @@ namespace elemd
         return _height;
     }*/
 
-    elemd::vec2 TextField::get_minimum_dimensions(float width, float height)
+    elemd::vec2 TextField::get_minimum_dimensions(elemd::Context* ctx, float width, float height)
     {
-        _formated_content = style.font_family->fit_substring(get_text(), width, style.font_size);
-        return style.font_family->measure_dimensions(_formated_content, style.font_size);
+        Font* font = style.font_family != nullptr ? style.font_family : ctx->get_default_font();
+        _formated_content = font->fit_substring(get_text(), width, style.font_size);
+        return font->measure_dimensions(_formated_content, style.font_size);
     }
 
     void TextField::paint(elemd::Context* ctx)
@@ -140,12 +143,18 @@ namespace elemd
 
     void TextField::set_text(std::string text)
     {
+        std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv_utf8_utf32;
+        set_text(conv_utf8_utf32.from_bytes(text));
+    }
+
+    void TextField::set_text(std::u32string text)
+    {
         _content = text;
         _cursor_pos =
             std::max(std::min(_cursor_pos, (unsigned int)_content.size()), (unsigned int)0);
     }
 
-    std::string TextField::get_text()
+    std::u32string TextField::get_text()
     {
         return _content;
     }

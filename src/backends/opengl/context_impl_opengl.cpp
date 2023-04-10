@@ -315,7 +315,7 @@ namespace elemd
 
         float initialX = x;
         float scale = (float)_font_size / LOADED_HEIGHT;
-        std::map<unsigned int, character> characters = _font->get_characters();
+        std::map<char32_t, character> characters = _font->get_characters();
         ImageImplOpengl* img = (ImageImplOpengl*)_font->get_image();
 
         for (char32_t &token : text)
@@ -357,12 +357,13 @@ namespace elemd
                  vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
                 {0, 0, 0, 0},                                 // border_radius
                 (float)img->_sampler_index,                   // sampler_index
-                1,                                            // use_tint
+                (float)(!ch.has_color),                // use_tint
                 vec2(width, height),                          // resolution
                 {vec2(originx, originy), vec2(cropx, cropy)}, // uvs
                 {0, 0, 0, 0},                                 // line_width
                 0,                                            // shadow_size
-                {0, 0, 0},                                    // is_msdf
+                {0, 0, 0},     // is_msdf
+                //{(float)!(_font->is_color_font()), 0, 0},          // is_msdf
             });
             impl->queue_color_call();
 
@@ -683,7 +684,7 @@ namespace elemd
             }
         }
 
-                impl->storage.clear();
+        impl->storage.clear();
         impl->draw_call_indices.clear();
         impl->scissor_primitives.clear();
         impl->current_color_call_cnt = 0;
@@ -720,6 +721,11 @@ namespace elemd
             impl->headless = false;
             impl->update_viewport((uint32_t)width, (uint32_t)height);
         }
+    }
+
+    Font* Context::get_default_font()
+    {
+        return _default_font;
     }
 
     void Context::_tmp_register_image(Image* image)
@@ -825,7 +831,11 @@ namespace elemd
 
     void ContextImplOpengl::configure_surface()
     {
-        glViewport(0, 0, _width, _height);
+        int width, height;
+        glfwGetFramebufferSize(_window->getGLFWWindow(), &width, &height);
+        glViewport(0, 0, width, height);
+
+        //glViewport(0, 0, _width, _height);
         glEnable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);

@@ -308,7 +308,7 @@ namespace elemd
 
         float initialX = x;
         float scale = (float)_font_size / LOADED_HEIGHT;
-        std::map<unsigned int, character> characters = _font->get_characters();
+        std::map<char32_t, character> characters = _font->get_characters();
         ImageImplVulkan* img = (ImageImplVulkan*)_font->get_image();
 
         for (char32_t& token : text)
@@ -350,7 +350,7 @@ namespace elemd
                  vec2(xf + widthf, yf + heightf) * 2.0f - vec2(1)},                     // vertices
                 {0, 0, 0, 0},                                 // border_radius
                 (float)img->_sampler_index,                   // sampler_index
-                1,                                            // use_tint
+                (float)(!ch.has_color),                       // use_tint
                 vec2(width, height),                          // resolution
                 {vec2(originx, originy), vec2(cropx, cropy)}, // uvs
                 {0, 0, 0, 0},                                 // line_width
@@ -669,6 +669,11 @@ namespace elemd
             impl->headless = false;
             impl->update_swapchain((uint32_t)width, (uint32_t)height);
         }
+    }
+
+    Font* Context::get_default_font()
+    {
+        return _default_font;
     }
 
     void Context::_tmp_register_image(Image* image)

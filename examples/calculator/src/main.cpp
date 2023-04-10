@@ -1,6 +1,8 @@
 #include <chrono>
 #include <thread>
 #include <vector>
+#include <codecvt> // for std::codecvt_utf8
+#include <locale>  // for std::wstring_convert
 
 #include <elemd/font.hpp>
 #include <elemd/ui/document.hpp>
@@ -10,15 +12,15 @@
 
 #include "solver.hpp"
 
-void add_operation(elemd::Heading* display, std::string op)
+void add_operation(elemd::Heading* display, std::u32string op)
 {
-    if (display->get_text() == "0")
+    if (display->get_text() == U"0")
     {
         display->set_text(op);
     }
     else
     {
-        display->set_text(display->get_text() + op);
+        display->set_text(display->get_text() + (std::u32string)op);
     }
 }
 
@@ -348,7 +350,7 @@ int main(void)
     h_back.style = key_heading_style;
     h_back.style.color = font_color_op;
     h_back.add_click_listener([&](elemd::Node::node_click_event event) {
-        std::string s = solution.get_text();
+        std::u32string s = solution.get_text();
         if (s.length() > 1)
         {
             s.pop_back();
@@ -368,7 +370,7 @@ int main(void)
     h_div.style = key_heading_style;
     h_div.style.color = font_color_op;
     h_div.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "/");
+        add_operation(&solution, U"/");
         return true;
     });
     button_div.add_child(&h_div);
@@ -377,7 +379,7 @@ int main(void)
     h_7.set_text("7");
     h_7.style = key_heading_style;
     h_7.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "7");
+        add_operation(&solution, U"7");
         return true;
     });
     button_7.add_child(&h_7);
@@ -386,7 +388,7 @@ int main(void)
     h_8.set_text("8");
     h_8.style = key_heading_style;
     h_8.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "8");
+        add_operation(&solution, U"8");
         return true;
     });
     button_8.add_child(&h_8);
@@ -395,7 +397,7 @@ int main(void)
     h_9.set_text("9");
     h_9.style = key_heading_style;
     h_9.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "9");
+        add_operation(&solution, U"9");
         return true;
     });
     button_9.add_child(&h_9);
@@ -405,7 +407,7 @@ int main(void)
     h_mul.style = key_heading_style;
     h_mul.style.color = font_color_op;
     h_mul.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "*");
+        add_operation(&solution, U"*");
         return true;
     });
     button_mul.add_child(&h_mul);
@@ -415,7 +417,7 @@ int main(void)
     h_4.set_text("4");
     h_4.style = key_heading_style;
     h_4.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "4");
+        add_operation(&solution, U"4");
         return true;
     });
     button_4.add_child(&h_4);
@@ -424,7 +426,7 @@ int main(void)
     h_5.set_text("5");
     h_5.style = key_heading_style;
     h_5.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "5");
+        add_operation(&solution, U"5");
         return true;
     });
     button_5.add_child(&h_5);
@@ -433,7 +435,7 @@ int main(void)
     h_6.set_text("6");
     h_6.style = key_heading_style;
     h_6.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "6");
+        add_operation(&solution, U"6");
         return true;
     });
     button_6.add_child(&h_6);
@@ -443,7 +445,7 @@ int main(void)
     h_sub.style = key_heading_style;
     h_sub.style.color = font_color_op;
     h_sub.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "-");
+        add_operation(&solution, U"-");
         return true;
     });
     button_sub.add_child(&h_sub);
@@ -453,7 +455,7 @@ int main(void)
     h_1.set_text("1");
     h_1.style = key_heading_style;
     h_1.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "1");
+        add_operation(&solution, U"1");
         return true;
     });
     button_1.add_child(&h_1);
@@ -462,7 +464,7 @@ int main(void)
     h_2.set_text("2");
     h_2.style = key_heading_style;
     h_2.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "2");
+        add_operation(&solution, U"2");
         return true;
     });
     button_2.add_child(&h_2);
@@ -471,7 +473,7 @@ int main(void)
     h_3.set_text("3");
     h_3.style = key_heading_style;
     h_3.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "3");
+        add_operation(&solution, U"3");
         return true;
     });
     button_3.add_child(&h_3);
@@ -481,7 +483,7 @@ int main(void)
     h_add.style = key_heading_style;
     h_add.style.color = font_color_op;
     h_add.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "+");
+        add_operation(&solution, U"+");
         return true;
     });
     button_add.add_child(&h_add);
@@ -491,7 +493,7 @@ int main(void)
     h_0.set_text("0");
     h_0.style = key_heading_style;
     h_0.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, "0");
+        add_operation(&solution, U"0");
         return true;
     });
     button_0.add_child(&h_0);
@@ -500,7 +502,7 @@ int main(void)
     h_comma.set_text(".");
     h_comma.style = key_heading_style;
     h_comma.add_click_listener([&](elemd::Node::node_click_event event) {
-        add_operation(&solution, ".");
+        add_operation(&solution, U".");
         return true;
     });
     button_comma.add_child(&h_comma);
@@ -512,11 +514,11 @@ int main(void)
     h_parenthesis.add_click_listener([&](elemd::Node::node_click_event event) {
         if (parenthesis_flip)
         {
-            add_operation(&solution, ")");
+            add_operation(&solution, U")");
         }
         else
         {
-            add_operation(&solution, "(");
+            add_operation(&solution, U"(");
         }
         parenthesis_flip = !parenthesis_flip;
         return true;
@@ -529,8 +531,11 @@ int main(void)
     h_equ.add_click_listener([&](elemd::Node::node_click_event event) {
         equation.set_text(solution.get_text());
 
-        std::string val = std::to_string(Solver::eval(solution.get_text()));
-        val.erase(val.find_last_not_of('0') + 1, std::string::npos);
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv_utf8_utf32;
+        
+
+        std::string val = std::to_string(Solver::eval(conv_utf8_utf32.to_bytes(solution.get_text())));
+        val.erase(val.find_last_not_of('0') + 1, std::u32string::npos);
 
         if (val.back() == '.')
         {
@@ -582,8 +587,8 @@ int main(void)
     body.add_child(&keypad);
 
     window->add_char_listener([&](elemd::char_event event) {
-        std::string in = event.utf8;
-        if (in.find_first_not_of("0123456789.+-*/()=") == std::string::npos)
+        std::u32string in = {static_cast<char32_t>(event.unnicode)};
+        if (in.find_first_not_of(U"0123456789.+-*/()=") == std::u32string::npos)
         {
             add_operation(&solution, in);
         }

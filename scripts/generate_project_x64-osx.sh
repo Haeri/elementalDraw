@@ -6,8 +6,8 @@ cd $(dirname "$0")
 cd ..
 root_path=$(pwd)
 
-build_type=""
-build_level="Debug"
+triplet_value="x64-osx-dynamic"
+lib_linkage=""
 feature_list=""
 
 if [ ! -d $root_path"/external/vcpkg/scripts/buildsystems/" ]; then
@@ -18,10 +18,8 @@ fi
 for var in "$@"
 do
 	if [ "$var" = "-static" ]; then
-		build_type="-DBUILD_SHARED_LIBS=OFF"
-	fi
-	if [ "$var" = "-release" ]; then
-		build_level="Release"
+		triplet_value="x64-osx"
+		lib_linkage="-DBUILD_SHARED_LIBS=OFF"
 	fi
 	if [ "$var" = "-ui" ]; then
 		feature_list="-DELEMD_UI=ON $feature_list"
@@ -37,10 +35,15 @@ done
 if [ ! -d "build/" ]; then
 	echo "INFO: First time setup will take longer as the dependencies need to be downloaded and compiled."
 else
-	rm -rf "build/$build_level"
+	rm -rf build
 fi
 
-cmake -B "build/$build_level" -S . -DCMAKE_BUILD_TYPE="$build_level" -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" -DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" $build_type $feature_list
+cmake -B "build" -S . -G Xcode \
+	-DVCPKG_TARGET_TRIPLET=$triplet_value \
+	-DVCPKG_OVERLAY_PORTS=$root_path"/external/custom-ports" \
+	-DCMAKE_TOOLCHAIN_FILE=$root_path"/external/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+	$lib_linkage \
+	$feature_list
 err=$?
 
 if [ $err -ne 0 ]; then

@@ -37,7 +37,7 @@ namespace elemd
 
     void Image::write_to_file(std::string file_path)
     {
-        if (stbi_write_png((file_path + "/out_" + _name + ".png").c_str(), _width, _height,
+        if (stbi_write_png(("./" + file_path + ".png").c_str(), _width, _height,
                            _components, _data, 0) == 0)
         {
             std::cerr << "error during saving" << std::endl;

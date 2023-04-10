@@ -4,7 +4,13 @@
 
 namespace elemd
 {
-    Document::Document(elemd::Window* window)
+    using ms = std::chrono::duration<double, std::milli>;
+
+    Document::Document(elemd::Window* window) : Document(window, window->create_context())
+    {
+    }
+
+    Document::Document(elemd::Window* window, elemd::Context* context)
     {
         _root = new Element();
         _root->set_document(this);
@@ -13,7 +19,7 @@ namespace elemd
         _height = window->get_height() / window->get_dpi_scale();
 
         _window = window;
-        _context = _window->create_context();
+        _context = context;
 
         _window->add_resize_listener([&](elemd::resize_event event) {
             _width = event.width / _window->get_scale().get_x();
@@ -65,7 +71,12 @@ namespace elemd
             }
         });
 
-        _window->add_key_listener([&](elemd::key_event event) {
+        _window->add_key_listener([&](elemd::key_event event) {            
+            if (event.key == KEY_I && event.action == ACTION_PRESS && event.mods == (KEY_MOD_SHIFT | KEY_MOD_CONTROL))
+            {
+                show_debug = !show_debug;
+            }
+
             if (_focused_node != nullptr)
             {
                 _focused_node->emit_key_event(event);
@@ -111,23 +122,14 @@ namespace elemd
 
     void Document::main_loop()
     {
-        for (auto& font : _fonts)
-        {
-            _context->_tmp_register_font(font);
-        }
-        for (auto& image : _images)
-        {
-            _context->_tmp_register_image(image);
-        }
+        _tmp_prepare();
 
-        _context->_tmp_prepare();
-
-        using ms = std::chrono::duration<double, std::milli>;
+        std::chrono::steady_clock::time_point current_time;
         std::chrono::steady_clock::time_point last_time = std::chrono::steady_clock::now();
 
         while (_window->is_running())
         {
-            std::chrono::steady_clock::time_point current_time = std::chrono::steady_clock::now();
+            current_time = std::chrono::steady_clock::now();   
             delta_time = std::chrono::duration_cast<ms>(current_time - last_time).count() / 1000.0f;
             last_time = current_time;
 
@@ -139,6 +141,7 @@ namespace elemd
             else
             {
                 _window->wait_events();
+                // helps smooth out the high dt after a interaction pause
                 last_time = std::chrono::steady_clock::now();
             }
 
@@ -183,10 +186,50 @@ namespace elemd
         return _window;
     }
 
+    void Document::_tmp_prepare()
+    {
+        for (auto& font : _fonts)
+        {
+            _context->_tmp_register_font(font);
+        }
+        for (auto& image : _images)
+        {
+            _context->_tmp_register_image(image);
+        }
+
+        _context->_tmp_prepare();
+    }
+
+    void Document::paint(double dt)
+    {
+        delta_time = dt;
+        paint();
+    }
+
     void Document::paint()
     {
-        _document_height = _root->layout(elemd::vec2(0, 0), _width, _height);
+        _document_height = _root->layout(_context, elemd::vec2(0, 0), _width, _height);
         _root->paint(_context);
+
+        // Draw perf info
+        if (show_debug)
+        {
+            // We do our own dt calculation since the document delta_time fakes the dt when there is inactivty
+            static std::chrono::steady_clock::time_point last_time = std::chrono::steady_clock::now();
+            std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+            float dt = std::chrono::duration_cast<ms>(now - last_time).count() / 1000.0f;
+            last_time = now;
+
+            _context->set_font(nullptr);
+            _context->set_font_size(10);
+            _context->set_fill_color({30, 30, 30, 255});
+            std::string info =
+                "dt: " + std::to_string((int)(dt * 1000)) +
+                "ms // highfq: " + std::to_string(_highFrequencyNext);
+            _context->draw_text(5, _height - 13, info);
+            _context->set_fill_color({230, 230, 230, 255});
+            _context->draw_text(4, _height - 14, info);
+        }
 
         _context->draw_frame();
         _context->present_frame();

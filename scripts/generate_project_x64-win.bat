@@ -24,15 +24,15 @@ if not exist "build/" (
 	rmdir /S /Q "build"
 )
 
-set build_type=
 set triplet_value=x64-windows
+set lib_linkage=
 set feature_list=
 set silent=
 
 for %%A in (%*) do (
 	if "%%A" == "-static" (
-		set build_type=-DBUILD_SHARED_LIBS=OFF
 		set triplet_value=x64-windows-static
+		set lib_linkage=-DBUILD_SHARED_LIBS=OFF
 	)
 	if "%%A" == "-ui" (
 		set "feature_list=!feature_list! -DELEMD_UI=ON"
@@ -53,7 +53,7 @@ cmake -B "build" -S . ^
 	-DVCPKG_TARGET_TRIPLET="%triplet_value%" ^
 	-DVCPKG_OVERLAY_PORTS="%root_path%\external\custom-ports" ^
 	-DCMAKE_TOOLCHAIN_FILE="%root_path%\external\vcpkg\scripts\buildsystems\vcpkg.cmake" ^
-	%build_type% ^
+	%lib_linkage% ^
 	%feature_list% 	
 set /a "err=%err%+%errorlevel%"
 

@@ -1,17 +1,17 @@
 {
-    "name": "elemd",
-    "version-string": "0.2.0",
-    "homepage": "https://github.com/Haeri/ElementalDraw",
+    "name": "elemental-draw",
+    "version-string": "0.2.1",
+    "homepage": "https://github.com/Haeri/elementalDraw",
     "description": "Portable C++ canvas library with a Vulkan backend",
     "features": {
         "video": {
-            "description": "Enable video loading and playyback with ffmpeg",
+            "description": "Enable video loading and playback with ffmpeg",
             "dependencies": [
                 "ffmpeg"
             ]
         },
         "audio": {
-            "description": "Enable audio loading and playyback with miniaudio",
+            "description": "Enable audio loading and playback with miniaudio",
             "dependencies": [
                 "miniaudio"
             ]
@@ -32,6 +32,7 @@
         {
             "name": "metal-cpp",
             "platform": "osx"
-        }
+        },
+        "jsoncpp"
     ]
 }

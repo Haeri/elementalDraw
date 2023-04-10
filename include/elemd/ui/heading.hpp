@@ -20,15 +20,16 @@ namespace elemd
         void add_child(Node* child) = delete;
 
         // float layout(elemd::vec2 position, float width, float height) override;
-        elemd::vec2 get_minimum_dimensions(float width, float height) override;
+        elemd::vec2 get_minimum_dimensions(elemd::Context* ctx, float width, float height) override;
         void paint(elemd::Context* ctx) override;
 
         void set_text(std::string text);
-        std::string get_text();
+        void set_text(std::u32string text);
+        std::u32string get_text();
 
     private:
-        std::string _content;
-        std::string _formated_content;
+        std::u32string _content;
+        std::u32string _formated_content;
     };
 } // namespace elemd
 
