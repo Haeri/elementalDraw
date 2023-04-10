@@ -1,10 +1,10 @@
 #ifndef ELEMD_ELEMENTAL_DRAW_HPP
 #define ELEMD_ELEMENTAL_DRAW_HPP
 
-#define ELEMD_LIBRARY_NAME "Elemental Draw"
+#define ELEMD_LIBRARY_NAME "elemental Draw"
 #define ELEMD_VERSION_MAJOR 0
 #define ELEMD_VERSION_MINOR 2
-#define ELEMD_VERSION_PATCH 0
+#define ELEMD_VERSION_PATCH 1
 
 #define TO_STR2(x) #x
 #define TO_STR(x) TO_STR2(x)

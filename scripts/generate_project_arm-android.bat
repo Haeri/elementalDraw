@@ -24,15 +24,14 @@ if not exist "build/" (
 	rmdir /S /Q "build"
 )
 
-set build_type=
 set triplet_value=arm64-android
 set feature_list=
 set silent=
 
 for %%A in (%*) do (
 	if "%%A" == "-static" (
-		set build_type=-DBUILD_SHARED_LIBS=OFF
-		set triplet_value=x64-windows-static
+		echo No static triplet available for Android
+		exit 1
 	)
 	if "%%A" == "-ui" (
 		set "feature_list=!feature_list! -DELEMD_UI=ON"
@@ -53,10 +52,11 @@ cmake -B "build" -S . ^
 	-G "MinGW Makefiles" ^
 	-DVCPKG_TARGET_TRIPLET="%triplet_value%" ^
 	-DVCPKG_OVERLAY_PORTS="%root_path%\external\custom-ports" ^
-	-DCMAKE_TOOLCHAIN_FILE="%root_path%\external\vcpkg\scripts\buildsystems\vcpkg.cmake" %build_type% ^
+	-DCMAKE_TOOLCHAIN_FILE="%root_path%\external\vcpkg\scripts\buildsystems\vcpkg.cmake" ^
   	-DANDROID_PLATFORM="android-21" ^
   	-DANDROID_ABI="arm64-v8a" ^
-  	-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="%ANDROID_NDK_HOME%\build\cmake\android.toolchain.cmake"
+  	-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="%ANDROID_NDK_HOME%\build\cmake\android.toolchain.cmake" ^
+  	%feature_list% 
 set /a "err=%err%+%errorlevel%"
 
 

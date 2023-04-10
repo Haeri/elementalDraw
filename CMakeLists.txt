@@ -6,12 +6,12 @@ if(ELEMD_UI)
   list(APPEND VCPKG_MANIFEST_FEATURES "ui")
 endif()
 
-option(ELEMD_AUDIO "Enable audio loading and playyback with miniaudio" OFF)
+option(ELEMD_AUDIO "Enable audio loading and playback with miniaudio" OFF)
 if(ELEMD_AUDIO)
   list(APPEND VCPKG_MANIFEST_FEATURES "audio")
 endif()
 
-option(ELEMD_VIDEO "Enable video loading and playyback with ffmpeg" OFF)
+option(ELEMD_VIDEO "Enable video loading and playback with ffmpeg" OFF)
 if(ELEMD_VIDEO)
   list(APPEND VCPKG_MANIFEST_FEATURES "video")
 endif()
@@ -103,7 +103,7 @@ endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
     SOVERSION 0
-    VERSION 0.2.0
+    VERSION 0.2.1
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
@@ -183,6 +183,7 @@ if (ELEMD_BUILD_EXAMPLES)
     set_target_properties(overview PROPERTIES FOLDER examples)
     set_target_properties(painter PROPERTIES FOLDER examples)
     set_target_properties(presenter PROPERTIES FOLDER examples)
+    
     set_target_properties(window-app PROPERTIES FOLDER examples)
     set_target_properties(window-app-runtime PROPERTIES FOLDER examples)
 
@@ -197,7 +198,10 @@ if (ELEMD_BUILD_EXAMPLES)
         set_target_properties(tasker PROPERTIES FOLDER examples)
     endif()
     if (ELEMD_AUDIO)
+        add_subdirectory(examples/roots_of_darknes)
         add_subdirectory(examples/platformer)
+
+        set_target_properties(roots-of-darknes PROPERTIES FOLDER examples)   
         set_target_properties(platformer PROPERTIES FOLDER examples)        
     endif()
     if (ELEMD_VIDEO)
@@ -235,7 +239,8 @@ if (ELEMD_BUILD_EXAMPLES)
     if (ELEMD_AUDIO)
         add_custom_command(
             TARGET ${PROJECT_NAME} POST_BUILD
-            DEPENDS platformer  
+            DEPENDS platformer roots-of-darknes                         
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/roots_of_darknes/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/examples/platformer/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/$<TARGET_FILE_NAME:${PROJECT_NAME}>             
             COMMENT "Copy library"
         )

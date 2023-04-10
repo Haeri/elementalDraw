@@ -42,6 +42,11 @@ if [ "$1" = "-static" ]; then
 	mkdir -p samples/slack
 	cp -R ./build/examples/slack/res ./samples/slack
 	cp ./build/examples/slack/Release/slack ./samples/slack
+
+	# Roots of Darknes
+	mkdir -p samples/roots_of_darknes
+	cp -R ./examples/roots_of_darknes/res ./samples/roots_of_darknes
+	cp ./build/examples/roots_of_darknes/Release/roots-of-darknes ./samples/roots_of_darknes
 	
 else
 	mkdir bin

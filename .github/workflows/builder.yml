@@ -6,6 +6,7 @@ on:
     - master
     - dev
     - metal
+    - ggj-roots
 
 jobs:
 
@@ -31,13 +32,7 @@ jobs:
         restore-keys: vcpkg-win
     - name: Generate Solution
     # removing -video flag till https://github.com/microsoft/vcpkg/issues/23021 is fixed
-      run: ./scripts/generate_project_win.bat -${{ matrix.type }} -ui -audio -s
-    - name: Debug
-      if: ${{ failure() }}
-      run: |
-        cd ./build
-        ls -la
-        tail -n 1000 vcpkg-manifest-install.log
+      run: ./scripts/generate_project_x64-win.bat -${{ matrix.type }} -ui -audio -s
     - name: Build
       run: |
         MSBuild.exe ./build/elemd.sln /p:Configuration=${{ matrix.conf }}
@@ -76,13 +71,7 @@ jobs:
         key: vcpkg-linux
         restore-keys: vcpkg-linux
     - name: Generate Solution
-      run: ./scripts/generate_project_linux.sh -${{ matrix.type }} -ui -video -audio -release
-    - name: Debug
-      if: ${{ failure() }}
-      run: |
-        cd ./build
-        ls -la
-        tail -n 1000 vcpkg-manifest-install.log
+      run: ./scripts/generate_project_x64-linux.sh -${{ matrix.type }} -ui -video -audio -release
     - name: Build
       run: |
         cd ./build/Release
@@ -112,7 +101,7 @@ jobs:
       with:
         submodules: 'true'
     - name: Setup Environment
-      run: brew install nasm
+      run: brew install nasm pkg-config
     - name: Cache
       uses: actions/cache@v3
       with:
@@ -120,20 +109,11 @@ jobs:
         key: vcpkg-mac
         restore-keys: vcpkg-mac
     - name: Generate Solution
-      run: ./scripts/generate_project_mac.sh -${{ matrix.type }} -ui -video -audio
-    - name: Debug
-      if: ${{ failure() }}
-      run: |
-        cd ./build
-        ls -la
-        tail -n 1000 vcpkg-manifest-install.log
+      run: ./scripts/generate_project_x64-osx.sh -${{ matrix.type }} -ui -video -audio
     - name: Build
       run: |
         cd ./build
         xcodebuild -project elemd.xcodeproj -configuration ${{ matrix.conf }}
-    - name: Debug 2
-      if: ${{ failure() }}
-      run: find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
     - name: Package
       run: ./scripts/package_mac.sh -${{ matrix.type }}
     - name: Upload

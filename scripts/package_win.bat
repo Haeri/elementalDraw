@@ -37,6 +37,10 @@ if "%1" == "-static" (
 	:: Slack
 	xcopy ".\build\examples\slack\res" ".\samples\slack\res" /I/E
 	xcopy ".\build\examples\slack\Release\slack.exe" ".\samples\slack\"
+
+	:: Roots of Darknes
+	xcopy ".\examples\roots_of_darknes\res" ".\samples\roots_of_darknes\res" /I/E
+	xcopy ".\build\examples\roots_of_darknes\Release\roots-of-darknes.exe" ".\samples\roots_of_darknes\"
 	
 ) else (
 	xcopy ".\build\Release" ".\bin" /I/E	
