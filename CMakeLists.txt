@@ -86,12 +86,6 @@ if(NOT DYNAMIC_RUNTIME_LIBRARY)
 endif()
 
 
-# ffmpeg fails on linux so we use this for shared version as well
-# relocation R_X86_64_PC32 against symbol `ff_pw_9' can not be used when making a shared object; recompile with -fPIC
-if (ELEMD_VIDEO AND UNIX AND NOT APPLE AND BUILD_SHARED_LIBS)
-    set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-Bsymbolic")
-endif()
-
 
 if (BUILD_SHARED_LIBS)
     add_compile_definitions(ELEMD_BUILD_SHARED)
